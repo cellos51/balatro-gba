@@ -126,7 +126,6 @@ void background_update() // This needs to be called before update() and draw() b
 
 void update()
 {
-
     game_update();
 }
 

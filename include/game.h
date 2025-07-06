@@ -10,6 +10,7 @@
 #define BG_ID_CARD_SELECTING 1
 #define BG_ID_CARD_PLAYING 2
 #define BG_ID_ROUND_END 3
+#define BG_ID_SHOP 4
 
 enum GameState
 {

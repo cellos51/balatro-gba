@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "util.h"
 #include "sprite.h"
 #include "card.h"
 #include "blind.h"
@@ -12,6 +13,7 @@
 #include "background_gfx.h"
 #include "background_play_gfx.h"
 #include "background_round_end_gfx.h"
+#include "background_shop_gfx.h"
 
 #include "soundbank.h"
 
@@ -333,6 +335,26 @@ void change_background(int id)
 
         //tte_printf("#{P:88,72; cx:0xF000}Cash Out: $5"); // Hardcoded example
     }
+    else if (id == BG_ID_SHOP)
+    {
+        REG_DISPCNT &= ~DCNT_WIN0;
+
+        memcpy(pal_bg_mem, background_shop_gfxPal, 64);
+        GRIT_CPY(&tile_mem[1], background_shop_gfxTiles);
+        GRIT_CPY(&se_mem[31], background_shop_gfxMap);
+
+        // Set the outline colors for the shop background
+        memset16(&pal_bg_mem[27], 0x213D, 1);
+        memset16(&pal_bg_mem[7], 0x10B4, 1);
+
+        memset16(&pal_bg_mem[14], 0x32BE, 1); // Reset the shop lights to correct colors
+        memset16(&pal_bg_mem[17], 0x4B5F, 1);
+        memset16(&pal_bg_mem[22], 0x5F9F, 1);
+        memset16(&pal_bg_mem[8], 0xFFFF, 1);
+
+        memcpy16(&pal_bg_mem[6], &pal_bg_mem[3], 1); // Disable the button highlight colors
+        memcpy16(&pal_bg_mem[13], &pal_bg_mem[15], 1);
+    }
     else
     {
         return; // Invalid background ID
@@ -341,28 +363,37 @@ void change_background(int id)
     background = id;
 }
 
-void set_chips()
+void set_temp_score(int value)
 {
-    tte_erase_rect(8, 80, 32, 88);
-
-    if (chips < 10)
-    {
-        tte_printf("#{P:24,80; cx:0xF000;}%d", chips); // Chips
-    }
-    else if (chips < 100)
-    {
-        tte_printf("#{P:16,80; cx:0xF000;}%d", chips);
-    }
-    else
-    {
-        tte_printf("#{P:8,80; cx:0xF000}%d", chips);
-    }
+    int x_offset = 40 - get_digits_even(value) * 8;
+    tte_erase_rect(8, 64, 64, 72);
+    tte_printf("#{P:%d,64; cx:0xF000}%d", x_offset, value);
 }
 
-void set_mult()
+void set_score(int value)
+{
+    int x_offset = 32;
+    tte_printf("#{P:%d,48; cx:0xF000}%d", x_offset, value);
+}
+
+void set_money(int value)
+{
+    int x_offset = 32 - get_digits_odd(value) * 8;
+    tte_erase_rect(8, 120, 64, 120);
+    tte_printf("#{P:%d,120; cx:0xC000}$%d", x_offset, value);
+}
+
+void set_chips(int value)
+{
+    int x_offset = 32 - get_digits(value) * 8; // Adjust the x offset based on the number of digits in chips
+    tte_erase_rect(8, 80, 32, 88);
+    tte_printf("#{P:%d,80; cx:0xF000;}%d", x_offset, value);
+}
+
+void set_mult(int value)
 {
     tte_erase_rect(40, 80, 64, 88);
-    tte_printf("#{P:40,80; cx:0xF000;}%d", mult); // Mult
+    tte_printf("#{P:40,80; cx:0xF000;}%d", value); // Mult
 }
 
 void set_hand()
@@ -442,8 +473,8 @@ void set_hand()
         break;
     }
 
-    set_chips();
-    set_mult();
+    set_chips(chips);
+    set_mult(mult);
 }
 
 void card_draw()
@@ -587,15 +618,16 @@ void game_init()
     tte_printf("#{P:40,24; cx:0xE000}%d", blind_get_requirement(current_blind, ante)); // Blind requirement
     tte_printf("#{P:40,32; cx:0xC000}$%d", blind_get_reward(current_blind)); // Blind reward
 
-    tte_printf("#{P:32,48; cx:0xF000}%d", 0); // Score
+    set_score(score); // Set the score display
 
-    tte_printf("#{P:24,80; cx:0xF000}%d", 0); // Chips
-    tte_printf("#{P:40,80; cx:0xF000}%d", 0); // Mult
+    set_chips(chips); // Set the chips display
+    set_mult(mult); // Set the multiplier display
 
     tte_printf("#{P:16,104; cx:0xD000}%d", hands); // Hand
     tte_printf("#{P:48,104; cx:0xE000}%d", discards); // Discard
 
-    tte_printf("#{P:24,120; cx:0xC000}$%d", money); // Money
+    //tte_printf("#{P:24,120; cx:0xC000}$%d", money); // Money
+    set_money(money); // Set the money display
 
     tte_printf("#{P:48,144; cx:0xC000}%d", 1); // Round
     tte_printf("#{P:8,144; cx:0xC000}%d#{cx:0xF000}/%d", ante, MAX_ANTE); // Ante
@@ -646,13 +678,12 @@ static void game_playing_process_input_and_state()
             lerped_temp_score = int2fx(temp_score);
             lerped_score = int2fx(score);
 
-            tte_erase_rect(8, 64, 64, 72);
-            tte_printf("#{P:8,64; cx:0xF000}%d", temp_score); // Score
+            set_temp_score(temp_score);
 
             chips = 0;
             mult = 0;
-            set_mult();
-            set_chips();
+            set_mult(mult);
+            set_chips(chips);
         }
     }
     else if (play_state == PLAY_ENDED)
@@ -662,11 +693,10 @@ static void game_playing_process_input_and_state()
 
         if (lerped_temp_score > 0)
         {
-            tte_erase_rect(8, 64, 64, 72);
-            tte_printf("#{P:8,64; cx:0xF000}%d", fx2int(lerped_temp_score)); // Temp Score
+            set_temp_score(fx2int(lerped_temp_score));
 
             // We actually don't need to erase this because the score only increases
-            tte_printf("#{P:32,48; cx:0xF000}%d", fx2int(lerped_score)); // Score
+            set_score(fx2int(lerped_score)); // Set the score display
 
             if (temp_score <= 0)
             {
@@ -682,7 +712,7 @@ static void game_playing_process_input_and_state()
 
             tte_erase_rect(8, 64, 64, 72); // Just erase the temp score
 
-            tte_printf("#{P:32,48; cx:0xF000}%d", score); // Score
+            set_score(score);
         }
     }
 }
@@ -1117,7 +1147,7 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
 
                                     // Relocated card scoring logic here
                                     chips += card_get_value(played[played_top - j]->card);
-                                    set_chips();
+                                    set_chips(chips);
                                     break;
                                 }
                             }
@@ -1238,7 +1268,8 @@ static void game_playing_ui_text_update()
 
 void game_playing()
 {
-    if (hand_state == HAND_SELECT && hands == 0) {
+    if (hand_state == HAND_SELECT && hands == 0) 
+    {
         game_state = GAME_LOSE;
     }
 
@@ -1465,7 +1496,7 @@ void game_round_end() // Writing this kind a made me want to kms. If somewone wa
                     memcpy(&se_mem[31][32 * y], &tile_map6, sizeof(tile_map6));
 
                     y = 4;
-                    const unsigned short tile_map2[10] = {0x002A, 0x001F, 0x001F, 0x001F, 0x001F, 0x001F, 0x001F, 0x001F, 0x042A, se_mem[31][32 * y + 9]};
+                    const unsigned short tile_map2[10] = {0x046B, 0x001F, 0x001F, 0x001F, 0x001F, 0x001F, 0x001F, 0x001F, 0x006B, se_mem[31][32 * y + 9]};
                     memcpy(&se_mem[31][32 * y], &tile_map2, sizeof(tile_map2));
                 }
                 else
@@ -1494,7 +1525,7 @@ void game_round_end() // Writing this kind a made me want to kms. If somewone wa
 
             if (sequence_step == 6)
             {
-                memset16(&pal_bg_mem[18], 0x1483, sizeof(pal_bg_mem));
+                memset16(&pal_bg_mem[18], 0x1483, 1);
                 state = 6;
                 timer = 0;
                 sequence_step = 0;
@@ -1590,14 +1621,104 @@ void game_round_end() // Writing this kind a made me want to kms. If somewone wa
 
                 tte_printf("#{P:88, 72; cx:0xF000}Cash Out: $%d", hands + blind_get_reward(current_blind)); // Print the cash out amount
             }
+            else if (timer > FRAMES(40) && key_hit(KEY_A))
+            {   
+                state = 8; // Go to the next state
+                money += hands + blind_get_reward(current_blind); // Reward the player
+                set_money(money);
+                memset16(&pal_bg_mem[6], 0x0174, 1);
 
-
+                obj_hide(round_end_blind_token->obj); // Hide the blind token object
+                tte_erase_rect(80, 72, 200, 160); // Erase the blind token text
+            }
 
             break;
         }
-        default:
-            state = 0;
+        case 8:
+        {
+            sequence_step++;
+            int x = 9; 
+            
+            for (int y = 19; y > 5; y--)
+            {
+                memcpy16(&se_mem[31][x + 32 * (y + 1)], &se_mem[31][x + 32 * y], 16);
+            }
+
+            if (sequence_step >= 20)
+            {
+                sequence_step = 0;
+                timer = 0; 
+                state = 9;
+            }
+        }
             break;
+        default:
+            timer = 0;
+            sequence_step = 0;
+            state = 0;
+            blind_reward = 0;
+            hand_reward = 0;
+            interest_reward = 0;
+            game_state = GAME_SHOP;
+            break;
+    }
+}
+
+
+void game_shop()
+{
+    change_background(BG_ID_SHOP);
+
+    if (timer % 20 == 0) // Shift palette around the border of the shop icon
+    {
+        unsigned short shifted_palette[4];
+        memcpy16(&shifted_palette[0], &pal_bg_mem[14], 1);
+        memcpy16(&shifted_palette[1], &pal_bg_mem[17], 1);
+        memcpy16(&shifted_palette[2], &pal_bg_mem[22], 1);
+        memcpy16(&shifted_palette[3], &pal_bg_mem[8], 1);
+
+        // Circularly shift the palette
+        int last = shifted_palette[3];
+
+        for (int i = 3; i > 0; --i) {
+            shifted_palette[i] = shifted_palette[i - 1];
+        }
+
+        shifted_palette[0] = last;
+
+        memcpy16(&pal_bg_mem[14], &shifted_palette[0], 1); // Copy the shifted palette to the next 4 slots
+        memcpy16(&pal_bg_mem[17], &shifted_palette[1], 1);
+        memcpy16(&pal_bg_mem[22], &shifted_palette[2], 1);
+        memcpy16(&pal_bg_mem[8], &shifted_palette[3], 1);
+
+    }
+
+    if (timer < 13)
+    {           
+        for (int y = 7; y < 40; y++)
+        {
+            int x = 9;
+            memcpy16(&se_mem[31][x + 32 * (y - 1)], &se_mem[31][x + 32 * y], 16);
+        }
+
+        if (timer >= 7)
+        {
+            int timer_offset = timer - 6;
+
+            for (int y = 0; y < timer_offset; y++)
+            {
+                int y_from = 26 + y - timer_offset;
+                int y_to = 0 + y;
+                memcpy16(&se_mem[31][32 * y_to], &se_mem[31][32 * y_from], 9);
+            }
+        }
+        
+        // if (timer == 8)
+        // {
+        //     int y_from = 26;
+        //     int y_to = 0;
+        //     memcpy16(&se_mem[31][32 * y_to], &se_mem[31][32 * y_from], 9);
+        // }
     }
 }
 
@@ -1614,7 +1735,7 @@ void game_update()
             game_round_end();
             break;
         case GAME_SHOP:
-            // Handle shop logic here
+            game_shop();
             break;
         case GAME_BLIND_SELECT:
             // Handle blind select logic here
