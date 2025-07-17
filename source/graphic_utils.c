@@ -24,7 +24,7 @@ static void clip_se_rect_to_screenblock(Rect* rect)
 }
 
 // Clips a rect of screenblock entries to be within one step of 
-// screenblock boundaries vertically (1 step from top, 1 step from bottom.
+// screenblock boundaries vertically (1 step from top, 1 step from bottom).
 static void clip_se_rect_within_step_of_full_screen_vert(Rect* se_rect)
 {
     Rect bounding_rect = FULL_SCREENBLOCK_RECT;
@@ -91,19 +91,19 @@ void main_bg_se_copy_rect(Rect rect_to, Rect rect_from)
     if (rect_from.left > rect_from.right
         || rect_from.top > rect_from.bottom
         || rect_to.left > rect_to.right
-        || rect_from.top > rect_from.bottom
-        // Check equal dimensions
-        || rect_width(&rect_from) != rect_width(&rect_to)
-        || rect_height(&rect_from) != rect_height(&rect_to))
+        || rect_from.top > rect_from.bottom)
     {
         return;
     }
 
-    for (int y = 0; y < rect_height(&rect_from); y++)
+    clip_se_rect_to_screenblock(&rect_to);
+    clip_se_rect_to_screenblock(&rect_from);
+
+    for (int y = 0; y < rect_height(&rect_to); y++)
     {
         memcpy16(&(se_mem[MAIN_BG_SBB][rect_to.left + SE_ROW_LEN * (rect_to.top + y)]),
                  &(se_mem[MAIN_BG_SBB][rect_from.left + SE_ROW_LEN * (rect_from.top + y)]),
-                 rect_width(&rect_from));
+                 rect_width(&rect_to));
     }
 }
 

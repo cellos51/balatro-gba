@@ -128,6 +128,10 @@ static const Rect POP_MENU_ANIM_RECT        = {9,       7,      24,     31 };
 // the whole rect so we don't have to track its position
 
 static const Rect SINGLE_BLIND_SELECT_RECT  = {9,       7,      13,     31 };
+static const Rect BLIND_SELECT_BTN_PREANIM_RECT = {10,  20,     12,     20 };
+static const Rect BLIND_SKIP_BTN_GRAY_RECT  = {0,       24,     4,      27 };
+static const Rect BLIND_SKIP_BTN_PREANIM_DEST_RECT = {9,29,     19,     31 };
+// preanim - pre-animation rects for before the pop-up animation
 
 static const Rect HAND_BG_RECT_SELECTING    = {9,       11,     24,     15 };
 // TODO: Currently unused, remove?
@@ -503,21 +507,22 @@ void change_background(int id)
 
         for (int i = 0; i < MAX_BLINDS; i++)
         {
+            Rect curr_blind_rect = SINGLE_BLIND_SELECT_RECT;
+
+            // There's no gap between them
+            curr_blind_rect.left += i * rect_width(&SINGLE_BLIND_SELECT_RECT);
+            curr_blind_rect.right += i * rect_width(&SINGLE_BLIND_SELECT_RECT);
+
             if (blinds[i] != BLIND_CURRENT && (i == SMALL_BLIND || i == BIG_BLIND)) // Make the skip button gray
             {
-                // TODO: Switch all the copies here to use main_bg_se_copy_rect()
-                int x_from = 0;
-                int y_from = 24 + (i * 4);
+                Rect skip_blind_btn_dest_rect = BLIND_SKIP_BTN_PREANIM_DEST_RECT;
+                skip_blind_btn_dest_rect.left = curr_blind_rect.left;
+                skip_blind_btn_dest_rect.right = curr_blind_rect.right; 
+                Rect skip_blind_btn_src_rect = BLIND_SKIP_BTN_GRAY_RECT;
+                skip_blind_btn_src_rect.top += i * rect_height(&BLIND_SKIP_BTN_GRAY_RECT);
+                skip_blind_btn_src_rect.bottom += i * rect_height(&BLIND_SKIP_BTN_GRAY_RECT);
 
-                int x_to = 9 + (i * 5);
-                int y_to = 29;
-                
-                for (int j = 0; j < 3; j++)
-                {
-                    memcpy16(&se_mem[MAIN_BG_SBB][x_to + 32 * y_to], &se_mem[MAIN_BG_SBB][x_from + 32 * y_from], 5);
-                    y_from++;
-                    y_to++;
-                }
+                main_bg_se_copy_rect(skip_blind_btn_dest_rect, skip_blind_btn_src_rect);
             }
 
             if (blinds[i] == BLIND_CURRENT) // Raise the blind panel up a bit
@@ -525,14 +530,9 @@ void change_background(int id)
                 int x_from = 0;
                 int y_from = 27;
 
-                Rect blind_rect = SINGLE_BLIND_SELECT_RECT;
+                main_bg_se_copy_rect_1_tile_vert(curr_blind_rect, SE_UP);
 
-                // There's no gap between them
-                blind_rect.left += i * rect_width(&SINGLE_BLIND_SELECT_RECT);
-                blind_rect.right += i * rect_width(&SINGLE_BLIND_SELECT_RECT);
-                main_bg_se_copy_rect_1_tile_vert(blind_rect, SE_UP);
-
-                int x_to = blind_rect.left;
+                int x_to = curr_blind_rect.left;
                 int y_to = 31;
 
                 if (i == BIG_BLIND)
@@ -555,7 +555,7 @@ void change_background(int id)
                 int x_from = 0;
                 int y_from = 20;
 
-                int x_to = 10 + (i * 5);
+                int x_to = 10 + (i * rect_width(&SINGLE_BLIND_SELECT_RECT));
                 int y_to = 20;
 
                 memcpy16(&se_mem[MAIN_BG_SBB][x_to + 32 * y_to], &se_mem[MAIN_BG_SBB][x_from + 32 * y_from], 3);
