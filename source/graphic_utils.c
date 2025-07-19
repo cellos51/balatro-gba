@@ -2,6 +2,7 @@
 #include <tonc_tte.h>
 #include <tonc_math.h>
 
+#include "util.h"
 #include "graphic_utils.h"
 
 const Rect FULL_SCREENBLOCK_RECT = { 0, 0, SE_ROW_LEN, SE_COL_LEN };
@@ -143,5 +144,21 @@ void main_bg_se_copy_tile_to_rect(u16 tile, Rect se_rect)
 void tte_erase_rect_wrapper(Rect rect)
 {
     tte_erase_rect(rect.left, rect.top, rect.right, rect.bottom);
+}
+
+void update_text_rect_to_right_align_num(Rect* rect, int num, int overflow_direction)
+{
+    int num_digits = get_digits(num);
+    if (overflow_direction == OVERFLOW_RIGHT)
+    {
+        rect->left = max(0, rect->right - num_digits * TILE_SIZE);
+    }
+    else if (overflow_direction == OVERFLOW_LEFT)
+    {
+        int num_fitting_digits = rect_width(rect) / TILE_SIZE;
+        if (num_digits < num_fitting_digits)
+            rect->left += (num_fitting_digits - num_digits) * TILE_SIZE;
+        //else nothing is to be updated, entire rect is filled and may overflow
+    }
 }
 

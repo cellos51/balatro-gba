@@ -161,7 +161,7 @@ static const Rect HAND_SIZE_RECT_PLAYING    = {128,     152,    152,    160 };
 static const Rect HAND_TYPE_RECT            = {8,       64,     64,     72  };
 // Score displayed in the same place as the hand type
 static const Rect TEMP_SCORE_RECT           = {8,       64,     64,     72  }; 
-static const Rect SCORE_RECT                = {32,       48,     64,     56 };
+static const Rect SCORE_RECT                = {32,      48,     64,     56  };
 
 static const Rect PLAYED_CARDS_SCORES_RECT  = {72,      48,     240,    56  };
 static const Rect BLIND_TOKEN_TEXT_RECT     = {80,      72,     200,    160 };
@@ -169,7 +169,7 @@ static const Rect MONEY_TEXT_RECT           = {8,       120,    64,     120 };
 static const Rect CHIPS_TEXT_RECT           = {8,       80,     32,     88  };
 static const Rect MULT_TEXT_RECT            = {40,      80,     64,     88  };
 static const Rect BLIND_REWARD_RECT         = {40,      32,     64,     40  };
-static const Rect BLIND_REQ_TEXT_RECT       = {40,      24,     64,     32  };
+static const Rect BLIND_REQ_TEXT_RECT       = {32,      24,     64,     32  };
 
 // Rects with UNDEFINED are only used in tte_printf, they need to be fully defined
 // to be used with tte_erase_rect_wrapper()
@@ -178,7 +178,7 @@ static const Rect DISCARDS_TEXT_RECT        = {48,      104,    UNDEFINED, UNDEF
 static const Rect DECK_SIZE_RECT            = {200,     152,    UNDEFINED, UNDEFINED };
 static const Rect ROUND_TEXT_RECT           = {48,      144,    UNDEFINED, UNDEFINED };
 static const Rect ANTE_TEXT_RECT            = {8,       144,    UNDEFINED, UNDEFINED };
-static const Rect ROUND_END_BLIND_REQ_RECT  = {112,     96,     UNDEFINED, UNDEFINED };
+static const Rect ROUND_END_BLIND_REQ_RECT  = {112,     96,     136,       UNDEFINED };
 static const Rect ROUND_END_BLIND_REWARD_RECT = { 168,  96,     UNDEFINED, UNDEFINED };
 static const Rect ROUND_END_NUM_HANDS_RECT  = {88,      116,    UNDEFINED, UNDEFINED };
 static const Rect HAND_REWARD_RECT          = {168,     UNDEFINED, UNDEFINED, UNDEFINED };
@@ -596,7 +596,7 @@ void change_background(int id)
 
 void set_temp_score(int value)
 {
-    int x_offset = 40 - get_digits_even(value) * 8;
+    int x_offset = 40 - get_digits_even(value) * TILE_SIZE;
     tte_erase_rect_wrapper(TEMP_SCORE_RECT);
     tte_printf("#{P:%d,%d; cx:0xF000}%d", x_offset, TEMP_SCORE_RECT.top, value);
 }
@@ -616,16 +616,17 @@ void set_score(int value)
 
 void set_money(int value)
 {
-    int x_offset = 32 - get_digits_odd(value) * 8;
+    int x_offset = 32 - get_digits_odd(value) * TILE_SIZE;
     tte_erase_rect_wrapper(MONEY_TEXT_RECT);
     tte_printf("#{P:%d,%d; cx:0xC000}$%d", x_offset, MONEY_TEXT_RECT.top, value);
 }
 
 void set_chips(int value)
 {
-    int x_offset = 32 - get_digits(value) * 8; // Adjust the x offset based on the number of digits in chips
+    Rect chips_text_rect = CHIPS_TEXT_RECT;
     tte_erase_rect_wrapper(CHIPS_TEXT_RECT);
-    tte_printf("#{P:%d,%d; cx:0xF000;}%d", x_offset, CHIPS_TEXT_RECT.top, value);
+    update_text_rect_to_right_align_num(&chips_text_rect, value, OVERFLOW_LEFT);
+    tte_printf("#{P:%d,%d; cx:0xF000;}%d", chips_text_rect.left, chips_text_rect.top, value);
 }
 
 void set_mult(int value)
@@ -895,7 +896,11 @@ void game_round_init()
         obj_hide(round_end_blind_token->obj); // Hide the blind token sprite for now
     }
 
-    tte_printf("#{P:%d,%d; cx:0xE000}%d", BLIND_REQ_TEXT_RECT.left, BLIND_REQ_TEXT_RECT.top, blind_get_requirement(current_blind, ante)); // Blind requirement
+    Rect blind_req_text_rect = BLIND_REQ_TEXT_RECT;
+    int blind_requirement = blind_get_requirement(current_blind, ante);
+    update_text_rect_to_right_align_num(&blind_req_text_rect, blind_requirement, OVERFLOW_RIGHT);
+    
+    tte_printf("#{P:%d,%d; cx:0xE000}%d", blind_req_text_rect.left, blind_req_text_rect.top, blind_requirement); // Blind requirement
     tte_printf("#{P:%d,%d; cx:0xC000}$%d", BLIND_REWARD_RECT.left, BLIND_REWARD_RECT.top, blind_get_reward(current_blind)); // Blind reward
 
     deck_shuffle(); // Shuffle the deck at the start of the round
@@ -1709,7 +1714,11 @@ void game_round_end()
             int current_ante = ante;
             if (current_blind == BOSS_BLIND) current_ante--; // Beating the boss blind increases the ante, so we need to display the previous ante value
 
-            tte_printf("#{P:%d,%d; cx:0xE000}%d", ROUND_END_BLIND_REQ_RECT.left, ROUND_END_BLIND_REQ_RECT.top, blind_get_requirement(current_blind, current_ante));
+            Rect blind_req_rect = ROUND_END_BLIND_REQ_RECT;
+            int blind_req = blind_get_requirement(current_blind, current_ante);
+            update_text_rect_to_right_align_num(&blind_req_rect, blind_req, OVERFLOW_RIGHT);
+
+            tte_printf("#{P:%d,%d; cx:0xE000}%d", blind_req_rect.left, blind_req_rect.top, blind_req);
 
             if (timer == 1)
             {
@@ -1755,7 +1764,7 @@ void game_round_end()
             {
                 blind_reward--;
                 tte_printf("#{P:%d,%d; cx:0xC000}$%d", BLIND_REWARD_RECT.left , BLIND_REWARD_RECT.top, blind_reward);
-                tte_printf("#{P:%d,%d; cx:0xC000}$%d", ROUND_END_BLIND_REWARD_RECT.left, ROUND_END_BLIND_REQ_RECT.top, blind_get_reward(current_blind) - blind_reward);
+                tte_printf("#{P:%d,%d; cx:0xC000}$%d", ROUND_END_BLIND_REWARD_RECT.left, ROUND_END_BLIND_REWARD_RECT.top, blind_get_reward(current_blind) - blind_reward);
             }
             else if (timer > FRAMES(20))
             {

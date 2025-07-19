@@ -36,6 +36,9 @@
 #define SE_UP	-1
 #define SE_DOWN 1
 
+#define OVERFLOW_LEFT	-1
+#define OVERFLOW_RIGHT	1
+
 // Tile size in pixels, both height and width as tiles are square
 #define TILE_SIZE 8
 
@@ -100,5 +103,19 @@ void main_bg_se_move_rect_1_tile_vert(Rect se_rect, int direction);
 
 // A wrapper for tte_erase_rect that would use the rect struct
 void tte_erase_rect_wrapper(Rect rect);
+
+/* Changes rect->left so it fits the digits of num exactly when right aligned to rect->right.
+ * Assumes num is not negative.
+ * 
+ * overflow_direction determines the direction the number will overflow
+ * if it's too large to fit inside the rect. 
+ * Should be either OVERFLOW_LEFT or OVERFLOW_RIGHT.
+ * 
+ * The rect is in number of pixels but should be a multiple of TILE_SIZE
+ * so it's a whole number of tiles to fit TTE characters
+ * 
+ * Note that both rect->left and rect-right need to be defined, top and bottom don't matter
+ */
+void update_text_rect_to_right_align_num(Rect* rect, int num, int overflow_direction);
 
 #endif //GRAPHIC_UTILS_H
