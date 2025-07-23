@@ -36,7 +36,8 @@ static bool used_layers[MAX_JOKER_OBJECTS] = {false}; // Track used layers for j
 
 void joker_init()
 {
-    GRIT_CPY(&pal_obj_mem[PAL_ROW_LEN * JOKER_PB], joker_gfxPal);
+    GRIT_CPY(&tile_mem[4][JOKER_TID], joker_gfxTiles);
+    memcpy16(&pal_obj_mem[PAL_ROW_LEN * JOKER_PB], joker_gfxPal, sizeof(joker_gfxPal) / 2);
 }
 
 Joker *joker_new(u8 id)
@@ -99,18 +100,14 @@ JokerObject *joker_object_new(Joker *joker)
     }
 
     joker_object->joker = joker;
-
-    int tile_index = JOKER_TID + (layer * JOKER_SPRITE_OFFSET);
-    memcpy32(&tile_mem[4][tile_index], &joker_gfxTiles[joker->id * TILE_SIZE * JOKER_SPRITE_OFFSET], TILE_SIZE * JOKER_SPRITE_OFFSET);
     joker_object->sprite = sprite_new
     (
         ATTR0_SQUARE | ATTR0_4BPP | ATTR0_AFF, 
         ATTR1_SIZE_32, 
-        tile_index, 
+        JOKER_TID + (JOKER_SPRITE_OFFSET * joker->id), 
         JOKER_PB,
         JOKER_STARTING_LAYER + layer
     );
-
     joker_object->tx = 0; // Target position
     joker_object->ty = 0;
     joker_object->x = 0;

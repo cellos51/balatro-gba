@@ -6,11 +6,6 @@
 
 #include "sprite.h"
 
-#define CARD_TID 0
-#define CARD_SPRITE_OFFSET 16
-#define CARD_PB 0
-#define CARD_STARTING_LAYER 0
-
 // Card suits
 #define HEARTS 0
 #define CLUBS 1

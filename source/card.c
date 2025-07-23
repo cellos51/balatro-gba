@@ -4,7 +4,6 @@
 #include <stdlib.h>
 
 #include "deck_gfx.h"
-#include "graphic_utils.h"
 
 // Audio
 #include "soundbank.h"
@@ -19,7 +18,8 @@ const static u16 card_sprite_lut[NUM_SUITS][NUM_RANKS] = {
 
 void card_init()
 {
-    GRIT_CPY(&pal_obj_mem[CARD_PB], deck_gfxPal);
+    GRIT_CPY(&tile_mem[4], deck_gfxTiles);
+    GRIT_CPY(pal_obj_mem, deck_gfxPal);
 }
 
 // Card methods
@@ -149,10 +149,8 @@ void card_object_update(CardObject *card_object)
 
 void card_object_set_sprite(CardObject *card_object, int layer)
 {
-    int tile_index = CARD_TID + (layer * CARD_SPRITE_OFFSET);
-    memcpy32(&tile_mem[4][tile_index], &deck_gfxTiles[card_sprite_lut[card_object->card->suit][card_object->card->rank] * TILE_SIZE], TILE_SIZE * CARD_SPRITE_OFFSET);
     sprite_destroy(&card_object->sprite); // Destroy the old sprite if it exists
-    card_object->sprite = sprite_new(ATTR0_SQUARE | ATTR0_4BPP | ATTR0_AFF, ATTR1_SIZE_32, tile_index, 0, layer + CARD_STARTING_LAYER);
+    card_object->sprite = sprite_new(ATTR0_SQUARE | ATTR0_4BPP | ATTR0_AFF, ATTR1_SIZE_32, card_sprite_lut[card_object->card->suit][card_object->card->rank], 0, layer);
 }
 
 void card_object_shake(CardObject *card_object, mm_word sound_id)

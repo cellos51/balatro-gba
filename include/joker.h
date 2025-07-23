@@ -1,16 +1,15 @@
 #ifndef JOKER_H
 #define JOKER_H
 
+#define JOKER_TID 880 // Tile ID for the starting index in the tile memory
+#define JOKER_SPRITE_OFFSET 16 // Offset for the joker sprites
+#define JOKER_PB 4 // Palette bank for the default jokers
+#define JOKER_STARTING_LAYER 27
+
 #include <maxmod.h>
 
 #include "sprite.h"
 #include "card.h"
-#include "game.h"
-
-#define JOKER_TID (MAX_HAND_SIZE + MAX_SELECTION_SIZE) * JOKER_SPRITE_OFFSET // Tile ID for the starting index in the tile memory
-#define JOKER_SPRITE_OFFSET 16 // Offset for the joker sprites
-#define JOKER_PB 4 // Palette bank for the default jokers
-#define JOKER_STARTING_LAYER 27
 
 #define BASE_EDITION 0
 #define FOIL_EDITION 1
