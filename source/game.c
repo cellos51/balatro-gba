@@ -962,7 +962,7 @@ void game_round_init()
     tte_printf("#{P:%d,%d; cx:0xE000}%d%c", blind_req_text_rect.left, blind_req_text_rect.top, blind_requirement, score_suffix); // Blind requirement
     tte_printf("#{P:%d,%d; cx:0xC000}$%d", BLIND_REWARD_RECT.left, BLIND_REWARD_RECT.top, blind_get_reward(current_blind)); // Blind reward
 
-    deck_shuffle(); // Shuffle the deck at the start of the round
+    //deck_shuffle(); // Shuffle the deck at the start of the round
 }
 
 void init_game_state(enum GameState game_state_to_init)
