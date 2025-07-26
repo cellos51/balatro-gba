@@ -204,6 +204,7 @@ static const Rect SHOP_REROLL_RECT          = {88,      96,    UNDEFINED, UNDEFI
 
 //TODO: Properly define and use
 #define MENU_POP_OUT_ANIM_FRAMES 20
+#define SCORED_CARD_TEXT_Y 48
 
 // General functions
 void set_seed(int seed)
@@ -265,7 +266,8 @@ void sort_cards()
     {
         if (hand[i] != NULL)
         {
-            sprite_destroy(&hand[i]->sprite);
+            // card_object_get_sprite() will not work here since we need the address
+            sprite_destroy(&(hand[i]->sprite_object->sprite));
         }
     }
 
@@ -275,7 +277,7 @@ void sort_cards()
         {
             //hand[i]->sprite = sprite_new(ATTR0_SQUARE | ATTR0_4BPP | ATTR0_AFF, ATTR1_SIZE_32, card_sprite_lut[hand[i]->card->suit][hand[i]->card->rank], 0, i);
             card_object_set_sprite(hand[i], i); // Set the sprite for the card object
-            sprite_position(hand[i]->sprite, fx2int(hand[i]->x), fx2int(hand[i]->y));
+            sprite_position(card_object_get_sprite(hand[i]), fx2int(hand[i]->sprite_object->x), fx2int(hand[i]->sprite_object->y));
         }
     }
 }
@@ -298,7 +300,7 @@ enum HandType hand_get_type()
 
     for (int i = 0; i <= hand_top; i++)
     {
-        if (hand[i] != NULL && hand[i]->selected)
+        if (hand[i] != NULL && card_object_is_selected(hand[i]))
         {
             suits[hand[i]->card->suit]++;
             ranks[hand[i]->card->rank]++;
@@ -628,7 +630,7 @@ void change_background(int id)
     background = id;
 }
 
-void set_temp_score(int value)
+void display_temp_score(int value)
 {
     int x_offset = 40 - get_digits_even(value) * TILE_SIZE;
     tte_erase_rect_wrapper(TEMP_SCORE_RECT);
@@ -805,8 +807,8 @@ void card_draw()
     const FIXED deck_x = int2fx(208);
     const FIXED deck_y = int2fx(110);
 
-    card_object->x = deck_x;
-    card_object->y = deck_y;
+    card_object->sprite_object->x = deck_x;
+    card_object->sprite_object->y = deck_y;
 
     hand[++hand_top] = card_object;
 
@@ -831,9 +833,9 @@ void hand_select()
 {
     if (hand_state != HAND_SELECT || hand[selection_x] == NULL) return;
 
-    if (hand[selection_x]->selected)
+    if (card_object_is_selected(hand[selection_x]))
     {
-        hand[selection_x]->selected = false;
+        card_object_set_selected(hand[selection_x], false);
         hand_selections--;
 
         mm_sound_effect sfx_select = {{SFX_CARD_SELECT}, 1024, 0, 255, 128,};
@@ -841,7 +843,7 @@ void hand_select()
     }
     else if (hand_selections < MAX_SELECTION_SIZE)
     {
-        hand[selection_x]->selected = true;
+        card_object_set_selected(hand[selection_x], true);
         hand_selections++;
 
         mm_sound_effect sfx_deselect = {{SFX_CARD_DESELECT}, 1024, 0, 255, 128,};
@@ -1139,7 +1141,7 @@ static void game_playing_process_input_and_state()
             lerped_temp_score = int2fx(temp_score);
             lerped_score = int2fx(score);
 
-            set_temp_score(temp_score);
+            display_temp_score(temp_score);
 
             chips = 0;
             mult = 0;
@@ -1154,7 +1156,7 @@ static void game_playing_process_input_and_state()
 
         if (lerped_temp_score > 0)
         {
-            set_temp_score(fx2int(lerped_temp_score));
+            display_temp_score(fx2int(lerped_temp_score));
 
             // We actually don't need to erase this because the score only increases
             display_score(fx2int(lerped_score)); // Set the score display
@@ -1210,16 +1212,12 @@ static void game_playing_discarded_cards_loop()
             discarded_card_object = card_object_new(discard_pop());
             //discarded_card_object->sprite = sprite_new(ATTR0_SQUARE | ATTR0_4BPP | ATTR0_AFF, ATTR1_SIZE_32, card_sprite_lut[discarded_card_object->card->suit][discarded_card_object->card->rank], 0, 0);
             card_object_set_sprite(discarded_card_object, 0); // Set the sprite for the discarded card object
-            discarded_card_object->tx = int2fx(204);
-            discarded_card_object->ty = int2fx(112);
-            discarded_card_object->x = int2fx(240);
-            discarded_card_object->y = int2fx(80);
-            discarded_card_object->vx = 0;
-            discarded_card_object->vy = 0;
-            discarded_card_object->scale = float2fx(1.0f);
-            discarded_card_object->vscale = float2fx(0.0f);
-            discarded_card_object->rotation = 0;
-            discarded_card_object->vrotation = 0;
+            sprite_object_reset_transform(discarded_card_object->sprite_object);
+
+            discarded_card_object->sprite_object->tx = int2fx(204);
+            discarded_card_object->sprite_object->ty = int2fx(112);
+            discarded_card_object->sprite_object->x = int2fx(240);
+            discarded_card_object->sprite_object->y = int2fx(80);
 
             card_object_update(discarded_card_object);
         }
@@ -1227,7 +1225,7 @@ static void game_playing_discarded_cards_loop()
         {
             card_object_update(discarded_card_object);
 
-            if (discarded_card_object->y >= discarded_card_object->ty)
+            if (discarded_card_object->sprite_object->y >= discarded_card_object->sprite_object->ty)
             {
                 deck_push(discarded_card_object->card); // Put the card back into the deck
                 card_object_destroy(&discarded_card_object);
@@ -1265,23 +1263,23 @@ static void cards_in_hand_update_loop(bool* discarded_card, int* played_selectio
             case HAND_SELECT:
                 bool is_focused = (i == selection_x && selection_y == 0);
 
-                if (is_focused && !hand[i]->selected)
+                if (is_focused && !card_object_is_selected(hand[i]))
                 {
                     hand_y -= int2fx(10);
                 }
-                else if (!is_focused && hand[i]->selected)
+                else if (!is_focused && card_object_is_selected(hand[i]))
                 {
                     hand_y -= int2fx(15);
                 }
-                else if (is_focused && hand[i]->selected)
+                else if (is_focused && card_object_is_selected(hand[i]))
                 {
                     hand_y -= int2fx(20);
                 }
 
-                if (i != selection_x && hand[i]->y > hand_y)
+                if (i != selection_x && hand[i]->sprite_object->y > hand_y)
                 {
-                    hand[i]->y = hand_y;
-                    hand[i]->vy = 0;
+                    hand[i]->sprite_object->y = hand_y;
+                    hand[i]->sprite_object->vy = 0;
                 }
 
                 hand_x = hand_x + (int2fx(i) - int2fx(hand_top) / 2) * -spacing_lut[hand_top]; // TODO: Change this later to reference a 2D LUT of positions
@@ -1289,7 +1287,7 @@ static void cards_in_hand_update_loop(bool* discarded_card, int* played_selectio
             case HAND_SHUFFLING:
                 /* FALL THROUGH */
             case HAND_DISCARD: // TODO: Add sound
-                if (hand[i]->selected || hand_state == HAND_SHUFFLING)
+                if (card_object_is_selected(hand[i]) || hand_state == HAND_SHUFFLING)
                 {
                     if (!*discarded_card)
                     {
@@ -1304,7 +1302,7 @@ static void cards_in_hand_update_loop(bool* discarded_card, int* played_selectio
                             *sound_played = true;
                         }
 
-                        if (hand[i]->x >= hand_x)
+                        if (hand[i]->sprite_object->x >= hand_x)
                         {
                             discard_push(hand[i]->card);
                             card_object_destroy(&hand[i]);
@@ -1315,8 +1313,8 @@ static void cards_in_hand_update_loop(bool* discarded_card, int* played_selectio
                             *sound_played = false;
                             timer = 0;
 
-                            hand_y = hand[i]->y;
-                            hand_x = hand[i]->x;
+                            hand_y = hand[i]->sprite_object->y;
+                            hand_x = hand[i]->sprite_object->x;
                         }
 
                         *discarded_card = true;
@@ -1354,11 +1352,11 @@ static void cards_in_hand_update_loop(bool* discarded_card, int* played_selectio
                 hand_x = hand_x + (int2fx(i) - int2fx(hand_top) / 2) * -spacing_lut[hand_top];
                 hand_y += int2fx(24);
 
-                if (hand[i]->selected && *discarded_card == false && timer % FRAMES(10) == 0)
+                if (card_object_is_selected(hand[i]) && *discarded_card == false && timer % FRAMES(10) == 0)
                 {
-                    hand[i]->selected = false;
+                    card_object_set_selected(hand[i], false);
                     played_push(hand[i]);
-                    sprite_destroy(&hand[i]->sprite);
+                    sprite_destroy(&hand[i]->sprite_object->sprite);
                     hand[i] = NULL;
                     sort_cards();
 
@@ -1396,7 +1394,7 @@ static void cards_in_hand_update_loop(bool* discarded_card, int* played_selectio
                             }
                         }
 
-                        played[highest_rank_index]->selected = true;
+                        card_object_set_selected(played[highest_rank_index], true);
                         break;
                     case PAIR: // find two cards with the same rank (Requires recursion)
                         for (int i = 0; i <= played_top - 1; i++)
@@ -1405,13 +1403,13 @@ static void cards_in_hand_update_loop(bool* discarded_card, int* played_selectio
                             {
                                 if (played[i]->card->rank == played[j]->card->rank)
                                 {
-                                    played[i]->selected = true;
-                                    played[j]->selected = true;
+                                    card_object_set_selected(played[i], true);
+                                    card_object_set_selected(played[j], true);
                                     break;
                                 }
                             }
 
-                            if (played[i]->selected) break;
+                            if (card_object_is_selected(played[i])) break;
                         }
                         break;
                     case TWO_PAIR: // find two pairs of cards with the same rank (Requires recursion)
@@ -1423,24 +1421,24 @@ static void cards_in_hand_update_loop(bool* discarded_card, int* played_selectio
                             {
                                 if (played[i]->card->rank == played[j]->card->rank)
                                 {
-                                    played[i]->selected = true;
-                                    played[j]->selected = true;
+                                    card_object_set_selected(played[i], true);
+                                    card_object_set_selected(played[j], true);
 
                                     break;
                                 }
                             }
 
-                            if (played[i]->selected) break;
+                            if (card_object_is_selected(played[i])) break;
                         }
 
                         for (; i <= played_top - 1; i++) // Find second pair
                         {
                             for (int j = i + 1; j <= played_top; j++)
                             {
-                                if (played[i]->card->rank == played[j]->card->rank && played[i]->selected == false && played[j]->selected == false)
+                                if (played[i]->card->rank == played[j]->card->rank && !card_object_is_selected(played[i]) && !card_object_is_selected(played[j]))
                                 {
-                                    played[i]->selected = true;
-                                    played[j]->selected = true;
+                                    card_object_set_selected(played[i], true);
+                                    card_object_set_selected(played[j], true);
                                     break;
                                 }
                             }
@@ -1453,14 +1451,14 @@ static void cards_in_hand_update_loop(bool* discarded_card, int* played_selectio
                             {
                                 if (played[i]->card->rank == played[j]->card->rank)
                                 {
-                                    played[i]->selected = true;
-                                    played[j]->selected = true;
+                                    card_object_set_selected(played[i], true);
+                                    card_object_set_selected(played[j], true);
 
                                     for (int k = j + 1; k <= played_top; k++)
                                     {
-                                        if (played[i]->card->rank == played[k]->card->rank && played[k]->selected == false)
+                                        if (played[i]->card->rank == played[k]->card->rank && !card_object_is_selected(played[k]))
                                         {
-                                            played[k]->selected = true;
+                                            card_object_set_selected(played[k], true);
                                             break;
                                         }
                                     }
@@ -1469,7 +1467,7 @@ static void cards_in_hand_update_loop(bool* discarded_card, int* played_selectio
                                 }
                             }
 
-                            if (played[i]->selected) break;
+                            if (card_object_is_selected(played[i])) break;
                         }
                         break;
                     case FOUR_OF_A_KIND: // find four cards with the same rank (requires recursion)
@@ -1490,7 +1488,7 @@ static void cards_in_hand_update_loop(bool* discarded_card, int* played_selectio
                             {
                                 if (i != unmatched_index)
                                 {
-                                    played[i]->selected = true;
+                                    card_object_set_selected(played[i], true);
                                 }
                             }
                         }
@@ -1498,7 +1496,7 @@ static void cards_in_hand_update_loop(bool* discarded_card, int* played_selectio
                         {
                             for (int i = 0; i <= played_top; i++)
                             {
-                                played[i]->selected = true;
+                                card_object_set_selected(played[i], true);
                             }
                         }
                         break;
@@ -1519,7 +1517,7 @@ static void cards_in_hand_update_loop(bool* discarded_card, int* played_selectio
                     case FLUSH_FIVE: // Select all played cards in the hand (This is functionally identical as the above hand types)
                         for (int i = 0; i <= played_top; i++)
                         {
-                            played[i]->selected = true;
+                            card_object_set_selected(played[i], true);
                         }
                         break;
                     }
@@ -1532,8 +1530,8 @@ static void cards_in_hand_update_loop(bool* discarded_card, int* played_selectio
                 break;
             }
 
-            hand[i]->tx = hand_x;
-            hand[i]->ty = hand_y;
+            hand[i]->sprite_object->tx = hand_x;
+            hand[i]->sprite_object->ty = hand_y;
             card_object_update(hand[i]);
         }
     }
@@ -1547,7 +1545,7 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
     {
         if (played[i] != NULL)
         {
-            if (played[i]->sprite == NULL)
+            if (card_object_get_sprite(played[i]) == NULL)
             {
                 //played[i]->sprite = sprite_new(ATTR0_SQUARE | ATTR0_4BPP | ATTR0_AFF, ATTR1_SIZE_32, card_sprite_lut[played[i]->card->suit][played[i]->card->rank], 0, i + MAX_HAND_SIZE);
                 card_object_set_sprite(played[i], i + MAX_HAND_SIZE); // Set the sprite for the played card object
@@ -1562,7 +1560,7 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
             switch (play_state)
             {
                 case PLAY_PLAYING:
-                    if (i == 0 && (timer % FRAMES(10) == 0 || played[played_top - *played_selections]->selected == false) && timer > FRAMES(40))
+                    if (i == 0 && (timer % FRAMES(10) == 0 || !card_object_is_selected(played[played_top - *played_selections])) && timer > FRAMES(40))
                     {
                         (*played_selections)--;
 
@@ -1573,7 +1571,7 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                         }
                     }
 
-                    if (played[i]->selected && played_top - i >= *played_selections)
+                    if (card_object_is_selected(played[i]) && played_top - i >= *played_selections)
                     {
                         played_y -= int2fx(10);
                     }
@@ -1602,7 +1600,7 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                                 }
                             }
 
-                            if (played[j]->selected)
+                            if (card_object_is_selected(played[j]))
                             {
                                 scored_cards = j + 1; // Count the number of cards that have been scored
                                 if (scored_cards > *played_selections)
@@ -1615,7 +1613,7 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                                         }
                                     }
 
-                                    tte_set_pos(fx2int(played[j]->x) + 8, 48); // Offset of 16 pixels to center the text on the card
+                                    tte_set_pos(fx2int(played[j]->sprite_object->x) + 8, SCORED_CARD_TEXT_Y); // Offset of 16 pixels to center the text on the card
                                     tte_set_special(0xD000); // Set text color to blue from background memory
 
                                     // Write the score to a character buffer variable
@@ -1666,13 +1664,13 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                         }
                     }
 
-                    if (played[i]->selected)
+                    if (card_object_is_selected(played[i]))
                     {
                         played_y -= int2fx(10);
                     }
                     break;
                 case PLAY_ENDING: // This is the reverse of PLAY_PLAYING. The cards get reset back to their neutral position sequentially
-                    if (i == 0 && (timer % FRAMES(10) == 0 || played[played_top - *played_selections]->selected == false) && timer > FRAMES(40))
+                    if (i == 0 && (timer % FRAMES(10) == 0 || !card_object_is_selected(played[played_top - *played_selections])) && timer > FRAMES(40))
                     {
                         (*played_selections)--;
 
@@ -1683,7 +1681,7 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                         }
                     }
 
-                    if (played[i]->selected && played_top - i <= *played_selections - 1)
+                    if (card_object_is_selected(played[i]) && played_top - i <= *played_selections - 1)
                     {
                         played_y -= int2fx(10);
                     }
@@ -1702,7 +1700,7 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                             *sound_played = true;
                         }
 
-                        if (played[i]->x >= played_x)
+                        if (played[i]->sprite_object->x >= played_x)
                         {
                             discard_push(played[i]->card); // Push the card to the discard pile
                             card_object_destroy(&played[i]);
@@ -1743,9 +1741,9 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                     break;
             }
 
-            played[i]->tx = played_x;
-            played[i]->ty = played_y;
-            played[i]->tscale = played_scale;
+            played[i]->sprite_object->tx = played_x;
+            played[i]->sprite_object->ty = played_y;
+            played[i]->sprite_object->tscale = played_scale;
             card_object_update(played[i]);
         }
     }
@@ -1767,12 +1765,12 @@ static void held_jokers_update_loop()
 
     for (int i = jokers_top; i >= 0; i--)
     {
-        jokers[i]->tx = hand_x - int2fx(spacing_lut[jokers_top][i]); 
-        jokers[i]->ty = hand_y;
+        jokers[i]->sprite_object->tx = hand_x - int2fx(spacing_lut[jokers_top][i]);
+        jokers[i]->sprite_object->ty = hand_y;
 
-        if (jokers[i]->selected)
+        if (joker_object_is_selected(jokers[i]))
         {
-            jokers[i]->ty -= int2fx(10);
+            jokers[i]->sprite_object->ty -= int2fx(10);
         }
 
         joker_object_update(jokers[i]);
@@ -1830,22 +1828,22 @@ static void game_shop_create_items(JokerObject *shop_jokers[], bool first_time)
         u8 joker_id = random() % MAX_JOKERS;
 
         shop_jokers[i] = joker_object_new(joker_new(joker_id));
-        shop_jokers[i]->x = int2fx(120 + i * 32);
-        shop_jokers[i]->y = int2fx(160);
-        shop_jokers[i]->tx = shop_jokers[i]->x;
-        shop_jokers[i]->ty = int2fx(71);
+        shop_jokers[i]->sprite_object->x = int2fx(120 + i * 32);
+        shop_jokers[i]->sprite_object->y = int2fx(160);
+        shop_jokers[i]->sprite_object->tx = shop_jokers[i]->sprite_object->x;
+        shop_jokers[i]->sprite_object->ty = int2fx(71);
 
-        int x = fx2int(shop_jokers[i]->tx) + TILE_SIZE - (get_digits_even(shop_jokers[i]->joker->value) - 1) * TILE_SIZE;
-        int y = fx2int(shop_jokers[i]->ty);
+        int x = fx2int(shop_jokers[i]->sprite_object->tx) + TILE_SIZE - (get_digits_even(shop_jokers[i]->joker->value) - 1) * TILE_SIZE;
+        int y = fx2int(shop_jokers[i]->sprite_object->ty);
         tte_printf("#{P:%d,%d; cx:0xC000}$%d", x, y, shop_jokers[i]->joker->value);
 
         if (first_time == false)
         {
-            shop_jokers[i]->y = shop_jokers[i]->ty; // If it's not the first time, set the y position to the target position
+            shop_jokers[i]->sprite_object->y = shop_jokers[i]->sprite_object->ty; // If it's not the first time, set the y position to the target position
             joker_object_shake(shop_jokers[i], UNDEFINED); // Give the joker a little wiggle animation
         }
 
-        sprite_position(shop_jokers[i]->sprite, fx2int(shop_jokers[i]->x), fx2int(shop_jokers[i]->y));
+        sprite_position(joker_object_get_sprite(shop_jokers[i]), fx2int(shop_jokers[i]->sprite_object->x), fx2int(shop_jokers[i]->sprite_object->y));
     }
 }
 
@@ -2319,7 +2317,7 @@ void game_shop()
                 {
                     if (i == selection_x - 1 && selection_y == 0)
                     {
-                        shop_jokers[i]->ty = int2fx(61);
+                        shop_jokers[i]->sprite_object->ty = int2fx(61);
 
                         if (key_hit(SELECT_CARD) && jokers_top < MAX_JOKERS_HELD_SIZE - 1 && money >= shop_jokers[i]->joker->value)
                         {
@@ -2328,8 +2326,8 @@ void game_shop()
                             display_money(money); // Update the money display
 
                             Rect joker_price_rect;
-                            joker_price_rect.left = fx2int(shop_jokers[i]->tx);
-                            joker_price_rect.top = fx2int(shop_jokers[i]->ty) + TILE_SIZE;
+                            joker_price_rect.left = fx2int(shop_jokers[i]->sprite_object->tx);
+                            joker_price_rect.top = fx2int(shop_jokers[i]->sprite_object->ty) + TILE_SIZE;
                             joker_price_rect.right = joker_price_rect.left + TILE_SIZE * 3;
                             joker_price_rect.bottom = joker_price_rect.top + TILE_SIZE;
 
@@ -2340,7 +2338,7 @@ void game_shop()
                     }
                     else
                     {
-                        shop_jokers[i]->ty = int2fx(71);
+                        shop_jokers[i]->sprite_object->ty = int2fx(71);
                     }
                 }
             }
@@ -2362,7 +2360,7 @@ void game_shop()
                 {
                     if (shop_jokers[i] != NULL)
                     {
-                        shop_jokers[i]->ty = int2fx(160);
+                        shop_jokers[i]->sprite_object->ty = int2fx(160);
                     }
                 }
 

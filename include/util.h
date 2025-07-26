@@ -33,4 +33,6 @@ static inline int get_digits_even(int n)
     return 5;
 }
 
+#define UNDEFINED -1
+
 #endif // UTIL_H

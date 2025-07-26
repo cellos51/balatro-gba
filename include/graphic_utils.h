@@ -50,8 +50,6 @@ typedef struct
 	int bottom;
 } Rect;
 
-#define UNDEFINED -1
-
 /* Gets the screenblock tile for the given coordinates (x, y).
  * x and y are in number of tiles.
  * Returns the screenblock tile.

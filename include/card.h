@@ -45,17 +45,7 @@ typedef struct
 typedef struct
 {
     Card *card;
-    Sprite *sprite;
-    FIXED tx, ty; // target position
-    FIXED x, y; // position
-    FIXED vx, vy; // velocity
-    FIXED tscale;
-    FIXED scale;
-    FIXED vscale;
-    FIXED trotation; // this never gets used so i might remove it later
-    FIXED rotation;
-    FIXED vrotation;
-    bool selected;
+    SpriteObject *sprite_object;
 } CardObject;
 
 // Card functions
@@ -71,6 +61,10 @@ CardObject *card_object_new(Card *card);
 void card_object_destroy(CardObject **card_object);
 void card_object_update(CardObject *card_object); // Update the card object position and scale
 void card_object_set_sprite(CardObject *card_object, int layer);
-void card_object_shake(CardObject *card_object, mm_word sound_id); // This doesn't actually score anything, it just performs an animation and plays a sound effect
+void card_object_shake(CardObject* card_object, mm_word sound_id);
+
+void card_object_set_selected(CardObject* card_object, bool selected);
+bool card_object_is_selected(CardObject* card_object);
+Sprite* card_object_get_sprite(CardObject* card_object);
 
 #endif // CARD_H

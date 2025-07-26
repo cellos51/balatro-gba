@@ -42,22 +42,8 @@ typedef struct
 
 typedef struct // copy of CardObject in card.h
 {
-    /* Note that since JokerObject is cast to CardObject in joker_object_update(),
-     * they have to have the exact same structure to have 
-     * the exact same field offsets in memory
-     */
     Joker *joker;
-    Sprite *sprite;
-    FIXED tx, ty;
-    FIXED x, y;
-    FIXED vx, vy;
-    FIXED tscale;
-    FIXED scale;
-    FIXED vscale;
-    FIXED trotation;
-    FIXED rotation;
-    FIXED vrotation;
-    bool selected;
+    SpriteObject* sprite_object;
 } JokerObject;
 
 typedef struct  // These jokers are triggered after the played hand has finished scoring.
@@ -83,5 +69,10 @@ void joker_object_destroy(JokerObject **joker_object);
 void joker_object_update(JokerObject *joker_object);
 void joker_object_shake(JokerObject *joker_object, mm_word sound_id); // This doesn't actually score anything, it just performs an animation and plays a sound effect
 bool joker_object_score(JokerObject *joker_object, Card* scored_card, int *chips, int *mult, int *xmult, int *money, bool *retrigger); // This scores the joker and returns true if it was scored successfully (Card = NULL means the joker is independent and not scored by a card)
+
+void joker_object_set_selected(JokerObject* joker_object, bool selected);
+bool joker_object_is_selected(JokerObject* joker_object);
+
+Sprite* joker_object_get_sprite(JokerObject* joker_object);
 
 #endif // JOKER_H

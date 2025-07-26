@@ -10,8 +10,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define JOKER_SCORE_TEXT_Y 48
+
 const static u8 joker_data_lut[MAX_JOKERS][2] = // Rarity, Value
 {
+    // TODO: Change to struct
     {COMMON_JOKER, 2}, // Default Joker
     {COMMON_JOKER, 5}, // Greedy Joker
 };
@@ -33,6 +36,7 @@ const static u8 edition_price_lut[MAX_EDITIONS] =
    since I'm lazy and sorting them wouldn't look good enough to warrant the effort.
 */
 static bool used_layers[MAX_JOKER_OBJECTS] = {false}; // Track used layers for joker sprites
+// TODO: Refactor sorting into SpriteObject?
 
 void joker_init()
 {
@@ -99,31 +103,24 @@ JokerObject *joker_object_new(Joker *joker)
     }
 
     joker_object->joker = joker;
+    joker_object->sprite_object = sprite_object_new();
 
     int tile_index = JOKER_TID + (layer * JOKER_SPRITE_OFFSET);
     memcpy32(&tile_mem[4][tile_index], &joker_gfxTiles[joker->id * TILE_SIZE * JOKER_SPRITE_OFFSET], TILE_SIZE * JOKER_SPRITE_OFFSET);
-    joker_object->sprite = sprite_new
+    sprite_object_set_sprite
     (
-        ATTR0_SQUARE | ATTR0_4BPP | ATTR0_AFF, 
-        ATTR1_SIZE_32, 
-        tile_index, 
-        JOKER_PB,
-        JOKER_STARTING_LAYER + layer
+        joker_object->sprite_object, 
+        sprite_new
+        (
+            ATTR0_SQUARE | ATTR0_4BPP | ATTR0_AFF, 
+            ATTR1_SIZE_32, 
+            tile_index, 
+            JOKER_PB,
+            JOKER_STARTING_LAYER + layer
+        )
     );
 
-    joker_object->tx = 0; // Target position
-    joker_object->ty = 0;
-    joker_object->x = 0;
-    joker_object->y = 0;
-    joker_object->vx = 0;
-    joker_object->vy = 0;
-    joker_object->tscale = float2fx(1.0f); // Target scale
-    joker_object->scale = float2fx(1.0f);
-    joker_object->vscale = float2fx(0.0f);
-    joker_object->trotation = float2fx(0.0f); // Target rotation
-    joker_object->rotation = float2fx(0.0f);
-    joker_object->vrotation = float2fx(0.0f);
-    joker_object->selected = false;
+    
 
     return joker_object;
 }
@@ -132,9 +129,9 @@ void joker_object_destroy(JokerObject **joker_object)
 {
     if (*joker_object == NULL) return;
 
-    int layer = sprite_get_layer((*joker_object)->sprite) - JOKER_STARTING_LAYER;
+    int layer = sprite_get_layer(joker_object_get_sprite(*joker_object)) - JOKER_STARTING_LAYER;
     used_layers[layer] = false;
-    sprite_destroy(&(*joker_object)->sprite); // Destroy the sprite
+    sprite_object_destroy(&(*joker_object)->sprite_object); // Destroy the sprite
     joker_destroy(&(*joker_object)->joker); // Destroy the joker
     free(*joker_object);
     *joker_object = NULL;
@@ -142,17 +139,13 @@ void joker_object_destroy(JokerObject **joker_object)
 
 void joker_object_update(JokerObject *joker_object)
 {
-    // Re-use the card object update logic by casting the JokerObject to a CardObject temporarily
-    // This works because card_object_update doesn't use any card data, which is why CardObject should've been generic. my bad
-    // TODO: Refactor and separate the relevant fields to a generic struct, maybe to Sprite or make a SpriteObject
     CardObject *card_object = (CardObject *)joker_object;
     card_object_update(card_object);
 }
 
 void joker_object_shake(JokerObject *joker_object, mm_word sound_id)
 {
-    CardObject *card_object = (CardObject *)joker_object;
-    card_object_shake(card_object, sound_id);
+    sprite_object_shake(joker_object->sprite_object, sound_id);
 }
 
 bool joker_object_score(JokerObject *joker_object, Card* scored_card, int *chips, int *mult, int *xmult, int *money, bool *retrigger)
@@ -169,7 +162,7 @@ bool joker_object_score(JokerObject *joker_object, Card* scored_card, int *chips
         *money += joker_effect.money;
         // TODO: Retrigger
 
-        tte_set_pos(fx2int(joker_object->x) + 8, 48); // Offset of 16 pixels to center the text on the card
+        tte_set_pos(fx2int(joker_object->sprite_object->x) + 8, JOKER_SCORE_TEXT_Y); // Offset of 16 pixels to center the text on the card
 
         char score_buffer[12];
 
@@ -198,4 +191,26 @@ bool joker_object_score(JokerObject *joker_object, Card* scored_card, int *chips
     }
 
     return false;
+}
+
+
+void joker_object_set_selected(JokerObject* joker_object, bool selected)
+{
+    if (joker_object == NULL)
+        return;
+    sprite_object_set_selected(joker_object->sprite_object, selected);
+}
+
+bool joker_object_is_selected(JokerObject* joker_object)
+{
+    if (joker_object == NULL)
+        return false;
+    return sprite_object_is_selected(joker_object->sprite_object);
+}
+
+Sprite* joker_object_get_sprite(JokerObject* joker_object)
+{
+    if (joker_object == NULL)
+        return NULL;
+    return sprite_object_get_sprite(joker_object->sprite_object);
 }
