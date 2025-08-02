@@ -487,6 +487,7 @@ const JokerInfo joker_registry[] = {
     { COMMON_JOKER, 4, smiley_face_joker_effect },
     { COMMON_JOKER, 4, even_steven_joker_effect },
     { COMMON_JOKER, 4, odd_todd_joker_effect },
+    { UNCOMMON_JOKER, 7, NULL },  // Shortcut Joker, has no active effect
 };
 
 static const size_t joker_registry_size = NUM_ELEM_IN_ARR(joker_registry);

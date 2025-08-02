@@ -148,7 +148,7 @@ void joker_destroy(Joker **joker)
 JokerEffect joker_get_score_effect(Joker *joker, Card *scored_card)
 {
     const JokerInfo *jinfo = get_joker_registry_entry(joker->id);
-    if (!jinfo) return (JokerEffect){0};
+    if (!jinfo || jinfo->effect == NULL) return (JokerEffect){0};
 
     return jinfo->effect(joker, scored_card);
 }

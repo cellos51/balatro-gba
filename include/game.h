@@ -86,4 +86,7 @@ int get_deck_top(void);
 int get_num_discards_remaining(void);
 int get_money(void);
 
+// joker specific functions
+bool is_shortcut_joker_active(void);
+
 #endif // GAME_H

@@ -64,14 +64,80 @@ bool hand_contains_full_house(u8* ranks) {
 }
 
 bool hand_contains_straight(u8 *ranks) {
-    for (int i = 0; i < NUM_RANKS - 4; i++)
+    if (!is_shortcut_joker_active())
     {
-        if (ranks[i] && ranks[i + 1] && ranks[i + 2] && ranks[i + 3] && ranks[i + 4])
+        // This is the regular case of detecting straights
+        for (int i = 0; i < NUM_RANKS - 4; i++)
+        {
+            if (ranks[i] && ranks[i + 1] && ranks[i + 2] && ranks[i + 3] && ranks[i + 4])
+                return true;
+        }
+        // Check for ace low straight
+        if (ranks[ACE] && ranks[TWO] && ranks[THREE] && ranks[FOUR] && ranks[FIVE])
             return true;
+    } else
+    {
+        // Shortcut Joker is active, we have to detect straights where any card may "skip" 1 rank
+        // We do this by calculating the longest possible straight that can end on each rank
+        // and stopping when we find one that is 5 cards long
+        u8 longest_short_cut_at[NUM_RANKS] = {0};
+
+        // A low ace can start a sequence. 'ace_low_len' is 1 if an ace is present,
+        // acting as a potential predecessor for TWO and THREE.
+        int ace_low_len = ranks[ACE] ? 1 : 0;
+
+        // Iterate through all ranks from TWO up to ACE.
+        for (int i = 0; i < NUM_RANKS; i++)
+        {
+            // No cards in this rank, no straight can end here, continue
+            if (ranks[i] == 0)
+            {
+                longest_short_cut_at[i] = 0;
+                continue;
+            }
+
+            int prev_len1 = 0;
+            int prev_len2 = 0;
+
+            // This logic handles the special connections for ace-low straights.
+            if (i == TWO)
+            {
+                // A TWO can be preceded by a low ACE (no skip).
+                prev_len1 = ace_low_len;
+            }
+            else if (i == THREE)
+            {
+                // A THREE can be preceded by a TWO (no skip) or a low ACE (skip).
+                prev_len1 = longest_short_cut_at[TWO];
+                prev_len2 = ace_low_len;
+            }
+            else if (i == ACE)
+            {
+                // An ACE (as the highest card) can be preceded by a KING or a QUEEN.
+                prev_len1 = longest_short_cut_at[KING];
+                prev_len2 = longest_short_cut_at[QUEEN];
+            }
+            else // For all other cards (FOUR through KING).
+            {
+                // A card can be preceded by the rank directly below or two ranks below.
+                prev_len1 = longest_short_cut_at[i - 1];
+                prev_len2 = longest_short_cut_at[i - 2];
+            }
+
+            // The length of the straight ending at rank 'i' is 1 (for the card itself)
+            // plus the length of the longest valid preceding straight.
+            if (prev_len1 > prev_len2)
+                longest_short_cut_at[i] = 1 + prev_len1;
+            else
+                longest_short_cut_at[i] = 1 + prev_len2;
+
+            // If we've formed a sequence of 5 or more cards, we have a straight.
+            if (longest_short_cut_at[i] >= 5)
+            {
+                return true;
+            }
+        }
     }
-    // Check for ace low straight
-    if (ranks[ACE] && ranks[TWO] && ranks[THREE] && ranks[FOUR] && ranks[FIVE])
-        return true;
 
     return false;
 }

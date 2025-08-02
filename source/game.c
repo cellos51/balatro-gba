@@ -87,17 +87,34 @@ static int deck_top = -1;
 static Card *discard_pile[MAX_DECK_SIZE] = {NULL};
 static int discard_top = -1;
 
+// Joker Special Variables
+static bool SHORTCUT_JOKER_ACTIVE = false;
+bool is_shortcut_joker_active(void) {
+    return SHORTCUT_JOKER_ACTIVE;
+}
+
 // Joker stack
 static inline void joker_push(JokerObject *joker)
 {
     if (jokers_top >= MAX_JOKERS_HELD_SIZE - 1) return;
     jokers[++jokers_top] = joker;
+
+    if (joker->joker->id == SHORTCUT_JOKER_ID) {
+        SHORTCUT_JOKER_ACTIVE = true;
+    }
 }
 
 static inline JokerObject *joker_pop()
 {
     if (jokers_top < 0) return NULL;
-    return jokers[jokers_top--];
+
+    JokerObject *joker = jokers[jokers_top--];
+
+    if (joker->joker->id == SHORTCUT_JOKER_ID) {
+        SHORTCUT_JOKER_ACTIVE = false;
+    }
+
+    return joker;
 }
 
 // Played stack
