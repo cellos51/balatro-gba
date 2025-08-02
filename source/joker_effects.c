@@ -215,6 +215,243 @@ static JokerEffect misprint_joker_effect(Joker *joker, Card *scored_card) {
     return effect;
 }
 
+static JokerEffect walkie_talkie_joker_effect(Joker *joker, Card *scored_card) {
+    JokerEffect effect = {0};
+    if (scored_card == NULL)
+        return effect;
+
+    if (scored_card->rank == TEN || scored_card->rank == FOUR) {
+            effect.chips = 10;
+            effect.mult = 4;
+    }
+
+    return effect;
+}
+
+static JokerEffect fibonnaci_joker_effect(Joker *joker, Card *scored_card) {
+    JokerEffect effect = {0};
+    if (scored_card == NULL)
+        return effect;
+
+    switch (scored_card->rank) {
+        case ACE: case TWO: case THREE: case FIVE: case EIGHT:
+            effect.mult = 8;
+        default:
+            break;
+    }
+
+    return effect;
+}
+
+static JokerEffect banner_joker_effect(Joker *joker, Card *scored_card) {
+    JokerEffect effect = {0};
+    if (scored_card != NULL)
+        return effect; // if card != null, we are not at the end-phase of scoring yet
+
+    effect.chips = 30 * get_num_discards_remaining();
+
+    return effect;
+}
+
+static JokerEffect mystic_summit_joker_effect(Joker *joker, Card *scored_card) {
+    JokerEffect effect = {0};
+    if (scored_card != NULL)
+        return effect; // if card != null, we are not at the end-phase of scoring yet
+
+    if (get_num_discards_remaining() == 0)
+        effect.mult = 15;
+
+    return effect;
+}
+
+static JokerEffect blackboard_joker_effect(Joker *joker, Card *scored_card) {
+    JokerEffect effect = {0};
+    if (scored_card != NULL)
+        return effect; // if card != null, we are not at the end-phase of scoring yet
+
+    bool all_cards_are_spades_or_clubs = true;
+    CardObject** hand = get_hand_array();
+    int hand_top = get_hand_top();
+    for (int i = 0; i < hand_top; i++ )
+    {
+        u8 suit = hand[i]->card->suit;
+        if (suit == HEARTS || suit == DIAMONDS) {
+            all_cards_are_spades_or_clubs = false;
+            break;
+        }
+    }
+
+    if (all_cards_are_spades_or_clubs)
+        effect.xmult = 3;
+
+    return effect;
+}
+
+static JokerEffect blue_joker_effect(Joker *joker, Card *scored_card) {
+    JokerEffect effect = {0};
+    if (scored_card != NULL)
+        return effect; // if card != null, we are not at the end-phase of scoring yet
+
+    effect.chips = (get_deck_top() + 1) * 2;
+
+    return effect;
+}
+
+static JokerEffect raised_fist_joker_effect(Joker *joker, Card *scored_card) {
+    JokerEffect effect = {0};
+    if (scored_card != NULL)
+        return effect; // if card != null, we are not at the end-phase of scoring yet
+
+    // Find the lowest rank card in hand
+    // Aces are always considered high value, even in an ace-low straight
+    u8 lowest_value = 99;
+    CardObject** hand = get_hand_array();
+    int hand_top = get_hand_top();
+    for (int i = 0; i < hand_top; i++ )
+    {
+        u8 value = card_get_value(hand[i]->card);
+        if (lowest_value > value)
+            lowest_value = value;
+    }
+
+    if (lowest_value != 99)
+        effect.mult = lowest_value * 2;
+
+    return effect;
+}
+
+static JokerEffect reserved_parking_joker_effect(Joker *joker, Card *scored_card) {
+    JokerEffect effect = {0};
+    if (scored_card != NULL)
+        return effect; // if card != null, we are not at the end-phase of scoring yet
+
+    CardObject** hand = get_hand_array();
+    int hand_top = get_hand_top();
+    for (int i = 0; i < hand_top; i++ )
+    {
+        switch (hand[i]->card->rank) {
+            case KING: case QUEEN: case JACK:
+                if (random() % 2 == 0)
+                    effect.money += 1;
+            default:
+                break;
+        }
+    }
+
+    return effect;
+}
+
+static JokerEffect business_card_joker_effect(Joker *joker, Card *scored_card) {
+    JokerEffect effect = {0};
+    if (scored_card == NULL)
+        return effect;
+
+    switch (scored_card->rank) {
+        case KING: case QUEEN: case JACK:
+            if (random() % 2 == 0)
+                effect.money = 1;
+        default:
+            break;
+    }
+
+    effect.chips = 1;
+
+    return effect;
+}
+
+static JokerEffect scholar_joker_effect(Joker *joker, Card *scored_card) {
+    JokerEffect effect = {0};
+    if (scored_card == NULL)
+        return effect;
+
+    if (scored_card->rank == ACE) {
+        effect.chips = 20;
+        effect.mult = 4;
+    }
+
+    return effect;
+}
+
+static JokerEffect scary_face_joker_effect(Joker *joker, Card *scored_card) {
+    JokerEffect effect = {0};
+    if (scored_card == NULL)
+        return effect;
+
+    switch (scored_card->rank) {
+        case KING: case QUEEN: case JACK:
+            effect.chips = 30;
+        default:
+            break;
+    }
+
+    return effect;
+}
+
+static JokerEffect abstract_joker_effect(Joker *joker, Card *scored_card) {
+    JokerEffect effect = {0};
+    if (scored_card != NULL)
+        return effect; // if card != null, we are not at the end-phase of scoring yet
+
+    // +1 xmult per occupied joker slot
+    int jokers_top = get_jokers_top();
+    effect.mult = (jokers_top + 1) * 3;
+
+    return effect;
+}
+
+static JokerEffect bull_joker_effect(Joker *joker, Card *scored_card) {
+    JokerEffect effect = {0};
+    if (scored_card != NULL)
+        return effect; // if card != null, we are not at the end-phase of scoring yet
+
+    effect.chips = get_money() * 2;
+
+    return effect;
+}
+
+static JokerEffect smiley_face_joker_effect(Joker *joker, Card *scored_card) {
+    JokerEffect effect = {0};
+    if (scored_card == NULL)
+        return effect;
+
+    switch (scored_card->rank) {
+        case KING: case QUEEN: case JACK:
+            effect.mult = 5;
+        default:
+            break;
+    }
+
+    return effect;
+}
+
+static JokerEffect even_steven_joker_effect(Joker *joker, Card *scored_card) {
+    JokerEffect effect = {0};
+    if (scored_card == NULL)
+        return effect;
+
+    if (card_get_value(scored_card) % 2 == 0) {
+        switch (scored_card->rank) {
+            case KING: case QUEEN: case JACK:
+                break;
+            default:
+                effect.mult = 4;
+        }
+    }
+
+    return effect;
+}
+
+static JokerEffect odd_todd_joker_effect(Joker *joker, Card *scored_card) {
+    JokerEffect effect = {0};
+    if (scored_card == NULL)
+        return effect;
+
+    if (card_get_value(scored_card) % 2 == 1) // todo test ace
+        effect.chips = 31;
+
+    return effect;
+}
+
 const JokerInfo joker_registry[] = {
     { COMMON_JOKER, 2, default_joker_effect },  // DEFAULT_JOKER_ID = 0
     { COMMON_JOKER, 5, greedy_joker_effect },   // GREEDY_JOKER_ID = 1
@@ -234,6 +471,22 @@ const JokerInfo joker_registry[] = {
     { COMMON_JOKER, 5, half_joker_effect },
     { UNCOMMON_JOKER, 8, joker_stencil_effect },
     { COMMON_JOKER, 4, misprint_joker_effect },
+    { COMMON_JOKER, 4, walkie_talkie_joker_effect },
+    { UNCOMMON_JOKER, 8, fibonnaci_joker_effect },
+    { COMMON_JOKER, 5, banner_joker_effect },
+    { COMMON_JOKER, 5, mystic_summit_joker_effect },
+    { UNCOMMON_JOKER, 6, blackboard_joker_effect },
+    { COMMON_JOKER, 5, blue_joker_effect },
+    { COMMON_JOKER, 5, raised_fist_joker_effect },
+    { COMMON_JOKER, 6, reserved_parking_joker_effect },
+    { COMMON_JOKER, 4, business_card_joker_effect },
+    { COMMON_JOKER, 4, scholar_joker_effect },
+    { COMMON_JOKER, 4, scary_face_joker_effect },
+    { COMMON_JOKER, 4, abstract_joker_effect },
+    { UNCOMMON_JOKER, 6, bull_joker_effect},
+    { COMMON_JOKER, 4, smiley_face_joker_effect },
+    { COMMON_JOKER, 4, even_steven_joker_effect },
+    { COMMON_JOKER, 4, odd_todd_joker_effect },
 };
 
 static const size_t joker_registry_size = NUM_ELEM_IN_ARR(joker_registry);

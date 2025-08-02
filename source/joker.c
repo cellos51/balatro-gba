@@ -235,32 +235,43 @@ bool joker_object_score(JokerObject *joker_object, Card* scored_card, int *chips
         *money += joker_effect.money;
         // TODO: Retrigger
 
-        tte_set_pos(fx2int(joker_object->sprite_object->x) + 8, JOKER_SCORE_TEXT_Y); // Offset of 16 pixels to center the text on the card
-
-        char score_buffer[12];
-
+        int cursorPosX = fx2int(joker_object->sprite_object->x) + 8; // Offset of 16 pixels to center the text on the card
         if (joker_effect.chips > 0)
         {
+            char score_buffer[12];
+            tte_set_pos(cursorPosX, JOKER_SCORE_TEXT_Y);
             tte_set_special(0xD000); // Blue
             snprintf(score_buffer, sizeof(score_buffer), "+%d", joker_effect.chips);
+            tte_write(score_buffer);
+            cursorPosX += 30;
         }
-        else if (joker_effect.mult > 0)
+        if (joker_effect.mult > 0)
         {
+            char score_buffer[12];
+            tte_set_pos(cursorPosX, JOKER_SCORE_TEXT_Y);
             tte_set_special(0xE000); // Red
             snprintf(score_buffer, sizeof(score_buffer), "+%d", joker_effect.mult);
+            tte_write(score_buffer);
+            cursorPosX += 30;
         }
-        else if (joker_effect.xmult > 0)
+        if (joker_effect.xmult > 0)
         {
+            char score_buffer[12];
+            tte_set_pos(cursorPosX, JOKER_SCORE_TEXT_Y);
             tte_set_special(0xE000); // Red
             snprintf(score_buffer, sizeof(score_buffer), "X%d", joker_effect.xmult);
+            tte_write(score_buffer);
+            cursorPosX += 30;
         }
-        else if (joker_effect.money > 0)
+        if (joker_effect.money > 0)
         {
+            char score_buffer[12];
+            tte_set_pos(cursorPosX, JOKER_SCORE_TEXT_Y);
             tte_set_special(0xC000); // Yellow
             snprintf(score_buffer, sizeof(score_buffer), "+%d", joker_effect.money);
+            tte_write(score_buffer);
+            cursorPosX += 30;
         }
-
-        tte_write(score_buffer);
 
         joker_object->joker->processed = true; // Mark the joker as processed
         joker_object_shake(joker_object, SFX_CARD_SELECT); // TODO: Add a sound effect for scoring the joker
