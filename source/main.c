@@ -33,7 +33,7 @@ void init_map() // Temp function derived from libtonc example
         // Actually for future reference, each number seems to equate to an XY on the palette, so 0xF0F0F0F0 would just push everything down 15 colors, since the second number isn't set.
     }
 
-	memcpy(&tile8_mem[AFFINE_BG_CBB], correctedTiles, affine_background_gfxTilesLen);
+	memcpy16(&tile8_mem[AFFINE_BG_CBB], correctedTiles, affine_background_gfxTilesLen);
     GRIT_CPY(&se_mem[AFFINE_BG_SBB], affine_background_gfxMap);
     memcpy16(&pal_bg_mem[16 * 15], affine_background_gfxPal, 5);
 

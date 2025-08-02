@@ -18,6 +18,7 @@
 #include "background_gfx.h"
 #include "background_shop_gfx.h"
 #include "background_blind_select_gfx.h"
+#include "affine_background_gfx.h"
 
 #include "soundbank.h"
 
@@ -428,6 +429,13 @@ void change_background(int id)
             else if (current_blind == BOSS_BLIND)
             {
                 main_bg_se_copy_rect(BOSS_BLIND_TITLE_SRC_RECT, TOP_LEFT_BLIND_TITLE_POINT);
+                u16 palette[5] = {};
+                palette[0] = blind_get_color(current_blind, BLIND_BACKGROUND_SECONDARY_COLOR_INDEX);
+                palette[1] = blind_get_color(current_blind, BLIND_SHADOW_COLOR_INDEX);
+                palette[2] = blind_get_color(current_blind, BLIND_BACKGROUND_SHADOW_COLOR_INDEX);
+                palette[3] = blind_get_color(current_blind, BLIND_MAIN_COLOR_INDEX);
+                palette[4] = blind_get_color(current_blind, BLIND_TEXT_COLOR_INDEX);
+                memcpy16(&pal_bg_mem[16 * 15], palette, 5);
             }
 
             bg_copy_current_item_to_top_left_panel();
