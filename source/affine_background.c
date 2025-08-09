@@ -5,6 +5,11 @@
 
 BG_AFFINE bgaff;
 AFF_SRC_EX asx = {32<<8, 64<<8, 120, 80, 0x0100, 0x0100, 0};
+static uint timer = 0;
+
+#define TOP_SCANLINE_OFFSET 228
+#define ANIMATION_SPEED_DIVISOR 16
+
 
 void affine_background_init()
 {
@@ -15,20 +20,36 @@ void affine_background_init()
     bgaff = bg_aff_default;
 }
 
-void affine_background_update()
+void affine_background_hblank()
 {
-    static uint timer = 0;
-    timer++;
+    vu16 vcount = REG_VCOUNT;
 
-    // These values are not permament, just the current configuration for the affine background
-    asx.tex_x += 5;
-    asx.tex_y += 12;
-    asx.sx = (lu_sin(timer * 100)) >> 8; // Scale the sine value to fit in a s16
-    asx.sx += 256; // Add 256 to the sine value to make it positive
-    asx.sy = (lu_sin(timer * 100 + 0x4000)) >> 8; // Scale the sine value to fit in a s16
-    asx.sy += 256; // Add 256 to the sine value to make it positive
+    // This fixes a visual issue where the top 3 pixels of the scanline are out of sync
+    if (vcount >= 160)
+    {
+        vcount -= TOP_SCANLINE_OFFSET;
+    }
+
+    const s32 timer_s32 = timer << 8;
+    const s32 vcount_s32 = vcount << 8;
+    const s16 vcount_s16 = vcount;
+    const s32 vcount_sine = lu_sin(vcount_s32 + timer_s32 / ANIMATION_SPEED_DIVISOR); // dividing the timer by 16 to make the animation slower
+
+    asx.scr_x = (SCREEN_WIDTH / 2); // 128 on x and y is an offset used to center the rotation
+    asx.scr_y = vcount_s16 - (SCREEN_HEIGHT / 2); // scr_y must equal vcount otherwise the background will have no vertical difference
+    asx.tex_x = vcount_sine;
+    asx.tex_y = vcount_sine / 64;
+    asx.sx = vcount_sine / 32;
+    asx.sy = vcount_sine / 16;
+    asx.alpha = vcount_sine + (timer_s32 / ANIMATION_SPEED_DIVISOR);
+    
     bg_rotscale_ex(&bgaff, &asx);
     REG_BG_AFFINE[2] = bgaff;
+}
+
+void affine_background_update()
+{
+    timer++;
 }
 
 void affine_background_set_color(COLOR color)

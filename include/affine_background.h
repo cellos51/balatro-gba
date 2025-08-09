@@ -9,6 +9,7 @@
 #define AFFINE_BG_PB (PAL_ROW_LEN * 15) // This isn't really a palette bank, just the starting index of the palette
 
 void affine_background_init();
+void affine_background_hblank();
 void affine_background_update();
 void affine_background_set_color(COLOR color);
 // Must be called with an array of size at least  AFFINE_BG_PAL_LEN
