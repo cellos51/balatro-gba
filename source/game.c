@@ -88,9 +88,15 @@ static Card *discard_pile[MAX_DECK_SIZE] = {NULL};
 static int discard_top = -1;
 
 // Joker Special Variables
-static bool SHORTCUT_JOKER_ACTIVE = false;
+static int SHORTCUT_JOKER_COUNT = 0;
 bool is_shortcut_joker_active(void) {
-    return SHORTCUT_JOKER_ACTIVE;
+    return SHORTCUT_JOKER_COUNT > 0;
+}
+
+static int FOUR_FINGERS_JOKER_COUNT = 0;
+static int STRAIGHT_AND_FLUSH_SIZE = 5;
+int get_straight_and_flush_size(void) {
+    return STRAIGHT_AND_FLUSH_SIZE;
 }
 
 // Joker stack
@@ -100,7 +106,16 @@ static inline void joker_push(JokerObject *joker)
     jokers[++jokers_top] = joker;
 
     if (joker->joker->id == SHORTCUT_JOKER_ID) {
-        SHORTCUT_JOKER_ACTIVE = true;
+        SHORTCUT_JOKER_COUNT++;
+    }
+
+    // In case the player gets multiple Four Fingers Jokers,
+    // only change size when the first one is added
+    if (joker->joker->id == FOUR_FINGERS_JOKER_ID) {
+        if (FOUR_FINGERS_JOKER_COUNT == 0) {
+            STRAIGHT_AND_FLUSH_SIZE--;
+        }
+        FOUR_FINGERS_JOKER_COUNT++;
     }
 }
 
@@ -111,7 +126,16 @@ static inline JokerObject *joker_pop()
     JokerObject *joker = jokers[jokers_top--];
 
     if (joker->joker->id == SHORTCUT_JOKER_ID) {
-        SHORTCUT_JOKER_ACTIVE = false;
+        SHORTCUT_JOKER_COUNT--;
+    }
+
+    // In case the player gets multiple Four Fingers Jokers,
+    // and only reset the size when all of them have been removed
+    if (joker->joker->id == FOUR_FINGERS_JOKER_ID) {
+        FOUR_FINGERS_JOKER_COUNT--;
+        if (FOUR_FINGERS_JOKER_COUNT == 0) {
+            STRAIGHT_AND_FLUSH_SIZE++;
+        }
     }
 
     return joker;
@@ -373,13 +397,6 @@ enum HandType hand_get_type()
             res_hand_type = STRAIGHT;
     }
 
-    // Check for royal flush vs regular straight flush
-    if (res_hand_type == STRAIGHT_FLUSH) {
-        if (ranks[TEN] && ranks[JACK] && ranks[QUEEN] && ranks[KING] && ranks[ACE])
-            return ROYAL_FLUSH;
-        return STRAIGHT_FLUSH;
-    }
-
     // The following can be optimized better but not sure how much it matters
     u8 n_of_a_kind = hand_contains_n_of_a_kind(ranks);
 
@@ -390,6 +407,13 @@ enum HandType hand_get_type()
         return FIVE_OF_A_KIND;
     }
 
+    // Check for royal flush vs regular straight flush
+    if (res_hand_type == STRAIGHT_FLUSH) {
+        if (ranks[TEN] && ranks[JACK] && ranks[QUEEN] && ranks[KING] && ranks[ACE])
+            return ROYAL_FLUSH;
+        return STRAIGHT_FLUSH;
+    }
+
     if (n_of_a_kind == 4) {
         return FOUR_OF_A_KIND;
     }
@@ -398,9 +422,15 @@ enum HandType hand_get_type()
         return FULL_HOUSE;
     }
 
-    // Flush is more valuable than the remaining hand types, so return now
+    // Flush and Straight are more valuable than the remaining hand types, so return them now
     if (res_hand_type == FLUSH) {
+        if (n_of_a_kind >= 5) {
+            return FLUSH_HOUSE;
+        }
         return FLUSH;
+    }
+    if (res_hand_type == STRAIGHT) {
+        return STRAIGHT;
     }
 
     if (n_of_a_kind == 3) {
@@ -1531,11 +1561,45 @@ static void cards_in_hand_update_loop(bool* discarded_card, int* played_selectio
                         /* FALL THROUGH */
                     case FLUSH:
                         /* FALL THROUGH */
-                    case FULL_HOUSE:
-                        /* FALL THROUGH */
                     case STRAIGHT_FLUSH:
                         /* FALL THROUGH */
                     case ROYAL_FLUSH:
+                        // Special handling because Four Fingers might be active
+                        bool final_selection[MAX_HAND_SIZE] = {false};
+                        int min_len = get_straight_and_flush_size(); // Will be 4 if Four Fingers is in effect, otherwise 5
+
+                        // if we have a flush in our hand
+                        if (hand_type == FLUSH || hand_type == STRAIGHT_FLUSH || hand_type == ROYAL_FLUSH) {
+                            bool flush_selection[MAX_HAND_SIZE] = {false};
+                            find_flush_in_played_cards(played, played_top, min_len, flush_selection);
+                            // Add the results into the final selection
+                            for (int i = 0; i <= played_top; i++) {
+                                final_selection[i] = flush_selection[i];
+                            }
+                        }
+
+                        // If we have a straight in our hand
+                        if (hand_type == STRAIGHT || hand_type == STRAIGHT_FLUSH || hand_type == ROYAL_FLUSH) {
+                            bool straight_selection[MAX_HAND_SIZE] = {false};
+                            find_straight_in_played_cards(played, played_top, is_shortcut_joker_active(), min_len, straight_selection);
+                            // Add the results into the final selection
+                            for (int i = 0; i <= played_top; i++) {
+                                final_selection[i] = final_selection[i] || straight_selection[i];
+                            }
+                            // If Four Fingers is active, pairs can happen in a valid straight
+                            // If Four Fingers is not active, pairs are impossible so this will not affect things
+                            select_paired_cards_in_hand(played, played_top, final_selection);
+                        }
+
+                        // Finally, set mark the cards as selected based final_selection
+                        for (int i = 0; i <= played_top; i++) {
+                            if (final_selection[i]) {
+                                card_object_set_selected(played[i], true);
+                            }
+                        }
+                        break;
+                        // ELSE FALL THROUGH
+                    case FULL_HOUSE:
                         /* FALL THROUGH */
                     case FIVE_OF_A_KIND:
                         /* FALL THROUGH */

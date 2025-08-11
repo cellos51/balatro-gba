@@ -88,5 +88,6 @@ int get_money(void);
 
 // joker specific functions
 bool is_shortcut_joker_active(void);
+int get_straight_and_flush_size(void);
 
 #endif // GAME_H
