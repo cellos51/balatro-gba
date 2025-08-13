@@ -18,14 +18,14 @@
 #include "soundbank.h"
 #include "soundbank_bin.h"
 
+#define SPLASH_FPS 60
+#define SPLASH_DURATION_SECONDS 10
+#define SPLASH_DURATION_FRAMES (SPLASH_FPS * SPLASH_DURATION_SECONDS)
+
 void init()
 {
     irq_init(NULL);
     irq_add(II_VBLANK, mmVBlank);
-
-    // Initialize maxmod
-    mmInitDefault((mm_addr)soundbank_bin, 12);
-    mmStart(MOD_MAIN_THEME, MM_PLAY_LOOP);
 
     // Initialize text engine
     tte_init_se(0, BG_CBB(TTE_CBB) | BG_SBB(TTE_SBB), 0, CLR_WHITE, 14, NULL, NULL);
@@ -44,7 +44,7 @@ void init()
     // BG1 is the main background layer
     REG_BG1CNT = BG_PRIO(1) | BG_CBB(MAIN_BG_CBB) | BG_SBB(MAIN_BG_SBB) | BG_8BPP;
 	// BG2 is the affine background layer
-    REG_BG2CNT = BG_PRIO(2) | BG_CBB(AFFINE_BG_CBB) | BG_SBB(AFFINE_BG_SBB) | BG_8BPP | BG_WRAP | BG_AFF_32x32;
+    REG_BG2CNT = BG_PRIO(2) | BG_CBB(AFFINE_BG_CBB) | BG_SBB(AFFINE_BG_CBB) | BG_8BPP | BG_WRAP;
 
     int win1_left = 72;
     int win1_top = 44;
@@ -71,7 +71,26 @@ void init()
 
     REG_DISPCNT = DCNT_MODE1 | DCNT_OBJ_1D | DCNT_BG0 | DCNT_BG1 | DCNT_BG2 | DCNT_OBJ | DCNT_WIN0 | DCNT_WIN1;
 
+    // Splash screen
+    tte_printf("#{P:72,8; cx:0xF000}DISCLAIMER");
+    tte_printf("#{P:8,24; cx:0xF000}This project is NOT endorsed \n by or affiliated with \n Playstack or LocalThunk.\n\n If you have paid for this, \n you have been scammed \n and should request a refund \n IMMEDIATELY. \n\n The only official place \n to obtain this is from: \n\n 'github.com/\n  cellos51/balatro-gba'");
+    tte_printf("#{P:8,144; cx:0xF000}(Press any key to skip)");
+    for (int i = 0; i < SPLASH_DURATION_FRAMES; i++)
+    {
+        VBlankIntrWait();
+        key_poll();
+        if (key_hit(KEY_A | KEY_B | KEY_START | KEY_SELECT)) // Skip intro
+        {
+            break;
+        }
+        tte_erase_rect_wrapper((Rect){208, 144, 240, 152});
+        tte_printf("#{P:208,144; cx:0xF000}%d", 1 + (SPLASH_DURATION_FRAMES - i) / SPLASH_FPS);
+    }
+    tte_erase_screen();
+
     // Initialize subsystems
+    mmInitDefault((mm_addr)soundbank_bin, 12);
+    mmStart(MOD_MAIN_THEME, MM_PLAY_LOOP);
     affine_background_init();
     sprite_init();
     card_init();

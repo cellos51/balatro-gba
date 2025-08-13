@@ -16,6 +16,7 @@
 #define BG_ID_ROUND_END 3
 #define BG_ID_SHOP 4
 #define BG_ID_BLIND_SELECT 5
+#define BG_ID_MAIN_MENU 6
 
 // Input bindings
 #define SELECT_CARD KEY_A
@@ -26,6 +27,7 @@
 
 enum GameState
 {
+    GAME_MAIN_MENU,
     GAME_PLAYING,
     GAME_ROUND_END,
     GAME_SHOP,
