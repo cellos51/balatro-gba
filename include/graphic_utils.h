@@ -42,6 +42,7 @@
 
 // Tile size in pixels, both height and width as tiles are square
 #define TILE_SIZE 8
+#define EFFECT_TEXT_SEPARATION_AMOUNT 32; // If we need to show multiple effects at once
 
 // By default TTE characters occupy a single tile
 #define TTE_CHAR_SIZE TILE_SIZE

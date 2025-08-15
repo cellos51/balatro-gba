@@ -35,6 +35,8 @@
 #define NUM_RANKS 13
 #define RANK_OFFSET 2 // Because the first rank is 2 and ranks start at 0
 
+#define IMPOSSIBLY_HIGH_CARD_VALUE 99
+
 // Card types
 typedef struct
 {

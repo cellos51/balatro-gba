@@ -173,6 +173,18 @@ int get_jokers_top(void) {
     return jokers_top;
 }
 
+int get_deck_top(void) {
+    return deck_top;
+}
+
+int get_num_discards_remaining(void) {
+    return discards;
+}
+
+int get_money(void) {
+    return money;
+}
+
 IntList* jokers_available_to_shop; // List of joker IDs
 
 // Consts
@@ -249,10 +261,6 @@ static const Rect SHOP_REROLL_RECT          = {88,      96,    UNDEFINED, UNDEFI
 #define PITCH_STEP_DRAW_SFX         24
 #define PITCH_STEP_UNDISCARD_SFX    2*PITCH_STEP_DRAW_SFX    
 // Naming the stage where cards return from the discard pile to the deck "undiscard"
-
-int get_num_discards_remaining(void) {
-    return discards;
-}
 
 // General functions
 void set_seed(int seed)
