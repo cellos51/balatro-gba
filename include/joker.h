@@ -78,6 +78,7 @@ void joker_destroy(Joker **joker);
 // Unique effects like "Four Fingers" or "Credit Card" will be hard coded into game.c with a conditional check for the joker ID from the players owned jokers
 // game.c should probably be restructured so most of the variables in it are moved to some sort of global variable header file so they can be easily accessed and modified for the jokers
 JokerEffect joker_get_score_effect(Joker *joker, Card *scored_card);
+int joker_get_sell_value(const Joker* joker);
 
 JokerObject *joker_object_new(Joker *joker);
 void joker_object_destroy(JokerObject **joker_object);

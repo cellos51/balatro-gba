@@ -119,6 +119,7 @@ SpriteObject* sprite_object_new()
     sprite_object->sprite = NULL;
     sprite_object_reset_transform(sprite_object);
     sprite_object->selected = false;
+    sprite_object->focused = false;
 
     return sprite_object;
 }

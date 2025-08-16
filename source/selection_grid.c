@@ -49,6 +49,9 @@ void selection_grid_move_selection_vert(SelectionGrid *selection_grid, int direc
         && new_selection.y < selection_grid->num_rows)
     {
         int new_row_size = selection_grid->rows[new_selection.y].get_size();
+        if (new_row_size <= 0)
+            return; 
+            
         if (selection.x >= new_row_size)
         {
             // TODO: Maintain relative horizontal position

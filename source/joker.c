@@ -181,6 +181,16 @@ JokerEffect joker_get_score_effect(Joker *joker, Card *scored_card)
     return jinfo->effect(joker, scored_card);
 }
 
+int joker_get_sell_value(const Joker* joker)
+{
+    if (joker == NULL)
+    {
+        return UNDEFINED;
+    }
+
+    return joker->value/2;
+}
+
 // JokerObject methods
 JokerObject *joker_object_new(Joker *joker)
 {
@@ -319,7 +329,6 @@ bool joker_object_score(JokerObject *joker_object, Card* scored_card, int *chips
 
     return false;
 }
-
 
 void joker_object_set_selected(JokerObject* joker_object, bool selected)
 {

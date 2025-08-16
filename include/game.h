@@ -23,6 +23,7 @@
 #define PEEK_DECK KEY_L // Not implemented
 #define SORT_HAND KEY_R
 #define PAUSE_GAME KEY_START // Not implemented
+#define SELL_KEY KEY_L
 
 enum GameState
 {
@@ -74,6 +75,10 @@ enum HandType
 void game_init();
 void game_update();
 
+// Forward declaration
+struct List; 
+typedef struct List List;
+
 // Utility functions for other files
 typedef struct CardObject CardObject; // forward declaration, actually declared in card.h
 typedef struct JokerObject JokerObject;
@@ -82,8 +87,7 @@ int             get_hand_top(void);
 int             hand_get_size(void);
 CardObject**    get_played_array(void);
 int             get_played_top(void);
-JokerObject**   get_jokers(void);
-int             get_jokers_top(void);
+List*           get_jokers(void);
 
 int get_num_discards_remaining(void);
 
