@@ -22,6 +22,7 @@ void init()
 {
     irq_init(NULL);
     irq_add(II_VBLANK, mmVBlank);
+    irq_add(II_HBLANK, affine_background_hblank);
 
     // Initialize maxmod
     mmInitDefault((mm_addr)soundbank_bin, 12);
