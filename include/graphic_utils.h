@@ -173,4 +173,10 @@ void memcpy16_tile8_with_palette_offset(u16* dst, const u16* src, uint hwcount, 
  */
 void memcpy32_tile8_with_palette_offset(u32* dst, const u32* src, uint wcount, u8 palette_offset);
 
+/* Toggles the visibility of the window layers.
+ * win0 and win1 are the visibility states for the two windows.
+ * These windows are primarily used for the shadows on held jokers, consumables and cards.
+ */
+void toggle_windows(bool win0, bool win1);
+
 #endif //GRAPHIC_UTILS_H

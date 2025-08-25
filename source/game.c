@@ -16,30 +16,33 @@
 #include "tonc_video.h"
 #include "audio_utils.h"
 #include "selection_grid.h"
+#include "splash_screen.h"
 
 #include "background_gfx.h"
 #include "background_shop_gfx.h"
 #include "background_blind_select_gfx.h"
 #include "affine_background_gfx.h"
+#include "background_main_menu_gfx.h"
+#include "affine_main_menu_background_gfx.h"
 
 #include "soundbank.h"
 
 #include "list.h"
 
-// This seed system is temporary.
-static uint rng_seed = 2048;
-static bool seeded = false;
+static uint rng_seed = 0;
 
 static uint timer = 0; // This might already exist in libtonc but idk so i'm just making my own
 static int game_speed = 1;
 static int background = 0;
 
-static enum GameState game_state = GAME_BLIND_SELECT; // The current game state, this is used to determine what the game is doing at any given time
+static enum GameState game_state = GAME_SPLASH_SCREEN; // The current game state, this is used to determine what the game is doing at any given time
 static enum HandState hand_state = HAND_DRAW;
 static enum PlayState play_state = PLAY_PLAYING;
 static int state = 0; // General state variable, used for switch statements in each game state related function
 
 static enum HandType hand_type = NONE;
+
+static CardObject *main_menu_ace = NULL;
 
 static Sprite *playing_blind_token = NULL; // The sprite that displays the blind when in "GAME_PLAYING/GAME_ROUND_END" state
 static Sprite *round_end_blind_token = NULL; // The sprite that displays the blind when in "GAME_ROUND_END" state
@@ -249,6 +252,9 @@ static const BG_POINT JOKER_DISCARD_TARGET  = {240,     30};
 
 #define ITEM_SHOP_Y 71 // TODO: Needs to be a rect?
 
+#define MAIN_MENU_BUTTONS 4
+#define MAIN_MENU_IMPLEMENTED_BUTTONS 1 // Remove this once all buttons are implemented
+
 //TODO: Properly define and use
 #define MENU_POP_OUT_ANIM_FRAMES 20
 #define GAME_OVER_ANIM_FRAMES 15
@@ -265,12 +271,8 @@ static const BG_POINT JOKER_DISCARD_TARGET  = {240,     30};
 // General functions
 void set_seed(int seed)
 {
-    if (!seeded)
-    {
-        seeded = true;
-        rng_seed = seed;
-        srand(rng_seed);
-    }
+    rng_seed = seed;
+    srand(rng_seed);
 }
 
 void sort_hand_by_suit()
@@ -437,7 +439,8 @@ void change_background(int id)
         }
         else
         {
-            REG_DISPCNT |= DCNT_WIN0; // Enable window 0 to make hand background transparent
+            toggle_windows(true, true); // Enable window 0 for the hand shadow
+            
             // Load the tiles and palette
             // Background
             memcpy(pal_bg_mem, background_gfxPal, 64); // This '64" isn't a specific number, I'm just using it to prevent the text colors from being overridden
@@ -476,6 +479,7 @@ void change_background(int id)
         }
 
         REG_WIN0V = (REG_WIN0V << 8) | 0xA0; // Set window 0 bottom to 160
+        toggle_windows(true, true);
 
         for (int i = 0; i <= 2; i++)
         {
@@ -492,16 +496,16 @@ void change_background(int id)
             background = BG_ID_ROUND_END;
         }
 
-        REG_DISPCNT &= ~DCNT_WIN0; // Disable window 0 so it doesn't make the cashout menu transparent
+       toggle_windows(false, true); // Disable window 0 so it doesn't make the cashout menu transparent
 
         main_bg_se_clear_rect(ROUND_END_MENU_RECT);
         tte_erase_rect_wrapper(HAND_SIZE_RECT);
     }
     else if (id == BG_ID_SHOP)
     {
-        REG_DISPCNT &= ~DCNT_WIN0;
+        toggle_windows(false, true);
 
-        memcpy(pal_bg_mem, background_shop_gfxPal, 64);
+        memcpy16(pal_bg_mem, background_shop_gfxPal, 64);
         GRIT_CPY(&tile_mem[MAIN_BG_CBB], background_shop_gfxTiles);
         GRIT_CPY(&se_mem[MAIN_BG_SBB], background_shop_gfxMap);
 
@@ -528,7 +532,7 @@ void change_background(int id)
         sprite_position(blind_select_tokens[BIG_BLIND], 120, default_y);
         sprite_position(blind_select_tokens[BOSS_BLIND], 160, default_y);
 
-        REG_DISPCNT &= ~DCNT_WIN0;
+        toggle_windows(false, true);
 
         memcpy16(pal_bg_mem, background_blind_select_gfxPal, 64);
         GRIT_CPY(&tile_mem[MAIN_BG_CBB], background_blind_select_gfxTiles);
@@ -626,6 +630,19 @@ void change_background(int id)
                 memcpy16(&se_mem[MAIN_BG_SBB][x_to + 32 * y_to], &se_mem[MAIN_BG_SBB][x_from + 32 * y_from], 3);
             }
         }
+    }
+    else if (id == BG_ID_MAIN_MENU)
+    {
+        toggle_windows(false, false);
+
+        tte_erase_screen();
+        memcpy16(pal_bg_mem, background_main_menu_gfxPal, PAL_ROW_LEN * 9);
+        GRIT_CPY(&tile_mem[MAIN_BG_CBB], background_main_menu_gfxTiles);
+        GRIT_CPY(&se_mem[MAIN_BG_SBB], background_main_menu_gfxMap);
+
+        // Disable the button highlight colors
+        // Select button PID is 5 and the outline is 3
+        memcpy16(&pal_bg_mem[3], &pal_bg_mem[5], 1);
     }
     else
     {
@@ -931,9 +948,6 @@ void increment_blind(enum BlindState increment_reason)
 
 static void game_round_init()
 {
-    // once we have a main menu, move the seed set there. this is only here now because there isn't a way to set the seed to a psudorandom value unless there is something to wait on
-    set_seed(rng_seed);
-
     hand_state = HAND_DRAW;
     cards_drawn = 0;
     hand_selections = 0;
@@ -981,6 +995,20 @@ static void game_round_init()
     deck_shuffle(); // Shuffle the deck at the start of the round
 }
 
+static void game_main_menu_init()
+{
+    affine_background_change_background(AFFINE_BG_MAIN_MENU);
+    change_background(BG_ID_MAIN_MENU);
+    main_menu_ace = card_object_new(card_new(SPADES, ACE));
+    card_object_set_sprite(main_menu_ace, 0); // Set the sprite for the ace of spades
+    main_menu_ace->sprite_object->sprite->obj->attr0 |= ATTR0_AFF_DBL; // Make the sprite double sized
+    main_menu_ace->sprite_object->tx = int2fx(88);
+    main_menu_ace->sprite_object->x = main_menu_ace->sprite_object->tx;
+    main_menu_ace->sprite_object->ty = int2fx(26);
+    main_menu_ace->sprite_object->y = main_menu_ace->sprite_object->ty;
+    main_menu_ace->sprite_object->tscale = float2fx(0.8f);
+}
+
 static void game_over_init()
 {
     // Clears the round end menu
@@ -1008,6 +1036,12 @@ static void init_game_state(enum GameState game_state_to_init)
     // Switch written out, add init for states as needed
     switch (game_state_to_init)
     {
+    case GAME_SPLASH_SCREEN:
+        splash_screen_init();
+        break;
+    case GAME_MAIN_MENU:
+        game_main_menu_init();
+        break;
     case GAME_PLAYING:
         game_round_init();
         break;
@@ -1029,7 +1063,7 @@ static void init_game_state(enum GameState game_state_to_init)
 }
 
 // Game functions
-static void game_set_state(enum GameState new_game_state)
+void game_set_state(enum GameState new_game_state)
 {
     timer = 0; // Reset the timer
     init_game_state(new_game_state);
@@ -1049,6 +1083,7 @@ void jokers_available_to_shop_init()
 
 void game_init()
 {
+    //change_background(BG_ID_MAIN_MENU);
     jokers_available_to_shop_init();
 
     // Initialize jokers list
@@ -1068,6 +1103,22 @@ void game_init()
     obj_hide(blind_select_tokens[SMALL_BLIND]->obj);
     obj_hide(blind_select_tokens[BIG_BLIND]->obj);
     obj_hide(blind_select_tokens[BOSS_BLIND]->obj);
+
+    game_set_state(game_state);
+}
+
+void game_start()
+{
+    set_seed(rng_seed);
+
+    affine_background_change_background(AFFINE_BG_GAME);
+
+    // Normally I would just cache these and hide/unhide but I didn't feel like dealing with defining a layer for it
+    card_destroy(&main_menu_ace->card);
+    card_object_destroy(&main_menu_ace);
+
+    hands = max_hands;
+    discards = max_discards;
 
     // Fill the deck with all the cards. Later on this can be replaced with a more dynamic system that allows for different decks and card types.
     for (int suit = 0; suit < NUM_SUITS; suit++)
@@ -1095,6 +1146,8 @@ void game_init()
     display_money(money); // Set the money display
 
     tte_printf("#{P:%d,%d; cx:0x%X000}%d#{cx:0x%X000}/%d", ANTE_TEXT_RECT.left, ANTE_TEXT_RECT.top, TTE_YELLOW_PB, ante, TTE_WHITE_PB, MAX_ANTE); // Ante
+
+    game_set_state(GAME_BLIND_SELECT);
 }
 
 static void game_playing_process_hand_select_input()
@@ -2613,7 +2666,6 @@ void game_shop()
             }
         }
     }
-    
 
     if (timer % 20 == 0)
     {
@@ -2824,6 +2876,54 @@ void game_blind_select()
     }
 }
 
+void game_main_menu()
+{
+    change_background(BG_ID_MAIN_MENU);
+
+    card_object_update(main_menu_ace);
+    main_menu_ace->sprite_object->trotation = lu_sin((timer << 8) / 2) / 3;
+    main_menu_ace->sprite_object->rotation = main_menu_ace->sprite_object->trotation;
+
+    // Seed randomization
+    rng_seed++;
+    if (key_curr_state() != key_prev_state()) // If the keys have changed, make it more pseudo-random
+    {
+        rng_seed *= 2;
+    }
+
+    if (key_hit(KEY_LEFT))
+    {
+        if (selection_x > 0)
+        {
+            selection_x--;
+        }
+    }
+    else if (key_hit(KEY_RIGHT))
+    {
+        if (selection_x < MAIN_MENU_IMPLEMENTED_BUTTONS)
+        {
+            selection_x++;
+        }
+    }
+    
+    if (selection_x == 0) // Play button
+    {   
+        // Select button PID is 5 and the outline is 3
+        memset16(&pal_bg_mem[3], CLR_WHITE, 1);
+
+        if (key_hit(KEY_A))
+        {
+            // Start the game
+            game_start();
+        }
+    }
+    else
+    {
+        // Select button PID is 5 and the outline is 3
+        memcpy16(&pal_bg_mem[3], &pal_bg_mem[5], 1);
+    }
+}
+
 static void discarded_jokers_update_loop()
 {
     if (discarded_jokers == NULL)
@@ -2841,7 +2941,6 @@ static void discarded_jokers_update_loop()
             joker_object_destroy(&joker_object);        
         }
     }
-    
 }
 
 static void held_jokers_update_loop()
@@ -2906,19 +3005,16 @@ void game_update()
 {
     timer++;
 
-    if (seeded == false)
-    {
-        rng_seed++;
-        if (key_curr_state() != key_prev_state()) // If the keys have changed, make it more pseudo-random
-        {
-            rng_seed *= 2;
-        }
-    }
-
     jokers_update_loop();
 
     switch (game_state)
     {
+        case GAME_SPLASH_SCREEN:
+            splash_screen_update(timer);
+            break;
+        case GAME_MAIN_MENU:
+            game_main_menu();
+            break;
         case GAME_PLAYING:
             game_playing();
             break;

@@ -23,10 +23,6 @@ void init()
     irq_init(NULL);
     irq_add(II_VBLANK, mmVBlank);
 
-    // Initialize maxmod
-    mmInitDefault((mm_addr)soundbank_bin, 12);
-    mmStart(MOD_MAIN_THEME, MM_PLAY_LOOP);
-
     // Initialize text engine
     tte_init_se(0, BG_CBB(TTE_CBB) | BG_SBB(TTE_SBB), 0, CLR_WHITE, TTE_BIT_UNPACK_OFFSET, NULL, NULL);
     tte_erase_screen();
@@ -44,7 +40,7 @@ void init()
     // BG1 is the main background layer
     REG_BG1CNT = BG_PRIO(1) | BG_CBB(MAIN_BG_CBB) | BG_SBB(MAIN_BG_SBB) | BG_8BPP;
 	// BG2 is the affine background layer
-    REG_BG2CNT = BG_PRIO(2) | BG_CBB(AFFINE_BG_CBB) | BG_SBB(AFFINE_BG_SBB) | BG_8BPP | BG_WRAP | BG_AFF_32x32;
+    REG_BG2CNT = BG_PRIO(2) | BG_CBB(AFFINE_BG_CBB) | BG_SBB(AFFINE_BG_CBB) | BG_8BPP | BG_WRAP;
 
     int win1_left = 72;
     int win1_top = 44;
@@ -72,6 +68,8 @@ void init()
     REG_DISPCNT = DCNT_MODE1 | DCNT_OBJ_1D | DCNT_BG0 | DCNT_BG1 | DCNT_BG2 | DCNT_OBJ | DCNT_WIN0 | DCNT_WIN1;
 
     // Initialize subsystems
+    mmInitDefault((mm_addr)soundbank_bin, 12);
+    mmStart(MOD_MAIN_THEME, MM_PLAY_LOOP);
     affine_background_init();
     sprite_init();
     card_init();

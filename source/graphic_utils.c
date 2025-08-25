@@ -270,3 +270,33 @@ void memcpy32_tile8_with_palette_offset(u32* dst, const u32* src, uint wcount, u
         dst[i] = src[i] + offset;
     }
 }
+
+void toggle_windows(bool win0, bool win1)
+{
+    if (win0)
+    {
+        REG_DISPCNT |= DCNT_WIN0;
+    }
+    else
+    {
+        REG_DISPCNT &= ~DCNT_WIN0;
+    }
+
+    if (win1)
+    {
+        REG_DISPCNT |= DCNT_WIN1;
+    }
+    else
+    {
+        REG_DISPCNT &= ~DCNT_WIN1;
+    }
+
+    if (win0 || win1)
+    {
+        REG_BLDCNT = BLD_BUILD(BLD_BG1, BLD_BG2, 1);
+    }
+    else
+    {
+        REG_BLDCNT = 0;
+    }
+}

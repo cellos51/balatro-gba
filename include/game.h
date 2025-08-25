@@ -16,6 +16,7 @@
 #define BG_ID_ROUND_END 3
 #define BG_ID_SHOP 4
 #define BG_ID_BLIND_SELECT 5
+#define BG_ID_MAIN_MENU 6
 
 // Input bindings
 #define SELECT_CARD KEY_A
@@ -27,6 +28,8 @@
 
 enum GameState
 {
+    GAME_SPLASH_SCREEN,
+    GAME_MAIN_MENU,
     GAME_PLAYING,
     GAME_ROUND_END,
     GAME_SHOP,
@@ -75,6 +78,7 @@ enum HandType
 // Game functions
 void game_init();
 void game_update();
+void game_set_state(enum GameState new_game_state);
 
 // Forward declaration
 struct List; 
