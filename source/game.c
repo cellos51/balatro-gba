@@ -29,6 +29,32 @@
 
 #include "list.h"
 
+// This could go in game.h or some other header somewhere
+// but it's essentially private to this file, so might as well
+// leave it.
+typedef enum
+{
+	PLAY_HAND_BTN_SELECTED_BORDER = 1,
+	BOSS_BLIND_PRIMARY = 1,
+	BLIND_BG_SHADOW = 2,
+	MAIN_MENU_PLAY_BUTTON_OUTLINE = 2,
+	BLIND_BG_SECONDARY = 5,
+	// SKIP_BTN_UNSELECTED_BORDER = 5,
+	MAIN_MENU_PLAY_BUTTON_MAIN_COLOR = 5,
+	SHOP_PANEL_SHADOW = 6,
+	BOSS_BLIND_SHADOW = 7,
+	SHOP_LIGHTS_1 = 8,
+	DISCARD_BTN_SELECTED_BORDER = 9,
+	BLIND_SKIP_BTN_SELECTED_BORDER = 10,
+	SHOP_LIGHTS_2 = 14,
+	SHOP_LIGHTS_3 = 17,
+	BLIND_SELECT_BTN_SELECTED_BORDER = 18,
+	BLIND_BG_PRIMARY = 19,
+	REWARD_PANEL_BORDER = 19,
+	SHOP_LIGHTS_4 = 22,
+	SHOP_BOTTOM_PANEL_BORDER = 26
+} _UIElementPID;
+
 static uint rng_seed = 0;
 
 static uint timer = 0; // This might already exist in libtonc but idk so i'm just making my own
@@ -262,8 +288,6 @@ static const BG_POINT JOKER_DISCARD_TARGET  = {240,     30};
 
 #define MAIN_MENU_BUTTONS 2
 #define MAIN_MENU_IMPLEMENTED_BUTTONS 1 // Remove this once all buttons are implemented
-#define MAIN_MENU_PLAY_BUTTON_MAIN_COLOR_PID 5
-#define MAIN_MENU_PLAY_BUTTON_OUTLINE_COLOR_PID 2
 
 //TODO: Properly define and use
 #define MENU_POP_OUT_ANIM_FRAMES 20
@@ -471,13 +495,13 @@ void change_background(int id)
             bg_copy_current_item_to_top_left_panel();
 
             // This would change the palette of the background to match the blind, but the backgroun doesn't use the blind token's exact colors so a different approach is required
-            memset16(&pal_bg_mem[19], blind_get_color(current_blind, BLIND_BACKGROUND_MAIN_COLOR_INDEX), 1);
-            memset16(&pal_bg_mem[5], blind_get_color(current_blind, BLIND_BACKGROUND_SECONDARY_COLOR_INDEX), 1);
-            memset16(&pal_bg_mem[2], blind_get_color(current_blind, BLIND_BACKGROUND_SHADOW_COLOR_INDEX), 1);
+            memset16(&pal_bg_mem[BLIND_BG_PRIMARY], blind_get_color(current_blind, BLIND_BACKGROUND_MAIN_COLOR_INDEX), 1);
+            memset16(&pal_bg_mem[BLIND_BG_SECONDARY], blind_get_color(current_blind, BLIND_BACKGROUND_SECONDARY_COLOR_INDEX), 1);
+            memset16(&pal_bg_mem[BLIND_BG_SHADOW], blind_get_color(current_blind, BLIND_BACKGROUND_SHADOW_COLOR_INDEX), 1);
 
             // Copy the Play Hand and Discard button colors to their selection highlights
-            memcpy16(&pal_bg_mem[1], &pal_bg_mem[7], 1);
-            memcpy16(&pal_bg_mem[9], &pal_bg_mem[12], 1);
+            memcpy16(&pal_bg_mem[PLAY_HAND_BTN_SELECTED_BORDER], &pal_bg_mem[7], 1);
+            memcpy16(&pal_bg_mem[DISCARD_BTN_SELECTED_BORDER], &pal_bg_mem[12], 1);
         }
     }
     else if (id == BG_ID_CARD_PLAYING)
@@ -520,16 +544,17 @@ void change_background(int id)
         GRIT_CPY(&se_mem[MAIN_BG_SBB], background_shop_gfxMap);
 
         // Set the outline colors for the shop background. This is used for the alternate shop palettes when opening packs
-        memset16(&pal_bg_mem[26], 0x213D, 1);
-        memset16(&pal_bg_mem[6], 0x10B4, 1);
+        memset16(&pal_bg_mem[SHOP_BOTTOM_PANEL_BORDER], 0x213D, 1);
+        memset16(&pal_bg_mem[SHOP_PANEL_SHADOW], 0x10B4, 1);
         
-        memset16(&pal_bg_mem[14], 0x32BE, 1); // Reset the shop lights to correct colors
-        memset16(&pal_bg_mem[17], 0x4B5F, 1);
-        memset16(&pal_bg_mem[22], 0x5F9F, 1);
-        memset16(&pal_bg_mem[8], 0xFFFF, 1);
+        memset16(&pal_bg_mem[SHOP_LIGHTS_2], 0x32BE, 1); // Reset the shop lights to correct colors
+        memset16(&pal_bg_mem[SHOP_LIGHTS_3], 0x4B5F, 1);
+        memset16(&pal_bg_mem[SHOP_LIGHTS_4], 0x5F9F, 1);
+        memset16(&pal_bg_mem[SHOP_LIGHTS_1], 0xFFFF, 1);
 
+		// I don't see any visual change from these copy. Remove?
         memcpy16(&pal_bg_mem[7], &pal_bg_mem[3], 1); // Disable the button highlight colors
-        memcpy16(&pal_bg_mem[5], &pal_bg_mem[16], 1);
+        memcpy16(&pal_bg_mem[5], &pal_bg_mem[16], 1); 
     }
     else if (id == BG_ID_BLIND_SELECT)
     {
@@ -549,8 +574,8 @@ void change_background(int id)
         GRIT_CPY(&se_mem[MAIN_BG_SBB], background_blind_select_gfxMap);
 
         // Copy boss blind colors to blind select palette
-        memset16(&pal_bg_mem[1], blind_get_color(BOSS_BLIND, BLIND_BACKGROUND_MAIN_COLOR_INDEX), 1);
-        memset16(&pal_bg_mem[7], blind_get_color(BOSS_BLIND, BLIND_BACKGROUND_SHADOW_COLOR_INDEX), 1);
+        memset16(&pal_bg_mem[BOSS_BLIND_PRIMARY], blind_get_color(BOSS_BLIND, BLIND_BACKGROUND_MAIN_COLOR_INDEX), 1);
+        memset16(&pal_bg_mem[BOSS_BLIND_SHADOW], blind_get_color(BOSS_BLIND, BLIND_BACKGROUND_SHADOW_COLOR_INDEX), 1);
 
         // Disable the button highlight colors
         // Select button PID is 15 and the outline is 18
@@ -651,7 +676,7 @@ void change_background(int id)
         GRIT_CPY(&se_mem[MAIN_BG_SBB], background_main_menu_gfxMap);
 
         // Disable the button highlight colors
-        memcpy16(&pal_bg_mem[MAIN_MENU_PLAY_BUTTON_OUTLINE_COLOR_PID], &pal_bg_mem[MAIN_MENU_PLAY_BUTTON_MAIN_COLOR_PID], 1);
+        memcpy16(&pal_bg_mem[MAIN_MENU_PLAY_BUTTON_OUTLINE], &pal_bg_mem[MAIN_MENU_PLAY_BUTTON_MAIN_COLOR], 1);
     }
     else
     {
@@ -1206,8 +1231,8 @@ static void game_playing_process_hand_select_input()
     {
         if (discard_button_highlighted == false) // Play button logic
         {
-            memset16(&pal_bg_mem[1], 0xFFFF, 1);
-            memcpy16(&pal_bg_mem[9], &pal_bg_mem[12], 1);
+            memset16(&pal_bg_mem[PLAY_HAND_BTN_SELECTED_BORDER], 0xFFFF, 1);
+            memcpy16(&pal_bg_mem[DISCARD_BTN_SELECTED_BORDER], &pal_bg_mem[12], 1);
 
             if (key_hit(SELECT_CARD) && hands > 0 && hand_play())
             {
@@ -1236,8 +1261,8 @@ static void game_playing_process_hand_select_input()
 
     if (selection_y == 0) // On row of cards
     {
-        memcpy16(&pal_bg_mem[1], &pal_bg_mem[7], 1); // Play button highlight color
-        memcpy16(&pal_bg_mem[9], &pal_bg_mem[12], 1); // Discard button highlight color
+        memcpy16(&pal_bg_mem[PLAY_HAND_BTN_SELECTED_BORDER], &pal_bg_mem[7], 1); // Play button highlight color
+        memcpy16(&pal_bg_mem[DISCARD_BTN_SELECTED_BORDER], &pal_bg_mem[12], 1); // Discard button highlight color
         
         if (key_hit(SELECT_CARD))
         {
@@ -2121,7 +2146,7 @@ void game_round_end()
             }   
             else if (timer > FRAMES(20))
             {
-                memset16(&pal_bg_mem[19], 0x1483, 1);
+                memset16(&pal_bg_mem[REWARD_PANEL_BORDER], 0x1483, 1);
                 state = 6;
                 timer = 0;
             }
@@ -2591,10 +2616,10 @@ static void game_shop_lights_anim_frame()
 {
     // Shift palette around the border of the shop icon
     COLOR shifted_palette[4];
-    memcpy16(&shifted_palette[0], &pal_bg_mem[14], 1);
-    memcpy16(&shifted_palette[1], &pal_bg_mem[17], 1);
-    memcpy16(&shifted_palette[2], &pal_bg_mem[22], 1);
-    memcpy16(&shifted_palette[3], &pal_bg_mem[8], 1);
+    memcpy16(&shifted_palette[0], &pal_bg_mem[SHOP_LIGHTS_2], 1);
+    memcpy16(&shifted_palette[1], &pal_bg_mem[SHOP_LIGHTS_3], 1);
+    memcpy16(&shifted_palette[2], &pal_bg_mem[SHOP_LIGHTS_4], 1);
+    memcpy16(&shifted_palette[3], &pal_bg_mem[SHOP_LIGHTS_1], 1);
 
     // Circularly shift the palette
     int last = shifted_palette[3];
@@ -2606,10 +2631,10 @@ static void game_shop_lights_anim_frame()
 
     shifted_palette[0] = last;
 
-    memcpy16(&pal_bg_mem[14], &shifted_palette[0], 1); // Copy the shifted palette to the next 4 slots
-    memcpy16(&pal_bg_mem[17], &shifted_palette[1], 1);
-    memcpy16(&pal_bg_mem[22], &shifted_palette[2], 1);
-    memcpy16(&pal_bg_mem[8], &shifted_palette[3], 1);
+    memcpy16(&pal_bg_mem[SHOP_LIGHTS_2], &shifted_palette[0], 1); // Copy the shifted palette to the next 4 slots
+    memcpy16(&pal_bg_mem[SHOP_LIGHTS_3], &shifted_palette[1], 1);
+    memcpy16(&pal_bg_mem[SHOP_LIGHTS_4], &shifted_palette[2], 1);
+    memcpy16(&pal_bg_mem[SHOP_LIGHTS_1], &shifted_palette[3], 1);
 }
 
 // Outro sequence (menu and shop icon going out of frame)
@@ -2787,13 +2812,15 @@ void game_blind_select()
 
             if (selection_y == 0)
             {
-                memset16(&pal_bg_mem[18], 0xFFFF, 1);
-                memcpy16(&pal_bg_mem[10], &pal_bg_mem[5], 1);
+				// 5 is the multiplier palette color and the skip button color
+                memset16(&pal_bg_mem[BLIND_SELECT_BTN_SELECTED_BORDER], 0xFFFF, 1);
+                memcpy16(&pal_bg_mem[BLIND_SKIP_BTN_SELECTED_BORDER], &pal_bg_mem[5], 1);
             }
             else
             {
-                memcpy16(&pal_bg_mem[18], &pal_bg_mem[15], 1);
-                memset16(&pal_bg_mem[10], 0xFFFF, 1);
+				// 15 is the select button color
+                memcpy16(&pal_bg_mem[BLIND_SELECT_BTN_SELECTED_BORDER], &pal_bg_mem[15], 1);
+                memset16(&pal_bg_mem[BLIND_SKIP_BTN_SELECTED_BORDER], 0xFFFF, 1);
             }
 
             break;
@@ -2914,7 +2941,7 @@ void game_main_menu()
     if (selection_x == 0) // Play button
     {   
         // Select button PID is 5 and the outline is 3
-        memset16(&pal_bg_mem[MAIN_MENU_PLAY_BUTTON_OUTLINE_COLOR_PID], HIGHLIGHT_COLOR, 1);
+        memset16(&pal_bg_mem[MAIN_MENU_PLAY_BUTTON_OUTLINE], HIGHLIGHT_COLOR, 1);
 
         if (key_hit(KEY_A))
         {
@@ -2925,7 +2952,7 @@ void game_main_menu()
     else
     {
         // Select button PID is 5 and the outline is 3
-        memcpy16(&pal_bg_mem[MAIN_MENU_PLAY_BUTTON_OUTLINE_COLOR_PID], &pal_bg_mem[MAIN_MENU_PLAY_BUTTON_MAIN_COLOR_PID], 1);
+        memcpy16(&pal_bg_mem[MAIN_MENU_PLAY_BUTTON_OUTLINE], &pal_bg_mem[MAIN_MENU_PLAY_BUTTON_MAIN_COLOR], 1);
     }
 }
 
