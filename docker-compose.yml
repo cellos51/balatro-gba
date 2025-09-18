@@ -1,7 +1,7 @@
 services:
   balatro:
-    image: devkitpro/devkitarm:latest
-    working_dir: /balatro
+    build:
+      dockerfile: ./Dockerfile
     volumes:
       - ./:/balatro
     user: "${UID-1000}:${GID-1000}"

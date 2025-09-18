@@ -50,6 +50,17 @@ A docker compose file is provided to build this project.
 
 Docker will build the project and the ROM will be in the same location as step 7 describes below.
 
+## **-Apple Container-**
+If for some reason you want to use Apple Container to build this project, you can also do so!
+
+1.) Install `container` from the releases in their [GitHub page](https://github.com/apple/container/releases)
+2.) Start the container system with `container system start`
+3.) Run `container build --tag balatro-builder --file Dockerfile .`
+4.) Run `container run --volume $(pwd):./balatro --name balatro --rm balatro-builder`
+5.) (Optional) if you want to remove the image from container, run `container image delete balatro-builder`
+
+After this, the `balatro.gba` file should be in the build folder
+
 ## **-Windows-**
 Video Tutorial: https://youtu.be/72Zzo1VDYzQ?si=UDmEdbST1Cx1zZV2
 ### With `Git` (not required)
