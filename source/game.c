@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "tonc_memmap.h"
 #include "util.h"
 #include "sprite.h"
 #include "card.h"
@@ -38,15 +39,22 @@ typedef enum
 	BOSS_BLIND_PRIMARY = 1,
 	BLIND_BG_SHADOW = 2,
 	MAIN_MENU_PLAY_BUTTON_OUTLINE = 2,
+	REROLL_BTN = 3,
 	BLIND_BG_SECONDARY = 5,
-	// SKIP_BTN_UNSELECTED_BORDER = 5,
+	BLIND_SKIP_BTN = 5, // 5, in the blind select, is the score multiplier and deck PID index also. In shop it's the next round selected border.
 	MAIN_MENU_PLAY_BUTTON_MAIN_COLOR = 5,
+	NEXT_ROUND_BTN_SELECTED_BORDER = 5,
 	SHOP_PANEL_SHADOW = 6,
 	BOSS_BLIND_SHADOW = 7,
+	PLAY_HAND_BTN = 7,
+	REROLL_BTN_SELECTED_BORDER = 7,
 	SHOP_LIGHTS_1 = 8,
 	DISCARD_BTN_SELECTED_BORDER = 9,
 	BLIND_SKIP_BTN_SELECTED_BORDER = 10,
+	DISCARD_BTN = 12, // 12 appears to also be the score multiplier, discard button, and deck PID index
 	SHOP_LIGHTS_2 = 14,
+	BLIND_SELECT_BTN = 15,
+	NEXT_ROUND_BTN = 16, // 16, in shop, is the next round button, multiplier, and deck PID.
 	SHOP_LIGHTS_3 = 17,
 	BLIND_SELECT_BTN_SELECTED_BORDER = 18,
 	BLIND_BG_PRIMARY = 19,
@@ -500,8 +508,8 @@ void change_background(int id)
             memset16(&pal_bg_mem[BLIND_BG_SHADOW], blind_get_color(current_blind, BLIND_BACKGROUND_SHADOW_COLOR_INDEX), 1);
 
             // Copy the Play Hand and Discard button colors to their selection highlights
-            memcpy16(&pal_bg_mem[PLAY_HAND_BTN_SELECTED_BORDER], &pal_bg_mem[7], 1);
-            memcpy16(&pal_bg_mem[DISCARD_BTN_SELECTED_BORDER], &pal_bg_mem[12], 1);
+            memcpy16(&pal_bg_mem[PLAY_HAND_BTN_SELECTED_BORDER], &pal_bg_mem[PLAY_HAND_BTN], 1);
+            memcpy16(&pal_bg_mem[DISCARD_BTN_SELECTED_BORDER], &pal_bg_mem[DISCARD_BTN], 1);
         }
     }
     else if (id == BG_ID_CARD_PLAYING)
@@ -552,9 +560,8 @@ void change_background(int id)
         memset16(&pal_bg_mem[SHOP_LIGHTS_4], 0x5F9F, 1);
         memset16(&pal_bg_mem[SHOP_LIGHTS_1], 0xFFFF, 1);
 
-		// I don't see any visual change from these copy. Remove?
-        memcpy16(&pal_bg_mem[7], &pal_bg_mem[3], 1); // Disable the button highlight colors
-        memcpy16(&pal_bg_mem[5], &pal_bg_mem[16], 1); 
+        memcpy16(&pal_bg_mem[REROLL_BTN_SELECTED_BORDER], &pal_bg_mem[REROLL_BTN], 1); // Disable the button highlight colors
+        memcpy16(&pal_bg_mem[NEXT_ROUND_BTN_SELECTED_BORDER], &pal_bg_mem[NEXT_ROUND_BTN], 1); 
     }
     else if (id == BG_ID_BLIND_SELECT)
     {
@@ -579,9 +586,12 @@ void change_background(int id)
 
         // Disable the button highlight colors
         // Select button PID is 15 and the outline is 18
-        memcpy16(&pal_bg_mem[18], &pal_bg_mem[15], 1);
-        // Skip button PID is 10 and the outline is 5
-        memcpy16(&pal_bg_mem[10], &pal_bg_mem[5], 1);
+        memcpy16(&pal_bg_mem[BLIND_SELECT_BTN_SELECTED_BORDER], &pal_bg_mem[BLIND_SELECT_BTN], 1);
+		// It seems the skip button (and score multiplier and deck) PB idx is
+		// actually 5, not 10. 10 is the selected border color
+		// Setting this palette value though doesn't seem to have an 
+		// effect.
+        memcpy16(&pal_bg_mem[BLIND_SKIP_BTN_SELECTED_BORDER], &pal_bg_mem[BLIND_SKIP_BTN], 1);
 
         for (int i = 0; i < MAX_BLINDS; i++)
         {
@@ -1232,7 +1242,7 @@ static void game_playing_process_hand_select_input()
         if (discard_button_highlighted == false) // Play button logic
         {
             memset16(&pal_bg_mem[PLAY_HAND_BTN_SELECTED_BORDER], 0xFFFF, 1);
-            memcpy16(&pal_bg_mem[DISCARD_BTN_SELECTED_BORDER], &pal_bg_mem[12], 1);
+            memcpy16(&pal_bg_mem[DISCARD_BTN_SELECTED_BORDER], &pal_bg_mem[DISCARD_BTN], 1);
 
             if (key_hit(SELECT_CARD) && hands > 0 && hand_play())
             {
@@ -1244,8 +1254,9 @@ static void game_playing_process_hand_select_input()
         }
         else // Discard button logic
         {
-            memcpy16(&pal_bg_mem[1], &pal_bg_mem[7], 1);
-            memset16(&pal_bg_mem[9], 0xFFFF, 1);
+			// 7 is score and play hand button color
+            memcpy16(&pal_bg_mem[PLAY_HAND_BTN_SELECTED_BORDER], &pal_bg_mem[PLAY_HAND_BTN], 1);
+            memset16(&pal_bg_mem[DISCARD_BTN_SELECTED_BORDER], 0xFFFF, 1);
 
             if (key_hit(SELECT_CARD) && discards > 0 && hand_discard())
             {
@@ -1261,8 +1272,8 @@ static void game_playing_process_hand_select_input()
 
     if (selection_y == 0) // On row of cards
     {
-        memcpy16(&pal_bg_mem[PLAY_HAND_BTN_SELECTED_BORDER], &pal_bg_mem[7], 1); // Play button highlight color
-        memcpy16(&pal_bg_mem[DISCARD_BTN_SELECTED_BORDER], &pal_bg_mem[12], 1); // Discard button highlight color
+        memcpy16(&pal_bg_mem[PLAY_HAND_BTN_SELECTED_BORDER], &pal_bg_mem[PLAY_HAND_BTN], 1); // Play button highlight color
+        memcpy16(&pal_bg_mem[DISCARD_BTN_SELECTED_BORDER], &pal_bg_mem[DISCARD_BTN], 1); // Discard button highlight color
         
         if (key_hit(SELECT_CARD))
         {
@@ -2282,8 +2293,6 @@ static int reroll_cost = REROLL_BASE_COST;
 
 #define NEXT_ROUND_BTN_SEL_X 0
 
-#define NEXT_ROUND_BTN_FRAME_PAL_IDX    5
-#define NEXT_ROUND_BTN_PAL_IDX          16
 #define REROLL_BTN_FRAME_PAL_IDX        7
 #define REROLL_BTN_PAL_IDX              3
 
@@ -2498,7 +2507,7 @@ static void shop_top_row_on_key_hit(SelectionGrid* selection_grid, Selection* se
         timer = 0; // Reset the timer
         reroll_cost = REROLL_BASE_COST;
 
-        memcpy16(&pal_bg_mem[NEXT_ROUND_BTN_FRAME_PAL_IDX], &pal_bg_mem[6], 1);
+        memcpy16(&pal_bg_mem[NEXT_ROUND_BTN_SELECTED_BORDER], &pal_bg_mem[SHOP_PANEL_SHADOW], 1);
 
         // memcpy16(&pal_bg_mem[16], &pal_bg_mem[6], 1); 
         // This changes the color of the button to a dark red.
@@ -2533,7 +2542,7 @@ static void shop_top_row_on_selection_changed(SelectionGrid* selection_grid, int
         if (prev_selection->x == NEXT_ROUND_BTN_SEL_X)
         {
             // Remove next round button highlight
-            memcpy16(&pal_bg_mem[NEXT_ROUND_BTN_FRAME_PAL_IDX], &pal_bg_mem[NEXT_ROUND_BTN_PAL_IDX], 1);
+            memcpy16(&pal_bg_mem[NEXT_ROUND_BTN_SELECTED_BORDER], &pal_bg_mem[NEXT_ROUND_BTN], 1);
         }
         else 
         {
@@ -2548,7 +2557,7 @@ static void shop_top_row_on_selection_changed(SelectionGrid* selection_grid, int
         if (new_selection->x == NEXT_ROUND_BTN_SEL_X)
         {
             // Highlight next round button
-            memset16(&pal_bg_mem[NEXT_ROUND_BTN_FRAME_PAL_IDX], HIGHLIGHT_COLOR, 1);
+            memset16(&pal_bg_mem[NEXT_ROUND_BTN_SELECTED_BORDER], HIGHLIGHT_COLOR, 1);
         }
         else 
         {
@@ -2569,11 +2578,11 @@ static void shop_reroll_row_on_selection_changed(SelectionGrid* selection_grid, 
     if (row_idx == prev_selection->y)
     {
         // Remove highlight
-        memcpy16(&pal_bg_mem[REROLL_BTN_FRAME_PAL_IDX], &pal_bg_mem[REROLL_BTN_PAL_IDX], 1);
+        memcpy16(&pal_bg_mem[REROLL_BTN_SELECTED_BORDER], &pal_bg_mem[REROLL_BTN], 1);
     }
     else if (row_idx == new_selection->y)
     {
-        memset16(&pal_bg_mem[REROLL_BTN_FRAME_PAL_IDX], HIGHLIGHT_COLOR, 1);
+        memset16(&pal_bg_mem[REROLL_BTN_SELECTED_BORDER], HIGHLIGHT_COLOR, 1);
     }
 }
 
@@ -2814,12 +2823,12 @@ void game_blind_select()
             {
 				// 5 is the multiplier palette color and the skip button color
                 memset16(&pal_bg_mem[BLIND_SELECT_BTN_SELECTED_BORDER], 0xFFFF, 1);
-                memcpy16(&pal_bg_mem[BLIND_SKIP_BTN_SELECTED_BORDER], &pal_bg_mem[5], 1);
+                memcpy16(&pal_bg_mem[BLIND_SKIP_BTN_SELECTED_BORDER], &pal_bg_mem[BLIND_SKIP_BTN], 1);
             }
             else
             {
 				// 15 is the select button color
-                memcpy16(&pal_bg_mem[BLIND_SELECT_BTN_SELECTED_BORDER], &pal_bg_mem[15], 1);
+                memcpy16(&pal_bg_mem[BLIND_SELECT_BTN_SELECTED_BORDER], &pal_bg_mem[BLIND_SELECT_BTN], 1);
                 memset16(&pal_bg_mem[BLIND_SKIP_BTN_SELECTED_BORDER], 0xFFFF, 1);
             }
 
