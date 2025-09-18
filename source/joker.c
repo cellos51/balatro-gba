@@ -13,9 +13,20 @@
 
 #define JOKER_SCORE_TEXT_Y 48
 #define NUM_JOKERS_PER_SPRITESHEET 2
+#define MAX_JOKERS 15
 
-const unsigned int **joker_gfxTiles;
-const unsigned short **joker_gfxPal;
+static const unsigned int *joker_gfxTiles[MAX_JOKERS] = 
+{
+#define DEF_JOKER_GFX(idx) joker_gfx##idx##Tiles,
+#include "../include/joker_table.h"
+#undef DEF_JOKER_GFX
+};
+static const unsigned short *joker_gfxPal[MAX_JOKERS] = 
+{
+#define DEF_JOKER_GFX(idx) joker_gfx##idx##Pal,
+#include "../include/joker_table.h"
+#undef DEF_JOKER_GFX
+};
 
 const static u8 edition_price_lut[MAX_EDITIONS] =
 {
@@ -113,42 +124,7 @@ void joker_init()
 {
     // This should init once only so no need to free
     int num_spritesheets = get_num_spritesheets();
-    joker_gfxTiles = (const unsigned int**)malloc((sizeof(unsigned int*) * num_spritesheets));
-    joker_gfxPal = (const unsigned short**)malloc((sizeof(unsigned int*) * num_spritesheets));
     joker_spritesheet_pb_map = (int*)malloc(sizeof(int) * num_spritesheets);
-    
-    // TODO: Automate this with the preprocessor somehow?
-    joker_gfxTiles[0] = joker_gfx0Tiles;
-    joker_gfxTiles[1] = joker_gfx1Tiles;
-    joker_gfxTiles[2] = joker_gfx2Tiles;
-    joker_gfxTiles[3] = joker_gfx3Tiles;
-    joker_gfxTiles[4] = joker_gfx4Tiles;
-    joker_gfxTiles[5] = joker_gfx5Tiles;
-    joker_gfxTiles[6] = joker_gfx6Tiles;
-    joker_gfxTiles[7] = joker_gfx7Tiles;
-    joker_gfxTiles[8] = joker_gfx8Tiles;
-    joker_gfxTiles[9] = joker_gfx9Tiles;
-    joker_gfxTiles[10] = joker_gfx10Tiles;
-    joker_gfxTiles[11] = joker_gfx11Tiles;
-    joker_gfxTiles[12] = joker_gfx12Tiles;
-    joker_gfxTiles[13] = joker_gfx13Tiles;
-    joker_gfxTiles[14] = joker_gfx14Tiles;
-
-    joker_gfxPal[0] = joker_gfx0Pal;
-    joker_gfxPal[1] = joker_gfx1Pal;
-    joker_gfxPal[2] = joker_gfx2Pal;
-    joker_gfxPal[3] = joker_gfx3Pal;
-    joker_gfxPal[4] = joker_gfx4Pal;
-    joker_gfxPal[5] = joker_gfx5Pal;
-    joker_gfxPal[6] = joker_gfx6Pal;
-    joker_gfxPal[7] = joker_gfx7Pal;
-    joker_gfxPal[8] = joker_gfx8Pal;
-    joker_gfxPal[9] = joker_gfx9Pal;
-    joker_gfxPal[10] = joker_gfx10Pal;
-    joker_gfxPal[11] = joker_gfx11Pal;
-    joker_gfxPal[12] = joker_gfx12Pal;
-    joker_gfxPal[13] = joker_gfx13Pal;
-    joker_gfxPal[14] = joker_gfx14Pal;
 
     for (int i = 0; i < num_spritesheets; i++)
     {
