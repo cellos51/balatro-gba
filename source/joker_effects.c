@@ -464,6 +464,47 @@ static JokerEffect odd_todd_joker_effect(Joker *joker, Card *scored_card) {
     return effect;
 }
 
+__attribute__((unused))
+static JokerEffect blueprint_joker_effect(Joker *joker, Card *scored_card) {
+    JokerEffect effect = {0};
+    List* jokers = get_jokers();
+    bool trigger_next_joker = false;
+
+    for (int i = 0; i < list_get_size(jokers); i++ ) {
+        JokerObject* joker_object = list_get(jokers, i);
+        if (trigger_next_joker) {
+            effect = joker_get_score_effect(joker_object->joker, scored_card);
+            break;
+        }
+
+        // JOKER_BLUEPRINT_ID (joker.h) will need to be updated
+        if (joker_object->joker->id == JOKER_BLUEPRINT_ID)
+            trigger_next_joker = true;
+    }
+
+    return effect;
+}
+
+__attribute__((unused))
+static JokerEffect brainstorm_joker_effect(Joker *joker, Card *scored_card) {
+    JokerEffect effect = {0};
+    if (joker->processed)
+        return effect;
+
+    List* jokers = get_jokers();
+    JokerObject* first_joker = list_get(jokers, 0);
+
+    // JOKER_BRAINSTORM_ID (joker.h) will need to be updated
+    if (first_joker->joker->id != JOKER_BRAINSTORM_ID) {
+        // manually flip this to avoid infinite blueprint + brainstorm loops
+        joker->processed = true;
+        effect = joker_get_score_effect(first_joker->joker, scored_card);
+        joker->processed = false;
+    }
+
+    return effect;
+}
+
 /* The index of a joker in the registry matches its ID.
  * The joker sprites are matched by ID so the position in the registry
  * determines the joker's sprite.
@@ -514,6 +555,9 @@ const JokerInfo joker_registry[] = {
 
     { COMMON_JOKER, 4, abstract_joker_effect },
     { UNCOMMON_JOKER, 6, bull_joker_effect},
+
+    { RARE_JOKER, 10, blueprint_joker_effect },
+    { RARE_JOKER, 10, brainstorm_joker_effect },
 #endif
 };
 
