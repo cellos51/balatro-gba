@@ -11,11 +11,21 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "pool.h"
+
 #define JOKER_SCORE_TEXT_Y 48
 #define NUM_JOKERS_PER_SPRITESHEET 2
 
-const unsigned int **joker_gfxTiles;
-const unsigned short **joker_gfxPal;
+// Jokers in deck
+DECLARE_POOL_TYPE(Joker)
+DEFINE_POOL_TYPE(Joker, 8); // 8 should be fine, we only have a max of 2
+
+// Jokers on screen
+DECLARE_POOL_TYPE(JokerObject)
+DEFINE_POOL_TYPE(JokerObject, 8) // 8 should be fine here as well, max of 2 from the shop in game.c
+
+static const unsigned int* joker_gfxTiles[15];
+static const unsigned short* joker_gfxPal[15];
 
 const static u8 edition_price_lut[MAX_EDITIONS] =
 {
@@ -38,7 +48,7 @@ static bool used_layers[MAX_JOKER_OBJECTS] = {false}; // Track used layers for j
 
 // Maps the spritesheet index to the palette bank index allocated to it.
 // Spritesheets that were not allocated are
-static int* joker_spritesheet_pb_map;
+static int joker_spritesheet_pb_map[128];
 static int joker_pb_num_sprite_users[JOKER_LAST_PB - JOKER_BASE_PB + 1] = { 0 };
 
 static int get_num_spritesheets()
@@ -113,10 +123,7 @@ void joker_init()
 {
     // This should init once only so no need to free
     int num_spritesheets = get_num_spritesheets();
-    joker_gfxTiles = (const unsigned int**)malloc((sizeof(unsigned int*) * num_spritesheets));
-    joker_gfxPal = (const unsigned short**)malloc((sizeof(unsigned int*) * num_spritesheets));
-    joker_spritesheet_pb_map = (int*)malloc(sizeof(int) * num_spritesheets);
-    
+
     // TODO: Automate this with the preprocessor somehow?
     joker_gfxTiles[0] = joker_gfx0Tiles;
     joker_gfxTiles[1] = joker_gfx1Tiles;
@@ -160,7 +167,7 @@ Joker *joker_new(u8 id)
 {
     if (id >= get_joker_registry_size()) return NULL;
 
-    Joker *joker = (Joker*)malloc(sizeof(Joker));
+    Joker *joker = POOL_GET(Joker);
     const JokerInfo *jinfo = get_joker_registry_entry(id);
 
     joker->id = id;
@@ -174,8 +181,7 @@ Joker *joker_new(u8 id)
 
 void joker_destroy(Joker **joker)
 {
-    if (*joker == NULL) return;
-    free(*joker);
+    POOL_FREE(Joker, *joker);
     *joker = NULL;
 }
 
@@ -200,7 +206,7 @@ int joker_get_sell_value(const Joker* joker)
 // JokerObject methods
 JokerObject *joker_object_new(Joker *joker)
 {
-    JokerObject *joker_object = malloc(sizeof(JokerObject));
+    JokerObject *joker_object = POOL_GET(JokerObject);
 
     int layer = 0;
     for (int i = 0; i < MAX_JOKER_OBJECTS; i++)
@@ -257,7 +263,7 @@ void joker_object_destroy(JokerObject **joker_object)
 
     sprite_object_destroy(&(*joker_object)->sprite_object); // Destroy the sprite
     joker_destroy(&(*joker_object)->joker); // Destroy the joker
-    free(*joker_object);
+    POOL_FREE(JokerObject, *joker_object);
     *joker_object = NULL;
 }
 

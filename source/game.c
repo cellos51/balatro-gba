@@ -335,7 +335,7 @@ void sort_cards()
         if (hand[i] != NULL)
         {
             // card_object_get_sprite() will not work here since we need the address
-            sprite_destroy(&(hand[i]->sprite_object->sprite));
+            sprite_destroy(&hand[i]->sprite_object->sprite);
         }
     }
 
