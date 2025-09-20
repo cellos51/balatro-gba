@@ -30,43 +30,6 @@
 
 #include "list.h"
 
-#define ITEM_SHOP_Y 71 // TODO: Needs to be a rect?
-
-#define MAIN_MENU_BUTTONS 2
-#define MAIN_MENU_IMPLEMENTED_BUTTONS 1 // Remove this once all buttons are implemented
-
-//TODO: Properly define and use
-#define MENU_POP_OUT_ANIM_FRAMES 20
-#define GAME_OVER_ANIM_FRAMES 15
-
-#define SCORED_CARD_TEXT_Y 48
-
-#define HIGHLIGHT_COLOR 0xFFFF
-
-#define PITCH_STEP_DISCARD_SFX      (-64)
-#define PITCH_STEP_DRAW_SFX         24
-#define PITCH_STEP_UNDISCARD_SFX    2*PITCH_STEP_DRAW_SFX    
-
-// Timer defs
-#define TM_ZERO 0
-#define TM_RESET_STATIC_VARS 30
-#define TM_END_POP_MENU_ANIM 13
-#define TM_START_ROUND_END_MENU_AMIN 1
-#define TM_END_DISPLAY_FIN_BLIND 30
-#define TM_END_DISPLAY_SCORE_MIN 4
-#define TM_ELLIPSIS_PRINT_MAX_TM 16
-#define TM_DISPLAY_REWARDS_CONT_WAIT 30
-#define TM_HAND_REWARD_INCR_WAIT 45
-#define TM_DISMISS_ROUND_END_TM 20
-#define TM_CREATE_SHOP_ITEMS_WAIT 1
-#define TM_SHIFT_SHOP_ICON_WAIT 7
-#define TM_END_GAME_SHOP_INTRO 12
-#define TM_SHOP_PRC_INPUT_START 1
-#define TM_DISP_BLIND_PANEL_FINISH 7
-#define TM_DISP_BLIND_PANEL_START 1
-#define TM_BLIND_SELECT_START 1
-#define TM_END_ANIM_SEQ 12
-
 // This could go in game.h or some other header somewhere
 // but it's essentially private to this file, so might as well
 // leave it.
@@ -196,80 +159,6 @@ static int deck_top = -1;
 static Card *discard_pile[MAX_DECK_SIZE] = {NULL};
 static int discard_top = -1;
 
-// Consts
-
-// Rects                                       left     top     right   bottom
-// Screenblock rects
-static const Rect ROUND_END_MENU_RECT       = {9,       7,      24,     20 }; 
-
-static const Rect POP_MENU_ANIM_RECT        = {9,       7,      24,     31 };
-// The rect for popping menu animations (round end, shop, blinds) 
-// - extends beyond the visible screen to the end of the screenblock
-// It includes both the target and source position rects. 
-// This is because when popping, the target position is blank so we just animate 
-// the whole rect so we don't have to track its position
-
-static const Rect SINGLE_BLIND_SELECT_RECT  = {9,       7,      13,     32 };
-
-static const Rect HAND_BG_RECT_SELECTING    = {9,       11,     24,     17 };
-// TODO: Currently unused, remove?
-//static const Rect HAND_BG_RECT_PLAYING      = {9,       14,     24,     18 };
-
-static const Rect TOP_LEFT_ITEM_SRC_RECT    = {0,       20,     8,      25 };
-static const BG_POINT TOP_LEFT_PANEL_POINT  = {0,       0, };
-static const Rect TOP_LEFT_PANEL_ANIM_RECT  = {0,       0,      8,      4  };
-/* Contains the shop icon/current blind etc. 
- * The difference between TOP_LEFT_PANEL_ANIM_RECT and TOP_LEFT_PANEL_RECT 
- * is due to an overlap between the bottom of the top left panel
- * and the top of the score panel in the tiles connecting them.
- * TOP_LEFT_PANEL_ANIM_RECT should be used for animations, 
- * TOP_LEFT_PANEL_RECT for copies etc. but mind the overlap
- */
-static const BG_POINT TOP_LEFT_BLIND_TITLE_POINT = {0,  21, };
-static const Rect BIG_BLIND_TITLE_SRC_RECT  = {0,       26,     8,      26 };
-static const Rect BOSS_BLIND_TITLE_SRC_RECT = {0,       27,     8,      27 };
-static const BG_POINT GAME_OVER_SRC_RECT_3X3_POS = {25, 29};
-static const Rect GAME_OVER_DIALOG_DEST_RECT= {11,      21,      23,     26};
-static const Rect GAME_OVER_ANIM_RECT       = {11,      8,       23,     26};
-
-// Rects for TTE (in pixels)
-static const Rect HAND_SIZE_RECT            = {128,     128,    152,    160 }; // Seems to include both SELECT and PLAYING
-static const Rect HAND_SIZE_RECT_SELECT     = {128,     128,    152,    136 };
-static const Rect HAND_SIZE_RECT_PLAYING    = {128,     152,    152,    160 };
-static const Rect HAND_TYPE_RECT            = {8,       64,     64,     72  };
-// Score displayed in the same place as the hand type
-static const Rect TEMP_SCORE_RECT           = {8,       64,     64,     72  }; 
-static const Rect SCORE_RECT                = {32,      48,     64,     56  };
-
-static const Rect PLAYED_CARDS_SCORES_RECT  = {72,      48,     240,    56  };
-static const Rect BLIND_TOKEN_TEXT_RECT     = {80,      72,     200,    160 };
-static const Rect MONEY_TEXT_RECT           = {8,       120,    64,     128 };
-static const Rect CHIPS_TEXT_RECT           = {8,       80,     32,     88  };
-static const Rect MULT_TEXT_RECT            = {40,      80,     64,     88  };
-static const Rect BLIND_REWARD_RECT         = {40,      32,     64,     40  };
-static const Rect BLIND_REQ_TEXT_RECT       = {32,      24,     64,     32  };
-static const Rect SHOP_PRICES_TEXT_RECT     = {72,      56,     192,    160 };
-
-// Rects with UNDEFINED are only used in tte_printf, they need to be fully defined
-// to be used with tte_erase_rect_wrapper()
-static const Rect HANDS_TEXT_RECT           = {16,      104,    UNDEFINED, UNDEFINED };
-static const Rect DISCARDS_TEXT_RECT        = {48,      104,    UNDEFINED, UNDEFINED };
-static const Rect DECK_SIZE_RECT            = {200,     152,    UNDEFINED, UNDEFINED };
-static const Rect ROUND_TEXT_RECT           = {48,      144,    UNDEFINED, UNDEFINED };
-static const Rect ANTE_TEXT_RECT            = {8,       144,    UNDEFINED, UNDEFINED };
-static const Rect ROUND_END_BLIND_REQ_RECT  = {104,     96,     136,       UNDEFINED };
-static const Rect ROUND_END_BLIND_REWARD_RECT = { 168,  96,     UNDEFINED, UNDEFINED };
-static const Rect ROUND_END_NUM_HANDS_RECT  = {88,      116,    UNDEFINED, UNDEFINED };
-static const Rect HAND_REWARD_RECT          = {168,     UNDEFINED, UNDEFINED, UNDEFINED };
-static const Rect CASHOUT_RECT              = {88,      72,     UNDEFINED, UNDEFINED };
-static const Rect SHOP_REROLL_RECT          = {88,      96,     UNDEFINED, UNDEFINED };
-static const Rect GAME_LOSE_MSG_TEXT_RECT   = {104,     72,     UNDEFINED, UNDEFINED};
-// 1 character to the right oF GAME_LOSE
-static const Rect GAME_WIN_MSG_TEXT_RECT    = {112,      72,     UNDEFINED, UNDEFINED};
-
-static const BG_POINT HELD_JOKERS_POS       = {108,     10};
-static const BG_POINT JOKER_DISCARD_TARGET  = {240,     30};
-
 // Played stack
 static inline void played_push(CardObject *card_object)
 {
@@ -356,6 +245,167 @@ int get_num_discards_remaining(void) {
 int get_money(void) {
     return money;
 }
+
+// Consts
+
+// Rects                                       left     top     right   bottom
+// Screenblock rects
+static const Rect ROUND_END_MENU_RECT       = {9,       7,      24,     20 }; 
+
+static const Rect POP_MENU_ANIM_RECT        = {9,       7,      24,     31 };
+// The rect for popping menu animations (round end, shop, blinds) 
+// - extends beyond the visible screen to the end of the screenblock
+// It includes both the target and source position rects. 
+// This is because when popping, the target position is blank so we just animate 
+// the whole rect so we don't have to track its position
+
+static const Rect SINGLE_BLIND_SELECT_RECT  = {9,       7,      13,     32 };
+
+static const Rect HAND_BG_RECT_SELECTING    = {9,       11,     24,     17 };
+// TODO: Currently unused, remove?
+//static const Rect HAND_BG_RECT_PLAYING      = {9,       14,     24,     18 };
+
+static const Rect TOP_LEFT_ITEM_SRC_RECT    = {0,       20,     8,      25 };
+static const BG_POINT TOP_LEFT_PANEL_POINT  = {0,       0, };
+static const Rect TOP_LEFT_PANEL_ANIM_RECT  = {0,       0,      8,      4  };
+/* Contains the shop icon/current blind etc. 
+ * The difference between TOP_LEFT_PANEL_ANIM_RECT and TOP_LEFT_PANEL_RECT 
+ * is due to an overlap between the bottom of the top left panel
+ * and the top of the score panel in the tiles connecting them.
+ * TOP_LEFT_PANEL_ANIM_RECT should be used for animations, 
+ * TOP_LEFT_PANEL_RECT for copies etc. but mind the overlap
+ */
+static const BG_POINT TOP_LEFT_BLIND_TITLE_POINT = {0,  21, };
+static const Rect BIG_BLIND_TITLE_SRC_RECT  = {0,       26,     8,      26 };
+static const Rect BOSS_BLIND_TITLE_SRC_RECT = {0,       27,     8,      27 };
+static const BG_POINT GAME_OVER_SRC_RECT_3X3_POS = {25, 29};
+static const Rect GAME_OVER_DIALOG_DEST_RECT= {11,      21,      23,     26};
+static const Rect GAME_OVER_ANIM_RECT       = {11,      8,       23,     26};
+
+// Rects for TTE (in pixels)
+static const Rect HAND_SIZE_RECT            = {128,     128,    152,    160 }; // Seems to include both SELECT and PLAYING
+static const Rect HAND_SIZE_RECT_SELECT     = {128,     128,    152,    136 };
+static const Rect HAND_SIZE_RECT_PLAYING    = {128,     152,    152,    160 };
+static const Rect HAND_TYPE_RECT            = {8,       64,     64,     72  };
+// Score displayed in the same place as the hand type
+static const Rect TEMP_SCORE_RECT           = {8,       64,     64,     72  }; 
+static const Rect SCORE_RECT                = {32,      48,     64,     56  };
+
+static const Rect PLAYED_CARDS_SCORES_RECT  = {72,      48,     240,    56  };
+static const Rect BLIND_TOKEN_TEXT_RECT     = {80,      72,     200,    160 };
+static const Rect MONEY_TEXT_RECT           = {8,       120,    64,     128 };
+static const Rect CHIPS_TEXT_RECT           = {8,       80,     32,     88  };
+static const Rect MULT_TEXT_RECT            = {40,      80,     64,     88  };
+static const Rect BLIND_REWARD_RECT         = {40,      32,     64,     40  };
+static const Rect BLIND_REQ_TEXT_RECT       = {32,      24,     64,     32  };
+static const Rect SHOP_PRICES_TEXT_RECT     = {72,      56,     192,    160 };
+
+// Rects with UNDEFINED are only used in tte_printf, they need to be fully defined
+// to be used with tte_erase_rect_wrapper()
+static const Rect HANDS_TEXT_RECT           = {16,      104,    UNDEFINED, UNDEFINED };
+static const Rect DISCARDS_TEXT_RECT        = {48,      104,    UNDEFINED, UNDEFINED };
+static const Rect DECK_SIZE_RECT            = {200,     152,    UNDEFINED, UNDEFINED };
+static const Rect ROUND_TEXT_RECT           = {48,      144,    UNDEFINED, UNDEFINED };
+static const Rect ANTE_TEXT_RECT            = {8,       144,    UNDEFINED, UNDEFINED };
+static const Rect ROUND_END_BLIND_REQ_RECT  = {104,     96,     136,       UNDEFINED };
+static const Rect ROUND_END_BLIND_REWARD_RECT = { 168,  96,     UNDEFINED, UNDEFINED };
+static const Rect ROUND_END_NUM_HANDS_RECT  = {88,      116,    UNDEFINED, UNDEFINED };
+static const Rect HAND_REWARD_RECT          = {168,     UNDEFINED, UNDEFINED, UNDEFINED };
+static const Rect CASHOUT_RECT              = {88,      72,     UNDEFINED, UNDEFINED };
+static const Rect SHOP_REROLL_RECT          = {88,      96,     UNDEFINED, UNDEFINED };
+static const Rect GAME_LOSE_MSG_TEXT_RECT   = {104,     72,     UNDEFINED, UNDEFINED};
+// 1 character to the right oF GAME_LOSE
+static const Rect GAME_WIN_MSG_TEXT_RECT    = {112,      72,     UNDEFINED, UNDEFINED};
+
+static const BG_POINT HELD_JOKERS_POS       = {108,     10};
+static const BG_POINT JOKER_DISCARD_TARGET  = {240,     30};
+
+#define ITEM_SHOP_Y 71 // TODO: Needs to be a rect?
+
+#define MAIN_MENU_BUTTONS 2
+#define MAIN_MENU_IMPLEMENTED_BUTTONS 1 // Remove this once all buttons are implemented
+
+//TODO: Properly define and use
+#define MENU_POP_OUT_ANIM_FRAMES 20
+#define GAME_OVER_ANIM_FRAMES 15
+
+#define SCORED_CARD_TEXT_Y 48
+
+#define HIGHLIGHT_COLOR 0xFFFF
+
+#define PITCH_STEP_DISCARD_SFX      (-64)
+#define PITCH_STEP_DRAW_SFX         24
+#define PITCH_STEP_UNDISCARD_SFX    2*PITCH_STEP_DRAW_SFX    
+
+#define BLIND_COUNT 3
+#define TEN_K 10000
+#define ONE_K 1000
+
+#define CARD_DRAW_POS_X 208
+#define CARD_DRAW_POS_Y 110
+#define CUR_BLIND_TOKEN_POS_X 8
+#define CUR_BLIND_TOKEN_POS_Y 18
+#define MAIN_MENU_ACE_TX 88
+#define MAIN_MENU_ACE_TY 26 
+#define CARD_DISCARD_PNT_X 240
+#define CARD_DISCARD_PNT_Y 70
+#define HAND_START_POS_X 120
+#define HAND_START_POS_Y 90
+#define CARD_FOCUSED_UNSEL_Y 10
+#define CARD_UNFOCUSED_SEL_Y 15
+#define CARD_FOCUSED_SEL_Y 20
+
+// Hand chip value def
+#define HIGH_CARD_CHIPS 5
+#define PAIR_CHIPS 10
+#define TWO_PAIR_CHIPS 20
+#define THREE_OAK_CHIPS 30
+#define STRAIGHT_CHIPS 30
+#define FLUSH_CHIPS 35
+#define FULL_HOUSE_CHIPS 40
+#define FOUR_OAK_CHIPS 60
+#define STRAIGHT_FLUSH_CHIPS 100
+#define ROYAL_FLUSH_CHIPS 100
+#define FIVE_OAK_CHIPS 120
+#define FLUSH_HOUSE_CHIPS 140
+#define FLUSH_FIVE_CHIPS 160
+#define NONE_CHIPS 0
+
+// Hand mult value defs
+#define HIGH_CARD_MULT 1
+#define PAIR_MULT 2
+#define TWO_PAIR_MULT 2
+#define THREE_OAK_MULT 3
+#define STRAIGHT_MULT 4
+#define FLUSH_MULT 4 
+#define FULL_HOUSE_MULT 4
+#define FOUR_OAK_MULT 7
+#define STRAIGHT_FLUSH_MULT 8
+#define ROYAL_FLUSH_MULT 8
+#define FIVE_OAK_MULT 12
+#define FLUSH_HOUSE_MULT 14
+#define FLUSH_FIVE_MULT 16
+#define NONE_MULT 0
+
+// Timer defs
+#define TM_ZERO 0
+#define TM_RESET_STATIC_VARS 30
+#define TM_END_POP_MENU_ANIM 13
+#define TM_START_ROUND_END_MENU_AMIN 1
+#define TM_END_DISPLAY_FIN_BLIND 30
+#define TM_END_DISPLAY_SCORE_MIN 4
+#define TM_ELLIPSIS_PRINT_MAX_TM 16
+#define TM_DISPLAY_REWARDS_CONT_WAIT 30
+#define TM_HAND_REWARD_INCR_WAIT 45
+#define TM_DISMISS_ROUND_END_TM 20
+#define TM_CREATE_SHOP_ITEMS_WAIT 1
+#define TM_SHIFT_SHOP_ICON_WAIT 7
+#define TM_END_GAME_SHOP_INTRO 12
+#define TM_SHOP_PRC_INPUT_START 1
+#define TM_DISP_BLIND_PANEL_FINISH 7
+#define TM_DISP_BLIND_PANEL_START 1
+#define TM_BLIND_SELECT_START 1
+#define TM_END_ANIM_SEQ 12
 
 // Naming the stage where cards return from the discard pile to the deck "undiscard"
 
@@ -653,7 +703,7 @@ void change_background(int id)
                 int x_to = 9 + (i * 5);
                 int y_to = 29;
 
-                for (int j = 0; j < 3; j++)
+                for (int j = 0; j < BLIND_COUNT; j++)
                 {
                     memcpy16(&se_mem[MAIN_BG_SBB][x_to + 32 * y_to], &se_mem[MAIN_BG_SBB][x_from + 32 * y_from], 5);
                     y_from++;
@@ -760,10 +810,10 @@ void display_score(int value)
     char score_suffix = ' ';
     int display_value = value;
     
-    if(value >= 10000)
+    if(value >= TEN_K)
     {
         score_suffix = 'k';
-        display_value = value / 1000; // 12,986 = 12k
+        display_value = value / ONE_K; // 12,986 = 12k
     }
     
     // Calculate text width: digits + suffix character (if 'k')
@@ -840,72 +890,72 @@ void set_hand()
     {
     case HIGH_CARD:
         print_hand_type("HIGH C");
-        chips = 5;
-        mult = 1;
+        chips = HIGH_CARD_CHIPS;
+        mult = HIGH_CARD_MULT;
         break;
     case PAIR:
         print_hand_type("PAIR");
-        chips = 10;
-        mult = 2;
+        chips = PAIR_CHIPS;
+        mult = PAIR_MULT;
         break;
     case TWO_PAIR:
         print_hand_type("2 PAIR");
-        chips = 20;
-        mult = 2;
+        chips = TWO_PAIR_CHIPS;
+        mult = TWO_PAIR_MULT;
         break;
     case THREE_OF_A_KIND:
         print_hand_type("3 OAK");
-        chips = 30;
-        mult = 3;
+        chips = THREE_OAK_CHIPS;
+        mult = THREE_OAK_MULT;
         break;
     case STRAIGHT:
         print_hand_type("STRT");
-        chips = 30;
-        mult = 4;
+        chips = STRAIGHT_FLUSH_CHIPS;
+        mult = STRAIGHT_MULT;
         break;
     case FLUSH:
         print_hand_type("FLUSH");
-        chips = 35;
-        mult = 4;
+        chips = FLUSH_CHIPS;
+        mult = FLUSH_MULT;
         break;
     case FULL_HOUSE:
         print_hand_type("FULL H");
-        chips = 40;
-        mult = 4;
+        chips = FULL_HOUSE_CHIPS;
+        mult = FULL_HOUSE_MULT;
         break;
     case FOUR_OF_A_KIND:
         print_hand_type("4 OAK");
-        chips = 60;
-        mult = 7;
+        chips = FOUR_OAK_CHIPS;
+        mult = FOUR_OAK_MULT;
         break;
     case STRAIGHT_FLUSH:
         print_hand_type("STRT F");
-        chips = 100;
-        mult = 8;
+        chips = STRAIGHT_FLUSH_CHIPS;
+        mult = STRAIGHT_FLUSH_MULT;
         break;
     case ROYAL_FLUSH:
         print_hand_type("ROYAL F");
-        chips = 100;
-        mult = 8;
+        chips = ROYAL_FLUSH_CHIPS;
+        mult = ROYAL_FLUSH_MULT;
         break;
     case FIVE_OF_A_KIND:
         print_hand_type("5 OAK");
-        chips = 120;
-        mult = 12;
+        chips = FIVE_OAK_CHIPS;
+        mult = FIVE_OAK_MULT;
         break;
     case FLUSH_HOUSE:
         print_hand_type("FLUSH H");
-        chips = 140;
-        mult = 14;
+        chips = FLUSH_HOUSE_CHIPS;
+        mult = FLUSH_HOUSE_MULT;
         break;
     case FLUSH_FIVE:
         print_hand_type("FLUSH 5");
-        chips = 160;
-        mult = 16;
+        chips = FLUSH_FIVE_CHIPS;
+        mult = FLUSH_FIVE_MULT;
         break;
     case NONE:
-        chips = 0;
-        mult = 0;
+        chips = NONE_CHIPS;
+        mult = NONE_MULT;
         break;
     }
 
@@ -919,8 +969,8 @@ void card_draw()
 
     CardObject *card_object = card_object_new(deck_pop());
 
-    const FIXED deck_x = int2fx(208);
-    const FIXED deck_y = int2fx(110);
+    const FIXED deck_x = int2fx(CARD_DRAW_POS_X);
+    const FIXED deck_y = int2fx(CARD_DRAW_POS_Y);
 
     card_object->sprite_object->x = deck_x;
     card_object->sprite_object->y = deck_y;
@@ -1064,13 +1114,13 @@ static void game_round_init()
     // TODO: Address Copilot review at
     // https://github.com/cellos51/balatro-gba/pull/46#pullrequestreview-3045772903
     char score_suffix = ' ';
-    if(blind_requirement >= 10000)
+    if(blind_requirement >= TEN_K)
     {
         // clear existing text
         tte_erase_rect_wrapper(blind_req_text_rect);
         
         score_suffix = 'k';
-        blind_requirement /= 1000; // 11,000 = 11k
+        blind_requirement /= ONE_K; // 11,000 = 11k
     }
     
     // Update text rect for right alignment AFTER shortening the number
@@ -1095,9 +1145,9 @@ static void game_main_menu_init()
     main_menu_ace = card_object_new(card_new(SPADES, ACE));
     card_object_set_sprite(main_menu_ace, 0); // Set the sprite for the ace of spades
     main_menu_ace->sprite_object->sprite->obj->attr0 |= ATTR0_AFF_DBL; // Make the sprite double sized
-    main_menu_ace->sprite_object->tx = int2fx(88);
+    main_menu_ace->sprite_object->tx = int2fx(MAIN_MENU_ACE_TX);
     main_menu_ace->sprite_object->x = main_menu_ace->sprite_object->tx;
-    main_menu_ace->sprite_object->ty = int2fx(26);
+    main_menu_ace->sprite_object->ty = int2fx(MAIN_MENU_ACE_TY);
     main_menu_ace->sprite_object->y = main_menu_ace->sprite_object->ty;
     main_menu_ace->sprite_object->tscale = float2fx(0.8f);
 }
@@ -1504,8 +1554,8 @@ void card_in_hand_loop_handle_discard_and_shuffling(int card_idx, bool* discarde
     {
         if (!*discarded_card)
         {
-            *hand_x = int2fx(240);
-            *hand_y = int2fx(70);
+            *hand_x = int2fx(CARD_DISCARD_PNT_X);
+            *hand_y = int2fx(CARD_DISCARD_PNT_Y);
 
             if (!*sound_played)
             {
@@ -1567,8 +1617,8 @@ static void cards_in_hand_update_loop(bool* discarded_card, int* played_selectio
     {
         if (hand[i] != NULL)
         {
-            FIXED hand_x = int2fx(120);
-            FIXED hand_y = int2fx(90);
+            FIXED hand_x = int2fx(HAND_START_POS_X);
+            FIXED hand_y = int2fx(HAND_START_POS_Y);
 
             switch (hand_state)
             {
@@ -1580,15 +1630,15 @@ static void cards_in_hand_update_loop(bool* discarded_card, int* played_selectio
 
                 if (is_focused && !card_object_is_selected(hand[i]))
                 {
-                    hand_y -= int2fx(10);
+                    hand_y -= int2fx(CARD_FOCUSED_UNSEL_Y);
                 }
                 else if (!is_focused && card_object_is_selected(hand[i]))
                 {
-                    hand_y -= int2fx(15);
+                    hand_y -= int2fx(CARD_UNFOCUSED_SEL_Y);
                 }
                 else if (is_focused && card_object_is_selected(hand[i]))
                 {
-                    hand_y -= int2fx(20);
+                    hand_y -= int2fx(CARD_FOCUSED_SEL_Y);
                 }
 
                 if (i != selection_x && hand[i]->sprite_object->y > hand_y)
