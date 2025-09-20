@@ -24,22 +24,24 @@
 
 enum BlindType
 {
-    SMALL_BLIND,
-    BIG_BLIND,
-    BOSS_BLIND,
-    MAX_BLINDS
+    BLIND_TYPE_SMALL,
+    BLIND_TYPE_BIG,
+    BLIND_TYPE_BOSS,
+    BLIND_TYPE_MAX,
 };
 
 enum BlindState
 {
-    BLIND_CURRENT,
-    BLIND_UPCOMING,
-    BLIND_DEFEATED,
-    BLIND_SKIPPED
+    BLIND_STATE_CURRENT,
+    BLIND_STATE_UPCOMING,
+    BLIND_STATE_DEFEATED,
+    BLIND_STATE_SKIPPED,
+    BLIND_STATE_MAX,
 };
 
 // TODO: Move this to a common interface for other palettes
-typedef struct {
+typedef struct
+{
     const u16* palette;
     u32 tid;
     u32 pb;

@@ -16,10 +16,10 @@ static const u16 small_blind_token_palette[PAL_ROW_LEN] = {0x0000, 0x7FFF, 0x34A
 static const u16 big_blind_token_palette[PAL_ROW_LEN] = {0x0000, 0x2527, 0x15F5, 0x36FC, 0x1E9C, 0x01B4, 0x0D0A, 0x010E};
 static const u16 boss_blind_token_palette[PAL_ROW_LEN] = {0x0000, 0x2CC9, 0x3D0D, 0x5E14, 0x5171, 0x4D0F, 0x2CC8, 0x3089}; // This variable is temporary, each boss blind will have its own unique palette
 
-static const Blind blindMap[MAX_BLINDS] =
+static const Blind blindMap[BLIND_TYPE_MAX] =
 {
     {
-        .type = SMALL_BLIND,
+        .type = BLIND_TYPE_SMALL,
         .pal_info =
         {
             .palette = small_blind_token_palette,
@@ -30,7 +30,7 @@ static const Blind blindMap[MAX_BLINDS] =
         .reward = SMALL_BLIND_REWARD,
     },
     {
-        .type = BIG_BLIND,
+        .type = BLIND_TYPE_BIG,
         .pal_info =
         {
             .palette = big_blind_token_palette,
@@ -41,7 +41,7 @@ static const Blind blindMap[MAX_BLINDS] =
         .reward = BIG_BLIND_REWARD,
     },
     {
-        .type = BOSS_BLIND,
+        .type = BLIND_TYPE_BOSS,
         .pal_info =
         {
             .palette = boss_blind_token_palette,
@@ -58,9 +58,8 @@ void blind_init()
     // Blind graphics (fighting grit every step of the way as usual)
     GRIT_CPY(&tile_mem[4][SMALL_BLIND_TID], blinds_gfxTiles);
 
-    for(int i = 0; i < MAX_BLINDS; i++)
-    {
-        const u16* pal = blindMap[i].pal_info.palette;
+    for(int i = 0; i < BLIND_TYPE_MAX; i++)
+    {const u16* pal = blindMap[i].pal_info.palette;
 
         u32 pb = blindMap[i].pal_info.pb;
         u32 pal_offset = PAL_ROW_LEN * pb;
