@@ -24,7 +24,6 @@ int pool_bm_get_free_idx(PoolBitmap *bm);
     } type##Pool;                                                           \
     type *pool_get_##type();                                                \
     void  pool_free_##type(type *obj);                                      \
-    void  pool_init_##type(type##Pool *pool);
 
 #define POOL_DEFINE_TYPE(type, capacity)                                    \
     static type type##_storage[capacity];                                   \

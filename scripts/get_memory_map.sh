@@ -1,10 +1,7 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
-
-# Run this from the root directory of the project, not the scripts directory
 POOL_DEF_FILE='./include/pools.def'
-ELF_FILE='./build/balatro.elf'
+ELF_FILE='./build/balatro-gba.elf'
 READELF='/opt/devkitpro/devkitARM/bin/arm-none-eabi-readelf'
 
 get_pool_names() {
@@ -13,24 +10,40 @@ get_pool_names() {
 
 TOTAL_BYTES=0
 
-echo "--------------------------------------------"
-printf "%-16s| %-10s | %s\n" "Object" "location" "size"
-echo "--------------------------------------------"
+print_line_break() {
+    echo "--------------------------------------------------------------------"
+}
+
+print_line_break
+printf "%-16s| %-10s | %-10s | %-10s | %-10s \n" "Object" "location" "pool size" "func size" "bitmap size"
+print_line_break
 
 for name in $(get_pool_names); do
-    output="$( \
-            "$READELF" -sW "$ELF_FILE" | \
-            grep "${name}_" | \
-            grep OBJECT | \
-            grep storage | sed -E 's@ +@ @g; s@^ @@' \
+    output_pool="$(                                  \
+            "$READELF" -sW "$ELF_FILE"             | \
+            grep "${name}_"                        | \
+            grep OBJECT                            | \
+            grep storage                           | \
+            sed -E 's@ +@ @g; s@^ @@'                \
+        )"
+    output_func="$(                                  \
+            "$READELF" -sW "$ELF_FILE"             | \
+            grep -E "pool_free|pool_get|pool_init" | \
+            grep -E "${name}$"                     | \
+            sed -E 's@ +@ @g; s@^ @@'              | \
+            tr -d '\n'                               \
         )"
 
-    location="$(cut -d ' ' -f 2 <<< $output)"
-    size="$(cut -d ' ' -f 3 <<< $output)"
-    TOTAL_BYTES=$(( TOTAL_BYTES + size ))
 
-    printf "%-16s| 0x%s | %-8u\n" "$name" "$location" "$size"
+    location="$(cut -d ' ' -f 2 <<< $output_pool)"
+    pool_size="$(cut -d ' ' -f 3 <<< $output_pool)"
+    func_size="$(cut -d ' ' -f 3 <<< $output_func)"
+    bm_size=4 #always gonna be 4, sizof(u32)
+    
+    TOTAL_BYTES=$(( TOTAL_BYTES + pool_size + func_size + bm_size ))
+
+    printf "%-16s| 0x%8s | %-10u | %-10u | %-10u \n" "$name" "$location" "$pool_size" "$func_size" "$bm_size"
 done
 
-echo "--------------------------------------------"
+print_line_break
 echo Total bytes used: $TOTAL_BYTES
