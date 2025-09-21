@@ -4,7 +4,7 @@ set -euo pipefail
 
 # Run this from the root directory of the project, not the scripts directory
 POOL_DEF_FILE='./include/pools.def'
-ELF_FILE='./build/balatro-gba.elf'
+ELF_FILE='./build/balatro.elf'
 READELF='/opt/devkitpro/devkitARM/bin/arm-none-eabi-readelf'
 
 get_pool_names() {
