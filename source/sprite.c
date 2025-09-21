@@ -15,11 +15,11 @@
 OBJ_ATTR obj_buffer[MAX_SPRITES];
 OBJ_AFFINE *obj_aff_buffer = (OBJ_AFFINE*)obj_buffer;
 
-DECLARE_POOL_TYPE(SpriteObject)
-DEFINE_POOL_TYPE(SpriteObject, MAX_SPRITES)
+POOL_DECLARE_TYPE(SpriteObject)
+POOL_DEFINE_TYPE(SpriteObject, MAX_SPRITES)
 
-DECLARE_POOL_TYPE(Sprite)
-DEFINE_POOL_TYPE(Sprite, MAX_SPRITES)
+POOL_DECLARE_TYPE(Sprite)
+POOL_DEFINE_TYPE(Sprite, MAX_SPRITES)
 
 static bool free_affines[MAX_AFFINES] = {false};
 

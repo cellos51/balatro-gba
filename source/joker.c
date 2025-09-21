@@ -29,13 +29,14 @@ static const unsigned short *joker_gfxPal[] =
 #undef DEF_JOKER_GFX
 };
 
-// Jokers in deck
-DECLARE_POOL_TYPE(Joker)
-DEFINE_POOL_TYPE(Joker, 8); // 8 should be fine, we only have a max of 2
+// This won't be more than the number of jokers in your current deck
+// plus the amount that can fit in the shop, 8 should be fine. For now...
+#define MAX_ACTIVE_JOKERS 8
 
-// Jokers on screen
-DECLARE_POOL_TYPE(JokerObject)
-DEFINE_POOL_TYPE(JokerObject, 8) // 8 should be fine here as well, max of 2 from the shop in game.c
+POOL_DECLARE_TYPE(Joker)
+POOL_DEFINE_TYPE(Joker, MAX_ACTIVE_JOKERS)
+POOL_DECLARE_TYPE(JokerObject)
+POOL_DEFINE_TYPE(JokerObject, MAX_ACTIVE_JOKERS)
 
 const static u8 edition_price_lut[MAX_EDITIONS] =
 {

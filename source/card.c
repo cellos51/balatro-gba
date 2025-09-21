@@ -14,10 +14,10 @@
 #define MAX_CARDS_PER_HAND (NUM_SUITS * NUM_RANKS)
 #define MAX_CARDS_ON_SCREEN 16
 
-DECLARE_POOL_TYPE(Card);
-DEFINE_POOL_TYPE(Card, MAX_CARDS_PER_HAND);
-DECLARE_POOL_TYPE(CardObject);
-DEFINE_POOL_TYPE(CardObject, MAX_CARDS_ON_SCREEN);
+POOL_DECLARE_TYPE(Card);
+POOL_DEFINE_TYPE(Card, MAX_CARDS_PER_HAND);
+POOL_DECLARE_TYPE(CardObject);
+POOL_DEFINE_TYPE(CardObject, MAX_CARDS_ON_SCREEN);
 
 // Card sprites lookup table. First index is the suit, second index is the rank. The value is the tile index.
 const static u16 card_sprite_lut[NUM_SUITS][NUM_RANKS] = {
