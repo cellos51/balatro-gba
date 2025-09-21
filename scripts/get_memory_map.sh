@@ -1,14 +1,13 @@
 #!/usr/bin/env bash
 
 POOL_DEF_FILE='./include/pools.def'
-ELF_FILE='./build/balatro-gba.elf'
+ELF_FILE='./build/balatro.elf'
 READELF='/opt/devkitpro/devkitARM/bin/arm-none-eabi-readelf'
+TOTAL_BYTES=0
 
 get_pool_names() {
     grep POOL_ENTRY "$POOL_DEF_FILE" | sed -n 's@.*(\(.*\)).*@\1@p' | sed 's@,@@g' | cut -d ' ' -f 1
 }
-
-TOTAL_BYTES=0
 
 print_line_break() {
     echo "--------------------------------------------------------------------"
@@ -38,7 +37,7 @@ for name in $(get_pool_names); do
     location="$(cut -d ' ' -f 2 <<< $output_pool)"
     pool_size="$(cut -d ' ' -f 3 <<< $output_pool)"
     func_size="$(cut -d ' ' -f 3 <<< $output_func)"
-    bm_size=4 #always gonna be 4, sizof(u32)
+    bm_size=16 #always gonna be 16, 4 * sizeof(u32)
     
     TOTAL_BYTES=$(( TOTAL_BYTES + pool_size + func_size + bm_size ))
 
