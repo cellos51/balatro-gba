@@ -6,6 +6,9 @@
 
 #include "sprite.h"
 
+#define MAX_CARDS (NUM_SUITS * NUM_RANKS)
+#define MAX_CARDS_ON_SCREEN 16
+
 #define CARD_TID 0
 #define CARD_SPRITE_OFFSET 16
 #define CARD_PB 0

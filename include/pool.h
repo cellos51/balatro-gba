@@ -22,8 +22,8 @@ int pool_bm_get_free_idx(PoolBitmap *bm);
         type *  objects;                                                    \
         u32 max_entries;                                                    \
     } type##Pool;                                                           \
-    type *pool_get_##type(type##Pool* pool);                                \
-    void  pool_free_##type(type##Pool *pool, type *obj);                    \
+    type *pool_get_##type();                                                \
+    void  pool_free_##type(type *obj);                                      \
     void  pool_init_##type(type##Pool *pool);
 
 #define POOL_DEFINE_TYPE(type, capacity)                                    \
@@ -38,20 +38,25 @@ int pool_bm_get_free_idx(PoolBitmap *bm);
         .objects = type##_storage,                                          \
         .max_entries = capacity,                                            \
     };                                                                      \
-    type * pool_get_##type(type##Pool *pool)                                \
+    type * pool_get_##type()                                                \
     {                                                                       \
-        int free_offset = pool_bm_get_free_idx(&pool->bm);                  \
+        int free_offset = pool_bm_get_free_idx(&type##_pool.bm);            \
         if(free_offset == -1) return NULL;                                  \
-        return &pool->objects[free_offset];                                 \
+        return &type##_pool.objects[free_offset];                           \
     }                                                                       \
-    void pool_free_##type(type##Pool *pool, type *entry)                    \
+    void pool_free_##type(type *entry)                                      \
     {                                                                       \
         if(entry == NULL) return;                                           \
-        int offset = entry - &pool->objects[0];                             \
-        pool_bm_clear_idx(&pool->bm, offset);                               \
+        int offset = entry - &type##_pool.objects[0];                       \
+        pool_bm_clear_idx(&type##_pool.bm, offset);                         \
     }
 
-#define POOL_GET(type) pool_get_##type(&type##_pool)
-#define POOL_FREE(type, obj) pool_free_##type(&type##_pool, obj)
+#define POOL_GET(type) pool_get_##type()
+#define POOL_FREE(type, obj) pool_free_##type(obj)
+
+#define POOL_ENTRY(name, capacity) \
+POOL_DECLARE_TYPE(name);
+#include "pools.def"
+#undef POOL_ENTRY
 
 #endif // POOL_H

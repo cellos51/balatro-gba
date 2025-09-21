@@ -8,18 +8,11 @@
 #include <stdlib.h>
 #include <maxmod.h>
 
-#define MAX_SPRITES 128
 #define MAX_AFFINES 32
 #define SPRITE_FOCUS_RAISE_PX 10
 
 OBJ_ATTR obj_buffer[MAX_SPRITES];
 OBJ_AFFINE *obj_aff_buffer = (OBJ_AFFINE*)obj_buffer;
-
-POOL_DECLARE_TYPE(SpriteObject)
-POOL_DEFINE_TYPE(SpriteObject, MAX_SPRITES)
-
-POOL_DECLARE_TYPE(Sprite)
-POOL_DEFINE_TYPE(Sprite, MAX_SPRITES)
 
 static bool free_affines[MAX_AFFINES] = {false};
 

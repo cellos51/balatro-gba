@@ -34,3 +34,10 @@ int pool_bm_get_free_idx(PoolBitmap *bm)
 
     return -1;
 }
+
+
+#define POOL_ENTRY(name, capacity) \
+POOL_DEFINE_TYPE(name, capacity);
+#include "sprite.h"
+#include "pools.def"
+#undef POOL_ENTRY

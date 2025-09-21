@@ -29,15 +29,6 @@ static const unsigned short *joker_gfxPal[] =
 #undef DEF_JOKER_GFX
 };
 
-// This won't be more than the number of jokers in your current deck
-// plus the amount that can fit in the shop, 8 should be fine. For now...
-#define MAX_ACTIVE_JOKERS 8
-
-POOL_DECLARE_TYPE(Joker)
-POOL_DEFINE_TYPE(Joker, MAX_ACTIVE_JOKERS)
-POOL_DECLARE_TYPE(JokerObject)
-POOL_DEFINE_TYPE(JokerObject, MAX_ACTIVE_JOKERS)
-
 const static u8 edition_price_lut[MAX_EDITIONS] =
 {
     0, // BASE_EDITION
