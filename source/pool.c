@@ -5,7 +5,7 @@ void pool_bm_clear_idx(PoolBitmap *bm, int idx)
     // Divide by 32 to get the word index
     u32 i = idx >> 5;
     // Get last 5-bits, same as a modulo (% 32) operation on positive numbers
-    u32 b = idx & 31;
+    u32 b = idx & 0x1F;
     bm->w[i] &= ~((u32)1 << b);
 }
 
@@ -15,7 +15,7 @@ int pool_bm_get_free_idx(PoolBitmap *bm)
     {
         u32 inv = ~bm->w[i];
 
-        // guard so we don't cal `ctz` with 0, since __builtin_ctz(0) is undefined
+        // guard so we don't call `ctz` with 0, since __builtin_ctz(0) is undefined
         // https://gcc.gnu.org/onlinedocs/gcc/Bit-Operation-Builtins.html#index-_005f_005fbuiltin_005fctz
         //
         // By using the bitwise inverse of the word, you can skip words that are full
@@ -38,6 +38,5 @@ int pool_bm_get_free_idx(PoolBitmap *bm)
 
 #define POOL_ENTRY(name, capacity) \
 POOL_DEFINE_TYPE(name, capacity);
-#include "sprite.h"
 #include "pools.def"
 #undef POOL_ENTRY
