@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    tags:
+      - "v*"
   pull_request:
     branches:
       - main
@@ -19,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Get docker image cache
         uses: actions/cache@v4
@@ -53,3 +55,24 @@ jobs:
 
       - name: Build the project
         run: docker compose -f docker-compose.yml run --rm balatro sh -c "make -j$(nproc)"
+
+      - name: Upload binary (if requested)
+        if: github.event.inputs.clear_cache == 'true'
+        run: |
+          echo "Clearing Docker cache..."
+          rm -rf /tmp/docker-cache
+          echo "Docker cache cleared"
+
+  release:
+    if: ${{ startsWith(github.ref, 'refs/tags/') }}
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # needed to create/attach to a Release
+    steps:
+      - uses: actions/checkout@v5
+      - run: docker compose -f docker-compose.yml run --rm balatro sh -c "make -j$(nproc)"
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            build/**
