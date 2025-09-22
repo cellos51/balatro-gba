@@ -249,6 +249,8 @@ static const Rect ROUND_END_BLIND_REQ_RECT  = {104,     96,     136,       UNDEF
 static const Rect ROUND_END_BLIND_REWARD_RECT = { 168,  96,     UNDEFINED, UNDEFINED };
 static const Rect ROUND_END_NUM_HANDS_RECT  = {88,      116,    UNDEFINED, UNDEFINED };
 static const Rect HAND_REWARD_RECT          = {168,     UNDEFINED, UNDEFINED, UNDEFINED };
+static const Rect ROUND_END_INTEREST_RECT   = {88,      126,    UNDEFINED, UNDEFINED };
+static const Rect INTEREST_REWARD_RECT      = {168,     UNDEFINED, UNDEFINED, UNDEFINED };
 static const Rect CASHOUT_RECT              = {88,      72,     UNDEFINED, UNDEFINED };
 static const Rect SHOP_REROLL_RECT          = {88,      96,     UNDEFINED, UNDEFINED };
 static const Rect GAME_LOSE_MSG_TEXT_RECT   = {104,     72,     UNDEFINED, UNDEFINED};
@@ -1943,7 +1945,7 @@ static void game_playing_ui_text_update()
 
 static void game_round_end_cashout()
 {
-    money += hands + blind_get_reward(current_blind); // Reward the player
+    money += hands + blind_get_reward(current_blind) + calculate_interest_reward(); // Reward the player
     display_money(money);
 
     hands = max_hands; // Reset the hands to the maximum
@@ -1999,6 +2001,8 @@ void game_round_end()
     static int blind_reward = 0;
     static int hand_reward = 0;
     static int interest_reward = 0; 
+    static int interest_to_count = 0;
+    static int interest_start_time = -1;
 
     switch (state)
     {
@@ -2011,6 +2015,9 @@ void game_round_end()
                 timer = 0; // Reset the timer
                 blind_reward = blind_get_reward(current_blind);
                 hand_reward = hands;
+                interest_reward = calculate_interest_reward();
+                interest_to_count = interest_reward;
+                interest_start_time = -1;
             }
             break;
         }
@@ -2130,22 +2137,19 @@ void game_round_end()
         case 6: // This state handles displaying the rewards earned from the completed round
         {
             int hand_y = 0;
-
-            // TODO: Implement interest
-            //int interest_y = 0;
+            int interest_y = 0;
 
             if (hands > 0)
             {
                 hand_y = 1;
             }
 
-            // TODO: implement interest
-            // if (interest > 0)
-            // {
-            //     interest_y = 1 + hand_y;
-            // }
+            if (interest_reward > 0)
+            {
+                 interest_y = 1 + hand_y;
+            }
 
-            if (hand_reward <= 0 && interest_reward <= 0) // Once all rewards are accounted for go to the next state
+            if (hand_reward <= 0 && interest_to_count <= 0) // Once all rewards are accounted for go to the next state
             {
                 timer = 0; // Reset the timer
                 state = 7; // Go to the next state
@@ -2181,6 +2185,29 @@ void game_round_end()
                     int y = (13 + hand_y) * TILE_SIZE;
                     hand_reward--;
                     tte_printf("#{P:%d, %d; cx:0x%X000}$%d", HAND_REWARD_RECT.left, y, TTE_YELLOW_PB, hands - hand_reward); // Print the hand reward
+
+                    if (hand_reward == 0)
+                    {
+                        interest_start_time = timer + 15; // Time to start printing the interest gained
+                    }
+                }
+            }
+            else if (timer >= interest_start_time && interest_to_count > 0 && interest_start_time != -1)
+            {
+                if (timer == interest_start_time) // Expand the black part of the panel down by one tile again
+                {
+                    Rect single_line_rect = ROUND_END_MENU_RECT;
+                    single_line_rect.top = 12 + interest_y;
+                    single_line_rect.bottom = single_line_rect.top + 1;
+                    main_bg_se_copy_rect_1_tile_vert(single_line_rect, SE_DOWN);
+
+                    tte_printf("#{P:%d,%d; cx:0x%X000}%d #{cx:0x%X000}Interest", ROUND_END_INTEREST_RECT.left, ROUND_END_INTEREST_RECT.top, TTE_YELLOW_PB, interest_reward, TTE_WHITE_PB); // Print the hand reward
+                }
+                else if (timer > interest_start_time + 15 && timer % FRAMES(20) == 0) // After 15 frames, every 20 frames, increment the interest reward text until the interest reward variable is depleted
+                {
+                    int y = (13 + interest_y) * TILE_SIZE;
+                    interest_to_count--;
+                    tte_printf("#{P:%d, %d; cx:0x%X000}$%d", INTEREST_REWARD_RECT.left, y, TTE_YELLOW_PB, interest_reward - interest_to_count); // Print the interest reward
                 }
             }
 
@@ -2210,7 +2237,16 @@ void game_round_end()
                 BG_POINT bottom_point = {6, 31};
                 main_bg_se_fill_rect_with_se(main_bg_se_get_se(bottom_point), bottom_rect);
 
-                tte_printf("#{P:%d, %d; cx:0x%X000}Cash Out: $%d", CASHOUT_RECT.left, CASHOUT_RECT.top, TTE_WHITE_PB, hands + blind_get_reward(current_blind)); // Print the cash out amount
+                int cashout_amount = hands + blind_get_reward(current_blind) + calculate_interest_reward();
+                if (cashout_amount < 10) // If cashout is two digits, omit the space so it fits in the box without clipping out
+                {
+                    tte_printf("#{P:%d, %d; cx:0x%X000}Cash Out: $%d", CASHOUT_RECT.left, CASHOUT_RECT.top, TTE_WHITE_PB, cashout_amount); 
+                }
+                else
+                {
+                    tte_printf("#{P:%d, %d; cx:0x%X000}Cash Out:$%d", CASHOUT_RECT.left, CASHOUT_RECT.top, TTE_WHITE_PB, cashout_amount); 
+                }
+                
             }
             else if (timer > FRAMES(40) && key_hit(SELECT_CARD)) // Wait until the player presses A to cash out
             {
@@ -2248,6 +2284,14 @@ void game_round_end()
             game_set_state(GAME_SHOP);
             break;
     }
+}
+
+int calculate_interest_reward()
+{
+    int reward = (money / 5) * INTEREST_PER_5; 
+    if (reward > MAX_INTEREST)
+        reward = MAX_INTEREST; 
+    return reward;
 }
 
 // Shop
