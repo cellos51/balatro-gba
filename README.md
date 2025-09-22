@@ -40,15 +40,37 @@ This **tech-demo/proof of concept** is strictly limited in content to a minimal 
 # **Build Instructions:**
 
 ## **-Docker-**
-A docker compose file is provided to build this project. 
+A docker compose file is provided to build this project. It provides a standard build environment for this projects CI/CD and can also be used to build the ROM locally.
 
-1.) Install [docker desktop](https://docs.docker.com/compose/install/). 
+_Some users may find this option to be the easiest way to build locally._
+- _This option **avoids** setting up the development environment as described below._
+- _No additional software besides **docker desktop** is required._
 
-2.) Open a terminal to this projects directory:
+### Step-by-Step
+
+1.) Install [docker desktop](https://docs.docker.com/desktop/) for your operating system.
+
+2.) Open a terminal to this project's directory:
 - On **linux** run `UID=$(id -u) GID=$(id -g) docker compose up`
 - On **windows** run `docker compose up`
 
-Docker will build the project and the ROM will be in the same location as step 7 describes below.
+<details>
+  <summary><i>How do I open a terminal in windows?</i></summary>
+  
+---
+
+From the file explorer, you can open a folder in **powershell** (_a modern windows terminal_):
+
+- **hold 'Shift'** and **Right Click** on the folder. 
+
+- Select **"Open PowerShell window here"** from the popup menu.
+
+---
+
+</details>
+
+3.) Docker will build the project and the ROM will be in the same location as step 7 describes below.
+
 
 ## **-Windows-**
 Video Tutorial: https://youtu.be/72Zzo1VDYzQ?si=UDmEdbST1Cx1zZV2
