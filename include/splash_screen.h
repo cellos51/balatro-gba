@@ -8,6 +8,6 @@
 #define SPLASH_DURATION_FRAMES (SPLASH_FPS * SPLASH_DURATION_SECONDS)
 
 void splash_screen_init();
-void splash_screen_update(uint timer);
+void splash_screen_update();
 
 #endif // SPLASH_SCREEN_H

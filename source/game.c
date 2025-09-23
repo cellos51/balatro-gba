@@ -2,7 +2,6 @@
 
 #include <maxmod.h>
 #include <tonc.h>
-#include <string.h>
 #include <stdlib.h>
 
 #include "tonc_memmap.h"
@@ -14,7 +13,6 @@
 #include "joker.h"
 #include "affine_background.h"
 #include "graphic_utils.h"
-#include "tonc_video.h"
 #include "audio_utils.h"
 #include "selection_grid.h"
 #include "splash_screen.h"
@@ -24,7 +22,6 @@
 #include "background_blind_select_gfx.h"
 #include "affine_background_gfx.h"
 #include "background_main_menu_gfx.h"
-#include "affine_main_menu_background_gfx.h"
 
 #include "soundbank.h"
 
@@ -92,13 +89,42 @@ typedef enum
     DISPLAY_BLIND_PANEL
 } _BlindSelectStates;
 
+// Used as a No Operation for game states that have no init and/or exit function.
+// ricfehr3 did the work of determining whether a noop or a NULL check was more 
+// efficient. Well, this is the answer.
+// Thanks!
+static void _noop() {}
+
+static void game_main_menu_init();
+static void game_main_menu_update();
+static void game_lose_init();
+static void game_win_init();
+static void game_playing_update();
+static void game_round_end_update();
+static void game_shop_update();
+static void game_blind_select_update();
+static void game_lose_update();
+static void game_win_update();
+static void game_round_init();
+static void game_state_shop_exit();
+static void game_blind_select_exit();
+static void game_round_end_exit();
+
 static uint rng_seed = 0;
 
 static uint timer = 0; // This might already exist in libtonc but idk so i'm just making my own
 static int game_speed = 1;
 static int background = 0;
 
-static enum GameState game_state = GAME_SPLASH_SCREEN; // The current game state, this is used to determine what the game is doing at any given time
+StateInfo states[GAME_STATE_MAX] = 
+{
+#define DEF_STATE_INFO(stateEnum, init_fn, update_fn, exit_fn) \
+    { .state = stateEnum, .on_init = init_fn, .on_update = update_fn, .on_exit = exit_fn },
+#include "../include/game_state_table.h"
+#undef DEF_STATE_INFO
+};
+
+static enum GameState game_state = GAME_STATE_SPLASH_SCREEN; // The current game state, this is used to determine what the game is doing at any given time
 static enum HandState hand_state = HAND_DRAW;
 static enum PlayState play_state = PLAY_PLAYING;
 static int state = 0; // General state variable, used for switch statements in each game state related function
@@ -1174,42 +1200,14 @@ static void game_win_init()
     affine_background_set_color(TEXT_CLR_BLUE);
 }
 
-static void init_game_state(enum GameState game_state_to_init)
-{
-    // Switch written out, add init for states as needed
-    switch (game_state_to_init)
-    {
-    case GAME_SPLASH_SCREEN:
-        splash_screen_init();
-        break;
-    case GAME_MAIN_MENU:
-        game_main_menu_init();
-        break;
-    case GAME_PLAYING:
-        game_round_init();
-        break;
-    case GAME_ROUND_END:
-        break;
-    case GAME_SHOP:
-        break;
-    case GAME_BLIND_SELECT:
-        break;
-    case GAME_LOSE:
-        game_lose_init();
-        break;
-    case GAME_WIN:
-        game_win_init();
-        break;
-    default:
-        break;
-    }
-}
-
 // Game functions
-void game_set_state(enum GameState new_game_state)
+void game_change_state(enum GameState new_game_state)
 {
     timer = TM_ZERO; // Reset the timer
-    init_game_state(new_game_state);
+    
+    states[game_state].on_exit();
+    states[new_game_state].on_init();
+
     game_state = new_game_state;
 }
 
@@ -1246,7 +1244,7 @@ void game_init()
     obj_hide(blind_select_tokens[BIG_BLIND]->obj);
     obj_hide(blind_select_tokens[BOSS_BLIND]->obj);
 
-    game_set_state(game_state);
+    game_change_state(game_state);
 }
 
 void game_start()
@@ -1289,7 +1287,7 @@ void game_start()
 
     tte_printf("#{P:%d,%d; cx:0x%X000}%d#{cx:0x%X000}/%d", ANTE_TEXT_RECT.left, ANTE_TEXT_RECT.top, TTE_YELLOW_PB, ante, TTE_WHITE_PB, MAX_ANTE); // Ante
 
-    game_set_state(GAME_BLIND_SELECT);
+    game_change_state(GAME_STATE_BLIND_SELECT);
 }
 
 static void game_playing_process_hand_select_input()
@@ -1471,7 +1469,7 @@ static bool game_round_is_over()
 
 static void game_playing_handle_round_over()
 {
-    enum GameState next_state = GAME_ROUND_END;
+    enum GameState next_state = GAME_STATE_ROUND_END;
 
     if (score >= blind_get_requirement(current_blind, ante))
     {
@@ -1483,16 +1481,16 @@ static void game_playing_handle_round_over()
             }
             else
             {
-                next_state = GAME_WIN;
+                next_state = GAME_STATE_WIN;
             }
         }
     }
     else if (hands == 0)
     {
-        next_state = GAME_LOSE;
+        next_state = GAME_STATE_LOSE;
     }
 
-    game_set_state(next_state);
+    game_change_state(next_state);
 }
 
 static void game_playing_discarded_cards_loop()
@@ -1534,6 +1532,8 @@ static void game_playing_discarded_cards_loop()
         if (discard_top == -1 && discarded_card_object == NULL) // If there are no more discarded cards, stop shuffling
         {
             // After HAND_SHUFFLING the round is over
+            // TODO: Add call to change state here
+            // after adding on_exit
             game_playing_handle_round_over();
         }
     }
@@ -2090,7 +2090,7 @@ static void game_round_end_cashout()
     display_score(score); // Set the score display
 }
 
-void game_playing()
+static void game_playing_update()
 {
     // Background logic (thissss might be moved to the card'ssss logic later. I'm a sssssnake)
     if (hand_state == HAND_DRAW || hand_state == HAND_DISCARD || hand_state == HAND_SELECT)
@@ -2120,20 +2120,22 @@ void game_playing()
     game_playing_ui_text_update();
 }
 
-void game_round_end_cleanup()
+static void game_round_end_exit()
 {
     // Cleanup blind tokens from this round to avoid accumulating 
     // allocated blind sprites each round
+    timer = 0;
+    state = 0;
     sprite_destroy(&playing_blind_token);
     sprite_destroy(&round_end_blind_token);
     // TODO: Reuse sprites for blind selection?
 }
 
-void game_round_end()
+static void game_round_end_update()
 {
     static int blind_reward = 0;
     static int hand_reward = 0;
-    static int interest_reward = 0; 
+    static int interest_reward = 0;
 
     switch (state)
     {
@@ -2382,8 +2384,7 @@ void game_round_end()
             blind_reward = 0;
             hand_reward = 0;
             interest_reward = 0;
-            game_round_end_cleanup();
-            game_set_state(GAME_SHOP);
+            game_change_state(GAME_STATE_SHOP);
             break;
     }
 }
@@ -2794,7 +2795,7 @@ static void game_shop_outro()
     }
 }
 
-void game_shop()
+static void game_shop_update()
 {
     change_background(BG_ID_SHOP);
 
@@ -2833,29 +2834,33 @@ void game_shop()
             break;
         }
         default:
-            state = 0; // Reset the state
 
-            for (int i = 0; i < list_get_size(shop_jokers); i++)
-            {
-                JokerObject* joker_object = list_get(shop_jokers, i);
-                if (joker_object != NULL)
-                {
-                    // Make the joker available back to shop                    
-                    int_list_append(jokers_available_to_shop, (intptr_t)joker_object->joker->id);
-                }
-                joker_object_destroy(&joker_object); // Destroy the joker objects
-            }
-
-            list_destroy(&shop_jokers);
-
-            increment_blind(BLIND_DEFEATED); // TODO: Move to game_round_end()?
-            game_set_state(GAME_BLIND_SELECT); // If we reach here, we should go to the blind select state
-
+            game_change_state(GAME_STATE_BLIND_SELECT); // If we reach here, we should go to the blind select state
             break;
     }
 }
 
-void game_blind_select()
+static void game_state_shop_exit()
+{
+    state = 0; // Reset the state
+    
+    for (int i = 0; i < list_get_size(shop_jokers); i++)
+    {
+        JokerObject* joker_object = list_get(shop_jokers, i);
+        if (joker_object != NULL)
+        {
+            // Make the joker available back to shop                    
+            int_list_append(jokers_available_to_shop, (intptr_t)joker_object->joker->id);
+        }
+        joker_object_destroy(&joker_object); // Destroy the joker objects
+    }
+    
+    list_destroy(&shop_jokers);
+    
+    increment_blind(BLIND_DEFEATED); // TODO: Move to game_round_end()?
+}
+
+static void game_blind_select_update()
 {
     switch (state) // I'm only using magic numbers here for the sake of simplicity since it's just sequential, but you can replace them with named constants or enums if it makes it clearer
     {
@@ -3011,16 +3016,20 @@ void game_blind_select()
             break;
         }
         default:
-            state = 0;
-            timer = TM_ZERO;
-            selection_y = 0;
-            background = UNDEFINED;
-            game_set_state(GAME_PLAYING);
+            game_change_state(GAME_STATE_PLAYING);
             break;
     }
 }
 
-void game_main_menu()
+static void game_blind_select_exit()
+{
+    state = 0;
+    timer = 0;
+    selection_y = 0;
+    background = UNDEFINED;
+}
+
+static void game_main_menu_update()
 {
     change_background(BG_ID_MAIN_MENU);
 
@@ -3121,7 +3130,7 @@ static void game_over_anim_frame()
     main_bg_se_move_rect_1_tile_vert(GAME_OVER_ANIM_RECT, SE_UP);
 }
 
-static void game_lose()
+static void game_lose_update()
 {
     if (timer < GAME_OVER_ANIM_FRAMES)
     {
@@ -3133,7 +3142,7 @@ static void game_lose()
     }
 }
 
-static void game_win()
+static void game_win_update()
 {
     if (timer < GAME_OVER_ANIM_FRAMES)
     {
@@ -3151,31 +3160,5 @@ void game_update()
 
     jokers_update_loop();
 
-    switch (game_state)
-    {
-        case GAME_SPLASH_SCREEN:
-            splash_screen_update(timer);
-            break;
-        case GAME_MAIN_MENU:
-            game_main_menu();
-            break;
-        case GAME_PLAYING:
-            game_playing();
-            break;
-        case GAME_ROUND_END:
-            game_round_end();
-            break;
-        case GAME_SHOP:
-            game_shop();
-            break;
-        case GAME_BLIND_SELECT:
-            game_blind_select();
-            break;
-        case GAME_LOSE:
-            game_lose();
-            break;
-        case GAME_WIN:
-            game_win();
-            break;
-    }
+    states[game_state].on_update();
 }

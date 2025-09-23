@@ -28,14 +28,15 @@
 
 enum GameState
 {
-    GAME_SPLASH_SCREEN,
-    GAME_MAIN_MENU,
-    GAME_PLAYING,
-    GAME_ROUND_END,
-    GAME_SHOP,
-    GAME_BLIND_SELECT,
-    GAME_LOSE,
-    GAME_WIN
+    GAME_STATE_SPLASH_SCREEN,
+    GAME_STATE_MAIN_MENU,
+    GAME_STATE_PLAYING,
+    GAME_STATE_ROUND_END,
+    GAME_STATE_SHOP,
+    GAME_STATE_BLIND_SELECT,
+    GAME_STATE_LOSE,
+    GAME_STATE_WIN,
+    GAME_STATE_MAX
 };
 
 enum HandState
@@ -75,10 +76,30 @@ enum HandType
     FLUSH_FIVE
 };
 
+typedef struct
+{
+    int round;
+    int ante;
+    int money;
+    int score;
+    int temp_score;
+    int chips;
+    int mult;
+    int current_blind;
+} RunState;
+
+typedef struct 
+{
+    enum GameState state;
+    void (*on_init)();
+    void (*on_update)();
+    void (*on_exit)();
+} StateInfo;
+
 // Game functions
 void game_init();
 void game_update();
-void game_set_state(enum GameState new_game_state);
+void game_change_state(enum GameState new_game_state);
 
 // Forward declaration
 struct List; 
@@ -87,6 +108,7 @@ typedef struct List List;
 // Utility functions for other files
 typedef struct CardObject CardObject; // forward declaration, actually declared in card.h
 typedef struct JokerObject JokerObject;
+
 CardObject**    get_hand_array(void);
 int             get_hand_top(void);
 int             hand_get_size(void);
