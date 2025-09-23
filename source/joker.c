@@ -331,3 +331,26 @@ Sprite* joker_object_get_sprite(JokerObject* joker_object)
         return NULL;
     return sprite_object_get_sprite(joker_object->sprite_object);
 }
+
+int joker_get_random_rarity()
+{
+    int joker_rarity = 0;
+    int rarity_roll = random() % 100; 
+    if (rarity_roll < COMMON_JOKER_CHANCE)  
+    {
+        // 0..69, 70% chance
+        joker_rarity = COMMON_JOKER;
+    }
+    else if (rarity_roll < COMMON_JOKER_CHANCE + UNCOMMON_JOKER_CHANCE) 
+    {
+        // 70..94, 25% chance
+        joker_rarity = UNCOMMON_JOKER;
+    }
+    else 
+    {
+        // 95..99, 5% chance
+        joker_rarity = RARE_JOKER;
+    }
+
+    return joker_rarity;
+}

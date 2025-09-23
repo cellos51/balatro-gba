@@ -2284,23 +2284,7 @@ void erase_price_under_sprite_object(SpriteObject *sprite_object)
 static int game_shop_get_random_joker_idx()
 {
     // Roll for what rarity the joker will be
-    int joker_rarity = 0;
-    int rarity_roll = random() % 100; 
-    if (rarity_roll < COMMON_JOKER_CHANCE)  
-    {
-        // 0..69, 70% chance
-        joker_rarity = COMMON_JOKER;
-    }
-    else if (rarity_roll < COMMON_JOKER_CHANCE + UNCOMMON_JOKER_CHANCE) 
-    {
-        // 70..94, 25% chance
-        joker_rarity = UNCOMMON_JOKER;
-    }
-    else 
-    {
-        // 95..99, 5% chance
-        joker_rarity = RARE_JOKER;
-    }
+    int joker_rarity = joker_get_random_rarity();
         
     // Now determine how many jokers are available based on the rarity
     int jokers_avail_size = list_get_size(jokers_available_to_shop);
