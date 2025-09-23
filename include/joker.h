@@ -29,7 +29,12 @@
 #define COMMON_JOKER 0
 #define UNCOMMON_JOKER 1
 #define RARE_JOKER 2
-#define LEGENDARY_JOKER 3
+#define LEGENDARY_JOKER 3.
+
+// Percent chance to get a joker of each rarity
+#define COMMON_JOKER_CHANCE 70
+#define UNCOMMON_JOKER_CHANCE 25
+#define RARE_JOKER_CHANCE 5
 
 #define MAX_JOKER_OBJECTS 32 // The maximum number of joker objects that can be created at once
 
