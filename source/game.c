@@ -851,8 +851,21 @@ void card_draw()
 
 void hand_set_focus(int index)
 {
-    if (index < 0 || index > hand_top || hand_state != HAND_SELECT) return;
-    selection_x = index;
+    if (hand_state != HAND_SELECT) return;
+
+    // Wrap around to the other side of the hand when going out of bounds on either side
+    if (index < 0)
+    {
+        selection_x = hand_top;
+    }
+    else if (index > hand_top)
+    {
+        selection_x = 0;
+    }
+    else
+    {
+        selection_x = index;
+    }
 
     play_sfx(SFX_CARD_FOCUS, MM_BASE_PITCH_RATE + rand() % 512);
 }
