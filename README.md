@@ -79,6 +79,24 @@ Disregard Steps 3-4 and instead click the green code button on the main reposito
 
 4.) Follow instructions from windows tutorial step 3
 
+## **-macOS-**
+1.) Install devkitPro installer using: https://github.com/devkitPro/installer and following https://devkitpro.org/wiki/devkitPro_pacman#macOS.
+> Note: You may have to install the installers directly from their url in a browser, as the installer script may not install correctly due to Cloudflare checks on their server. You can use one of the following urls: 
+
+> Apple Silicon: https://pkg.devkitpro.org/packages/macos-installers/devkitpro-pacman-installer.arm64.pkg
+
+> Intel: https://pkg.devkitpro.org/packages/macos-installers/devkitpro-pacman-installer.x86_64.pkg
+ 
+
+2.) Verify that devkitPro is installed in '/opt/devkitpro'
+
+3.) Add the following to your .bashrc or .zshrc (or export the variables in your shell session): 
+- export DEVKITPRO=/opt/devkitpro
+- export DEVKITARM=$DEVKITPRO/devkitARM
+- export PATH=$PATH:$DEVKITPRO/tools/bin:$DEVKITPRO/pacman/bin
+
+4.) Follow instructions from Windows tutorial step 4
+
 ## **Common Issues:**
 
 #### 1. **When I run `make` it errors out and won't compile!**
