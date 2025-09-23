@@ -32,7 +32,7 @@
 static uint rng_seed = 0;
 
 static uint timer = 0; // This might already exist in libtonc but idk so i'm just making my own
-static int game_speed = 1;
+static int game_speed = 1; // BY DEFAULT IS SET TO 1, but if changed to 2 or more, should speed up all (or most) of the game aspects that should be sped up by speed, as in the original game.
 static int background = 0;
 
 static enum GameState game_state = GAME_SPLASH_SCREEN; // The current game state, this is used to determine what the game is doing at any given time
@@ -181,6 +181,16 @@ int get_num_discards_remaining(void) {
 
 int get_money(void) {
     return money;
+}
+int get_game_speed(void)
+{
+    return game_speed;
+}
+
+// for the future when a menu actually lets this variable be changed.
+void set_game_speed(int game_speed)
+{
+    game_speed = game_speed;
 }
 
 
@@ -1269,7 +1279,7 @@ static void game_playing_process_input_and_state()
         if (mult > 0)
         {
             temp_score = chips * mult;
-            lerped_temp_score = int2fx(temp_score);
+            lerped_temp_score = fx2int(fxdiv(int2fx(1), int2fx(game_speed)) * int2fx(temp_score)); // game speed affects how fast the score text increases.
             lerped_score = int2fx(score);
 
             display_temp_score(temp_score);
