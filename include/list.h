@@ -2,26 +2,42 @@
 #define LIST_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
-typedef struct List
+typedef struct
 {
-    void** _array;
-    int size;
-    int allocated_size;
-} List;
+    int prev;       // link-node idx, or -1 if at tail of list
+    int next;       // link-node idx, or -1 if at head of list
+    int elem_idx;   // index into T_pool
+} ListNode;
 
-List *list_new(int init_size);
-void list_destroy(List **list);
-bool list_append(List *list, void *value);
-bool list_remove_by_idx(List *list, int index);
-void* list_get(List *list, int index);
-int list_get_size(List *list);
-bool list_remove_by_value(List *list, void *value);
-bool list_exists(List *list, void *value);
+typedef struct
+{
+    int head; // link-node idx or -1, or -1 if nothing in list
+    int tail;
+} ListHead;
 
-bool int_list_append(List *list, intptr_t value);
-intptr_t int_list_get(List *list, int index);
-bool int_list_remove_by_value(List *list, intptr_t value);
-bool int_list_exists(List *list, intptr_t value);
+typedef struct
+{
+    const ListHead *p_list;
+    ListNode *p_current_node;
+} ListItr;
+
+// add push back
+// add iterator to fix while loop
+
+ListHead list_new(void);
+void list_destroy(ListHead* p_list);
+bool list_is_empty(ListHead list);
+int list_push_front(ListHead *p_list, int elem_idx);
+int list_push_back(ListHead *p_list, int elem_idx);
+int list_get_at_idx(ListHead list, int elem_idx);
+void list_remove_node(ListHead *p_list, ListNode *p_node);
+ListItr list_itr_new(const ListHead* p_list);
+ListNode* list_itr_next(ListItr* p_itr);
+void list_remove_at_idx(ListHead *p_list, int elem_idx);
+int list_get_len(ListHead list);
+
+int list_has_idx(ListHead list, int idx);
 
 #endif
