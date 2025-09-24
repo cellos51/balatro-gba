@@ -1,6 +1,8 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include "list.h"
+
 #define MAX_HAND_SIZE 16
 #define MAX_DECK_SIZE 52
 #define MAX_JOKERS_HELD_SIZE 5 // This doesn't account for negatives right now.
@@ -92,8 +94,7 @@ void game_update();
 void game_change_state(enum GameState new_game_state);
 
 // Forward declaration
-struct List; 
-typedef struct List List;
+struct ListHead;
 
 // Utility functions for other files
 typedef struct CardObject CardObject; // forward declaration, actually declared in card.h
@@ -106,9 +107,9 @@ int             hand_get_size(void);
 CardObject**    get_played_array(void);
 int             get_played_top(void);
 int             get_scored_card_index(void);
-List*           get_jokers(void);
 bool            is_joker_owned(int joker_id);
 bool            card_is_face(Card *card);
+ListHead*       get_jokers_list(void);
 
 int get_deck_top(void);
 int get_num_discards_remaining(void);
