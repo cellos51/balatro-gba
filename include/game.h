@@ -76,18 +76,6 @@ enum HandType
     FLUSH_FIVE
 };
 
-typedef struct
-{
-    int round;
-    int ante;
-    int money;
-    int score;
-    int temp_score;
-    int chips;
-    int mult;
-    int current_blind;
-} RunState;
-
 typedef struct 
 {
     enum GameState state;
