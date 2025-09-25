@@ -96,6 +96,8 @@ typedef struct
     char *display_name;
 } HandValues;
 
+typedef void (*ActionFn)();
+
 // Used as a No Operation for game states that have no init and/or exit function.
 // ricfehr3 did the work of determining whether a noop or a NULL check was more 
 // efficient. Well, this is the answer.
@@ -118,6 +120,9 @@ static void game_lose_on_init();
 static void game_lose_on_update();
 static void game_win_on_init();
 static void game_win_on_update();
+static void game_shop_intro();
+static void game_shop_process_user_input();
+static void game_shop_outro();
 
 static uint rng_seed = 0;
 
@@ -150,6 +155,9 @@ static const HandValues hand_values[] =
     { .chips = 140,     .mult = 14,     .display_name = "FLUSH H"   },  // FLUSH_HOUSE
     { .chips = 160,     .mult = 16,     .display_name = "FLUSH 5"   }   // FLUSH_FIVE
 };
+
+static const ActionFn shop_state_actions[] = 
+    { game_shop_intro, game_shop_process_user_input, game_shop_outro };
 
 static enum GameState game_state = GAME_STATE_SPLASH_SCREEN; // The current game state, this is used to determine what the game is doing at any given time
 static enum HandState hand_state = HAND_DRAW;
