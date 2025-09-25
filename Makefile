@@ -38,17 +38,23 @@ GRAPHICS	:= graphics
 #---------------------------------------------------------------------------------
 ARCH	:=	-mthumb -mthumb-interwork
 
+GIT_DIRTY := $(shell git diff-index --quiet HEAD -- || echo "-dirty")
+GIT_HASH := $(shell git rev-parse --short HEAD || echo "undef")
+GIT_C_FLAGS := -DGIT_HASH=\"$(GIT_HASH)\" -DGIT_DIRTY=\"$(GIT_DIRTY)\"
+
 CFLAGS	:= -g -O3 -Wall -Werror\
         -mcpu=arm7tdmi -mtune=arm7tdmi \
         -ffast-math -fomit-frame-pointer -funroll-loops \
         $(ARCH)
+
+CFLAGS  += $(GIT_C_FLAGS)
 
 CFLAGS	+=	$(INCLUDE)
 
 CXXFLAGS	:=	$(CFLAGS) -fno-rtti -fno-exceptions
 
 ASFLAGS	:=	-g $(ARCH)
-LDFLAGS	=	-g $(ARCH) -Wl,-Map,$(notdir $*.map)
+LDFLAGS	=	-g $(ARCH) -Wl,-Map,$(notdir $*.map),--undefined=balatro_version
 
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
