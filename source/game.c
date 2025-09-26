@@ -674,8 +674,8 @@ void change_background(int id)
         const int default_y = 89 + (TILE_SIZE * 12); // Default y position for the blind select tokens. 12 is the amound of tiles the background is shifted down by
         // TODO refactor magic numbers '80/120/160' into a map to loop with
         sprite_position(blind_select_tokens[BLIND_TYPE_SMALL], 80, default_y);
-        sprite_position(blind_select_tokens[BLIND_TYPE_BOSS], 120, default_y);
-        sprite_position(blind_select_tokens[BLIND_TYPE_BIG], 160, default_y);
+        sprite_position(blind_select_tokens[BLIND_TYPE_BIG], 120, default_y);
+        sprite_position(blind_select_tokens[BLIND_TYPE_BOSS], 160, default_y);
 
         toggle_windows(false, true);
 
@@ -696,15 +696,13 @@ void change_background(int id)
 		// effect.
         memcpy16(&pal_bg_mem[BLIND_SKIP_BTN_SELECTED_BORDER_PID], &pal_bg_mem[BLIND_SKIP_BTN_PID], 1);
 
-        // TODO: This should have it's data mapped with all these x,y constants
-        // and it should operate in a loop without the if/else blocks on those
-        // constants associated with each blind type
         for (int i = 0; i < BLIND_TYPE_MAX; i++)
         {
             if (blinds[i] != BLIND_STATE_CURRENT &&
                 (i == BLIND_TYPE_SMALL || i == BLIND_TYPE_BIG)) // Make the skip button gray
             {
                 // TODO: Switch all the copies here to use main_bg_se_copy_rect()
+                // Note, this is difficult as the tiles to copy are not aligned.
                 int x_from = 0;
                 int y_from = 24 + (i * 4);
 
@@ -719,67 +717,75 @@ void change_background(int id)
                 }
             }
 
-            if (blinds[i] == BLIND_STATE_CURRENT) // Raise the blind panel up a bit
-            {
-                int x_from = 0;
-                int y_from = 27;
-
-                Rect blind_rect = SINGLE_BLIND_SELECT_RECT;
-
-                // There's no gap between them
-                blind_rect.left += i * rect_width(&SINGLE_BLIND_SELECT_RECT);
-                blind_rect.right += i * rect_width(&SINGLE_BLIND_SELECT_RECT);
-                main_bg_se_copy_rect_1_tile_vert(blind_rect, SE_UP);
-
-                int x_to = blind_rect.left;
-                int y_to = 31;
-
-                if (i == BLIND_TYPE_BIG)
+            switch(blinds[i]) {
+                case BLIND_STATE_CURRENT: // Raise the blind panel up a bit
                 {
-                    y_from = 31;
+                    int x_from = 0;
+                    int y_from = 27;
+
+                    Rect blind_rect = SINGLE_BLIND_SELECT_RECT;
+
+                    // There's no gap between them
+                    blind_rect.left += i * rect_width(&SINGLE_BLIND_SELECT_RECT);
+                    blind_rect.right += i * rect_width(&SINGLE_BLIND_SELECT_RECT);
+                    main_bg_se_copy_rect_1_tile_vert(blind_rect, SE_UP);
+
+                    int x_to = blind_rect.left;
+                    int y_to = 31;
+
+                    if (i == BLIND_TYPE_BIG)
+                    {
+                        y_from = 31;
+                    }
+                    else if (i == BLIND_TYPE_BOSS)
+                    {
+                        x_from = x_to;
+                        y_from = 30;
+                    }
+
+                    // Copy plain tiles onto the bottom of the raised blind panel to fill the gap created by the raise
+                    Rect gap_fill_rect = {x_from, y_from, x_from + rect_width(&SINGLE_BLIND_SELECT_RECT) - 1, y_from}; // - 1 to stay within rect boundaries
+                    BG_POINT gap_fill_point = {x_to, y_to};
+                    main_bg_se_copy_rect(gap_fill_rect, gap_fill_point);
+
+                    sprite_position(blind_select_tokens[i], blind_select_tokens[i]->pos.x, blind_select_tokens[i]->pos.y - TILE_SIZE); // Move token up by a tile
+                    break;
                 }
-                else if (i == BLIND_TYPE_BOSS)
+                case BLIND_STATE_UPCOMING: // Change the select icon to "NEXT" 
                 {
-                    x_from = x_to;
-                    y_from = 30;
+                    int x_from = 0;
+                    int y_from = 20;
+
+                    int x_to = 10 + (i * 5);
+                    int y_to = 20;
+
+                    memcpy16(&se_mem[MAIN_BG_SBB][x_to + 32 * y_to], &se_mem[MAIN_BG_SBB][x_from + 32 * y_from], 3);
+                    break;
                 }
+                case BLIND_STATE_SKIPPED: // Change the select icon to "SKIP"
+                {
+                    int x_from = 3;
+                    int y_from = 20;
 
-                // Copy plain tiles onto the bottom of the raised blind panel to fill the gap created by the raise
-                Rect gap_fill_rect = {x_from, y_from, x_from + rect_width(&SINGLE_BLIND_SELECT_RECT) - 1, y_from}; // - 1 to stay within rect boundaries
-                BG_POINT gap_fill_point = {x_to, y_to};
-                main_bg_se_copy_rect(gap_fill_rect, gap_fill_point);
+                    int x_to = 10 + (i * 5);
+                    int y_to = 20;
 
-                sprite_position(blind_select_tokens[i], blind_select_tokens[i]->pos.x, blind_select_tokens[i]->pos.y - TILE_SIZE); // Move token up by a tile
-            }
-            else if (blinds[i] == BLIND_STATE_UPCOMING) // Change the select icon to "NEXT" 
-            {
-                int x_from = 0;
-                int y_from = 20;
+                    memcpy16(&se_mem[MAIN_BG_SBB][x_to + 32 * y_to], &se_mem[MAIN_BG_SBB][x_from + 32 * y_from], 3);
+                    break;
+                }
+                case BLIND_STATE_DEFEATED: // Change the select icon to "DEFEATED"
+                {
+                    int x_from = 6;
+                    int y_from = 20;
 
-                int x_to = 10 + (i * 5);
-                int y_to = 20;
+                    int x_to = 10 + (i * 5);
+                    int y_to = 20;
 
-                memcpy16(&se_mem[MAIN_BG_SBB][x_to + 32 * y_to], &se_mem[MAIN_BG_SBB][x_from + 32 * y_from], 3);
-            }
-            else if (blinds[i] == BLIND_STATE_SKIPPED) // Change the select icon to "SKIP"
-            {
-                int x_from = 3;
-                int y_from = 20;
-
-                int x_to = 10 + (i * 5);
-                int y_to = 20;
-
-                memcpy16(&se_mem[MAIN_BG_SBB][x_to + 32 * y_to], &se_mem[MAIN_BG_SBB][x_from + 32 * y_from], 3);
-            }
-            else if (blinds[i] == BLIND_STATE_DEFEATED) // Change the select icon to "DEFEATED"
-            {
-                int x_from = 6;
-                int y_from = 20;
-
-                int x_to = 10 + (i * 5);
-                int y_to = 20;
-
-                memcpy16(&se_mem[MAIN_BG_SBB][x_to + 32 * y_to], &se_mem[MAIN_BG_SBB][x_from + 32 * y_from], 3);
+                    memcpy16(&se_mem[MAIN_BG_SBB][x_to + 32 * y_to], &se_mem[MAIN_BG_SBB][x_from + 32 * y_from], 3);
+                    break;
+                }
+                default:
+                    break;
             }
         }
     }

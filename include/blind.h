@@ -14,20 +14,29 @@
 #define BIG_BLIND_TID (BLIND_SPRITE_OFFSET + SMALL_BLIND_TID)
 #define BOSS_BLIND_TID (BLIND_SPRITE_OFFSET + BIG_BLIND_TID)
 
-#define BLIND_TEXT_COLOR_INDEX 1
-#define BLIND_SHADOW_COLOR_INDEX 2
-#define BLIND_HIGHLIGHT_COLOR_INDEX 3
-#define BLIND_MAIN_COLOR_INDEX 4
-#define BLIND_BACKGROUND_MAIN_COLOR_INDEX 5
-#define BLIND_BACKGROUND_SECONDARY_COLOR_INDEX 6
-#define BLIND_BACKGROUND_SHADOW_COLOR_INDEX 7
+enum BlindColorIndex
+{
+    BLIND_TEXT_COLOR_INDEX = 1,
+    BLIND_SHADOW_COLOR_INDEX = 2,
+    BLIND_HIGHLIGHT_COLOR_INDEX = 3,
+    BLIND_MAIN_COLOR_INDEX = 4,
+    BLIND_BACKGROUND_MAIN_COLOR_INDEX = 5,
+    BLIND_BACKGROUND_SECONDARY_COLOR_INDEX = 6,
+    BLIND_BACKGROUND_SHADOW_COLOR_INDEX = 7,
+};
+
+#define BLIND_INFO_TABLE \
+    BLIND_INFO(SMALL, small, FIX_ONE) \
+    BLIND_INFO(BIG, big, FIX_ONE) \
+    BLIND_INFO(BOSS, boss, FIX_ONE)
 
 enum BlindType
 {
-    BLIND_TYPE_SMALL,
-    BLIND_TYPE_BIG,
-    BLIND_TYPE_BOSS,
+#define BLIND_INFO(NAME, name, multi)                    \
+    BLIND_TYPE_##NAME ,
+    BLIND_INFO_TABLE
     BLIND_TYPE_MAX,
+#undef BLIND_INFO
 };
 
 enum BlindState
@@ -51,7 +60,7 @@ typedef struct
 {
     enum BlindType type;
     PaletteInfo pal_info;
-    FIXED multiplier;
+    FIXED score_req_multipler;
     s32 reward;
 } Blind;
 
@@ -59,7 +68,7 @@ void blind_init();
 
 int blind_get_requirement(enum BlindType type, int ante);
 int blind_get_reward(enum BlindType type);
-u16 blind_get_color(enum BlindType type, int index);
+u16 blind_get_color(enum BlindType type, enum BlindColorIndex index);
 
 Sprite *blind_token_new(enum BlindType type, int x, int y, int sprite_index);
 
