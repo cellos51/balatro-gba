@@ -4,10 +4,6 @@
 #include <tonc.h>
 #include <stdlib.h>
 
-#include "tonc_input.h"
-#include "tonc_memdef.h"
-#include "tonc_memmap.h"
-#include "tonc_tte.h"
 #include "util.h"
 #include "sprite.h"
 #include "card.h"
@@ -3132,8 +3128,6 @@ static void game_lose_on_update()
 // util we decide what we want to do after a game over.
 static void game_lose_on_exit()
 {
-    // update blind. Will start back on whatever blind you lost on
-    // setting current_blind doesn't seem to work. Jokers are also left over.
     timer = TM_ZERO;
     current_blind = SMALL_BLIND;
     blinds[0] = BLIND_CURRENT;
