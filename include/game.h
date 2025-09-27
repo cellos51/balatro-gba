@@ -26,16 +26,12 @@
 #define PAUSE_GAME KEY_START // Not implemented
 #define SELL_KEY KEY_L
 
+// Enum value names in ../include/def_state_info_table.h
 enum GameState
 {
-    GAME_STATE_SPLASH_SCREEN,
-    GAME_STATE_MAIN_MENU,
-    GAME_STATE_PLAYING,
-    GAME_STATE_ROUND_END,
-    GAME_STATE_SHOP,
-    GAME_STATE_BLIND_SELECT,
-    GAME_STATE_LOSE,
-    GAME_STATE_WIN,
+#define DEF_STATE_INFO(stateEnum, on_init, on_update, on_exit) stateEnum,
+#include "../include/def_state_info_table.h"
+#undef DEF_STATE_INFO
     GAME_STATE_MAX
 };
 
@@ -78,7 +74,7 @@ enum HandType
 
 typedef struct 
 {
-    enum GameState state;
+    int substate;
     void (*on_init)();
     void (*on_update)();
     void (*on_exit)();
