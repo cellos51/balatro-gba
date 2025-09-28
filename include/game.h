@@ -26,16 +26,13 @@
 #define PAUSE_GAME KEY_START // Not implemented
 #define SELL_KEY KEY_L
 
+// Enum value names in ../include/def_state_info_table.h
 enum GameState
 {
-    GAME_SPLASH_SCREEN,
-    GAME_MAIN_MENU,
-    GAME_PLAYING,
-    GAME_ROUND_END,
-    GAME_SHOP,
-    GAME_BLIND_SELECT,
-    GAME_LOSE,
-    GAME_WIN
+#define DEF_STATE_INFO(stateEnum, on_init, on_update, on_exit) stateEnum,
+#include "../include/def_state_info_table.h"
+#undef DEF_STATE_INFO
+    GAME_STATE_MAX
 };
 
 enum HandState
@@ -75,10 +72,18 @@ enum HandType
     FLUSH_FIVE
 };
 
+typedef struct 
+{
+    int substate;
+    void (*on_init)();
+    void (*on_update)();
+    void (*on_exit)();
+} StateInfo;
+
 // Game functions
 void game_init();
 void game_update();
-void game_set_state(enum GameState new_game_state);
+void game_change_state(enum GameState new_game_state);
 
 // Forward declaration
 struct List; 
@@ -87,6 +92,7 @@ typedef struct List List;
 // Utility functions for other files
 typedef struct CardObject CardObject; // forward declaration, actually declared in card.h
 typedef struct JokerObject JokerObject;
+
 CardObject**    get_hand_array(void);
 int             get_hand_top(void);
 int             hand_get_size(void);
