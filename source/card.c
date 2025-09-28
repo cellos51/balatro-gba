@@ -9,6 +9,8 @@
 // Audio
 #include "soundbank.h"
 
+#include "pool.h"
+
 // Card sprites lookup table. First index is the suit, second index is the rank. The value is the tile index.
 const static u16 card_sprite_lut[NUM_SUITS][NUM_RANKS] = {
     {0, 16, 32, 48, 64, 80, 96, 112, 128, 144, 160, 176, 192},
@@ -25,7 +27,7 @@ void card_init()
 // Card methods
 Card *card_new(u8 suit, u8 rank)
 {
-    Card *card = malloc(sizeof(Card));
+    Card *card = POOL_GET(Card);
 
     card->suit = suit;
     card->rank = rank;
@@ -35,8 +37,7 @@ Card *card_new(u8 suit, u8 rank)
 
 void card_destroy(Card **card)
 {
-    if (*card == NULL) return;
-    free(*card);
+    POOL_FREE(Card, *card);
     *card = NULL;
 }
 
@@ -61,7 +62,7 @@ u8 card_get_value(Card *card)
 // CardObject methods
 CardObject *card_object_new(Card *card)
 {
-    CardObject *card_object = malloc(sizeof(CardObject));
+    CardObject *card_object = POOL_GET(CardObject);
 
     card_object->card = card;
     card_object->sprite_object = sprite_object_new();
@@ -73,8 +74,7 @@ void card_object_destroy(CardObject **card_object)
 {
     if (*card_object == NULL) return;
     sprite_object_destroy(&((*card_object)->sprite_object));
-    //card_destroy(&(*card_object)->card); // In practice, this is unnecessary because the card will be inserted into the discard pile and then back into the deck. If you need to destroy the card, you can do it manually before calling this function.
-    free(*card_object);
+    POOL_FREE(CardObject, *card_object);
     *card_object = NULL;
 }
 

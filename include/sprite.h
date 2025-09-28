@@ -5,6 +5,9 @@
 #include <maxmod.h>
 
 #define CARD_SPRITE_SIZE 32
+#define MAX_SPRITES 128
+#define MAX_SPRITE_OBJECTS 16
+
 
 typedef struct 
 {
