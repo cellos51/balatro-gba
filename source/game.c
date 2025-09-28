@@ -4,6 +4,7 @@
 #include <tonc.h>
 #include <stdlib.h>
 
+#include "tonc_memdef.h"
 #include "util.h"
 #include "sprite.h"
 #include "card.h"
@@ -3119,7 +3120,7 @@ static void game_lose_on_update()
         tte_printf("#{P:%d,%d; cx:0x%X000}GAME OVER", GAME_LOSE_MSG_TEXT_RECT.left, GAME_LOSE_MSG_TEXT_RECT.top, TTE_RED_PB);
     }
 
-    if (key_hit(KEY_START)) game_change_state(GAME_STATE_BLIND_SELECT);
+    if (key_hit(KEY_ANY)) game_change_state(GAME_STATE_BLIND_SELECT);
 }
 
 // This function isn't set in stone. This is just a placeholder
