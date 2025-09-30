@@ -67,6 +67,9 @@
 // By default TTE characters occupy a single tile
 #define TTE_CHAR_SIZE TILE_SIZE
 
+// Some defines for common register bits
+#define SE_HORIZONTAL_FLIP 0x0400
+
 // When making this, missed that it already exists in tonc_math.h
 typedef RECT Rect;
 
