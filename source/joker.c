@@ -338,18 +338,23 @@ int joker_get_random_rarity()
     int rarity_roll = random() % 100; 
     if (rarity_roll < COMMON_JOKER_CHANCE)  
     {
-        // 0..69, 70% chance
+        // 0..68, 69% chance
         joker_rarity = COMMON_JOKER;
     }
     else if (rarity_roll < COMMON_JOKER_CHANCE + UNCOMMON_JOKER_CHANCE) 
     {
-        // 70..94, 25% chance
+        // 69..93, 25% chance
         joker_rarity = UNCOMMON_JOKER;
     }
-    else 
+    else if (rarity_roll < COMMON_JOKER_CHANCE + UNCOMMON_JOKER_CHANCE + RARE_JOKER_CHANCE)
     {
-        // 95..99, 5% chance
+        // 94..98, 5% chance
         joker_rarity = RARE_JOKER;
+    }
+    else
+    {
+        // 99, 1% chance
+        joker_rarity = LEGENDARY_JOKER;
     }
 
     return joker_rarity;

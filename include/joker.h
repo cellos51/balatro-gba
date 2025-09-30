@@ -32,9 +32,12 @@
 #define LEGENDARY_JOKER 3.
 
 // Percent chance to get a joker of each rarity
-#define COMMON_JOKER_CHANCE 70
+// Note that this deviates slightly from the Balatro wiki to allow legendary
+// jokers to appear without spectral cards implemented
+#define COMMON_JOKER_CHANCE 69
 #define UNCOMMON_JOKER_CHANCE 25
 #define RARE_JOKER_CHANCE 5
+#define LEGENDARY_JOKER_CHANCE 1
 
 #define MAX_JOKER_OBJECTS 32 // The maximum number of joker objects that can be created at once
 
