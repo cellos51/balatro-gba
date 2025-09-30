@@ -86,6 +86,7 @@ typedef struct List List;
 
 // Utility functions for other files
 typedef struct CardObject CardObject; // forward declaration, actually declared in card.h
+typedef struct Card Card;
 typedef struct JokerObject JokerObject;
 CardObject**    get_hand_array(void);
 int             get_hand_top(void);
@@ -93,9 +94,12 @@ int             hand_get_size(void);
 CardObject**    get_played_array(void);
 int             get_played_top(void);
 List*           get_jokers(void);
+bool            is_joker_present(int joker_id);
+bool            card_is_face(Card *card);
 
 int get_deck_top(void);
 int get_num_discards_remaining(void);
+int get_num_hands_remaining(void);
 int get_money(void);
 
 #endif // GAME_H

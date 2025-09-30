@@ -161,6 +161,18 @@ List *get_jokers(void) {
     return jokers;
 }
 
+bool is_joker_present(int joker_id) {
+    for (int k = 0; k < list_get_size(jokers); k++)
+    {
+        JokerObject *joker = list_get(jokers, k);
+        if (joker->joker->id == joker_id)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 void add_joker(JokerObject *joker_object)
 {
     list_append(jokers, joker_object);
@@ -177,6 +189,10 @@ int get_deck_top(void) {
 
 int get_num_discards_remaining(void) {
     return discards;
+}
+
+int get_num_hands_remaining(void) {
+    return hands;
 }
 
 int get_money(void) {
@@ -421,6 +437,17 @@ enum HandType hand_get_type()
     }
 
     return res_hand_type; // should be HIGH_CARD
+}
+
+// Returns true if the card is *considered* a face card
+bool card_is_face(Card *card) {
+    // Card is a face card, or Pareidolia is present
+    return (
+        card->rank == JACK  ||
+        card->rank == QUEEN ||
+        card->rank == KING  ||
+        is_joker_present(PAREIDOLIA_JOKER_ID)
+    );
 }
 
 /* Copies the appropriate item into the top left panel (blind/shop icon)
