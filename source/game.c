@@ -2281,6 +2281,42 @@ void erase_price_under_sprite_object(SpriteObject *sprite_object)
     tte_erase_rect_wrapper(price_rect);
 }
 
+static int game_shop_get_random_joker_idx()
+{
+    // Roll for what rarity the joker will be
+    int joker_rarity = joker_get_random_rarity();
+        
+    // Now determine how many jokers are available based on the rarity
+    int jokers_avail_size = list_get_size(jokers_available_to_shop);
+    int matching_indices[jokers_avail_size];
+    int match_count = 0;
+
+    for (int i = 0; i < jokers_avail_size; i++)
+    {
+        intptr_t joker_id = int_list_get(jokers_available_to_shop, i);
+        const JokerInfo *info = get_joker_registry_entry(joker_id); 
+        if (info->rarity == joker_rarity)
+        {
+            matching_indices[match_count] = i;
+            match_count++;
+        }
+    }
+
+    int selected_joker_idx = 0;
+    if (match_count > 0)
+    {
+        // If we counted at least one joker with matching rarity, pick one of them randomly
+        selected_joker_idx = matching_indices[random() % match_count];
+    }
+    else
+    {
+        // Didn't find any jokers of matching rarity, just pick one at random instead
+        selected_joker_idx = random() % jokers_avail_size;
+    }
+
+    return int_list_get(jokers_available_to_shop, selected_joker_idx);
+}
+
 static void game_shop_create_items()
 {
     tte_erase_rect_wrapper(SHOP_PRICES_TEXT_RECT);
@@ -2294,8 +2330,7 @@ static void game_shop_create_items()
 
     for (int i = 0; i < MAX_SHOP_JOKERS; i++)
     {
-        // TODO: weight the random choice by joker rarity
-        int joker_idx = random() % list_get_size(jokers_available_to_shop);
+        int joker_idx = game_shop_get_random_joker_idx();
         intptr_t joker_id = int_list_get(jokers_available_to_shop, joker_idx);
         list_remove_by_idx(jokers_available_to_shop, joker_idx);
         
