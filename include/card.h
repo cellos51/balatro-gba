@@ -38,7 +38,7 @@
 #define IMPOSSIBLY_HIGH_CARD_VALUE 100
 
 // Card types
-typedef struct
+typedef struct Card
 {
     u8 suit;
     u8 rank;
