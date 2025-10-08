@@ -4,13 +4,20 @@ set -euo pipefail
 
 POOL_DEF_FILE='./include/pools.def'
 ELF_FILE="${1-./build/balatro-gba.elf}"
-READELF='/opt/devkitpro/devkitARM/bin/arm-none-eabi-readelf'
+READELF="${READELF-/opt/devkitpro/devkitARM/bin/arm-none-eabi-readelf}"
 TOTAL_BYTES=0
 
 if [ ! -f "$ELF_FILE" ]; then
     echo "elf file not found: $ELF_FILE"
     echo "You can pass your elf file with:"
     echo "    $(basename $0) <file>"
+    exit 1
+fi
+
+if [ ! -x "$READELF" ]; then
+    echo "ERROR: \"$READELF\" is not an executable file."
+    echo "You can override the file location for 'arm-none-eabi-readelf' with the READELF env variable."
+    echo "  e.g. $ READELF=\"/my/custom/location/arm-none-eabi-readelf\" $(basename $0) <file>"
     exit 1
 fi
 
@@ -41,12 +48,20 @@ for name in $(get_pool_names); do
             sed -E 's@ +@ @g; s@^ @@'              | \
             tr -d '\n'                               \
         )"
+    output_bm="$(                                    \
+            "$READELF" -sW "$ELF_FILE"             | \
+            grep -E "${name}_bitmap_w"             | \
+            grep OBJECT                            | \
+            sed -E 's@ +@ @g; s@^ @@'              | \
+            tr -d '\n'                               \
+        )"
 
 
     address="$(cut -d ' ' -f 2 <<< $output_pool)"
     pool_size="$(cut -d ' ' -f 3 <<< $output_pool)"
     func_size="$(cut -d ' ' -f 3 <<< $output_func)"
-    bm_size=16 #always gonna be 16, 4 * sizeof(u32)
+    bm_size="$(cut -d ' ' -f 3 <<< $output_bm)"
+    #bm_size=16 #always gonna be 16, 4 * sizeof(u32)
     
     TOTAL_BYTES=$(( TOTAL_BYTES + pool_size + func_size + bm_size ))
 

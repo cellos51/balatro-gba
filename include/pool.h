@@ -10,6 +10,7 @@ typedef struct PoolBitmap {
     u32 *w;
     u32 nbits;
     u32 nwords;
+    u32 cap;
 } PoolBitmap;
 
 void pool_bm_clear_idx(PoolBitmap *bm, int idx);
@@ -20,7 +21,6 @@ int pool_bm_get_free_idx(PoolBitmap *bm);
     {                                                                       \
         PoolBitmap bm;                                                      \
         type *  objects;                                                    \
-        u32 max_entries;                                                    \
     } type##Pool;                                                           \
     type *pool_get_##type();                                                \
     void  pool_free_##type(type *obj);                                      \
@@ -33,9 +33,10 @@ int pool_bm_get_free_idx(PoolBitmap *bm);
         .bm = {                                                             \
             .w = type##_bitmap_w,                                           \
             .nbits = POOL_BITS_PER_WORD,                                    \
-            .nwords = sizeof(u32)},                                         \
+            .nwords = sizeof(u32),                                          \
+            .cap = capacity,                                                \
+        },                                                                  \
         .objects = type##_storage,                                          \
-        .max_entries = capacity,                                            \
     };                                                                      \
     type * pool_get_##type()                                                \
     {                                                                       \

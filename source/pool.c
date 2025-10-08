@@ -28,7 +28,7 @@ int pool_bm_get_free_idx(PoolBitmap *bm)
             int bit = __builtin_ctz(inv);
             bm->w[i] |= ((u32)1 << bit);
             int idx = i * POOL_BITS_PER_WORD + bit;
-            return idx;
+            return (idx < bm->cap) ? idx : -1;
         }
     }
 

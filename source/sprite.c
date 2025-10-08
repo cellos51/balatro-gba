@@ -14,11 +14,23 @@
 OBJ_ATTR obj_buffer[MAX_SPRITES];
 OBJ_AFFINE *obj_aff_buffer = (OBJ_AFFINE*)obj_buffer;
 
+typedef struct
+{
+    bool used;
+    Sprite* p_sprite;
+} _UsedSprite;
+
 static bool free_affines[MAX_AFFINES] = {false};
+static _UsedSprite free_sprites[MAX_SPRITES] = {{0}};
 
 // Sprite methods
 Sprite *sprite_new(u16 a0, u16 a1, u32 tid, u32 pb, int sprite_index)
 {
+    if(free_sprites[sprite_index].used)
+    {
+        return free_sprites[sprite_index].p_sprite;
+    }
+
     Sprite* sprite = POOL_GET(Sprite);
 
     sprite->obj = NULL;
@@ -40,6 +52,7 @@ Sprite *sprite_new(u16 a0, u16 a1, u32 tid, u32 pb, int sprite_index)
 
         if (aff_index == MAX_AFFINES)
         {
+            POOL_FREE(Sprite, sprite);
             return NULL;
         }
 
@@ -56,6 +69,9 @@ Sprite *sprite_new(u16 a0, u16 a1, u32 tid, u32 pb, int sprite_index)
         obj_set_attr(sprite->obj, a0, a1, ATTR2_PALBANK(pb) | tid);
     }
 
+    free_sprites[sprite_index].used = true;
+    free_sprites[sprite_index].p_sprite = sprite;
+    sprite->idx = sprite_index;
     return sprite;
 }
 
@@ -70,6 +86,9 @@ void sprite_destroy(Sprite **sprite)
     {
         free_affines[(*sprite)->aff - obj_aff_buffer] = false;
     }
+
+    free_sprites[(*sprite)->idx].used = false;
+    free_sprites[(*sprite)->idx].p_sprite = NULL;
 
     POOL_FREE(Sprite, *sprite);
 

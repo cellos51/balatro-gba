@@ -14,6 +14,7 @@ typedef struct
     OBJ_ATTR *obj;
     OBJ_AFFINE *aff;
     POINT pos;
+    int idx;
 } Sprite;
 
 // A sprite object is a sprite that is selectable and movable in animation
