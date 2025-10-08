@@ -77,6 +77,7 @@ void init()
     blind_init();
     joker_init();
     game_init();
+    game_change_state(GAME_STATE_SPLASH_SCREEN);
 }
 
 void update()
