@@ -102,4 +102,7 @@ int get_num_discards_remaining(void);
 int get_num_hands_remaining(void);
 int get_money(void);
 
+int get_game_speed(void);
+void set_game_speed(int game_speed_);
+
 #endif // GAME_H

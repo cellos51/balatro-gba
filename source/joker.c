@@ -93,7 +93,7 @@ static int get_unused_joker_pb()
 }
 
 static int allocate_pb_if_needed(u8 joker_id)
-{
+{ 
     int joker_spritesheet_idx = joker_get_spritesheet_idx(joker_id);
     int joker_pb = joker_spritesheet_pb_map[joker_spritesheet_idx];
     if (joker_pb != UNDEFINED)
