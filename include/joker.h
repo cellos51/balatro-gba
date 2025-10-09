@@ -29,7 +29,15 @@
 #define COMMON_JOKER 0
 #define UNCOMMON_JOKER 1
 #define RARE_JOKER 2
-#define LEGENDARY_JOKER 3
+#define LEGENDARY_JOKER 3.
+
+// Percent chance to get a joker of each rarity
+// Note that this deviates slightly from the Balatro wiki to allow legendary
+// jokers to appear without spectral cards implemented
+#define COMMON_JOKER_CHANCE 69
+#define UNCOMMON_JOKER_CHANCE 25
+#define RARE_JOKER_CHANCE 5
+#define LEGENDARY_JOKER_CHANCE 1
 
 #define MAX_JOKER_OBJECTS 32 // The maximum number of joker objects that can be created at once
 
@@ -92,5 +100,6 @@ void joker_object_set_selected(JokerObject* joker_object, bool selected);
 bool joker_object_is_selected(JokerObject* joker_object);
 
 Sprite* joker_object_get_sprite(JokerObject* joker_object);
+int joker_get_random_rarity();
 
 #endif // JOKER_H
