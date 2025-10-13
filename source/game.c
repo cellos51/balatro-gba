@@ -2314,7 +2314,7 @@ static int game_shop_get_random_joker_idx()
         selected_joker_idx = random() % jokers_avail_size;
     }
 
-    return int_list_get(jokers_available_to_shop, selected_joker_idx);
+    return selected_joker_idx;
 }
 
 static void game_shop_create_items()
