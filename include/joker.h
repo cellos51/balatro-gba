@@ -29,7 +29,7 @@
 #define COMMON_JOKER 0
 #define UNCOMMON_JOKER 1
 #define RARE_JOKER 2
-#define LEGENDARY_JOKER 3.
+#define LEGENDARY_JOKER 3
 
 // Percent chance to get a joker of each rarity
 // Note that this deviates slightly from the Balatro wiki to allow legendary
