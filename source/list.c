@@ -181,19 +181,48 @@ int list_get_at_idx(ListHead list, int elem_idx)
     return -1;
 }
 
-int list_has_idx(ListHead list, int idx)
+bool list_exists(ListHead list, int idx)
 {
-    if (list_is_empty(list)) return -1;
+    if (list_is_empty(list)) return false;
     
+    ListItr itr = list_itr_new(&list);
+    ListNode* ln;
+
+    while((ln = list_itr_next(&itr)))
+    {
+        if(ln->elem_idx == idx) return true;
+    }
+
+    return false;
+}
+
+
+int list_get_at_object_idx(ListHead list, int elem_idx)
+{
     int len = 0;
     ListItr itr = list_itr_new(&list);
     ListNode* ln;
 
     while((ln = list_itr_next(&itr)))
     {
+        if(ln->elem_idx == elem_idx) return len;
         len++;
-        if(ln->elem_idx == idx) return len;
     }
 
     return -1;
+}
+
+void list_remove_at_object_idx(ListHead* p_list, int elem_idx)
+{
+    ListItr itr = list_itr_new(p_list);
+    ListNode* ln;
+
+    while((ln = list_itr_next(&itr)))
+    {
+        if(ln->elem_idx == elem_idx)
+        {
+            list_remove_node(p_list, ln);
+            return;
+        }
+    }
 }

@@ -2487,7 +2487,7 @@ void erase_price_under_sprite_object(SpriteObject *sprite_object)
     tte_erase_rect_wrapper(price_rect);
 }
 
-#define TEST_JOKER_ID 0
+#define TEST_JOKER_ID 6
 
 static void game_shop_create_items()
 {
@@ -2506,9 +2506,10 @@ static void game_shop_create_items()
         int joker_idx = 0;
         intptr_t joker_id = 0;
         #ifdef TEST_JOKER_ID // Allow defining an ID for a joker to always appear in shop and be tested
-        if ((joker_idx = list_has_idx(_avail_shop_jokers_list, TEST_JOKER_ID)) >= 0)
+        if ((joker_idx = list_get_at_object_idx(_avail_shop_jokers_list, TEST_JOKER_ID)) >= 0)
         {
             joker_id = TEST_JOKER_ID;
+            //list_remove_at_object_idx(&_avail_shop_jokers_list, joker_idx);
             list_remove_at_idx(&_avail_shop_jokers_list, joker_idx);
         }
         else
@@ -2529,8 +2530,8 @@ static void game_shop_create_items()
         print_price_under_sprite_object(joker_object->sprite_object, joker_object->joker->value);
 
         sprite_position(joker_object_get_sprite(joker_object), fx2int(joker_object->sprite_object->x), fx2int(joker_object->sprite_object->y));
-        list_push_front(&_shop_jokers_list, POOL_IDX(JokerObject, joker_object));
-        //list_push_back(&_shop_jokers_list, POOL_IDX(JokerObject, joker_object));
+
+        list_push_back(&_shop_jokers_list, POOL_IDX(JokerObject, joker_object));
     }
 }
 
@@ -2895,7 +2896,7 @@ static void game_shop_on_update()
 {
     change_background(BG_ID_SHOP);
 
-    if (_shop_jokers_list.head > 0)
+    if (!list_is_empty(_shop_jokers_list))
     {
         ListItr itr = list_itr_new(&_shop_jokers_list);
         ListNode* ln;
