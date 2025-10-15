@@ -31,11 +31,13 @@ void list_destroy(ListHead* p_list);
 bool list_is_empty(ListHead list);
 int list_push_front(ListHead *p_list, int elem_idx);
 int list_push_back(ListHead *p_list, int elem_idx);
-int list_get_at_idx(ListHead list, int elem_idx);
 void list_remove_node(ListHead *p_list, ListNode *p_node);
 ListItr list_itr_new(const ListHead* p_list);
 ListNode* list_itr_next(ListItr* p_itr);
+int list_get_at_idx(ListHead list, int elem_idx);
 void list_remove_at_idx(ListHead *p_list, int elem_idx);
+int list_get_at_object_idx(ListHead list, int elem_idx);
+void list_remove_at_object_idx(ListHead *p_list, int elem_idx);
 int list_get_len(ListHead list);
 
 int list_has_idx(ListHead list, int idx);
