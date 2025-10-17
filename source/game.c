@@ -164,7 +164,7 @@ static const SubStateActionFn round_end_state_actions[] =
     game_round_end_dismiss_round_end_panel
 };
 
-static enum GameState game_state = GAME_STATE_SPLASH_SCREEN; // The current game state, this is used to determine what the game is doing at any given time
+static enum GameState game_state = GAME_STATE_UNDEFINED; // The current game state, this is used to determine what the game is doing at any given time
 static enum HandState hand_state = HAND_DRAW;
 static enum PlayState play_state = PLAY_PLAYING;
 
@@ -1270,10 +1270,17 @@ void game_change_state(enum GameState new_game_state)
     timer = TM_ZERO; // Reset the timer
     
     state_info[game_state].substate = 0;
-    state_info[game_state].on_exit();
-    state_info[new_game_state].on_init();
+    if (game_state != GAME_STATE_UNDEFINED)
+    {
+        state_info[game_state].on_exit();
+    }
 
-    game_state = new_game_state;
+    if (new_game_state != GAME_STATE_UNDEFINED)
+    {
+        state_info[new_game_state].on_init();
+
+        game_state = new_game_state;
+    }
 }
 
 void jokers_available_to_shop_init()

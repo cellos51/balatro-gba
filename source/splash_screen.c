@@ -4,6 +4,8 @@
 
 #include "graphic_utils.h"
 #include "game.h"
+#include "maxmod.h"
+#include "soundbank.h"
 
 static const Rect COUNTDOWN_TIMER_RECT = {208, 144, 240, 152};
 static uint timer = 0;
@@ -34,4 +36,9 @@ void splash_screen_on_update()
 
     game_change_state(GAME_STATE_MAIN_MENU);
     tte_erase_screen();
+}
+
+void splash_screen_on_exit()
+{
+    mmStart(MOD_MAIN_THEME, MM_PLAY_LOOP);
 }

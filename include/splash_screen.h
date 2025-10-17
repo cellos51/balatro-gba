@@ -9,5 +9,6 @@
 
 void splash_screen_on_init();
 void splash_screen_on_update();
+void splash_screen_on_exit();
 
 #endif // SPLASH_SCREEN_H
