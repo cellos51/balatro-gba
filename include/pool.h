@@ -3,6 +3,12 @@
 
 #include <stdint.h>
 
+#ifdef POOLS_TEST_ENV
+#define POOLS_DEF_FILE "def_test_mempool.h"
+#else
+#define POOLS_DEF_FILE "def_balatro_mempool.h"
+#endif
+
 #define POOL_BITS_PER_WORD 32
 #define POOL_BITMAP_BYTES   8
 

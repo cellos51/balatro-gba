@@ -1,8 +1,7 @@
-POOLS_DEF_FILE := \"def_test_mempool.h\"
 
 CC := gcc
 CFLAGS := -I../../include -I. \
-          -g -O3 -Wall -Werror -DPOOLS_DEF_FILE=$(POOLS_DEF_FILE) 
+          -g -O3 -Wall -Werror -DPOOLS_TEST_ENV=t 
 
 SRC            := pool_test.c ../../source/pool.c
 OUT            := build/pool_test
