@@ -1,7 +1,7 @@
 
 CC := gcc
 CFLAGS := -I../../include -I. \
-          -g -O3 -Wall -Werror -DPOOLS_TEST_ENV=t 
+          -g -O3 -Wall -Werror -DPOOLS_TEST_ENV=yes
 
 SRC            := pool_test.c ../../source/pool.c
 OUT            := build/pool_test
