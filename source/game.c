@@ -2146,7 +2146,7 @@ void game_round_end()
 
             if (interest_reward > 0)
             {
-                 interest_y = 1 + hand_y;
+                interest_y = 1 + hand_y;
             }
 
             if (hand_reward <= 0 && interest_to_count <= 0) // Once all rewards are accounted for go to the next state
