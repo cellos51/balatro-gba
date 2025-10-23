@@ -229,10 +229,10 @@ static int selection_y = 0;
 
 static bool sort_by_suit = false;
 
-static ListHead _all_jokers_list;
-static ListHead _discarded_jokers_list;
-static ListHead _avail_shop_jokers_list; // List of joker IDs
-static ListHead _shop_jokers_list;
+static List _all_jokers_list;
+static List _discarded_jokers_list;
+static List _avail_shop_jokers_list; // List of joker IDs
+static List _shop_jokers_list;
 
 // Stacks
 static CardObject *played[MAX_SELECTION_SIZE] = {NULL};
@@ -348,7 +348,7 @@ int get_scored_card_index(void)
     return scored_card_index;
 }
 
-ListHead* get_jokers_list(void) {
+List* get_jokers_list(void) {
     return &_all_jokers_list;
 }
 
@@ -3192,7 +3192,7 @@ static void game_shop_on_exit()
         if (joker_object != NULL)
         {
             //_shop_jokers_list
-            //list_push_back(ListHead *p_list, int elem_idx);
+            //list_push_back(List *p_list, int elem_idx);
             // Make the joker available back to shop
             //int_list_append(jokers_available_to_shop, (intptr_t)joker_object->joker->id);
             list_push_back(&_avail_shop_jokers_list, joker_object->joker->id);

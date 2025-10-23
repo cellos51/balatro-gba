@@ -267,7 +267,7 @@ static JokerEffect joker_stencil_effect(Joker *joker, Card *scored_card, enum Jo
 
     SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
 
-    ListHead* jokers = get_jokers_list();
+    List* jokers = get_jokers_list();
 
     // +1 xmult per empty joker slot...
     //int num_jokers = list_get_size(jokers);
@@ -833,7 +833,7 @@ static JokerEffect dusk_joker_effect(Joker *joker, Card *scored_card, enum Joker
 static JokerEffect blueprint_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event)
 {
     JokerEffect effect = {0};
-    ListHead* jokers = get_jokers_list();
+    List* jokers = get_jokers_list();
     int list_size = list_get_len(*jokers);
     
     for (int i = 0; i < list_size  - 1; i++ ) {
@@ -858,7 +858,7 @@ static JokerEffect brainstorm_joker_effect(Joker *joker, Card *scored_card, enum
         return effect;
     }
 
-    ListHead* jokers = get_jokers_list();
+    List* jokers = get_jokers_list();
     JokerObject* first_joker = POOL_AT(JokerObject, list_get_at_idx(*jokers, 0));
 
     if (first_joker != NULL && first_joker->joker->id != JOKER_BRAINSTORM_ID)
@@ -1082,7 +1082,7 @@ const JokerInfo joker_registry[] = {
     { UNCOMMON_JOKER,  7, NULL,/* Four Fingers */        on_joker_created_noop            }, // 48
     { COMMON_JOKER,    4, scholar_joker_effect,          on_joker_created_noop            }, // 49
 
-    // The following jokers don't have sprites yet, 
+    // The following jokers don't have sprites yet,
     // uncomment them when their sprites are added.
 #if 0
     { COMMON_JOKER,   5, photograph_joker_effect,       photograph_on_joker_created },
