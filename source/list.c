@@ -4,13 +4,13 @@
 #include "list.h"
 #include "pool.h"
 
-ListHead list_new(void)
+List list_new(void)
 {
-    ListHead head = { .head = -1, .tail = -1};
+    List head = { .head = -1, .tail = -1};
     return head;
 }
 
-void list_destroy(ListHead* p_list)
+void list_destroy(List* p_list)
 {
     if(list_is_empty(*p_list)) return;
 
@@ -23,12 +23,12 @@ void list_destroy(ListHead* p_list)
     }
 }
 
-bool list_is_empty(ListHead list)
+bool list_is_empty(List list)
 {
     return list.head < 0;
 }
 
-int list_push_front(ListHead *p_list, int elem_idx)
+int list_push_front(List *p_list, int elem_idx)
 {
     ListNode *p_node = POOL_GET(ListNode);
     int n = POOL_IDX(ListNode, p_node); // Get the index of of the node in the pool
@@ -51,7 +51,7 @@ int list_push_front(ListHead *p_list, int elem_idx)
     return n;
 }
 
-int list_push_back(ListHead *p_list, int elem_idx)
+int list_push_back(List *p_list, int elem_idx)
 {
     ListNode *p_node = POOL_GET(ListNode);
     int n = POOL_IDX(ListNode, p_node); // Get the index of of the node in the pool
@@ -73,7 +73,7 @@ int list_push_back(ListHead *p_list, int elem_idx)
     return n;
 }
 
-void list_remove_node(ListHead *p_list, ListNode *p_node)
+void list_remove_node(List *p_list, ListNode *p_node)
 {
     ListNode* p_prev_node = NULL;
     ListNode* p_next_node = NULL;
@@ -112,7 +112,7 @@ void list_remove_node(ListHead *p_list, ListNode *p_node)
     POOL_FREE(ListNode, p_node);
 }
 
-ListItr list_itr_new(const ListHead* p_list)
+ListItr list_itr_new(const List* p_list)
 {
     ListItr itr =
     {
@@ -137,7 +137,7 @@ ListNode* list_itr_next(ListItr* p_itr)
     return ln;
 }
 
-void list_remove_at_idx(ListHead* p_list, int elem_idx)
+void list_remove_at_idx(List* p_list, int n)
 {
     int len = 0;
     ListItr itr = list_itr_new(p_list);
@@ -145,7 +145,7 @@ void list_remove_at_idx(ListHead* p_list, int elem_idx)
 
     while((ln = list_itr_next(&itr)))
     {
-        if(elem_idx == len++)
+        if(n == len++)
         {
             list_remove_node(p_list, ln);
             return;
@@ -153,7 +153,7 @@ void list_remove_at_idx(ListHead* p_list, int elem_idx)
     }
 }
 
-int list_get_len(ListHead list)
+int list_get_len(List list)
 {
     int len = 0;
     ListItr itr = list_itr_new(&list);
@@ -167,7 +167,7 @@ int list_get_len(ListHead list)
     return len;
 }
 
-int list_get_at_idx(ListHead list, int elem_idx)
+int list_get_at_idx(List list, int n)
 {
     int len = 0;
     ListItr itr = list_itr_new(&list);
@@ -175,13 +175,13 @@ int list_get_at_idx(ListHead list, int elem_idx)
 
     while((ln = list_itr_next(&itr)))
     {
-        if(elem_idx == len++) return ln->elem_idx;
+        if (n == len++) return ln->elem_idx;
     }
 
     return -1;
 }
 
-bool list_exists(ListHead list, int idx)
+bool list_exists(List list, int idx)
 {
     if (list_is_empty(list)) return false;
     
@@ -197,7 +197,7 @@ bool list_exists(ListHead list, int idx)
 }
 
 
-int list_get_at_object_idx(ListHead list, int elem_idx)
+int list_get_at_object_idx(List list, int elem_idx)
 {
     int len = 0;
     ListItr itr = list_itr_new(&list);
@@ -212,7 +212,7 @@ int list_get_at_object_idx(ListHead list, int elem_idx)
     return -1;
 }
 
-void list_remove_at_object_idx(ListHead* p_list, int elem_idx)
+void list_remove_at_object_idx(List* p_list, int elem_idx)
 {
     ListItr itr = list_itr_new(p_list);
     ListNode* ln;

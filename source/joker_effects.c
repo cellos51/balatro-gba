@@ -193,7 +193,7 @@ static JokerEffect joker_stencil_effect(Joker *joker, Card *scored_card) {
     if (scored_card != NULL)
         return effect; // if card != null, we are not at the end-phase of scoring yet
 
-    ListHead* jokers = get_jokers_list();
+    List* jokers = get_jokers_list();
 
     // +1 xmult per empty joker slot...
     //int num_jokers = list_get_size(jokers);
@@ -585,7 +585,7 @@ static JokerEffect triboulet_joker_effect(Joker *joker, Card *scored_card) {
 
 static JokerEffect blueprint_joker_effect(Joker *joker, Card *scored_card) {
     JokerEffect effect = {0};
-    ListHead* jokers = get_jokers_list();
+    List* jokers = get_jokers_list();
     int list_size = list_get_len(*jokers);
     
     for (int i = 0; i < list_size  - 1; i++ ) {
@@ -606,7 +606,7 @@ static JokerEffect brainstorm_joker_effect(Joker *joker, Card *scored_card) {
     if (in_brainstorm)
         return effect;
 
-    ListHead* jokers = get_jokers_list();
+    List* jokers = get_jokers_list();
     JokerObject* first_joker = POOL_AT(JokerObject, list_get_at_idx(*jokers, 0));
 
     if (first_joker != NULL && first_joker->joker->id != JOKER_BRAINSTORM_ID) {
@@ -674,7 +674,7 @@ const JokerInfo joker_registry[] = {
     { COMMON_JOKER, 5, raised_fist_joker_effect },      // 41
     { COMMON_JOKER, 4, smiley_face_joker_effect },      // 42
 
-    // The following jokers don't have sprites yet, 
+    // The following jokers don't have sprites yet,
     // uncomment them when their sprites are added.
 #if 0
 

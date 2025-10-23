@@ -89,7 +89,7 @@ void game_update();
 void game_change_state(enum GameState new_game_state);
 
 // Forward declaration
-struct ListHead;
+struct List;
 
 // Utility functions for other files
 typedef struct CardObject CardObject; // forward declaration, actually declared in card.h
@@ -103,7 +103,7 @@ CardObject**    get_played_array(void);
 int             get_played_top(void);
 bool            is_joker_owned(int joker_id);
 bool            card_is_face(Card *card);
-ListHead*       get_jokers_list(void);
+List*       get_jokers_list(void);
 
 int get_deck_top(void);
 int get_num_discards_remaining(void);
