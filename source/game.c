@@ -2509,7 +2509,6 @@ static void game_shop_create_items()
         if ((joker_idx = list_get_at_object_idx(_avail_shop_jokers_list, TEST_JOKER_ID)) >= 0)
         {
             joker_id = TEST_JOKER_ID;
-            //list_remove_at_object_idx(&_avail_shop_jokers_list, joker_idx);
             list_remove_at_idx(&_avail_shop_jokers_list, joker_idx);
         }
         else
