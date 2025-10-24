@@ -207,7 +207,8 @@ static JokerEffect joker_stencil_effect(Joker *joker, Card *scored_card) {
 
     while((ln = list_itr_next(&itr)))
     {
-        JokerObject* joker_object = POOL_AT(JokerObject, ln->elem_idx);
+        //JokerObject* joker_object = POOL_AT(JokerObject, ln->elem_idx);
+        JokerObject* joker_object = ln->data.ptr;
         if (joker_object->joker->id == JOKER_STENCIL_ID) effect.xmult++;
     }
 
@@ -583,25 +584,49 @@ static JokerEffect triboulet_joker_effect(Joker *joker, Card *scored_card) {
     return effect;
 }
 
+// TODO: test and verify this change
 static JokerEffect blueprint_joker_effect(Joker *joker, Card *scored_card) {
     JokerEffect effect = {0};
     List* jokers = get_jokers_list();
+
+    ListItr itr = list_itr_new(jokers);
+    ListNode* ln;
+
+    while((ln = list_itr_next(&itr)))
+    {
+        JokerObject* curr_joker_object = (JokerObject*)ln->data.ptr;
+        if (curr_joker_object->joker == joker)
+        {
+            ListNode* next_node = list_itr_next(&itr);
+            if(!next_node) break;
+          
+            JokerObject* next_joker_object = (JokerObject*)next_node->data.ptr;
+            effect = joker_get_score_effect(next_joker_object->joker, scored_card);
+            break;
+        }
+    }
+
+    /*
     int list_size = list_get_len(*jokers);
     
     for (int i = 0; i < list_size  - 1; i++ ) {
-        JokerObject* curr_joker_object = POOL_AT(JokerObject, list_get_at_idx(*jokers, i));
+        //JokerObject* curr_joker_object = POOL_AT(JokerObject, list_get_at_idx(*jokers, i));
+        JokerObject* curr_joker_object = list_get_at_idx(*jokers, i));
         if (curr_joker_object->joker == joker) {
             JokerObject* next_joker_object = POOL_AT(JokerObject, list_get_at_idx(*jokers, i + 1));
             effect = joker_get_score_effect(next_joker_object->joker, scored_card);
             break;
         }
     }
+    */
 
     return effect;
 }
 
+// TODO: Readd, test, and verify
 static JokerEffect brainstorm_joker_effect(Joker *joker, Card *scored_card) {
     JokerEffect effect = {0};
+  /*
     static bool in_brainstorm = false;
     if (in_brainstorm)
         return effect;
@@ -615,6 +640,7 @@ static JokerEffect brainstorm_joker_effect(Joker *joker, Card *scored_card) {
         effect = joker_get_score_effect(first_joker->joker, scored_card);
         in_brainstorm = false;
     }
+    */
 
     return effect;
 }
