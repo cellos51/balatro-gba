@@ -2,6 +2,7 @@
 #define POOL_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #ifdef POOLS_TEST_ENV
 #define POOLS_DEF_FILE "def_test_mempool.h"
