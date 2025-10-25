@@ -12,15 +12,21 @@
 #define POOL_BITS_PER_WORD 32
 #define POOL_BITMAP_BYTES   8
 
-typedef struct PoolBitmap {
+typedef struct PoolBitmap
+{
     uint32_t *w;
     uint32_t nbits;
     uint32_t nwords;
     uint32_t cap;
 } PoolBitmap;
 
-void pool_bm_clear_idx(PoolBitmap *bm, int idx);
+//void pool_bm_clear_idx(PoolBitmap *bm, int idx);
+void pool_bm_set_idx(PoolBitmap *bm, int idx, bool val);
 int pool_bm_get_free_idx(PoolBitmap *bm);
+void pool_bm_clear(PoolBitmap *bm);
+bool pool_bm_empty(PoolBitmap *bm);
+bool pool_bm_is_set(PoolBitmap *bm, int idx);
+int pool_bm_num_set_bits(PoolBitmap *bm);
 
 #define POOL_DECLARE_TYPE(type)                                             \
     typedef struct                                                          \
@@ -56,7 +62,7 @@ int pool_bm_get_free_idx(PoolBitmap *bm);
     {                                                                       \
         if(entry == NULL) return;                                           \
         int offset = entry - &type##_pool.objects[0];                       \
-        pool_bm_clear_idx(&type##_pool.bm, offset);                         \
+        pool_bm_set_idx(&type##_pool.bm, offset, false);                    \
     }                                                                       \
     int pool_idx_##type(type *entry)                                        \
     {                                                                       \

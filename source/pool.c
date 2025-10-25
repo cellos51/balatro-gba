@@ -1,6 +1,7 @@
 #include "pool.h"
 #include "util.h"
 
+/*
 void pool_bm_clear_idx(PoolBitmap *bm, int idx)
 {
     uint32_t i = idx / POOL_BITS_PER_WORD;
@@ -14,6 +15,29 @@ void pool_bm_clear_idx(PoolBitmap *bm, int idx)
     // Get last 5-bits, same as a modulo (% 32) operation on positive numbers
     //uint32_t b = idx & 0x1F;
     bm->w[i] &= ~((uint32_t)1 << b);
+}
+*/
+
+void pool_bm_set_idx(PoolBitmap *bm, int idx, bool val)
+{
+    uint32_t i = idx / POOL_BITS_PER_WORD;
+    uint32_t b = idx % POOL_BITS_PER_WORD;
+
+    // Below are the "fast" forms of the above operations, respectively.
+    // These are more efficient, but removed for readability
+    // See: https://github.com/cellos51/balatro-gba/pull/132#discussion_r2365966071
+    // Divide by 32 to get the word index
+    //uint32_t i = idx >> 5;
+    // Get last 5-bits, same as a modulo (% 32) operation on positive numbers
+    //uint32_t b = idx & 0x1F;
+    if(val)
+    {
+        bm->w[i] |= (uint32_t)1 << b;
+    }
+    else
+    {
+        bm->w[i] &= ~((uint32_t)1 << b);
+    }
 }
 
 int pool_bm_get_free_idx(PoolBitmap *bm)
@@ -42,6 +66,42 @@ int pool_bm_get_free_idx(PoolBitmap *bm)
     return UNDEFINED;
 }
 
+void pool_bm_clear(PoolBitmap *bm)
+{
+    for(int i = 0; i < bm->nwords; i++)
+    {
+        bm->w[i] = 0;
+    }
+}
+
+bool pool_bm_empty(PoolBitmap *bm)
+{
+    for(int i = 0; i < bm->nwords; i++)
+    {
+        if(bm->w[i]) return false;
+    }
+    return true;
+}
+
+bool pool_bm_is_set(PoolBitmap *bm, int idx)
+{
+    uint32_t i = idx / POOL_BITS_PER_WORD;
+    uint32_t b = idx % POOL_BITS_PER_WORD;
+
+    return bm->w[i] & (uint32_t)1 << b;
+}
+
+int pool_bm_num_set_bits(PoolBitmap *bm)
+{
+    int sum = 0;
+
+    for(int i = 0; i < bm->nwords; i++)
+    {
+        sum += __builtin_popcount(bm->w[i]);
+    }
+
+    return sum;
+}
 
 #define POOL_ENTRY(name, capacity) \
 POOL_DEFINE_TYPE(name, capacity);
