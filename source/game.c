@@ -221,8 +221,17 @@ static bool sort_by_suit = false;
 
 static List _active_jokers_list;
 static List _discarded_jokers_list;
-// TODO: turn this into a bitmap
-static List _avail_shop_jokers_list; // List of joker IDs
+
+uint32_t _avail_jokers_bm_data[POOL_BITMAP_BYTES];
+static PoolBitmap _avail_jokers_bm =
+{
+    .w = _avail_jokers_bm_data,
+    .nbits = POOL_BITS_PER_WORD,
+    .nwords = POOL_BITMAP_BYTES,
+    .cap = 256,
+};
+
+//static List _avail_shop_jokers_list; // List of joker IDs
 static List _shop_jokers_list;
 
 // Stacks
@@ -1291,14 +1300,16 @@ void jokers_available_to_shop_init()
 {
     int num_defined_jokers = get_joker_registry_size();
 
-    list_destroy(&_avail_shop_jokers_list);
-    _avail_shop_jokers_list = list_new();
+    //list_destroy(&_avail_shop_jokers_list);
+    //_avail_shop_jokers_list = list_new();
+    pool_bm_clear(&_avail_jokers_bm);
     
     for (intptr_t i = 0; i < num_defined_jokers; i++)
     {
+        pool_bm_set_idx(&_avail_jokers_bm, i, true);
         // Add all joker IDs sequentially
         //list_push_back(&_avail_shop_jokers_list, i);
-        list_push_back(&_avail_shop_jokers_list, list_data_int(i));
+        //list_push_back(&_avail_shop_jokers_list, list_data_int(i));
     }
 }
 
@@ -1307,7 +1318,7 @@ void game_init()
     // Initialize all jokers list once
     _active_jokers_list = list_new();
     _discarded_jokers_list = list_new();
-    _avail_shop_jokers_list = list_new();
+    //_avail_shop_jokers_list = list_new();
     _shop_jokers_list = list_new();
 
     jokers_available_to_shop_init();
@@ -2499,7 +2510,8 @@ void erase_price_under_sprite_object(SpriteObject *sprite_object)
 static void game_shop_create_items()
 {
     tte_erase_rect_wrapper(SHOP_PRICES_TEXT_RECT);
-    if (list_is_empty(_avail_shop_jokers_list))
+    //if (list_is_empty(_avail_shop_jokers_list))
+    if (pool_bm_empty(&_avail_jokers_bm))
     {
         // No jokers to create
         return;
@@ -2513,20 +2525,58 @@ static void game_shop_create_items()
         int joker_idx = 0;
         intptr_t joker_id = 0;
         #ifdef TEST_JOKER_ID // Allow defining an ID for a joker to always appear in shop and be tested
-        if ((joker_idx = list_get_at_object_idx(_avail_shop_jokers_list, list_data_int(TEST_JOKER_ID))) >= 0)
+        //if ((joker_idx = list_get_at_object_idx(_avail_shop_jokers_list, list_data_int(TEST_JOKER_ID))) >= 0)
+        if (pool_bm_is_set(&_avail_jokers_bm, TEST_JOKER_ID))
         {
             joker_id = TEST_JOKER_ID;
-            list_remove_at_idx(&_avail_shop_jokers_list, joker_idx);
+            joker_idx = TEST_JOKER_ID;
+            //list_remove_at_idx(&_avail_shop_jokers_list, joker_idx);
         }
         else
         #endif
         {
-            joker_idx = random() % list_get_len(_avail_shop_jokers_list);
+            //joker_idx = random() % list_get_len(_avail_shop_jokers_list);
+            // TODO: Come back to this... here it will make a mistake because 0's will ruin the indices
+            // however... if you can think of a clever way to get the offset in the bitmap??? Maybe
+            // A quick binary search, counting the number of 1's byte-by-byte
+            // Then when it's higher you stop and find it there. Would still be faster than
+            // the list
+            joker_idx = random() % pool_bm_num_set_bits(&_avail_jokers_bm);
+            //joker_id = joker_idx;
+            // should be moved out of here for sure
+            int tracker, prev_tracker = 0;
+            for(int i = 0; i < _avail_jokers_bm.nwords; i++)
+            {
+                tracker = __builtin_popcount(_avail_jokers_bm.w[i]);
+
+                if(tracker > joker_idx)
+                {
+                    // The index is here somewhere
+                    int base = prev_tracker; // this one is to count the 1's not the offset
+                    int offset = prev_tracker; // this one is for the actual offset we want to map the id to
+                    for (int j = 0; j < POOL_BITS_PER_WORD; j++)
+                    {
+                        if(base == joker_idx)
+                        {
+                            joker_id = offset;
+                            break;
+                        }
+                        offset++;
+                        base += (_avail_jokers_bm.w[i] >> j) & 0x01;
+                    }
+                    
+                    break;
+                }
+
+                prev_tracker = tracker;
+            }
+            
             //joker_id = list_get_at_idx(_avail_shop_jokers_list, joker_idx);
-            joker_id = list_get_at_idx(_avail_shop_jokers_list, joker_idx).val;
-            list_remove_at_idx(&_avail_shop_jokers_list, joker_idx);
+            //joker_id = list_get_at_idx(_avail_shop_jokers_list, joker_idx).val;
+            
+            //list_remove_at_idx(&_avail_shop_jokers_list, joker_idx);
         }
-        // TODO: do this here: list_remove_at_idx(&_avail_shop_jokers_list, joker_idx);
+        pool_bm_set_idx(&_avail_jokers_bm, joker_idx, false);
         
         JokerObject *joker_object = joker_object_new(joker_new(joker_id));
 
@@ -2592,7 +2642,8 @@ static void game_shop_reroll(int *reroll_cost)
 
         if (joker_object != NULL)
         {
-            list_push_back(&_avail_shop_jokers_list, list_data_int(joker_object->joker->id));
+            //list_push_back(&_avail_shop_jokers_list, list_data_int(joker_object->joker->id));
+            pool_bm_set_idx(&_avail_jokers_bm, joker_object->joker->id, true);
             joker_object_destroy(&joker_object); // Destroy the joker object if it exists
         }
     }
@@ -2664,19 +2715,15 @@ void game_sell_joker(int joker_idx)
     if (joker_idx < 0 || joker_idx > list_get_len(_active_jokers_list))
         return;
     
-    //int list_offset = list_get_at_idx(_all_jokers_list, joker_idx);
-    //int list_offset = list_get_at_idx(_all_jokers_list, joker_idx).val;
-    // TODO THIS SEEMS WRONG
-    //JokerObject *joker_object = POOL_AT(JokerObject, list_offset);
-    
     JokerObject* joker_object = (JokerObject*)list_get_at_idx(_active_jokers_list, joker_idx).ptr;
     money += joker_get_sell_value(joker_object->joker);
     display_money(money);
     erase_price_under_sprite_object(joker_object->sprite_object);
 
     list_remove_at_idx(&_active_jokers_list, joker_idx);
-    //list_push_back(&_avail_shop_jokers_list, (intptr_t)joker_object->joker->id);
-    list_push_back(&_avail_shop_jokers_list, list_data_int(joker_object->joker->id));
+    
+    //list_push_back(&_avail_shop_jokers_list, list_data_int(joker_object->joker->id));
+    pool_bm_set_idx(&_avail_jokers_bm, joker_idx, true);
 
     joker_start_discard_animation(joker_object);
 }
@@ -2962,12 +3009,9 @@ static void game_shop_on_exit()
         JokerObject* joker_object = (JokerObject*)ln->data.ptr;
         if (joker_object != NULL)
         {
-            //_shop_jokers_list
-            //list_push_back(List *p_list, int elem_idx);
             // Make the joker available back to shop
-            //int_list_append(jokers_available_to_shop, (intptr_t)joker_object->joker->id);
-            //list_push_back(&_avail_shop_jokers_list, joker_object->joker->id);
-            list_push_back(&_avail_shop_jokers_list, list_data_int(joker_object->joker->id));
+            //list_push_back(&_avail_shop_jokers_list, list_data_int(joker_object->joker->id));
+            pool_bm_set_idx(&_avail_jokers_bm, joker_object->joker->id, true);
         }
         joker_object_destroy(&joker_object); // Destroy the joker objects
     }
@@ -3283,7 +3327,7 @@ static void game_over_on_exit()
     sprite_destroy(&blind_select_tokens[BLIND_TYPE_SMALL]);
     sprite_destroy(&blind_select_tokens[BLIND_TYPE_BIG]);
     sprite_destroy(&blind_select_tokens[BLIND_TYPE_BOSS]);
-    list_destroy(&_avail_shop_jokers_list);
+    //list_destroy(&_avail_shop_jokers_list);
 
     game_init();
 
