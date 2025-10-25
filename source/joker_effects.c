@@ -3,6 +3,7 @@
 #include "util.h"
 #include "hand_analysis.h"
 #include "list.h"
+#include "pool.h"
 #include <stdlib.h>
 
 static JokerEffect default_joker_effect(Joker *joker, Card *scored_card) {
@@ -192,20 +193,23 @@ static JokerEffect joker_stencil_effect(Joker *joker, Card *scored_card) {
     if (scored_card != NULL)
         return effect; // if card != null, we are not at the end-phase of scoring yet
 
-    List* jokers = get_jokers();
+    List* jokers = get_jokers_list();
 
     // +1 xmult per empty joker slot...
-    int num_jokers = list_get_size(jokers);
+    //int num_jokers = list_get_size(jokers);
+    int num_jokers = list_get_len(*jokers);
 
     effect.xmult = (MAX_JOKERS_HELD_SIZE) - num_jokers;
 
     // ...and also each stencil_joker adds +1 xmult
-    
-    for (int i = 0; i < num_jokers; i++ )
+    ListItr itr = list_itr_new(jokers);
+    ListNode* ln;
+
+    while((ln = list_itr_next(&itr)))
     {
-        JokerObject* joker_object = list_get(jokers, i);
-        if (joker_object->joker->id == JOKER_STENCIL_ID)
-            effect.xmult++;
+        //JokerObject* joker_object = POOL_AT(JokerObject, ln->elem_idx);
+        JokerObject* joker_object = ln->data.ptr;
+        if (joker_object->joker->id == JOKER_STENCIL_ID) effect.xmult++;
     }
 
     return effect;
@@ -388,7 +392,7 @@ static JokerEffect abstract_joker_effect(Joker *joker, Card *scored_card) {
         return effect; // if card != null, we are not at the end-phase of scoring yet
 
     // +1 xmult per occupied joker slot
-    int num_jokers = list_get_size(get_jokers());
+    int num_jokers = list_get_len(*get_jokers_list());
     effect.mult = num_jokers * 3;
 
     return effect;
@@ -580,31 +584,55 @@ static JokerEffect triboulet_joker_effect(Joker *joker, Card *scored_card) {
     return effect;
 }
 
+// TODO: test and verify this change
 static JokerEffect blueprint_joker_effect(Joker *joker, Card *scored_card) {
     JokerEffect effect = {0};
-    List* jokers = get_jokers();
-    int list_size = list_get_size(jokers);
-    
-    for (int i = 0; i < list_size  - 1; i++ ) {
-        JokerObject* curr_joker_object = list_get(jokers, i);
-        if (curr_joker_object->joker == joker) {
-            JokerObject* next_joker_object = list_get(jokers, i + 1);
+    List* jokers = get_jokers_list();
+
+    ListItr itr = list_itr_new(jokers);
+    ListNode* ln;
+
+    while((ln = list_itr_next(&itr)))
+    {
+        JokerObject* curr_joker_object = (JokerObject*)ln->data.ptr;
+        if (curr_joker_object->joker == joker)
+        {
+            ListNode* next_node = list_itr_next(&itr);
+            if(!next_node) break;
+          
+            JokerObject* next_joker_object = (JokerObject*)next_node->data.ptr;
             effect = joker_get_score_effect(next_joker_object->joker, scored_card);
             break;
         }
     }
 
+    /*
+    int list_size = list_get_len(*jokers);
+    
+    for (int i = 0; i < list_size  - 1; i++ ) {
+        //JokerObject* curr_joker_object = POOL_AT(JokerObject, list_get_at_idx(*jokers, i));
+        JokerObject* curr_joker_object = list_get_at_idx(*jokers, i));
+        if (curr_joker_object->joker == joker) {
+            JokerObject* next_joker_object = POOL_AT(JokerObject, list_get_at_idx(*jokers, i + 1));
+            effect = joker_get_score_effect(next_joker_object->joker, scored_card);
+            break;
+        }
+    }
+    */
+
     return effect;
 }
 
+// TODO: Readd, test, and verify
 static JokerEffect brainstorm_joker_effect(Joker *joker, Card *scored_card) {
     JokerEffect effect = {0};
+  /*
     static bool in_brainstorm = false;
     if (in_brainstorm)
         return effect;
 
-    List* jokers = get_jokers();
-    JokerObject* first_joker = list_get(jokers, 0);
+    List* jokers = get_jokers_list();
+    JokerObject* first_joker = POOL_AT(JokerObject, list_get_at_idx(*jokers, 0));
 
     if (first_joker != NULL && first_joker->joker->id != JOKER_BRAINSTORM_ID) {
         // Static var to avoid infinite blueprint + brainstorm loops
@@ -612,6 +640,7 @@ static JokerEffect brainstorm_joker_effect(Joker *joker, Card *scored_card) {
         effect = joker_get_score_effect(first_joker->joker, scored_card);
         in_brainstorm = false;
     }
+    */
 
     return effect;
 }
@@ -671,7 +700,7 @@ const JokerInfo joker_registry[] = {
     { COMMON_JOKER, 5, raised_fist_joker_effect },      // 41
     { COMMON_JOKER, 4, smiley_face_joker_effect },      // 42
 
-    // The following jokers don't have sprites yet, 
+    // The following jokers don't have sprites yet,
     // uncomment them when their sprites are added.
 #if 0
 
@@ -689,6 +718,7 @@ const JokerInfo* get_joker_registry_entry(int joker_id) {
     return &joker_registry[joker_id];
 }
 
-size_t get_joker_registry_size(void) {
+size_t get_joker_registry_size(void)
+{
     return joker_registry_size;
 }

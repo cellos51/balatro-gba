@@ -2,6 +2,7 @@
 #define POOL_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #ifdef POOLS_TEST_ENV
 #define POOLS_DEF_FILE "def_test_mempool.h"
@@ -12,15 +13,21 @@
 #define POOL_BITS_PER_WORD 32
 #define POOL_BITMAP_BYTES   8
 
-typedef struct PoolBitmap {
+typedef struct PoolBitmap
+{
     uint32_t *w;
     uint32_t nbits;
     uint32_t nwords;
     uint32_t cap;
 } PoolBitmap;
 
-void pool_bm_clear_idx(PoolBitmap *bm, int idx);
+//void pool_bm_clear_idx(PoolBitmap *bm, int idx);
+void pool_bm_set_idx(PoolBitmap *bm, int idx, bool val);
 int pool_bm_get_free_idx(PoolBitmap *bm);
+void pool_bm_clear(PoolBitmap *bm);
+bool pool_bm_empty(PoolBitmap *bm);
+bool pool_bm_is_set(PoolBitmap *bm, int idx);
+int pool_bm_num_set_bits(PoolBitmap *bm);
 
 #define POOL_DECLARE_TYPE(type)                                             \
     typedef struct                                                          \
@@ -30,6 +37,8 @@ int pool_bm_get_free_idx(PoolBitmap *bm);
     } type##Pool;                                                           \
     type *pool_get_##type();                                                \
     void  pool_free_##type(type *obj);                                      \
+    int pool_idx_##type(type *obj);                                         \
+    type *pool_at_##type(int idx);
 
 #define POOL_DEFINE_TYPE(type, capacity)                                    \
     static type type##_storage[capacity];                                   \
@@ -54,11 +63,22 @@ int pool_bm_get_free_idx(PoolBitmap *bm);
     {                                                                       \
         if(entry == NULL) return;                                           \
         int offset = entry - &type##_pool.objects[0];                       \
-        pool_bm_clear_idx(&type##_pool.bm, offset);                         \
+        pool_bm_set_idx(&type##_pool.bm, offset, false);                    \
+    }                                                                       \
+    int pool_idx_##type(type *entry)                                        \
+    {                                                                       \
+        return entry - &type##_pool.objects[0];                             \
+    }                                                                       \
+    type *pool_at_##type(int idx)                                           \
+    {                                                                       \
+        if(idx < 0 || idx >= type##_pool.bm.cap) return NULL;               \
+        return &type##_pool.objects[idx];                                   \
     }
 
 #define POOL_GET(type) pool_get_##type()
 #define POOL_FREE(type, obj) pool_free_##type(obj)
+#define POOL_IDX(type, obj) pool_idx_##type(obj) // the index of the object
+#define POOL_AT(type, idx) pool_at_##type(idx) // the object at
 
 #define POOL_ENTRY(name, capacity) \
 POOL_DECLARE_TYPE(name);

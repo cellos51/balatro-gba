@@ -43,6 +43,8 @@
 #define PAREIDOLIA_JOKER_ID 30
 #define JOKER_BRAINSTORM_ID 40
 
+#include "list.h"
+
 typedef struct 
 {
     u8 id; // Unique ID for the joker, used to identify different jokers
