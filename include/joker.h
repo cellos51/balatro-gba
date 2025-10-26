@@ -35,22 +35,22 @@
 #define RARE_JOKER 2
 #define LEGENDARY_JOKER 3
 
-// When does the Joker callback take place?
+// When does the Joker effect function take place?
 // These are just the common ones. Special Joker behaviour will be checked on a
 // Joker per Joker basis (see if it's there, then do something, e.g. Pareidolia, Baseball Card)
 enum JokerEvent {
-    JOKER_CALLBACK_ON_HAND_PLAYED,     // Triggers only once when the hand is played
-    JOKER_CALLBACK_ON_CARD_SCORED,     // Triggers when a played card scores (e.g. Walkie Talkie, Fibonnacci...)
-    JOKER_CALLBACK_ON_CARD_SCORED_END, // Triggers after the card has finishd scoring (e.g. retrigger Jokers)
-    JOKER_CALLBACK_ON_CARD_HELD,       // Triggers when considering cards held in hand (e.g. Baron, Shoot the Moon...)
-    JOKER_CALLBACK_INDEPENDANT,        // Joker will trigger normally, when Jokers are scored (e.g. base Joker)
-    JOKER_CALLBACK_ON_HAND_SCORED_END, // Triggers when entire hand has finished scoring (e.g. food Jokers)
-    JOKER_CALLBACK_ON_HAND_DISCARDED,  // Triggers when discarding a hand
-    JOKER_CALLBACK_ON_ROUND_END,       // Triggers at the end of the round (e.g. Rocket)
-    JOKER_CALLBACK_ON_BLIND_SELECTED,  // Triggers when selecting a blind (e.g. Dagger, Riff Raff, Madness..)
+    JOKER_EVENT_ON_HAND_PLAYED,     // Triggers only once when the hand is played
+    JOKER_EVENT_ON_CARD_SCORED,     // Triggers when a played card scores (e.g. Walkie Talkie, Fibonnacci...)
+    JOKER_EVENT_ON_CARD_SCORED_END, // Triggers after the card has finishd scoring (e.g. retrigger Jokers)
+    JOKER_EVENT_INDEPENDANT,        // Joker will trigger normally, when Jokers are scored (e.g. base Joker)
+    JOKER_EVENT_ON_HAND_SCORED_END, // Triggers when entire hand has finished scoring (e.g. food Jokers)
+    JOKER_EVENT_ON_HAND_DISCARDED,  // Triggers when discarding a hand
+    JOKER_EVENT_ON_ROUND_END,       // Triggers at the end of the round (e.g. Rocket)
+    JOKER_EVENT_ON_BLIND_SELECTED,  // Triggers when selecting a blind (e.g. Dagger, Riff Raff, Madness..)
 };
 
 #define MAX_JOKER_OBJECTS 32 // The maximum number of joker objects that can be created at once
+#define MAX_JOKER_MSG_BUF_LEN 9 // strlen("Extinct!") + 1 as that is the currently the longest joker message displayed
 
 // Jokers in the game
 #define DEFAULT_JOKER_ID 0
@@ -60,7 +60,6 @@ enum JokerEvent {
 #define JOKER_BRAINSTORM_ID 40
 
 // not yet in th registry
-#define MIME_ID 255
 #define SELTZER_ID 254
 #define PHOTOGRAPH_ID 253
 #define SOCK_AND_BUSKIN_JOKER_ID 252
@@ -78,10 +77,10 @@ typedef struct
     // General purpose values that are interpreted differently for each Joker (scaling, last retriggered card, etc...)
     union
     {
-        int32_t data;
+        s32 data;
         struct {
-            int16_t data0;
-            int16_t data1;
+            s16 data0;
+            s16 data1;
         } halves;
     };
 } Joker;
@@ -100,16 +99,13 @@ typedef struct  // These jokers are triggered after the played hand has finished
     int money;
     bool retrigger; // Retrigger played hand (e.g. "Dusk" joker, even though on the wiki it says "On Scored" it makes more sense to have it here)
     bool expire; // Joker is destroyed (food jokers)
-    char message[8]; // Used to send custom messages e.g. "Extinct" or "-1" (Bananas and food Jokers)
+    char message[MAX_JOKER_MSG_BUF_LEN]; // Used to send custom messages e.g. "Extinct" or "-1" (Bananas and food Jokers)
 } JokerEffect;
 
 typedef JokerEffect (*JokerEffectFunc)(Joker *joker, Card *scored_card, enum JokerEvent joker_event);
 typedef struct {
     u8 rarity;
     u8 base_value;
-    // The following callbacks need to be called at the appropriate time.
-    // If NULL, then the Joker does not have an effect associated with this time.
-    // Some Jokers have effects at several times so we need several callbacks
     JokerEffectFunc joker_effect;
 } JokerInfo;
 const JokerInfo* get_joker_registry_entry(int joker_id);

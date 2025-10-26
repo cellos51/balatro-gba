@@ -33,6 +33,7 @@
 #define TTE_BLUE_PB     13  // 0xD
 #define TTE_RED_PB      14  // 0xE
 #define TTE_WHITE_PB    15  // 0xF
+#define TTE_SPECIAL_PB_MULT_OFFSET 0x1000 //TODO: Change to a better name?
 
 #define TEXT_CLR_YELLOW RGB15(31, 20, 0)    // 0x029F
 #define TEXT_CLR_BLUE   RGB15(0, 18, 31)    // 0x7E40

@@ -1999,7 +1999,7 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                                     continue;
                                 }
 
-                                if (joker_object_score(joker, played[*played_selections - 1]->card, JOKER_CALLBACK_ON_CARD_SCORED, &chips, &mult, NULL, &money, &retrigger)) // NULLs aren't implemented yet
+                                if (joker_object_score(joker, played[*played_selections - 1]->card, JOKER_EVENT_ON_CARD_SCORED, &chips, &mult, NULL, &money, &retrigger)) // NULLs aren't implemented yet
                                 {
                                     display_chips(chips);
                                     display_mult(mult);
@@ -2037,7 +2037,7 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                                         {
                                             joker_scored_index += 1;
                                             JokerObject *joker = list_get(jokers, k);
-                                            if (joker_object_score(joker, played[*played_selections - 1]->card, JOKER_CALLBACK_ON_CARD_SCORED, &chips, &mult, NULL, &money, &retrigger)) // NULLs aren't implemented yet
+                                            if (joker_object_score(joker, played[*played_selections - 1]->card, JOKER_EVENT_ON_CARD_SCORED, &chips, &mult, NULL, &money, &retrigger)) // NULLs aren't implemented yet
                                             {
                                                 last_joker_scored_rarity = joker->joker->rarity;
 
@@ -2095,7 +2095,7 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                                 {
                                     joker_scored_index += 1;
                                     JokerObject *joker = list_get(jokers, k);
-                                    if (joker_object_score(joker, NULL, JOKER_CALLBACK_INDEPENDANT, &chips, &mult, NULL, &money, &retrigger)) // NULLs aren't implemented yet
+                                    if (joker_object_score(joker, NULL, JOKER_EVENT_INDEPENDANT, &chips, &mult, NULL, &money, &retrigger)) // NULLs aren't implemented yet
                                     {
                                         display_chips(chips);
                                         display_mult(mult);
@@ -2112,7 +2112,7 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                                     // The only thing that could need displaying is money
                                     joker_round_end_index += 1;
                                     JokerObject *joker = list_get(jokers, k);
-                                    if (joker_object_score(joker, NULL, JOKER_CALLBACK_ON_HAND_SCORED_END, &chips, &mult, NULL, &money, &retrigger))
+                                    if (joker_object_score(joker, NULL, JOKER_EVENT_ON_HAND_SCORED_END, &chips, &mult, NULL, &money, &retrigger))
                                     {
                                         // don't know which ones are really necessary so here they all are
                                         display_chips(chips);

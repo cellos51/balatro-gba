@@ -149,28 +149,22 @@ Joker *joker_new(u8 id)
     // Implement scaling Jokers and retriggers
     switch (id)
     {
-        // in-scope Jokers
         case HANGING_CHAD_ID:
             joker->data = 2; // retriggers left, reset to 2 at round end
             break;
         case DUSK_ID:
-            joker->data = -1; // previously retriggered card index
+            joker->data = UNDEFINED; // previously retriggered card index
             break;
         case HACK_ID:
-            joker->data = -1; // previously retriggered card index
+            joker->data = UNDEFINED; // previously retriggered card index
             break;
         case PHOTOGRAPH_ID:
-            joker->data = -1; // First scoring face card index
+            joker->data = UNDEFINED; // First scoring face card index
             break;
         case SOCK_AND_BUSKIN_JOKER_ID:
-            joker->data = -1; // previously retriggered face card index
-
-        // out-of-scope Jokers
-        case MIME_ID:
-            joker->data = -1; // previously retriggered held card index
-            break;
+            joker->data = UNDEFINED; // previously retriggered face card index
         case SELTZER_ID:
-            joker->halves.data0 = -1; // previously retriggered card index
+            joker->halves.data0 = UNDEFINED; // previously retriggered card index
             joker->halves.data1 = 10; // remaining retriggered hands
             break;
         default:
@@ -302,7 +296,7 @@ bool joker_object_score(JokerObject *joker_object, Card* scored_card, enum Joker
 
     // Use the custom message to show a retrigger
     if (joker_effect.retrigger) {
-        snprintf(joker_effect.message, 7, "Again!");
+        snprintf(joker_effect.message, MAX_JOKER_MSG_BUF_LEN, "Again!");
     }
 
     const int joker_score_display_offset_px = (MAX_CARD_SCORE_STR_LEN + 1)*TTE_CHAR_SIZE;
@@ -311,40 +305,40 @@ bool joker_object_score(JokerObject *joker_object, Card* scored_card, enum Joker
     int cursorPosX = fx2int(joker_object->sprite_object->x) + 8; // Offset of 16 pixels to center the text on the card
     if (joker_effect.chips > 0)
     {
-        char score_buffer[INT_MAX_DIGITS + 1]; // For '+' and null terminator
+        char score_buffer[INT_MAX_DIGITS + 2]; // For '+' and null terminator
         tte_set_pos(cursorPosX, JOKER_SCORE_TEXT_Y);
         // TODO fix magic number
-        tte_set_special(TTE_BLUE_PB * 4096); // Blue
+        tte_set_special(TTE_BLUE_PB * TTE_SPECIAL_PB_MULT_OFFSET);
         snprintf(score_buffer, sizeof(score_buffer), "+%d", joker_effect.chips);
         tte_write(score_buffer);
         cursorPosX += joker_score_display_offset_px;
     }
     if (joker_effect.mult > 0)
     {
-        char score_buffer[INT_MAX_DIGITS + 1];
+        char score_buffer[INT_MAX_DIGITS + 2];
         tte_set_pos(cursorPosX, JOKER_SCORE_TEXT_Y);
         // TODO fix magic number
-        tte_set_special(TTE_RED_PB * 4096); // Red
+        tte_set_special(TTE_RED_PB * TTE_SPECIAL_PB_MULT_OFFSET);
         snprintf(score_buffer, sizeof(score_buffer), "+%d", joker_effect.mult);
         tte_write(score_buffer);
         cursorPosX += joker_score_display_offset_px;
     }
     if (joker_effect.xmult > 0)
     {
-        char score_buffer[INT_MAX_DIGITS + 1];
+        char score_buffer[INT_MAX_DIGITS + 2];
         tte_set_pos(cursorPosX, JOKER_SCORE_TEXT_Y);
         // TODO fix magic number
-        tte_set_special(TTE_RED_PB * 4096); // Red
+        tte_set_special(TTE_RED_PB * TTE_SPECIAL_PB_MULT_OFFSET);
         snprintf(score_buffer, sizeof(score_buffer), "X%d", joker_effect.xmult);
         tte_write(score_buffer);
         cursorPosX += joker_score_display_offset_px;
     }
     if (joker_effect.money > 0)
     {
-        char score_buffer[INT_MAX_DIGITS + 1];
+        char score_buffer[INT_MAX_DIGITS + 2];
         tte_set_pos(cursorPosX, JOKER_SCORE_TEXT_Y);
         // TODO fix magic number
-        tte_set_special(TTE_YELLOW_PB * 4096); // Yellow
+        tte_set_special(TTE_YELLOW_PB * TTE_SPECIAL_PB_MULT_OFFSET);
         snprintf(score_buffer, sizeof(score_buffer), "+%d", joker_effect.money);
         tte_write(score_buffer);
         cursorPosX += joker_score_display_offset_px;
@@ -354,7 +348,7 @@ bool joker_object_score(JokerObject *joker_object, Card* scored_card, enum Joker
     {
         tte_set_pos(cursorPosX, JOKER_SCORE_TEXT_Y);
         // TODO fix magic number
-        tte_set_special(TTE_YELLOW_PB * 4096); // Yellow
+        tte_set_special(TTE_WHITE_PB * TTE_SPECIAL_PB_MULT_OFFSET);
         tte_write(joker_effect.message);
         cursorPosX += joker_score_display_offset_px;
     }
