@@ -186,12 +186,12 @@ void joker_destroy(Joker **joker)
     *joker = NULL;
 }
 
-JokerEffect joker_get_score_effect(Joker *joker, Card *scored_card, int scored_when)
+JokerEffect joker_get_score_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event)
 {
     const JokerInfo *jinfo = get_joker_registry_entry(joker->id);
     if (!jinfo || jinfo->joker_effect == NULL) return (JokerEffect){0};
 
-    return jinfo->joker_effect(joker, scored_card, scored_when);
+    return jinfo->joker_effect(joker, scored_card, joker_event);
 }
 
 int joker_get_sell_value(const Joker* joker)
@@ -279,9 +279,15 @@ void joker_object_shake(JokerObject *joker_object, mm_word sound_id)
     sprite_object_shake(joker_object->sprite_object, sound_id);
 }
 
-bool joker_object_score(JokerObject *joker_object, Card* scored_card, int scored_when, int *chips, int *mult, int *xmult, int *money, bool *retrigger)
+bool joker_object_score(JokerObject *joker_object, Card* scored_card, enum JokerEvent joker_event, int *chips, int *mult, int *xmult, int *money, bool *retrigger)
 {
-    JokerEffect joker_effect = joker_get_score_effect(joker_object->joker, scored_card, scored_when);
+    // protect against NULL joker_objects
+    if (joker_object == NULL)
+    {
+        return false;
+    }
+
+    JokerEffect joker_effect = joker_get_score_effect(joker_object->joker, scored_card, joker_event);
 
     if (memcmp(&joker_effect, &(JokerEffect){0}, sizeof(JokerEffect)) == 0)
     {
@@ -305,7 +311,7 @@ bool joker_object_score(JokerObject *joker_object, Card* scored_card, int scored
     int cursorPosX = fx2int(joker_object->sprite_object->x) + 8; // Offset of 16 pixels to center the text on the card
     if (joker_effect.chips > 0)
     {
-        char score_buffer[INT_MAX_DIGITS + 2]; // For '+' and null terminator
+        char score_buffer[INT_MAX_DIGITS + 1]; // For '+' and null terminator
         tte_set_pos(cursorPosX, JOKER_SCORE_TEXT_Y);
         // TODO fix magic number
         tte_set_special(TTE_BLUE_PB * 4096); // Blue
@@ -315,7 +321,7 @@ bool joker_object_score(JokerObject *joker_object, Card* scored_card, int scored
     }
     if (joker_effect.mult > 0)
     {
-        char score_buffer[INT_MAX_DIGITS + 2];
+        char score_buffer[INT_MAX_DIGITS + 1];
         tte_set_pos(cursorPosX, JOKER_SCORE_TEXT_Y);
         // TODO fix magic number
         tte_set_special(TTE_RED_PB * 4096); // Red
@@ -325,7 +331,7 @@ bool joker_object_score(JokerObject *joker_object, Card* scored_card, int scored
     }
     if (joker_effect.xmult > 0)
     {
-        char score_buffer[INT_MAX_DIGITS + 2];
+        char score_buffer[INT_MAX_DIGITS + 1];
         tte_set_pos(cursorPosX, JOKER_SCORE_TEXT_Y);
         // TODO fix magic number
         tte_set_special(TTE_RED_PB * 4096); // Red
@@ -335,7 +341,7 @@ bool joker_object_score(JokerObject *joker_object, Card* scored_card, int scored
     }
     if (joker_effect.money > 0)
     {
-        char score_buffer[INT_MAX_DIGITS + 2];
+        char score_buffer[INT_MAX_DIGITS + 1];
         tte_set_pos(cursorPosX, JOKER_SCORE_TEXT_Y);
         // TODO fix magic number
         tte_set_special(TTE_YELLOW_PB * 4096); // Yellow
