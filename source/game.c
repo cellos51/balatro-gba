@@ -220,7 +220,6 @@ static int scored_card_index = 0;
 // Keeping track of what Jokers are scored at each step
 static int joker_scored_index = 0;
 static int joker_round_end_index = 0;
-static int last_joker_scored_rarity = -1; // Baseball Card exclusive
 
 static int selection_x = 0;
 static int selection_y = 0;
@@ -384,14 +383,6 @@ void set_game_speed(int new_game_speed)
 int get_money(void)
 {
     return money;
-}
-
-static void reset_scoring_indices()
-{
-    scored_card_index = 0;
-    joker_scored_index = 0;
-    joker_round_end_index = 0;
-    last_joker_scored_rarity = -1;
 }
 
 
@@ -1960,6 +1951,25 @@ static void cards_in_hand_update_loop(bool* discarded_card, int* played_selectio
     }
 }
 
+// returns true if the top level scoring function should return too
+static bool joker_scoring_loop(int* iteration_start, Card* played_card, enum JokerEvent joker_event)
+{
+    for (int k = *iteration_start; k < list_get_size(jokers); k++)
+    {
+        *iteration_start += 1;
+        JokerObject *joker = list_get(jokers, k);
+        if (joker_object_score(joker, played_card, joker_event, &chips, &mult, NULL, &money, &retrigger))
+        {
+            display_chips(chips);
+            display_mult(mult);
+            display_money(money);
+
+            return true;
+        }
+    }
+    return false;
+}
+
 static void played_cards_update_loop(bool* discarded_card, int* played_selections, bool* sound_played)
 {
     // So this one is a bit fucking weird because I have to work kinda backwards for everything because of the order of the pushed cards from the hand to the play stack
@@ -2025,20 +2035,9 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
 
                             if (*played_selections > 0)
                             {
-                                for (int k = joker_scored_index; k < list_get_size(jokers); k++)
+                                if (joker_scoring_loop(&joker_scored_index, played[*played_selections - 1]->card, JOKER_EVENT_ON_CARD_SCORED))
                                 {
-                                    joker_scored_index += 1;
-                                    JokerObject *joker = list_get(jokers, k);
-                                    if (joker_object_score(joker, played[*played_selections - 1]->card, JOKER_EVENT_ON_CARD_SCORED, &chips, &mult, NULL, &money, &retrigger))
-                                    {
-                                        last_joker_scored_rarity = joker->joker->rarity;
-
-                                        display_chips(chips);
-                                        display_mult(mult);
-                                        display_money(money);
-
-                                        return; 
-                                    }
+                                    return;
                                 }
                             }
 
@@ -2092,37 +2091,15 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
 
                         tte_erase_rect_wrapper(PLAYED_CARDS_SCORES_RECT);
 
-                        // Independent joker scoring loop
-                        for (int k = joker_scored_index; k < list_get_size(jokers); k++)
+                        if (joker_scoring_loop(&joker_scored_index, NULL, JOKER_EVENT_INDEPENDANT))
                         {
-                            joker_scored_index += 1;
-                            JokerObject *joker = list_get(jokers, k);
-                            if (joker_object_score(joker, NULL, JOKER_EVENT_INDEPENDANT, &chips, &mult, NULL, &money, &retrigger)) // NULLs aren't implemented yet
-                            {
-                                display_chips(chips);
-                                display_mult(mult);
-                                display_money(money);
-
-                                return; // Returning was just the easiest way to break out of the loop
-                            }
+                            return;
                         }
 
                         // Trigger hand end effect for all jokers once they are done scoring
-                        for (int k = joker_round_end_index; k < list_get_size(jokers); k++)
+                        if (joker_scoring_loop(&joker_round_end_index, NULL, JOKER_EVENT_ON_HAND_SCORED_END))
                         {
-                            // Reset the joker's processed state for the next round and process round end effects
-                            // The only thing that could need displaying is money
-                            joker_round_end_index += 1;
-                            JokerObject *joker = list_get(jokers, k);
-                            if (joker_object_score(joker, NULL, JOKER_EVENT_ON_HAND_SCORED_END, &chips, &mult, NULL, &money, &retrigger))
-                            {
-                                // don't know which ones are really necessary so here they all are
-                                display_chips(chips);
-                                display_mult(mult);
-                                display_money(money);
-                            
-                                return;
-                            }
+                            return;
                         }
 
                         play_state = PLAY_ENDING;
@@ -2194,7 +2171,9 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                                 hand_selections = 0;
                                 *played_selections = 0;
                                 played_top = -1; // Reset the played stack
-                                reset_scoring_indices();
+                                scored_card_index = 0;
+                                joker_scored_index = 0;
+                                joker_round_end_index = 0;
                                 timer = TM_ZERO;
                                 break; // Break out of the loop to avoid accessing an invalid index
                             }
