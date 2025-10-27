@@ -70,13 +70,13 @@ void init()
 
     // Initialize subsystems
     mmInitDefault((mm_addr)soundbank_bin, 12);
-    mmStart(MOD_MAIN_THEME, MM_PLAY_LOOP);
     affine_background_init();
     sprite_init();
     card_init();
     blind_init();
     joker_init();
     game_init();
+    game_change_state(GAME_STATE_SPLASH_SCREEN);
 }
 
 void update()

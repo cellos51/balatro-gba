@@ -5,12 +5,16 @@
 #include <maxmod.h>
 
 #define CARD_SPRITE_SIZE 32
+#define MAX_SPRITES 128
+#define MAX_SPRITE_OBJECTS 16
+
 
 typedef struct 
 {
     OBJ_ATTR *obj;
     OBJ_AFFINE *aff;
     POINT pos;
+    int idx;
 } Sprite;
 
 // A sprite object is a sprite that is selectable and movable in animation

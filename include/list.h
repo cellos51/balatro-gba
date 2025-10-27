@@ -17,9 +17,11 @@ bool list_remove_by_idx(List *list, int index);
 void* list_get(List *list, int index);
 int list_get_size(List *list);
 bool list_remove_by_value(List *list, void *value);
+bool list_exists(List *list, void *value);
 
 bool int_list_append(List *list, intptr_t value);
 intptr_t int_list_get(List *list, int index);
 bool int_list_remove_by_value(List *list, intptr_t value);
+bool int_list_exists(List *list, intptr_t value);
 
 #endif

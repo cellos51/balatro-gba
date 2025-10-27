@@ -8,6 +8,10 @@
 #include "game.h"
 #include "graphic_utils.h"
 
+// This won't be more than the number of jokers in your current deck
+// plus the amount that can fit in the shop, 8 should be fine. For now...
+#define MAX_ACTIVE_JOKERS 8
+
 #define JOKER_TID (MAX_HAND_SIZE + MAX_SELECTION_SIZE) * JOKER_SPRITE_OFFSET // Tile ID for the starting index in the tile memory
 #define JOKER_SPRITE_OFFSET 16 // Offset for the joker sprites
 #define JOKER_BASE_PB 4 // The starting palette index for the jokers
@@ -44,6 +48,8 @@
 #define DEFAULT_JOKER_ID 0
 #define GREEDY_JOKER_ID 1 // This is just an example to show the patern of making joker IDs
 #define JOKER_STENCIL_ID 16
+#define PAREIDOLIA_JOKER_ID 30
+#define JOKER_BRAINSTORM_ID 40
 
 typedef struct 
 {

@@ -1,7 +1,9 @@
+#include "game.h"
 #include "sprite.h"
 #include "util.h"
 #include "audio_utils.h"
 #include "soundbank.h"
+#include "pool.h"
 
 #include <tonc.h>
 #include <stdlib.h>
@@ -20,7 +22,7 @@ static bool free_affines[MAX_AFFINES] = {false};
 // Sprite methods
 Sprite *sprite_new(u16 a0, u16 a1, u32 tid, u32 pb, int sprite_index)
 {
-    Sprite *sprite = malloc(sizeof(Sprite));
+    Sprite* sprite = POOL_GET(Sprite);
 
     sprite->obj = NULL;
     sprite->aff = NULL;
@@ -31,7 +33,7 @@ Sprite *sprite_new(u16 a0, u16 a1, u32 tid, u32 pb, int sprite_index)
     }
     else
     {
-        free(sprite);
+        POOL_FREE(Sprite, sprite);
         return NULL;
     }
 
@@ -51,7 +53,7 @@ Sprite *sprite_new(u16 a0, u16 a1, u32 tid, u32 pb, int sprite_index)
 
         if (aff_index == MAX_AFFINES)
         {
-            free(sprite);
+            POOL_FREE(Sprite, sprite);
             return NULL;
         }
 
@@ -61,32 +63,39 @@ Sprite *sprite_new(u16 a0, u16 a1, u32 tid, u32 pb, int sprite_index)
         sprite->aff = &obj_aff_buffer[aff_index];
         obj_set_attr(sprite->obj, a0, a1, ATTR2_PALBANK(pb) | tid);
         obj_aff_identity(&obj_aff_buffer[aff_index]);
-        return sprite;
     }
     else
     {
         sprite->obj = &obj_buffer[sprite_index];
         obj_set_attr(sprite->obj, a0, a1, ATTR2_PALBANK(pb) | tid);
-        return sprite;
     }
+
+    sprite->idx = sprite_index;
+
+    return sprite;
 }
 
 void sprite_destroy(Sprite **sprite)
 {
     if (*sprite == NULL) return;
+
     obj_hide((*sprite)->obj);
-    free_sprites[(*sprite)->obj - obj_buffer] = NULL;
+
     if ((*sprite)->aff != NULL)
     {
         free_affines[(*sprite)->aff - obj_aff_buffer] = false;
     }
-    free(*sprite);
+
+    free_sprites[(*sprite)->idx] = NULL;
+
+    POOL_FREE(Sprite, *sprite);
+
     *sprite = NULL;
 }
 
 int sprite_get_layer(Sprite *sprite)
 {
-    if (sprite == NULL || sprite->obj == NULL) return -1;
+    if (sprite == NULL || sprite->obj == NULL) return UNDEFINED;
     return sprite->obj - obj_buffer;
 }
 
@@ -114,7 +123,7 @@ int sprite_get_pb(const Sprite *sprite)
 // SpriteObject methods
 SpriteObject* sprite_object_new()
 {
-    SpriteObject* sprite_object = (SpriteObject*)malloc(sizeof(SpriteObject));
+    SpriteObject* sprite_object = POOL_GET(SpriteObject);
     sprite_object->sprite = NULL;
     sprite_object_reset_transform(sprite_object);
     sprite_object->selected = false;
@@ -126,8 +135,8 @@ SpriteObject* sprite_object_new()
 void sprite_object_destroy(SpriteObject** sprite_object)
 {
     if (*sprite_object == NULL) return;
-    sprite_destroy(&((*sprite_object)->sprite));
-    free(*sprite_object);
+    sprite_destroy(&(*sprite_object)->sprite);
+    POOL_FREE(SpriteObject, *sprite_object);
     *sprite_object = NULL;
 }
 
@@ -157,8 +166,8 @@ void sprite_object_reset_transform(SpriteObject* sprite_object)
 
 void sprite_object_update(SpriteObject* sprite_object)
 {
-    sprite_object->vx += (sprite_object->tx - sprite_object->x) / 8;
-    sprite_object->vy += (sprite_object->ty - sprite_object->y) / 8;
+    sprite_object->vx += ((sprite_object->tx - sprite_object->x) * get_game_speed()) / 8;
+    sprite_object->vy += ((sprite_object->ty - sprite_object->y) * get_game_speed()) / 8;
 
     sprite_object->vscale += (sprite_object->tscale - sprite_object->scale) / 8; // Scale up the card when it's played
 
