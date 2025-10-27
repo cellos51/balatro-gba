@@ -2525,8 +2525,6 @@ static void game_shop_create_items()
 
     for (int i = 0; i < MAX_SHOP_JOKERS; i++)
     {
-        
-        int joker_idx = 0;
         intptr_t joker_id = 0;
         #ifdef TEST_JOKER_ID0 // Allow defining an ID for a joker to always appear in shop and be tested
         if (int_list_exists(jokers_available_to_shop, TEST_JOKER_ID0))
