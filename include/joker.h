@@ -38,7 +38,8 @@
 // When does the Joker effect function take place?
 // These are just the common ones. Special Joker behaviour will be checked on a
 // Joker per Joker basis (see if it's there, then do something, e.g. Pareidolia, Baseball Card)
-enum JokerEvent {
+enum JokerEvent
+{
     JOKER_EVENT_ON_HAND_PLAYED,     // Triggers only once when the hand is played
     JOKER_EVENT_ON_CARD_SCORED,     // Triggers when a played card scores (e.g. Walkie Talkie, Fibonnacci...)
     JOKER_EVENT_ON_CARD_SCORED_END, // Triggers after the card has finishd scoring (e.g. retrigger Jokers)
@@ -59,7 +60,7 @@ enum JokerEvent {
 #define PAREIDOLIA_JOKER_ID 30
 #define JOKER_BRAINSTORM_ID 40
 
-// not yet in th registry
+// not yet in the registry
 #define SELTZER_ID 254
 #define PHOTOGRAPH_ID 253
 #define SOCK_AND_BUSKIN_JOKER_ID 252

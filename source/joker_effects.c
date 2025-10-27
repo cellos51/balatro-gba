@@ -428,14 +428,9 @@ static JokerEffect reserved_parking_joker_effect(Joker *joker, Card *scored_card
     // switch from CARD_SCORED to CARD_HELD when triggering held cards is implemented
     SCORE_ON_EVENT_ONLY_WITH_CARD(scored_card, JOKER_EVENT_ON_CARD_SCORED, joker_event, effect)
 
-    CardObject** hand = get_hand_array();
-    int hand_size = hand_get_size();
-    for (int i = 0; i < hand_size; i++ )
+    if ((random() % 2 == 0) && card_is_face(scored_card))
     {
-        if ((random() % 2 == 0) && card_is_face(hand[i]->card))
-        {
-            effect.money += 1;
-        }
+        effect.money = 1;
     }
 
     return effect;
@@ -719,14 +714,9 @@ static JokerEffect shoot_the_moon_joker_effect(Joker *joker, Card *scored_card, 
     // switch from CARD_SCORED to CARD_HELD when triggering held cards is implemented
     SCORE_ON_EVENT_ONLY_WITH_CARD(scored_card, JOKER_EVENT_ON_CARD_SCORED, joker_event, effect)
         
-    CardObject** hand = get_hand_array();
-    int hand_size = hand_get_size();
-    for (int i = 0; i < hand_size; i++ )
+    if (scored_card->rank == QUEEN)
     {
-        if (hand[i]->card->rank == QUEEN)
-        {
-            effect.mult += 13;
-        }
+        effect.mult = 13;
     }
 
     return effect;
@@ -822,7 +812,7 @@ static JokerEffect blueprint_joker_effect(Joker *joker, Card *scored_card, enum 
     List* jokers = get_jokers();
     int list_size = list_get_size(jokers);
     
-    for (int i = 0; i < list_size  - 1; i++ )
+    for (int i = 0; i < list_size - 1; i++ )
     {
         JokerObject* curr_joker_object = list_get(jokers, i);
         if (curr_joker_object->joker == joker)

@@ -49,15 +49,11 @@ enum HandState
 enum PlayState
 {
     PLAY_PLAYING,
-    PLAY_SCORING,
+    PLAY_SCORING_SPECIAL,
+    PLAY_SCORING_CARDS,
+    PLAY_SCORING_JOKERS,
     PLAY_ENDING,
     PLAY_ENDED
-};
-
-enum ScoreState
-{
-    SCORING_CARDS,
-    SCORING_JOKERS
 };
 
 // Hand types
