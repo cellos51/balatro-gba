@@ -1970,50 +1970,12 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
 
                         if (*played_selections == 0)
                         {
-                            play_state = PLAY_SCORING_SPECIAL;
+                            play_state = PLAY_SCORING_CARDS;
                             timer = TM_ZERO;
                         }
                     }
 
                     if (card_object_is_selected(played[i]) && played_top - i >= *played_selections)
-                    {
-                        played_y -= int2fx(10);
-                    }
-                    break;
-
-                case PLAY_SCORING_SPECIAL:
-
-                    if (i == 0 && (timer % FRAMES(30) == 0) && timer > FRAMES(40))
-                    {
-                        // Special Joker Effects
-
-                        // Baseball card: if an UNCOMMON Joker was scored before, give x1.5 Mult
-                        if (is_joker_owned(BASEBALL_CARD_ID) && last_joker_scored_rarity == UNCOMMON_JOKER)
-                        {
-                            // activate all baseball cards, if any
-                            for (int k = 0; k < list_get_size(jokers); k++)
-                            {
-                                JokerObject *joker = list_get(jokers, k);
-                                if (joker->joker->id != BASEBALL_CARD_ID)
-                                {
-                                    continue;
-                                }
-
-                                if (joker_object_score(joker, played[*played_selections - 1]->card, JOKER_EVENT_ON_CARD_SCORED, &chips, &mult, NULL, &money, &retrigger))
-                                {
-                                    display_chips(chips);
-                                    display_mult(mult);
-                                    display_money(money);
-
-                                    return; 
-                                }
-                            }
-                        }
-
-                        play_state = PLAY_SCORING_CARDS;
-                    }
-
-                    if (card_object_is_selected(played[i]))
                     {
                         played_y -= int2fx(10);
                     }

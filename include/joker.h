@@ -66,7 +66,6 @@ enum JokerEvent
 #define SOCK_AND_BUSKIN_JOKER_ID 252
 #define DUSK_ID 251
 #define HACK_ID 250
-#define BASEBALL_CARD_ID 249
 #define HANGING_CHAD_ID 247
 
 typedef struct 
