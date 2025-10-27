@@ -351,7 +351,7 @@ int joker_get_random_rarity()
         // 94..98, 5% chance
         joker_rarity = RARE_JOKER;
     }
-    else
+    else if (rarity_roll < COMMON_JOKER_CHANCE + UNCOMMON_JOKER_CHANCE + RARE_JOKER_CHANCE + LEGENDARY_CHANCE)
     {
         // 99, 1% chance
         joker_rarity = LEGENDARY_JOKER;
