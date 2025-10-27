@@ -295,7 +295,8 @@ bool joker_object_score(JokerObject *joker_object, Card* scored_card, enum Joker
     *retrigger = joker_effect.retrigger;
 
     // Use the custom message to show a retrigger
-    if (joker_effect.retrigger) {
+    if (joker_effect.retrigger)
+    {
         snprintf(joker_effect.message, MAX_JOKER_MSG_BUF_LEN, "Again!");
     }
 
@@ -352,7 +353,8 @@ bool joker_object_score(JokerObject *joker_object, Card* scored_card, enum Joker
         tte_write(joker_effect.message);
         cursorPosX += joker_score_display_offset_px;
     }
-    if (joker_effect.expire) {
+    if (joker_effect.expire)
+    {
         // TODO make Jokers expire
     }
 

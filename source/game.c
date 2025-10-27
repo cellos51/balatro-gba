@@ -298,11 +298,13 @@ static inline void reset_top_left_panel_bottom_row()
 }
 
 // get-functions, for other files to view game state (mainly for jokers)
-CardObject **get_hand_array(void) {
+CardObject **get_hand_array(void)
+{
     return hand;
 }
 
-int get_hand_top(void) {
+int get_hand_top(void)
+{
     return hand_top;
 }
 
@@ -311,23 +313,28 @@ int hand_get_size(void)
     return hand_top + 1;
 }
 
-CardObject **get_played_array(void) {
+CardObject **get_played_array(void)
+{
     return played;
 }
 
-int get_played_top(void) {
+int get_played_top(void)
+{
     return played_top;
 }
 
-int get_scored_card_index(void) {
+int get_scored_card_index(void)
+{
     return scored_card_index;
 }
 
-List *get_jokers(void) {
+List *get_jokers(void)
+{
     return jokers;
 }
 
-bool is_joker_owned(int joker_id) {
+bool is_joker_owned(int joker_id)
+{
     for (int k = 0; k < list_get_size(jokers); k++)
     {
         JokerObject *joker = list_get(jokers, k);
@@ -379,7 +386,8 @@ int get_money(void)
     return money;
 }
 
-static void reset_scoring_indices() {
+static void reset_scoring_indices()
+{
     scored_card_index = 0;
     joker_scored_index = 0;
     joker_round_end_index = 0;
@@ -644,7 +652,8 @@ enum HandType hand_get_type()
         res_hand_type = FLUSH;
 
     // Check for straight
-    if (hand_contains_straight(ranks)) {
+    if (hand_contains_straight(ranks))
+    {
         if (res_hand_type == FLUSH)
             res_hand_type = STRAIGHT_FLUSH;
         else
@@ -652,7 +661,8 @@ enum HandType hand_get_type()
     }
 
     // Check for royal flush vs regular straight flush
-    if (res_hand_type == STRAIGHT_FLUSH) {
+    if (res_hand_type == STRAIGHT_FLUSH)
+    {
         if (ranks[TEN] && ranks[JACK] && ranks[QUEEN] && ranks[KING] && ranks[ACE])
             return ROYAL_FLUSH;
         return STRAIGHT_FLUSH;
@@ -661,32 +671,40 @@ enum HandType hand_get_type()
     // The following can be optimized better but not sure how much it matters
     u8 n_of_a_kind = hand_contains_n_of_a_kind(ranks);
 
-    if (n_of_a_kind >= 5) {
-        if (res_hand_type == FLUSH) {
+    if (n_of_a_kind >= 5)
+    {
+        if (res_hand_type == FLUSH)
+        {
             return FLUSH_FIVE;
         }
         return FIVE_OF_A_KIND;
     }
 
-    if (n_of_a_kind == 4) {
+    if (n_of_a_kind == 4)
+    {
         return FOUR_OF_A_KIND;
     }
 
-    if (n_of_a_kind == 3 && hand_contains_full_house(ranks)) {
+    if (n_of_a_kind == 3 && hand_contains_full_house(ranks))
+    {
         return FULL_HOUSE;
     }
 
     // Flush is more valuable than the remaining hand types, so return now
-    if (res_hand_type == FLUSH) {
+    if (res_hand_type == FLUSH)
+    {
         return FLUSH;
     }
 
-    if (n_of_a_kind == 3) {
+    if (n_of_a_kind == 3)
+    {
         return THREE_OF_A_KIND;
     }
 
-    if (n_of_a_kind == 2) {
-        if (hand_contains_two_pair(ranks)) {
+    if (n_of_a_kind == 2)
+    {
+        if (hand_contains_two_pair(ranks))
+        {
             return TWO_PAIR;
         }
         return PAIR;
@@ -696,7 +714,8 @@ enum HandType hand_get_type()
 }
 
 // Returns true if the card is *considered* a face card
-bool card_is_face(Card *card) {
+bool card_is_face(Card *card)
+{
     // Card is a face card, or Pareidolia is present
     return (
         card->rank == JACK  ||
@@ -867,7 +886,8 @@ void change_background(int id)
                 }
             }
 
-            switch(blinds[i]) {
+            switch(blinds[i])
+            {
                 case BLIND_STATE_CURRENT: // Raise the blind panel up a bit
                 {
                     int x_from = 0;
@@ -1990,7 +2010,8 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                         // If we need to retrigger, then we have scored a card previously
                         // and thus have incremented scored_card_index by 1.
                         // Take out this increment to score the previous card again
-                        if (retrigger) {
+                        if (retrigger)
+                        {
                             retrigger = false;
                             scored_card_index -= 1;
                         }
