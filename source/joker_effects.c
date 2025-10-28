@@ -789,7 +789,7 @@ static JokerEffect dusk_joker_effect(Joker *joker, Card *scored_card, enum Joker
         
         case JOKER_EVENT_ON_CARD_SCORED:
             // data is index of previously retriggered played card
-            // Only retrigger current card if it's striclty after the last one we retriggered
+            // Only retrigger current card if it's strictly after the last one we retriggered
             if (get_num_hands_remaining() == 0)
             {
                 effect.retrigger = (*p_last_retriggered_index < get_scored_card_index());

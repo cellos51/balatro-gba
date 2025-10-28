@@ -273,7 +273,7 @@ void joker_object_shake(JokerObject *joker_object, mm_word sound_id)
     sprite_object_shake(joker_object->sprite_object, sound_id);
 }
 
-bool joker_object_score(JokerObject *joker_object, Card* scored_card, enum JokerEvent joker_event, int *chips, int *mult, int *xmult, int *money, bool *retrigger)
+bool joker_object_score(JokerObject *joker_object, Card* scored_card, enum JokerEvent joker_event, int *chips, int *mult, int *money, bool *retrigger)
 {
     // protect against NULL joker_objects
     if (joker_object == NULL)

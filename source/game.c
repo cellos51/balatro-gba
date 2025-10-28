@@ -1958,7 +1958,7 @@ static bool joker_scoring_loop(int* iteration_start, Card* played_card, enum Jok
     {
         *iteration_start += 1;
         JokerObject *joker = list_get(jokers, k);
-        if (joker_object_score(joker, played_card, joker_event, &chips, &mult, NULL, &money, &retrigger))
+        if (joker_object_score(joker, played_card, joker_event, &chips, &mult, &money, &retrigger))
         {
             display_chips(chips);
             display_mult(mult);
