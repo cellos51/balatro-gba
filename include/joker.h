@@ -35,6 +35,14 @@
 #define RARE_JOKER 2
 #define LEGENDARY_JOKER 3
 
+// Percent chance to get a joker of each rarity
+// Note that this deviates slightly from the Balatro wiki to allow legendary
+// jokers to appear without spectral cards implemented
+#define COMMON_JOKER_CHANCE 70
+#define UNCOMMON_JOKER_CHANCE 25
+#define RARE_JOKER_CHANCE 5
+#define LEGENDARY_JOKER_CHANCE 0
+
 // When does the Joker effect function take place?
 // These are just the common ones. Special Joker behaviour will be checked on a
 // Joker per Joker basis (see if it's there, then do something, e.g. Pareidolia, Baseball Card)
@@ -133,5 +141,6 @@ void joker_object_set_selected(JokerObject* joker_object, bool selected);
 bool joker_object_is_selected(JokerObject* joker_object);
 
 Sprite* joker_object_get_sprite(JokerObject* joker_object);
+int joker_get_random_rarity();
 
 #endif // JOKER_H
