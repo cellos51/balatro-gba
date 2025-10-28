@@ -146,29 +146,9 @@ Joker *joker_new(u8 id)
     joker->rarity = jinfo->rarity;
     joker->data = 0;
 
-    // Implement scaling Jokers and retriggers
-    switch (id)
+    if (jinfo->on_joker_created)
     {
-        case HANGING_CHAD_ID:
-            joker->data = 2; // retriggers left, reset to 2 at round end
-            break;
-        case DUSK_ID:
-            joker->data = UNDEFINED; // previously retriggered card index
-            break;
-        case HACK_ID:
-            joker->data = UNDEFINED; // previously retriggered card index
-            break;
-        case PHOTOGRAPH_ID:
-            joker->data = UNDEFINED; // First scoring face card index
-            break;
-        case SOCK_AND_BUSKIN_JOKER_ID:
-            joker->data = UNDEFINED; // previously retriggered face card index
-        case SELTZER_ID:
-            joker->halves.data0 = UNDEFINED; // previously retriggered card index
-            joker->halves.data1 = 10; // remaining retriggered hands
-            break;
-        default:
-            break;
+        jinfo->on_joker_created(joker);
     }
 
     return joker;

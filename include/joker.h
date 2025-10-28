@@ -103,10 +103,12 @@ typedef struct  // These jokers are triggered after the played hand has finished
 } JokerEffect;
 
 typedef JokerEffect (*JokerEffectFunc)(Joker *joker, Card *scored_card, enum JokerEvent joker_event);
+typedef void (*JokerCallbackOnCreated)(Joker *joker);
 typedef struct {
     u8 rarity;
     u8 base_value;
     JokerEffectFunc joker_effect;
+    JokerCallbackOnCreated on_joker_created;
 } JokerInfo;
 const JokerInfo* get_joker_registry_entry(int joker_id);
 size_t get_joker_registry_size(void);
