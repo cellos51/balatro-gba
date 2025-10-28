@@ -253,6 +253,17 @@ void joker_object_shake(JokerObject *joker_object, mm_word sound_id)
     sprite_object_shake(joker_object->sprite_object, sound_id);
 }
 
+void set_and_shift_text(char* str, int* cursor_pos_x, int color_pb)
+{
+    tte_set_pos(*cursor_pos_x, JOKER_SCORE_TEXT_Y);
+    tte_set_special(color_pb * TTE_SPECIAL_PB_MULT_OFFSET);
+    tte_write(str);
+
+    // + 1 For space
+    const int joker_score_display_offset_px = (MAX_CARD_SCORE_STR_LEN + 1)*TTE_CHAR_SIZE;
+    *cursor_pos_x += joker_score_display_offset_px;
+}
+
 bool joker_object_score(JokerObject *joker_object, Card* scored_card, enum JokerEvent joker_event, int *chips, int *mult, int *money, bool *retrigger)
 {
     // protect against NULL joker_objects
@@ -273,65 +284,37 @@ bool joker_object_score(JokerObject *joker_object, Card* scored_card, enum Joker
     *mult     *= joker_effect.xmult > 0 ? joker_effect.xmult : 1; // if xmult is zero, DO NOT multiply by it
     *money    += joker_effect.money;
     *retrigger = joker_effect.retrigger;
-
-    // Use the custom message to show a retrigger
-    if (joker_effect.retrigger)
-    {
-        snprintf(joker_effect.message, MAX_JOKER_MSG_BUF_LEN, "Again!");
-    }
-
-    const int joker_score_display_offset_px = (MAX_CARD_SCORE_STR_LEN + 1)*TTE_CHAR_SIZE;
-    // + 1 For space
+    // joker_effect.message will have been set if the Joker had anything custom to say
 
     int cursorPosX = fx2int(joker_object->sprite_object->x) + 8; // Offset of 16 pixels to center the text on the card
     if (joker_effect.chips > 0)
     {
         char score_buffer[INT_MAX_DIGITS + 2]; // For '+' and null terminator
-        tte_set_pos(cursorPosX, JOKER_SCORE_TEXT_Y);
-        // TODO fix magic number
-        tte_set_special(TTE_BLUE_PB * TTE_SPECIAL_PB_MULT_OFFSET);
         snprintf(score_buffer, sizeof(score_buffer), "+%d", joker_effect.chips);
-        tte_write(score_buffer);
-        cursorPosX += joker_score_display_offset_px;
+        set_and_shift_text(score_buffer, &cursorPosX, TTE_BLUE_PB);
     }
     if (joker_effect.mult > 0)
     {
         char score_buffer[INT_MAX_DIGITS + 2];
-        tte_set_pos(cursorPosX, JOKER_SCORE_TEXT_Y);
-        // TODO fix magic number
-        tte_set_special(TTE_RED_PB * TTE_SPECIAL_PB_MULT_OFFSET);
         snprintf(score_buffer, sizeof(score_buffer), "+%d", joker_effect.mult);
-        tte_write(score_buffer);
-        cursorPosX += joker_score_display_offset_px;
+        set_and_shift_text(score_buffer, &cursorPosX, TTE_RED_PB);
     }
     if (joker_effect.xmult > 0)
     {
         char score_buffer[INT_MAX_DIGITS + 2];
-        tte_set_pos(cursorPosX, JOKER_SCORE_TEXT_Y);
-        // TODO fix magic number
-        tte_set_special(TTE_RED_PB * TTE_SPECIAL_PB_MULT_OFFSET);
-        snprintf(score_buffer, sizeof(score_buffer), "X%d", joker_effect.xmult);
-        tte_write(score_buffer);
-        cursorPosX += joker_score_display_offset_px;
+        snprintf(score_buffer, sizeof(score_buffer), "+%d", joker_effect.xmult);
+        set_and_shift_text(score_buffer, &cursorPosX, TTE_RED_PB);
     }
     if (joker_effect.money > 0)
     {
         char score_buffer[INT_MAX_DIGITS + 2];
-        tte_set_pos(cursorPosX, JOKER_SCORE_TEXT_Y);
-        // TODO fix magic number
-        tte_set_special(TTE_YELLOW_PB * TTE_SPECIAL_PB_MULT_OFFSET);
         snprintf(score_buffer, sizeof(score_buffer), "+%d", joker_effect.money);
-        tte_write(score_buffer);
-        cursorPosX += joker_score_display_offset_px;
+        set_and_shift_text(score_buffer, &cursorPosX, TTE_YELLOW_PB);
     }
-    // custom message for Jokers + retriggers will say "Again!"
+    // custom message for Jokers (including retriggers where Jokers will say "Again!")
     if (joker_effect.message[0] != '\0') // Message is not empty
     {
-        tte_set_pos(cursorPosX, JOKER_SCORE_TEXT_Y);
-        // TODO fix magic number
-        tte_set_special(TTE_WHITE_PB * TTE_SPECIAL_PB_MULT_OFFSET);
-        tte_write(joker_effect.message);
-        cursorPosX += joker_score_display_offset_px;
+        set_and_shift_text(joker_effect.message, &cursorPosX, TTE_WHITE_PB);
     }
     if (joker_effect.expire)
     {

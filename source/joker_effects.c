@@ -592,6 +592,10 @@ static JokerEffect hanging_chad_joker_effect(Joker *joker, Card *scored_card, en
         case JOKER_EVENT_ON_CARD_SCORED:
             effect.retrigger = (*p_remaining_retriggers > 0);
             *p_remaining_retriggers -= 1;
+            if (effect.retrigger)
+            {
+                snprintf(effect.message, MAX_JOKER_MSG_BUF_LEN, "Again!");
+            }
             break;
 
         default:
@@ -803,6 +807,10 @@ static JokerEffect dusk_joker_effect(Joker *joker, Card *scored_card, enum Joker
             {
                 effect.retrigger = (*p_last_retriggered_index < get_scored_card_index());
                 *p_last_retriggered_index = get_scored_card_index();
+                if (effect.retrigger)
+                {
+                    snprintf(effect.message, MAX_JOKER_MSG_BUF_LEN, "Again!");
+                }
             }
             
             break;
@@ -881,6 +889,10 @@ static JokerEffect hack_joker_effect(Joker *joker, Card *scored_card, enum Joker
                 case FIVE:
                     effect.retrigger = (*p_last_retriggered_index < get_scored_card_index());
                     *p_last_retriggered_index = get_scored_card_index();
+                    if (effect.retrigger)
+                    {
+                        snprintf(effect.message, MAX_JOKER_MSG_BUF_LEN, "Again!");
+                    }
             }
             break;
 
@@ -921,6 +933,10 @@ static JokerEffect seltzer_joker_effect(Joker *joker, Card *scored_card, enum Jo
             {
                 effect.retrigger = (*p_last_retriggered_idx < get_scored_card_index());
                 *p_last_retriggered_idx = get_scored_card_index();
+                if (effect.retrigger)
+                {
+                    snprintf(effect.message, MAX_JOKER_MSG_BUF_LEN, "Again!");
+                }
             } 
             break;
 
@@ -947,6 +963,10 @@ static JokerEffect sock_and_buskin_joker_effect(Joker *joker, Card *scored_card,
             // Works the same way as Dusk, but for face cards
             effect.retrigger = (*p_last_retriggered_face_index < get_scored_card_index() && card_is_face(scored_card));
             *p_last_retriggered_face_index = get_scored_card_index();
+            if (effect.retrigger)
+            {
+                snprintf(effect.message, MAX_JOKER_MSG_BUF_LEN, "Again!");
+            }
             break;
 
         default:
