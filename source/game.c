@@ -2091,7 +2091,7 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
 
                         tte_erase_rect_wrapper(PLAYED_CARDS_SCORES_RECT);
 
-                        if (joker_scoring_loop(&joker_scored_index, NULL, JOKER_EVENT_INDEPENDANT))
+                        if (joker_scoring_loop(&joker_scored_index, NULL, JOKER_EVENT_INDEPENDENT))
                         {
                             return;
                         }

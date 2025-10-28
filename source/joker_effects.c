@@ -21,7 +21,7 @@ static JokerEffect default_joker_effect(Joker *joker, Card *scored_card, enum Jo
 {
     JokerEffect effect = {0};
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDANT, joker_event, effect)
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
 
     effect.mult = 4;
     return effect;
@@ -65,9 +65,9 @@ static JokerEffect jolly_joker_effect(Joker *joker, Card *scored_card, enum Joke
 {
     JokerEffect effect = {0};
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDANT, joker_event, effect)
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
 
-    // this Joker scores in an independant manner
+    // this Joker scores in an independent manner
     // This is really inefficient but the only way at the moment to check for whole-hand conditions
     u8 suits[NUM_SUITS];
     u8 ranks[NUM_RANKS];
@@ -85,7 +85,7 @@ static JokerEffect zany_joker_effect(Joker *joker, Card *scored_card, enum Joker
 {
     JokerEffect effect = {0};
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDANT, joker_event, effect)
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
 
     // This is really inefficient but the only way at the moment to check for whole-hand conditions
     u8 suits[NUM_SUITS];
@@ -104,7 +104,7 @@ static JokerEffect mad_joker_effect(Joker *joker, Card *scored_card, enum JokerE
 {
     JokerEffect effect = {0};
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDANT, joker_event, effect)
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
 
     u8 suits[NUM_SUITS];
     u8 ranks[NUM_RANKS];
@@ -122,7 +122,7 @@ static JokerEffect crazy_joker_effect(Joker *joker, Card *scored_card, enum Joke
 {
     JokerEffect effect = {0};
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDANT, joker_event, effect)
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
 
     u8 suits[NUM_SUITS];
     u8 ranks[NUM_RANKS];
@@ -140,7 +140,7 @@ static JokerEffect droll_joker_effect(Joker *joker, Card *scored_card, enum Joke
 {
     JokerEffect effect = {0};
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDANT, joker_event, effect)
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
 
     u8 suits[NUM_SUITS];
     u8 ranks[NUM_RANKS];
@@ -158,7 +158,7 @@ static JokerEffect sly_joker_effect(Joker *joker, Card *scored_card, enum JokerE
 {
     JokerEffect effect = {0};
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDANT, joker_event, effect)
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
 
     u8 suits[NUM_SUITS];
     u8 ranks[NUM_RANKS];
@@ -176,7 +176,7 @@ static JokerEffect wily_joker_effect(Joker *joker, Card *scored_card, enum Joker
 {
     JokerEffect effect = {0};
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDANT, joker_event, effect)
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
 
     u8 suits[NUM_SUITS];
     u8 ranks[NUM_RANKS];
@@ -194,7 +194,7 @@ static JokerEffect clever_joker_effect(Joker *joker, Card *scored_card, enum Jok
 {
     JokerEffect effect = {0};
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDANT, joker_event, effect)
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
 
     u8 suits[NUM_SUITS];
     u8 ranks[NUM_RANKS];
@@ -212,7 +212,7 @@ static JokerEffect devious_joker_effect(Joker *joker, Card *scored_card, enum Jo
 {
     JokerEffect effect = {0};
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDANT, joker_event, effect)
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
 
     u8 suits[NUM_SUITS];
     u8 ranks[NUM_RANKS];
@@ -230,7 +230,7 @@ static JokerEffect crafty_joker_effect(Joker *joker, Card *scored_card, enum Jok
 {
     JokerEffect effect = {0};
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDANT, joker_event, effect)
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
 
     u8 suits[NUM_SUITS];
     u8 ranks[NUM_RANKS];
@@ -248,7 +248,7 @@ static JokerEffect half_joker_effect(Joker *joker, Card *scored_card, enum Joker
 {
     JokerEffect effect = {0};
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDANT, joker_event, effect)
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
 
     int played_size = get_played_top() + 1;
     if (played_size <= 3) 
@@ -263,7 +263,7 @@ static JokerEffect joker_stencil_effect(Joker *joker, Card *scored_card, enum Jo
 {
     JokerEffect effect = {0};
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDANT, joker_event, effect)
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
 
     List* jokers = get_jokers();
 
@@ -291,7 +291,7 @@ static JokerEffect misprint_joker_effect(Joker *joker, Card *scored_card, enum J
 {
     JokerEffect effect = {0};
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDANT, joker_event, effect)
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
 
     effect.mult = random() % (MISPRINT_MAX_MULT + 1);
 
@@ -339,7 +339,7 @@ static JokerEffect banner_joker_effect(Joker *joker, Card *scored_card, enum Jok
 {
     JokerEffect effect = {0};
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDANT, joker_event, effect)
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
 
     effect.chips = 30 * get_num_discards_remaining();
 
@@ -350,7 +350,7 @@ static JokerEffect mystic_summit_joker_effect(Joker *joker, Card *scored_card, e
 {
     JokerEffect effect = {0};
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDANT, joker_event, effect)
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
 
     if (get_num_discards_remaining() == 0)
     {
@@ -364,7 +364,7 @@ static JokerEffect blackboard_joker_effect(Joker *joker, Card *scored_card, enum
 {
     JokerEffect effect = {0};
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDANT, joker_event, effect)
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
 
     bool all_cards_are_spades_or_clubs = true;
     CardObject** hand = get_hand_array();
@@ -389,7 +389,7 @@ static JokerEffect blue_joker_effect(Joker *joker, Card *scored_card, enum Joker
 {
     JokerEffect effect = {0};
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDANT, joker_event, effect)
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
 
     effect.chips = (get_deck_top() + 1) * 2;
 
@@ -400,7 +400,7 @@ static JokerEffect raised_fist_joker_effect(Joker *joker, Card *scored_card, enu
 {
     JokerEffect effect = {0};
     
-    SCORE_ON_EVENT_ONLY_WITH_CARD(scored_card, JOKER_EVENT_ON_CARD_SCORED, joker_event, effect)
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
 
     // Find the lowest rank card in hand
     // Aces are always considered high value, even in an ace-low straight
@@ -424,14 +424,19 @@ static JokerEffect reserved_parking_joker_effect(Joker *joker, Card *scored_card
 {
     JokerEffect effect = {0};
 
-    // switch from CARD_SCORED to CARD_HELD when triggering held cards is implemented
-    SCORE_ON_EVENT_ONLY_WITH_CARD(scored_card, JOKER_EVENT_ON_CARD_SCORED, joker_event, effect)
+    // switch from INDEPENDENT to CARD_HELD when it's implemented
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
 
-    if ((random() % 2 == 0) && card_is_face(scored_card))
+    CardObject** hand = get_hand_array();
+    int hand_size = hand_get_size();
+    for (int i = 0; i < hand_size; i++ )
     {
-        effect.money = 1;
+        if ((random() % 2 == 0) && card_is_face(hand[i]->card))
+        {
+            effect.money += 1;
+        }
     }
-
+    
     return effect;
 };
 
@@ -482,7 +487,7 @@ static JokerEffect abstract_joker_effect(Joker *joker, Card *scored_card, enum J
 {
     JokerEffect effect = {0};
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDANT, joker_event, effect)
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
 
     // +1 xmult per occupied joker slot
     int num_jokers = list_get_size(get_jokers());
@@ -495,7 +500,7 @@ static JokerEffect bull_joker_effect(Joker *joker, Card *scored_card, enum Joker
 {
     JokerEffect effect = {0};
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDANT, joker_event, effect)
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
     
     effect.chips = get_money() * 2;
 
@@ -558,7 +563,7 @@ static JokerEffect acrobat_joker_effect(Joker *joker, Card *scored_card, enum Jo
 {
     JokerEffect effect = {0};
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDANT, joker_event, effect)
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
     
     // 0 remaining hands mean we're scoring the last hand
     if (get_num_hands_remaining() == 0)
@@ -600,7 +605,7 @@ static JokerEffect the_duo_joker_effect(Joker *joker, Card *scored_card, enum Jo
 {
     JokerEffect effect = {0};
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDANT, joker_event, effect)
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
     
     // This is really inefficient but the only way at the moment to check for whole-hand conditions
     u8 suits[NUM_SUITS];
@@ -620,7 +625,7 @@ static JokerEffect the_trio_joker_effect(Joker *joker, Card *scored_card, enum J
 {
     JokerEffect effect = {0};
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDANT, joker_event, effect)
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
 
     // This is really inefficient but the only way at the moment to check for whole-hand conditions
     u8 suits[NUM_SUITS];
@@ -638,7 +643,7 @@ static JokerEffect the_family_joker_effect(Joker *joker, Card *scored_card, enum
 {
     JokerEffect effect = {0};
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDANT, joker_event, effect)
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
     
     // This is really inefficient but the only way at the moment to check for whole-hand conditions
     u8 suits[NUM_SUITS];
@@ -658,7 +663,7 @@ static JokerEffect the_order_joker_effect(Joker *joker, Card *scored_card, enum 
 {
     JokerEffect effect = {0};
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDANT, joker_event, effect)
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
 
     u8 suits[NUM_SUITS];
     u8 ranks[NUM_RANKS];
@@ -677,7 +682,7 @@ static JokerEffect the_tribe_joker_effect(Joker *joker, Card *scored_card, enum 
 {
     JokerEffect effect = {0};
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDANT, joker_event, effect)
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
 
     u8 suits[NUM_SUITS];
     u8 ranks[NUM_RANKS];
@@ -695,7 +700,7 @@ static JokerEffect bootstraps_joker_effect(Joker *joker, Card *scored_card, enum
 {
     JokerEffect effect = {0};
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDANT, joker_event, effect)
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
 
     effect.mult = (get_money() / 5) * 2;
 
@@ -711,11 +716,16 @@ static JokerEffect shoot_the_moon_joker_effect(Joker *joker, Card *scored_card, 
     JokerEffect effect = {0};
 
     // switch from CARD_SCORED to CARD_HELD when triggering held cards is implemented
-    SCORE_ON_EVENT_ONLY_WITH_CARD(scored_card, JOKER_EVENT_ON_CARD_SCORED, joker_event, effect)
-        
-    if (scored_card->rank == QUEEN)
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
+
+    CardObject** hand = get_hand_array();
+    int hand_size = hand_get_size();
+    for (int i = 0; i < hand_size; i++ )
     {
-        effect.mult = 13;
+        if (hand[i]->card->rank == QUEEN)
+        {
+            effect.mult += 13;
+        }
     }
 
     return effect;

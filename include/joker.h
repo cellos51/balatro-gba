@@ -43,7 +43,7 @@ enum JokerEvent
     JOKER_EVENT_ON_HAND_PLAYED,     // Triggers only once when the hand is played
     JOKER_EVENT_ON_CARD_SCORED,     // Triggers when a played card scores (e.g. Walkie Talkie, Fibonnacci...)
     JOKER_EVENT_ON_CARD_SCORED_END, // Triggers after the card has finishd scoring (e.g. retrigger Jokers)
-    JOKER_EVENT_INDEPENDANT,        // Joker will trigger normally, when Jokers are scored (e.g. base Joker)
+    JOKER_EVENT_INDEPENDENT,        // Joker will trigger normally, when Jokers are scored (e.g. base Joker)
     JOKER_EVENT_ON_HAND_SCORED_END, // Triggers when entire hand has finished scoring (e.g. food Jokers)
     JOKER_EVENT_ON_HAND_DISCARDED,  // Triggers when discarding a hand
     JOKER_EVENT_ON_ROUND_END,       // Triggers at the end of the round (e.g. Rocket)
