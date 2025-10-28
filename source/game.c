@@ -199,8 +199,8 @@ static int hands = 0;
 static int discards = 0;
 
 static int round = 0;
-static int ante = 1;
-static int money = 4;
+static int ante = 0;
+static int money = 0;
 static int score = 0;
 static int temp_score = 0; // This is the score that shows in the same spot as the hand type.
 static FIXED lerped_score = 0;
@@ -2541,6 +2541,42 @@ void erase_price_under_sprite_object(SpriteObject *sprite_object)
     tte_erase_rect_wrapper(price_rect);
 }
 
+static int game_shop_get_random_joker_idx()
+{
+    // Roll for what rarity the joker will be
+    int joker_rarity = joker_get_random_rarity();
+        
+    // Now determine how many jokers are available based on the rarity
+    int jokers_avail_size = list_get_size(jokers_available_to_shop);
+    int matching_indices[jokers_avail_size];
+    int match_count = 0;
+
+    for (int i = 0; i < jokers_avail_size; i++)
+    {
+        intptr_t joker_id = int_list_get(jokers_available_to_shop, i);
+        const JokerInfo *info = get_joker_registry_entry(joker_id); 
+        if (info->rarity == joker_rarity)
+        {
+            matching_indices[match_count] = i;
+            match_count++;
+        }
+    }
+
+    int selected_joker_idx = 0;
+    if (match_count > 0)
+    {
+        // If we counted at least one joker with matching rarity, pick one of them randomly
+        selected_joker_idx = matching_indices[random() % match_count];
+    }
+    else
+    {
+        // Didn't find any jokers of matching rarity, just pick one at random instead
+        selected_joker_idx = random() % jokers_avail_size;
+    }
+
+    return selected_joker_idx;
+}
+
 static void game_shop_create_items()
 {
     tte_erase_rect_wrapper(SHOP_PRICES_TEXT_RECT);
@@ -2554,20 +2590,26 @@ static void game_shop_create_items()
 
     for (int i = 0; i < MAX_SHOP_JOKERS; i++)
     {
-        int joker_idx = 0;
         intptr_t joker_id = 0;
-        #ifdef TEST_JOKER_ID // Allow defining an ID for a joker to always appear in shop and be tested
-        if (int_list_exists(jokers_available_to_shop, TEST_JOKER_ID))
+        #ifdef TEST_JOKER_ID0 // Allow defining an ID for a joker to always appear in shop and be tested
+        if (int_list_exists(jokers_available_to_shop, TEST_JOKER_ID0))
         {
-            joker_id = TEST_JOKER_ID;
+            joker_id = TEST_JOKER_ID0;
+            int_list_remove_by_value(jokers_available_to_shop, joker_id);
+        }
+        else
+        #endif
+        #ifdef TEST_JOKER_ID1
+        if (int_list_exists(jokers_available_to_shop, TEST_JOKER_ID1))
+        {
+            joker_id = TEST_JOKER_ID1;
             int_list_remove_by_value(jokers_available_to_shop, joker_id);
         }
         else
         #endif
         {
-           joker_idx = random() % list_get_size(jokers_available_to_shop);
-           joker_id = int_list_get(jokers_available_to_shop, joker_idx);
-           // TODO: weight the random choice by joker rarity
+            int joker_idx = game_shop_get_random_joker_idx();
+            joker_id = int_list_get(jokers_available_to_shop, joker_idx);
             list_remove_by_idx(jokers_available_to_shop, joker_idx);
         }
         
