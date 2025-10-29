@@ -101,6 +101,5 @@ List*           get_jokers(void);
 int get_deck_top(void);
 int get_num_discards_remaining(void);
 int get_money(void);
-int calculate_interest_reward(void);
 
 #endif // GAME_H

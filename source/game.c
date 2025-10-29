@@ -1943,6 +1943,15 @@ static void game_playing_ui_text_update()
     }
 }
 
+static int calculate_interest_reward()
+{
+    int reward = (money / 5) * INTEREST_PER_5; 
+    if (reward > MAX_INTEREST)
+        reward = MAX_INTEREST; 
+    return reward;
+}
+
+
 static void game_round_end_cashout()
 {
     money += hands + blind_get_reward(current_blind) + calculate_interest_reward(); // Reward the player
@@ -2278,14 +2287,6 @@ void game_round_end()
             game_set_state(GAME_SHOP);
             break;
     }
-}
-
-int calculate_interest_reward()
-{
-    int reward = (money / 5) * INTEREST_PER_5; 
-    if (reward > MAX_INTEREST)
-        reward = MAX_INTEREST; 
-    return reward;
 }
 
 // Shop
