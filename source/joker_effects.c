@@ -282,7 +282,7 @@ static JokerEffect joker_stencil_effect(Joker *joker, Card *scored_card, enum Jo
     while((ln = list_itr_next(&itr)))
     {
         //JokerObject* joker_object = POOL_AT(JokerObject, ln->elem_idx);
-        JokerObject* joker_object = ln->data.ptr;
+        JokerObject* joker_object = ln->data;
         if (joker_object->joker->id == JOKER_STENCIL_ID) effect.xmult++;
     }
 
@@ -840,13 +840,13 @@ static JokerEffect blueprint_joker_effect(Joker *joker, Card *scored_card, enum 
 
     while((ln = list_itr_next(&itr)))
     {
-        JokerObject* curr_joker_object = (JokerObject*)ln->data.ptr;
+        JokerObject* curr_joker_object = (JokerObject*)ln->data;
         if (curr_joker_object->joker == joker)
         {
             ListNode* next_node = list_itr_next(&itr);
             if(!next_node) break;
           
-            JokerObject* next_joker_object = (JokerObject*)next_node->data.ptr;
+            JokerObject* next_joker_object = (JokerObject*)next_node->data;
             effect = joker_get_score_effect(next_joker_object->joker, scored_card, joker_event);
             break;
         }

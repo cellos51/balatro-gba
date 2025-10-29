@@ -15,7 +15,7 @@
 #define POOL_DECLARE_TYPE(type)                                             \
     typedef struct                                                          \
     {                                                                       \
-        Bitset* bm;                                                         \
+        Bitset* bitset;                                                     \
         type *  objects;                                                    \
     } type##Pool;                                                           \
     type *pool_get_##type();                                                \
@@ -28,12 +28,12 @@
     static type type##_storage[capacity];                                   \
     static type##Pool type##_pool =                                         \
     {                                                                       \
-        .bm = & type##_bitset,                                              \
+        .bitset = & type##_bitset,                                          \
         .objects = type##_storage,                                          \
     };                                                                      \
     type * pool_get_##type()                                                \
     {                                                                       \
-        int free_offset = bitset_get_free_idx(type##_pool.bm);              \
+        int free_offset = bitset_get_free_idx(type##_pool.bitset);          \
         if(free_offset == -1) return NULL;                                  \
         return &type##_pool.objects[free_offset];                           \
     }                                                                       \
@@ -41,7 +41,7 @@
     {                                                                       \
         if(entry == NULL) return;                                           \
         int offset = entry - &type##_pool.objects[0];                       \
-        bitset_set_idx(type##_pool.bm, offset, false);                      \
+        bitset_set_idx(type##_pool.bitset, offset, false);                  \
     }                                                                       \
     int pool_idx_##type(type *entry)                                        \
     {                                                                       \
@@ -49,7 +49,7 @@
     }                                                                       \
     type *pool_at_##type(int idx)                                           \
     {                                                                       \
-        if(idx < 0 || idx >= (type##_pool.bm)->cap) return NULL;            \
+        if(idx < 0 || idx >= (type##_pool.bitset)->cap) return NULL;        \
         return &type##_pool.objects[idx];                                   \
     }
 

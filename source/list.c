@@ -8,7 +8,6 @@
 // Good!
 List list_new(void)
 {
-    //List head = { .head = -1, .tail = -1};
     List head = { .head = NULL, .tail = NULL};
     return head;
 }
@@ -30,30 +29,24 @@ void list_destroy(List* p_list)
 // Good!
 bool list_is_empty(List list)
 {
-    //return list.head < 0;
     return list.head == NULL;
 }
 
 // Good!
-void list_push_front(List *p_list, union ListData data)
+void list_push_front(List *p_list, void* data)
 {
     ListNode *p_node = POOL_GET(ListNode);
-    //int n = POOL_IDX(ListNode, p_node); // Get the index of of the node in the pool
 
-    //p_node->elem_idx = elem_idx;
-    //p_node->prev = -1;
     p_node->data = data;
     p_node->prev = NULL;
     p_node->next = p_list->head;
 
     if (list_is_empty(*p_list))
     {
-        //p_list->tail = n;
         p_list->tail = p_node;
     }
     else
     {
-        //POOL_AT(ListNode, p_list->head)->prev = n;
         p_list->head->prev = p_node;
     }
 
@@ -61,24 +54,19 @@ void list_push_front(List *p_list, union ListData data)
 }
 
 // Good!
-void list_push_back(List *p_list, union ListData data)
+void list_push_back(List *p_list, void* data)
 {
     ListNode *p_node = POOL_GET(ListNode);
-    //int n = POOL_IDX(ListNode, p_node); // Get the index of of the node in the pool
-    //p_node->elem_idx = elem_idx;
     p_node->data = data;
     p_node->prev = p_list->tail;
-    //p_node->next = -1;
     p_node->next = NULL;
 
     if (list_is_empty(*p_list))
     {
-        //p_list->head = n;
         p_list->head = p_node;
     }
     else
     {
-        //POOL_AT(ListNode, p_list->tail)->next = n;
         p_list->tail->next = p_node;
     }
 
@@ -210,7 +198,7 @@ int list_get_len(List list)
 }
 
 // Good!
-union ListData list_get_at_idx(List list, int n)
+void* list_get_at_idx(List list, int n)
 {
     int len = 0;
     ListItr itr = list_itr_new(&list);
@@ -221,13 +209,11 @@ union ListData list_get_at_idx(List list, int n)
         if (n == len++) return ln->data;
     }
 
-    union ListData ret = {.val = UNDEFINED};
-
-    return ret;
+    return NULL;
 }
 
 // Good!
-int list_get_at_object_idx(List list, union ListData data)
+int list_get_at_object_idx(List list, void* data)
 {
     int len = 0;
     ListItr itr = list_itr_new(&list);
@@ -235,22 +221,22 @@ int list_get_at_object_idx(List list, union ListData data)
 
     while((ln = list_itr_next(&itr)))
     {
-        if(ln->data.val == data.val) return len;
+        if(ln->data == data) return len;
         len++;
     }
 
-    return -1;
+    return UNDEFINED;
 }
 
 // Good!
-void list_remove_at_object_idx(List* p_list, union ListData data)
+void list_remove_at_object_idx(List* p_list, void* data)
 {
     ListItr itr = list_itr_new(p_list);
     ListNode* ln;
 
     while((ln = list_itr_next(&itr)))
     {
-        if(ln->data.val == data.val)
+        if(ln->data == data)
         {
             list_remove_node(p_list, ln);
             return;

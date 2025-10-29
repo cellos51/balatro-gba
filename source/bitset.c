@@ -23,11 +23,11 @@ void bitset_set_idx(Bitset *bitset, int idx, bool on)
     }
 }
 
-int bitset_get_free_idx(Bitset *bm)
+int bitset_get_free_idx(Bitset *bitset)
 {
-    for (uint32_t i = 0; i < bm->nwords; i++)
+    for (uint32_t i = 0; i < bitset->nwords; i++)
     {
-        uint32_t inv = ~bm->w[i];
+        uint32_t inv = ~bitset->w[i];
 
         // guard so we don't call `ctz` with 0, since __builtin_ctz(0) is undefined
         // https://gcc.gnu.org/onlinedocs/gcc/Bit-Operation-Builtins.html#index-_005f_005fbuiltin_005fctz
@@ -40,47 +40,47 @@ int bitset_get_free_idx(Bitset *bm)
         if (inv)
         {
             int bit = __builtin_ctz(inv);
-            bm->w[i] |= ((uint32_t)1 << bit);
+            bitset->w[i] |= ((uint32_t)1 << bit);
             int idx = i * BITSET_BITS_PER_WORD + bit;
-            return (idx < bm->cap) ? idx : UNDEFINED;
+            return (idx < bitset->cap) ? idx : UNDEFINED;
         }
     }
 
     return UNDEFINED;
 }
 
-void bitset_clear(Bitset *bm)
+void bitset_clear(Bitset *bitset)
 {
-    for(int i = 0; i < bm->nwords; i++)
+    for(int i = 0; i < bitset->nwords; i++)
     {
-        bm->w[i] = 0;
+        bitset->w[i] = 0;
     }
 }
 
-bool bitset_is_empty(Bitset *bm)
+bool bitset_is_empty(Bitset *bitset)
 {
-    for(int i = 0; i < bm->nwords; i++)
+    for(int i = 0; i < bitset->nwords; i++)
     {
-        if(bm->w[i]) return false;
+        if(bitset->w[i]) return false;
     }
     return true;
 }
 
-bool bitset_get_idx(Bitset *bm, int idx)
+bool bitset_get_idx(Bitset *bitset, int idx)
 {
     uint32_t i = idx / BITSET_BITS_PER_WORD;
     uint32_t b = idx % BITSET_BITS_PER_WORD;
 
-    return bm->w[i] & (uint32_t)1 << b;
+    return bitset->w[i] & (uint32_t)1 << b;
 }
 
-int bitset_num_set_bits(Bitset *bm)
+int bitset_num_set_bits(Bitset *bitset)
 {
     int sum = 0;
 
-    for(int i = 0; i < bm->nwords; i++)
+    for(int i = 0; i < bitset->nwords; i++)
     {
-        sum += __builtin_popcount(bm->w[i]);
+        sum += __builtin_popcount(bitset->w[i]);
     }
 
     return sum;
