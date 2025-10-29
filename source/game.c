@@ -190,6 +190,8 @@ static enum BlindState blinds[BLIND_TYPE_MAX] =
 static int blind_reward = 0;
 static int hand_reward = 0;
 static int interest_reward = 0;
+static int interest_to_count = 0;
+static int interest_start_time = UNDEFINED;
 
 // Red deck default (can later be moved to a deck.h file or something)
 static int max_hands = 4;
@@ -431,6 +433,8 @@ static const Rect ROUND_END_BLIND_REQ_RECT  = {104,     96,     136,       UNDEF
 static const Rect ROUND_END_BLIND_REWARD_RECT = { 168,  96,     UNDEFINED, UNDEFINED };
 static const Rect ROUND_END_NUM_HANDS_RECT  = {88,      116,    UNDEFINED, UNDEFINED };
 static const Rect HAND_REWARD_RECT          = {168,     UNDEFINED, UNDEFINED, UNDEFINED };
+static const Rect ROUND_END_INTEREST_RECT   = {88,      126,    UNDEFINED, UNDEFINED };
+static const Rect INTEREST_REWARD_RECT      = {168,     UNDEFINED, UNDEFINED, UNDEFINED };
 static const Rect CASHOUT_RECT              = {88,      72,     UNDEFINED, UNDEFINED };
 static const Rect SHOP_REROLL_RECT          = {88,      96,     UNDEFINED, UNDEFINED };
 static const Rect GAME_LOSE_MSG_TEXT_RECT   = {104,     72,     UNDEFINED, UNDEFINED};
@@ -486,8 +490,10 @@ static const BG_POINT MAIN_MENU_ACE_T       = {88,      26};
 #define TM_END_DISPLAY_FIN_BLIND 30
 #define TM_END_DISPLAY_SCORE_MIN 4
 #define TM_ELLIPSIS_PRINT_MAX_TM 16
-#define TM_DISPLAY_REWARDS_CONT_WAIT 30
-#define TM_HAND_REWARD_INCR_WAIT 45
+#define TM_REWARD_INCR_INTERVAL 20
+#define TM_REWARD_DISPLAY_INTERVAL 15
+#define TM_DISPLAY_REWARDS_CONT_WAIT TM_ELLIPSIS_PRINT_MAX_TM + TM_REWARD_DISPLAY_INTERVAL
+#define TM_HAND_REWARD_INCR_WAIT TM_DISPLAY_REWARDS_CONT_WAIT + TM_REWARD_DISPLAY_INTERVAL
 #define TM_DISMISS_ROUND_END_TM 20
 #define TM_CREATE_SHOP_ITEMS_WAIT 1
 #define TM_SHIFT_SHOP_ICON_WAIT 7
@@ -497,6 +503,8 @@ static const BG_POINT MAIN_MENU_ACE_T       = {88,      26};
 #define TM_DISP_BLIND_PANEL_START 1
 #define TM_BLIND_SELECT_START 1
 #define TM_END_ANIM_SEQ 12
+
+
 
 // Palette IDs
 #define PLAY_HAND_BTN_SELECTED_BORDER_PID 1
@@ -2195,6 +2203,14 @@ static void game_playing_on_update()
     game_playing_ui_text_update();
 }
 
+static int calculate_interest_reward()
+{
+    int reward = (money / 5) * INTEREST_PER_5; 
+    if (reward > MAX_INTEREST)
+        reward = MAX_INTEREST; 
+    return reward;
+}
+
 static void game_round_end_on_exit()
 {
     // Cleanup blind tokens from this round to avoid accumulating 
@@ -2228,6 +2244,9 @@ static void game_round_end_start()
         timer = TM_ZERO; // Reset the timer
         blind_reward = blind_get_reward(current_blind);
         hand_reward = hands;
+        interest_reward = calculate_interest_reward();
+        interest_to_count = interest_reward;
+        interest_start_time = UNDEFINED;
     }
 }
 
@@ -2341,22 +2360,19 @@ static void game_round_end_panel_exit()
 static void game_round_end_display_rewards()
 {
     int hand_y = 0;
-    
-    // TODO: Implement interest
-    //int interest_y = 0;
-    
+    int interest_y = 0;
+
     if (hands > 0)
     {
         hand_y = 1;
     }
-    
-    // TODO: implement interest
-    // if (interest > 0)
-    // {
-    //     interest_y = 1 + hand_y;
-    // }
-    
-    if (hand_reward <= 0 && interest_reward <= 0) // Once all rewards are accounted for go to the next state
+
+    if (interest_reward > 0)
+    {
+        interest_y = 1 + hand_y;
+    }
+
+    if (hand_reward <= 0 && interest_to_count <= 0) // Once all rewards are accounted for go to the next state
     {
         timer = TM_ZERO; // Reset the timer
         state_info[game_state].substate = DISPLAY_CASHOUT; // Go to the next state
@@ -2387,11 +2403,33 @@ static void game_round_end_display_rewards()
     
             tte_printf("#{P:%d,%d; cx:0x%X000}%d #{cx:0x%X000}Hands", ROUND_END_NUM_HANDS_RECT.left, ROUND_END_NUM_HANDS_RECT.top, TTE_BLUE_PB,  hand_reward, TTE_WHITE_PB); // Print the hand reward
         }
-        else if (timer > TM_HAND_REWARD_INCR_WAIT && timer % FRAMES(20) == 0) // After 15 frames, every 20 frames, increment the hand reward text until the hand reward variable is depleted
+        else if (timer > TM_HAND_REWARD_INCR_WAIT && timer % FRAMES(TM_REWARD_DISPLAY_INTERVAL) == 0) // After 15 frames, every 20 frames, increment the hand reward text until the hand reward variable is depleted
         {
             int y = (13 + hand_y) * TILE_SIZE;
             hand_reward--;
             tte_printf("#{P:%d, %d; cx:0x%X000}$%d", HAND_REWARD_RECT.left, y, TTE_YELLOW_PB, hands - hand_reward); // Print the hand reward
+            if (hand_reward == 0)
+            {
+                interest_start_time = timer + TM_REWARD_DISPLAY_INTERVAL; // Time to start printing the interest gained
+            }
+        }
+    }
+    else if (timer >= interest_start_time && interest_to_count > 0 && interest_start_time != -1)
+    {
+        if (timer == interest_start_time) // Expand the black part of the panel down by one tile again
+        {
+            Rect single_line_rect = ROUND_END_MENU_RECT;
+            single_line_rect.top = 12 + interest_y;
+            single_line_rect.bottom = single_line_rect.top + 1;
+            main_bg_se_copy_rect_1_tile_vert(single_line_rect, SE_DOWN);
+
+            tte_printf("#{P:%d,%d; cx:0x%X000}%d #{cx:0x%X000}Interest", ROUND_END_INTEREST_RECT.left, ROUND_END_INTEREST_RECT.top, TTE_YELLOW_PB, interest_reward, TTE_WHITE_PB);
+        }
+        else if (timer > interest_start_time + 15 && timer % FRAMES(20) == 0) // After 15 frames, every 20 frames, increment the interest reward text until the interest reward variable is depleted
+        {
+            int y = (13 + interest_y) * TILE_SIZE;
+            interest_to_count--;
+            tte_printf("#{P:%d, %d; cx:0x%X000}$%d", INTEREST_REWARD_RECT.left, y, TTE_YELLOW_PB, interest_reward - interest_to_count);
         }
     }
 }
@@ -2420,14 +2458,17 @@ static void game_round_end_display_cashout()
         BG_POINT bottom_point = {6, 31};
         main_bg_se_fill_rect_with_se(main_bg_se_get_se(bottom_point), bottom_rect);
     
-        tte_printf("#{P:%d, %d; cx:0x%X000}Cash Out: $%d", CASHOUT_RECT.left, CASHOUT_RECT.top, TTE_WHITE_PB, hands + blind_get_reward(current_blind)); // Print the cash out amount
+        int cashout_amount = hands + blind_get_reward(current_blind) + calculate_interest_reward();
+
+        bool omit_space = cashout_amount >= 10;
+        tte_printf("#{P:%d, %d; cx:0x%X000}Cash Out:%s$%d", CASHOUT_RECT.left, CASHOUT_RECT.top, TTE_WHITE_PB, omit_space ? "" : " " , cashout_amount);
     }
     else if (timer > FRAMES(40) && key_hit(SELECT_CARD)) // Wait until the player presses A to cash out
     {
         game_round_end_cashout();
     
         state_info[game_state].substate = DISMISS_ROUND_END_PANEL; // Go to the next state
-        timer = TM_ZERO; // Reset the timer
+        timer = TM_ZERO;
     
         obj_hide(round_end_blind_token->obj); // Hide the blind token object
         tte_erase_rect_wrapper(BLIND_TOKEN_TEXT_RECT); // Erase the blind token text

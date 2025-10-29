@@ -10,6 +10,10 @@
 #define MAX_CARD_SCORE_STR_LEN (MAX_CARD_SCORE_DIGITS + 1) // For the '+' or 'X'
 #define FRAMES(x) (((x) + game_speed - 1) / game_speed)
 
+ // TODO: Can make these dynamic to support interest-related jokers and vouchers
+#define MAX_INTEREST 5 
+#define INTEREST_PER_5 1
+
 // TODO: Turn into enum?
 #define BG_ID_CARD_SELECTING 1
 #define BG_ID_CARD_PLAYING 2
