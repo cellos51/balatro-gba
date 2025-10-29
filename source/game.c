@@ -2238,14 +2238,8 @@ void game_round_end()
                 main_bg_se_fill_rect_with_se(main_bg_se_get_se(bottom_point), bottom_rect);
 
                 int cashout_amount = hands + blind_get_reward(current_blind) + calculate_interest_reward();
-                if (cashout_amount < 10) // If cashout is two digits, omit the space so it fits in the box without clipping out
-                {
-                    tte_printf("#{P:%d, %d; cx:0x%X000}Cash Out: $%d", CASHOUT_RECT.left, CASHOUT_RECT.top, TTE_WHITE_PB, cashout_amount); 
-                }
-                else
-                {
-                    tte_printf("#{P:%d, %d; cx:0x%X000}Cash Out:$%d", CASHOUT_RECT.left, CASHOUT_RECT.top, TTE_WHITE_PB, cashout_amount); 
-                }
+                bool omit_space = cashout_amount >= 10;
+                tte_printf("#{P:%d, %d; cx:0x%X000}Cash Out:%s$%d", CASHOUT_RECT.left, CASHOUT_RECT.top, TTE_WHITE_PB, omit_space ? "" : " " , cashout_amount);
                 
             }
             else if (timer > FRAMES(40) && key_hit(SELECT_CARD)) // Wait until the player presses A to cash out
