@@ -86,7 +86,7 @@ int bitset_num_set_bits(Bitset *bitset)
     return sum;
 }
 
-int bitset_find_of_nth_set(const Bitset *bitset, int n)
+int bitset_find_idx_of_nth_set(const Bitset *bitset, int n)
 {
     int tracker, prev_tracker = 0;
     for(int i = 0; i < bitset->nwords; i++)
@@ -117,14 +117,6 @@ int bitset_find_of_nth_set(const Bitset *bitset, int n)
     return UNDEFINED;
 }
 
-int bitset_get_next_free_idx(const Bitset *bitset, int start)
-{
-    // pretty inefficient and confusing way this is setup right now.
-    // This is just for testing and NEEDS to be done a better way
-    return bitset_find_of_nth_set(bitset, start);
-}
-
-
 BitsetItr bitset_itr_new(const Bitset* bitset)
 {
     BitsetItr itr =
@@ -138,5 +130,5 @@ BitsetItr bitset_itr_new(const Bitset* bitset)
 
 int bitset_itr_next(BitsetItr* itr)
 {
-    return bitset_find_of_nth_set(itr->bitset, itr->itr++);
+    return bitset_find_idx_of_nth_set(itr->bitset, itr->itr++);
 }

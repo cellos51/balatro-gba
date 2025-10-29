@@ -21,17 +21,25 @@ typedef struct
     int itr; // the iteration we are on
 } BitsetItr;
 
+// Set the flag at the 'idx' index in the bitset
 void bitset_set_idx(Bitset *bitset, int idx, bool on);
+// Get the flag at the 'idx' index in the bitset
 bool bitset_get_idx(Bitset *bm, int idx);
+// Get the next free (set to 0) index in the bitset.
+// It also sets the bit which it maybe should do... It really shouldn't do two things
+// But it's such a fast operation idk. // TODO: decide what you wanna do
 int bitset_get_free_idx(Bitset *bitset);
+// Clear the entire bitset
 void bitset_clear(Bitset *bitset);
+// Returns true if no bits are set
 bool bitset_is_empty(Bitset *bitset);
+// Returns the number of set bits
 int bitset_num_set_bits(Bitset *bitset);
-
-int bitset_find_of_nth_set(const Bitset *bitset, int n);
-// temporary function for testing iterator
-int bitset_get_next_free_idx(const Bitset *bitset, int start);
+// Find the index at the nth set bit
+int bitset_find_idx_of_nth_set(const Bitset *bitset, int n);
+// Get a new bitset iterator
 BitsetItr bitset_itr_new(const Bitset* bitset);
+// Get the next set bit index at the next iteration. If it's at the end, return UNDEFINED instead.
 int bitset_itr_next(BitsetItr* itr);
 
 #define BITSET_DEFINE(name, capacity)                         \
