@@ -1,8 +1,9 @@
 # Balatro-GBA
 
-[![Build Status](https://img.shields.io/github/actions/workflow/status/cellos51/balatro-gba/build_ci_workflow.yml?style=flat&logo=github&branch=main&label=Builds&labelColor=gray&color=default&v=1)](https://github.com/cellos51/balatro-gba/actions)
-[![Open Issues](https://custom-icon-badges.demolab.com/github/issues/cellos51/balatro-gba?logo=bug&style=flat&label=Issues&labelColor=gray&color=red&v=2)](https://github.com/cellos51/balatro-gba/issues)
-[![Pull Requests](https://custom-icon-badges.demolab.com/github/issues-pr/cellos51/balatro-gba?logo=git-pull-request&style=flat&label=Pull%20Requests&labelColor=gray&color=indigo&v=3)](https://github.com/cellos51/balatro-gba/pulls)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/cellos51/balatro-gba/build_ci_workflow.yml?style=flat&logo=github&branch=main&label=Builds&labelColor=gray&color=default&maxAge=7200)](https://github.com/cellos51/balatro-gba/actions)
+[![Open Issues](https://img.shields.io/github/issues/cellos51/balatro-gba?style=flat&color=red&label=Issues&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2Ij48cGF0aCBmaWxsPSJ3aGl0ZSIgZD0iTTggOS41YTEuNSAxLjUgMCAxIDAgMC0zIDEuNSAxLjUgMCAwIDAgMCAzWiI+PC9wYXRoPjxwYXRoIGZpbGw9IndoaXRlIiBkPSJNOCAwYTggOCAwIDEgMSAwIDE2QTggOCAwIDAgMSA4IDBaTTEuNSA4YTYuNSA2LjUgMCAxIDAgMTMgMCA2LjUgNi41IDAgMCAwLTEzIDBaIj48L3BhdGg+PC9zdmc+)](https://github.com/cellos51/balatro-gba/issues)
+[![Pull Requests](https://img.shields.io/github/issues-pr/cellos51/balatro-gba?style=flat&color=indigo&label=Pull%20Requests&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2Ij48cGF0aCBmaWxsPSJ3aGl0ZSIgZD0iTTEuNSAzLjI1YTIuMjUgMi4yNSAwIDEgMSAzIDIuMTIydjUuMjU2YTIuMjUxIDIuMjUxIDAgMSAxLTEuNSAwVjUuMzcyQTIuMjUgMi4yNSAwIDAgMSAxLjUgMy4yNVptNS42NzctLjE3N0w5LjU3My42NzdBLjI1LjI1IDAgMCAxIDEwIC44NTRWMi41aDFBMi41IDIuNSAwIDAgMSAxMy41IDV2NS42MjhhMi4yNTEgMi4yNTEgMCAxIDEtMS41IDBWNWExIDEgMCAwIDAtMS0xaC0xdjEuNjQ2YS4yNS4yNSAwIDAgMS0uNDI3LjE3N0w3LjE3NyAzLjQyN2EuMjUuMjUgMCAwIDEgMC0uMzU0Wk0zLjc1IDIuNWEuNzUuNzUgMCAxIDAgMCAxLjUuNzUuNzUgMCAwIDAgMC0xLjVabTAgOS41YS43NS43NSAwIDEgMCAwIDEuNS43NS43NSAwIDAgMCAwLTEuNVptOC4yNS43NWEuNzUuNzUgMCAxIDAgMS41IDAgLjc1Ljc1IDAgMCAwLTEuNSAwWiI+PC9wYXRoPjwvc3ZnPg==)](https://github.com/cellos51/balatro-gba/pulls)
+[![Discussions](https://img.shields.io/github/discussions/cellos51/balatro-gba?style=flat&color=blue&label=Discussions&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2Ij48cGF0aCBmaWxsPSJ3aGl0ZSIgZD0iTTEuNzUgMWg4LjVjLjk2NiAwIDEuNzUuNzg0IDEuNzUgMS43NXY1LjVBMS43NSAxLjc1IDAgMCAxIDEwLjI1IDEwSDcuMDYxbC0yLjU3NCAyLjU3M0ExLjQ1OCAxLjQ1OCAwIDAgMSAyIDExLjU0M1YxMGgtLjI1QTEuNzUgMS43NSAwIDAgMSAwIDguMjV2LTUuNUMwIDEuNzg0Ljc4NCAxIDEuNzUgMVpNMS41IDIuNzV2NS41YzAgLjEzOC4xMTIuMjUuMjUuMjVoMWEuNzUuNzUgMCAwIDEgLjc1Ljc1djIuMTlsMi43Mi0yLjcyYS43NDkuNzQ5IDAgMCAxIC41My0uMjJoMy41YS4yNS4yNSAwIDAgMCAuMjUtLjI1di01LjVhLjI1LjI1IDAgMCAwLS4yNS0uMjVoLTguNWEuMjUuMjUgMCAwIDAtLjI1LjI1Wm0xMyAyYS4yNS4yNSAwIDAgMC0uMjUtLjI1aC0uNWEuNzUuNzUgMCAwIDEgMC0xLjVoLjVjLjk2NiAwIDEuNzUuNzg0IDEuNzUgMS43NXY1LjVBMS43NSAxLjc1IDAgMCAxIDE0LjI1IDEySDE0djEuNTQzYTEuNDU4IDEuNDU4IDAgMCAxLTIuNDg3IDEuMDNMOS4yMiAxMi4yOGEuNzQ5Ljc0OSAwIDAgMSAuMzI2LTEuMjc1Ljc0OS43NDkgMCAwIDEgLjczNC4yMTVsMi4yMiAyLjIydi0yLjE5YS43NS43NSAwIDAgMSAuNzUtLjc1aDFhLjI1LjI1IDAgMCAwIC4yNS0uMjVaIj48L3BhdGg+PC9zdmc+)](https://github.com/cellos51/balatro-gba/discussions)
 
 This is an attempt to recreate the game **'Balatro'** as accurately as possible, including all of the visual effects that make Balatro feel satisfying to play.
 This **tech-demo/proof of concept** is strictly limited in content to a minimal version of Balatro and will **NOT** recreate the full game. **This version is intended for people who already own and know how the official full game works.** Please refer to the Balatro Wiki if you need help understanding certain mechanics or abilities.
@@ -40,15 +41,36 @@ This **tech-demo/proof of concept** is strictly limited in content to a minimal 
 # **Build Instructions:**
 
 ## **-Docker-**
-A docker compose file is provided to build this project. 
+A docker compose file is provided to build this project. It provides a standard build environment for this projects CI/CD and can also be used to build the ROM locally.
 
-1.) Install [docker desktop](https://docs.docker.com/compose/install/). 
+_Some users may find this option to be the easiest way to build locally._
+- _This option **avoids** setting up the development environment as described below._
+- _No additional software besides **docker desktop** is required._
 
-2.) Open a terminal to this projects directory:
-- On **linux** run `UID=$(id -u) GID=$(id -g) docker compose up`
-- On **windows** run `docker compose up`
+### Step-by-Step
 
-Docker will build the project and the ROM will be in the same location as step 7 describes below.
+1.) Install [docker desktop](https://docs.docker.com/desktop/) for your operating system.
+
+2.) Open a terminal to this project's directory:
+- On **Linux** run `UID=$(id -u) GID=$(id -g) docker compose up`
+- On **Windows** run `docker compose up`
+
+<details>
+  <summary><i>How do I open a terminal in windows?</i></summary>
+  
+---
+
+From the file explorer, you can open a folder in **powershell** (_a modern windows terminal_):
+
+- **hold 'Shift'** and **Right Click** on the folder. 
+
+- Select **"Open PowerShell window here"** from the popup menu.
+
+---
+
+</details>
+
+3.) Docker will build the project and the ROM will be in the same location as step 7 describes below.
 
 ## **-Windows-**
 Video Tutorial: https://youtu.be/72Zzo1VDYzQ?si=UDmEdbST1Cx1zZV2
@@ -71,13 +93,31 @@ Disregard Steps 3-4 and instead click the green code button on the main reposito
 
 ## **-Linux-**
 
-1.) Add the devkitPro repo using these instructions https://devkitpro.org/wiki/devkitPro_pacman
+1.) Add the devkitPro repository using these instructions https://devkitpro.org/wiki/devkitPro_pacman
 
-2.) Install devkitPro by running `sudo pacman -S gba-dev` and accepting all packages
+2.) Install devkitPro by running `sudo pacman -S gba-dev` and accepting all packages.
 
-3.) Activate the devkitPro environment by running `source /etc/profile.d/devkit-env.sh` or opening a new shell
+3.) Activate the devkitPro environment by running `source /etc/profile.d/devkit-env.sh` or opening a new shell.
 
-4.) Follow instructions from windows tutorial step 3
+4.) Follow instructions from the Windows tutorial starting from Step 3
+
+## **-macOS-**
+1.) Install devkitPro installer using: https://github.com/devkitPro/installer and following https://devkitpro.org/wiki/devkitPro_pacman#macOS.
+> Note: You may have to install the installers directly from their url in a browser, as the installer script may not install correctly due to Cloudflare checks on their server. You can use one of the following urls: 
+
+> Apple Silicon: https://pkg.devkitpro.org/packages/macos-installers/devkitpro-pacman-installer.arm64.pkg
+
+> Intel: https://pkg.devkitpro.org/packages/macos-installers/devkitpro-pacman-installer.x86_64.pkg
+ 
+
+2.) Verify that devkitPro is installed in '/opt/devkitpro'
+
+3.) Add the following to your .bashrc or .zshrc (or export the variables in your shell session): 
+- export DEVKITPRO=/opt/devkitpro
+- export DEVKITARM=$DEVKITPRO/devkitARM
+- export PATH=$PATH:$DEVKITPRO/tools/bin:$DEVKITPRO/pacman/bin
+
+4.) Follow instructions from Windows tutorial step 4
 
 ## **Common Issues:**
 

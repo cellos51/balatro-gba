@@ -11,11 +11,24 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "pool.h"
+
 #define JOKER_SCORE_TEXT_Y 48
 #define NUM_JOKERS_PER_SPRITESHEET 2
+#define MAX_DEFINABLE_JOKERS 150
 
-const unsigned int **joker_gfxTiles;
-const unsigned short **joker_gfxPal;
+static const unsigned int *joker_gfxTiles[] =
+{
+#define DEF_JOKER_GFX(idx) joker_gfx##idx##Tiles,
+#include "../include/def_joker_gfx_table.h"
+#undef DEF_JOKER_GFX
+};
+static const unsigned short *joker_gfxPal[] = 
+{
+#define DEF_JOKER_GFX(idx) joker_gfx##idx##Pal,
+#include "../include/def_joker_gfx_table.h"
+#undef DEF_JOKER_GFX
+};
 
 const static u8 edition_price_lut[MAX_EDITIONS] =
 {
@@ -38,7 +51,7 @@ static bool used_layers[MAX_JOKER_OBJECTS] = {false}; // Track used layers for j
 
 // Maps the spritesheet index to the palette bank index allocated to it.
 // Spritesheets that were not allocated are
-static int* joker_spritesheet_pb_map;
+static int joker_spritesheet_pb_map[(MAX_DEFINABLE_JOKERS + 1) / NUM_JOKERS_PER_SPRITESHEET];
 static int joker_pb_num_sprite_users[JOKER_LAST_PB - JOKER_BASE_PB + 1] = { 0 };
 
 static int get_num_spritesheets()
@@ -113,42 +126,6 @@ void joker_init()
 {
     // This should init once only so no need to free
     int num_spritesheets = get_num_spritesheets();
-    joker_gfxTiles = (const unsigned int**)malloc((sizeof(unsigned int*) * num_spritesheets));
-    joker_gfxPal = (const unsigned short**)malloc((sizeof(unsigned int*) * num_spritesheets));
-    joker_spritesheet_pb_map = (int*)malloc(sizeof(int) * num_spritesheets);
-    
-    // TODO: Automate this with the preprocessor somehow?
-    joker_gfxTiles[0] = joker_gfx0Tiles;
-    joker_gfxTiles[1] = joker_gfx1Tiles;
-    joker_gfxTiles[2] = joker_gfx2Tiles;
-    joker_gfxTiles[3] = joker_gfx3Tiles;
-    joker_gfxTiles[4] = joker_gfx4Tiles;
-    joker_gfxTiles[5] = joker_gfx5Tiles;
-    joker_gfxTiles[6] = joker_gfx6Tiles;
-    joker_gfxTiles[7] = joker_gfx7Tiles;
-    joker_gfxTiles[8] = joker_gfx8Tiles;
-    joker_gfxTiles[9] = joker_gfx9Tiles;
-    joker_gfxTiles[10] = joker_gfx10Tiles;
-    joker_gfxTiles[11] = joker_gfx11Tiles;
-    joker_gfxTiles[12] = joker_gfx12Tiles;
-    joker_gfxTiles[13] = joker_gfx13Tiles;
-    joker_gfxTiles[14] = joker_gfx14Tiles;
-
-    joker_gfxPal[0] = joker_gfx0Pal;
-    joker_gfxPal[1] = joker_gfx1Pal;
-    joker_gfxPal[2] = joker_gfx2Pal;
-    joker_gfxPal[3] = joker_gfx3Pal;
-    joker_gfxPal[4] = joker_gfx4Pal;
-    joker_gfxPal[5] = joker_gfx5Pal;
-    joker_gfxPal[6] = joker_gfx6Pal;
-    joker_gfxPal[7] = joker_gfx7Pal;
-    joker_gfxPal[8] = joker_gfx8Pal;
-    joker_gfxPal[9] = joker_gfx9Pal;
-    joker_gfxPal[10] = joker_gfx10Pal;
-    joker_gfxPal[11] = joker_gfx11Pal;
-    joker_gfxPal[12] = joker_gfx12Pal;
-    joker_gfxPal[13] = joker_gfx13Pal;
-    joker_gfxPal[14] = joker_gfx14Pal;
 
     for (int i = 0; i < num_spritesheets; i++)
     {
@@ -160,7 +137,7 @@ Joker *joker_new(u8 id)
 {
     if (id >= get_joker_registry_size()) return NULL;
 
-    Joker *joker = (Joker*)malloc(sizeof(Joker));
+    Joker *joker = POOL_GET(Joker);
     const JokerInfo *jinfo = get_joker_registry_entry(id);
 
     joker->id = id;
@@ -174,15 +151,14 @@ Joker *joker_new(u8 id)
 
 void joker_destroy(Joker **joker)
 {
-    if (*joker == NULL) return;
-    free(*joker);
+    POOL_FREE(Joker, *joker);
     *joker = NULL;
 }
 
 JokerEffect joker_get_score_effect(Joker *joker, Card *scored_card)
 {
     const JokerInfo *jinfo = get_joker_registry_entry(joker->id);
-    if (!jinfo) return (JokerEffect){0};
+    if (!jinfo || jinfo->effect == NULL) return (JokerEffect){0};
 
     return jinfo->effect(joker, scored_card);
 }
@@ -200,7 +176,7 @@ int joker_get_sell_value(const Joker* joker)
 // JokerObject methods
 JokerObject *joker_object_new(Joker *joker)
 {
-    JokerObject *joker_object = malloc(sizeof(JokerObject));
+    JokerObject *joker_object = POOL_GET(JokerObject);
 
     int layer = 0;
     for (int i = 0; i < MAX_JOKER_OBJECTS; i++)
@@ -257,7 +233,7 @@ void joker_object_destroy(JokerObject **joker_object)
 
     sprite_object_destroy(&(*joker_object)->sprite_object); // Destroy the sprite
     joker_destroy(&(*joker_object)->joker); // Destroy the joker
-    free(*joker_object);
+    POOL_FREE(JokerObject, *joker_object);
     *joker_object = NULL;
 }
 
@@ -355,4 +331,28 @@ Sprite* joker_object_get_sprite(JokerObject* joker_object)
     if (joker_object == NULL)
         return NULL;
     return sprite_object_get_sprite(joker_object->sprite_object);
+}
+
+int joker_get_random_rarity()
+{
+    int joker_rarity = 0;
+    int rarity_roll = random() % 100; 
+    if (rarity_roll < COMMON_JOKER_CHANCE)  
+    {
+        joker_rarity = COMMON_JOKER;
+    }
+    else if (rarity_roll < COMMON_JOKER_CHANCE + UNCOMMON_JOKER_CHANCE) 
+    {
+        joker_rarity = UNCOMMON_JOKER;
+    }
+    else if (rarity_roll < COMMON_JOKER_CHANCE + UNCOMMON_JOKER_CHANCE + RARE_JOKER_CHANCE)
+    {
+        joker_rarity = RARE_JOKER;
+    }
+    else if (rarity_roll < COMMON_JOKER_CHANCE + UNCOMMON_JOKER_CHANCE + RARE_JOKER_CHANCE + LEGENDARY_JOKER_CHANCE)
+    {
+        joker_rarity = LEGENDARY_JOKER;
+    }
+
+    return joker_rarity;
 }

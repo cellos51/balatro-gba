@@ -304,9 +304,6 @@ static JokerEffect blue_joker_effect(Joker *joker, Card *scored_card) {
     return effect;
 }
 
-// Using __attribute__((unused)) for jokers with no sprites yet to avoid warning
-// Remove the attribute once they have sprites
-__attribute__((unused))
 static JokerEffect raised_fist_joker_effect(Joker *joker, Card *scored_card) 
 {
     JokerEffect effect = {0};
@@ -331,7 +328,6 @@ static JokerEffect raised_fist_joker_effect(Joker *joker, Card *scored_card)
     return effect;
 } 
 
-__attribute__((unused))
 static JokerEffect reserved_parking_joker_effect(Joker *joker, Card *scored_card) {
     JokerEffect effect = {0};
     if (scored_card != NULL)
@@ -341,12 +337,8 @@ static JokerEffect reserved_parking_joker_effect(Joker *joker, Card *scored_card
     int hand_size = hand_get_size();
     for (int i = 0; i < hand_size; i++ )
     {
-        switch (hand[i]->card->rank) {
-            case KING: case QUEEN: case JACK:
-                if (random() % 2 == 0)
-                    effect.money += 1;
-            default:
-                break;
+        if ((random() % 2 == 0) && card_is_face(hand[i]->card)) {
+            effect.money += 1;
         }
     }
 
@@ -358,12 +350,8 @@ static JokerEffect business_card_joker_effect(Joker *joker, Card *scored_card) {
     if (scored_card == NULL)
         return effect;
 
-    switch (scored_card->rank) {
-        case KING: case QUEEN: case JACK:
-            if (random() % 2 == 0)
-                effect.money = 2;
-        default:
-            break;
+    if ((random() % 2 == 0) && card_is_face(scored_card)) {
+        effect.money = 2;
     }
 
     return effect;
@@ -387,17 +375,13 @@ static JokerEffect scary_face_joker_effect(Joker *joker, Card *scored_card) {
     if (scored_card == NULL)
         return effect;
 
-    switch (scored_card->rank) {
-        case KING: case QUEEN: case JACK:
-            effect.chips = 30;
-        default:
-            break;
+    if (card_is_face(scored_card)) {
+        effect.chips = 30;
     }
 
     return effect;
 }
 
- __attribute__((unused))
 static JokerEffect abstract_joker_effect(Joker *joker, Card *scored_card) {
     JokerEffect effect = {0};
     if (scored_card != NULL)
@@ -410,7 +394,6 @@ static JokerEffect abstract_joker_effect(Joker *joker, Card *scored_card) {
     return effect;
 }
 
-__attribute__((unused))
 static JokerEffect bull_joker_effect(Joker *joker, Card *scored_card) {
     JokerEffect effect = {0};
     if (scored_card != NULL)
@@ -426,11 +409,8 @@ static JokerEffect smiley_face_joker_effect(Joker *joker, Card *scored_card) {
     if (scored_card == NULL)
         return effect;
 
-    switch (scored_card->rank) {
-        case KING: case QUEEN: case JACK:
-            effect.mult = 5;
-        default:
-            break;
+    if (card_is_face(scored_card)) {
+        effect.mult = 5;
     }
 
     return effect;
@@ -460,6 +440,178 @@ static JokerEffect odd_todd_joker_effect(Joker *joker, Card *scored_card) {
 
     if (card_get_value(scored_card) % 2 == 1) // todo test ace
         effect.chips = 31;
+
+    return effect;
+}
+
+__attribute__((unused))
+static JokerEffect acrobat_joker_effect(Joker *joker, Card *scored_card) {
+    JokerEffect effect = {0};
+    if (scored_card == NULL)
+        return effect;
+
+    // 0 remaining hands mean we're scoring the last hand
+    if (get_num_hands_remaining() == 0) {
+        effect.xmult = 3;
+    }
+
+    return effect;
+}
+
+static JokerEffect the_duo_joker_effect(Joker *joker, Card *scored_card) {
+    JokerEffect effect = {0};
+    if (scored_card != NULL)
+        return effect; // if card != null, we are not at the end-phase of scoring yet
+    
+     // This is really inefficient but the only way at the moment to check for whole-hand conditions
+    u8 suits[NUM_SUITS];
+    u8 ranks[NUM_RANKS];
+    get_played_distribution(ranks, suits);
+
+    if (hand_contains_n_of_a_kind(ranks) >= 2)
+        effect.xmult = 2;
+    return effect;
+ }
+
+static JokerEffect the_trio_joker_effect(Joker *joker, Card *scored_card) {
+    JokerEffect effect = {0};
+    if (scored_card != NULL)
+        return effect; // if card != null, we are not at the end-phase of scoring yet
+    
+     // This is really inefficient but the only way at the moment to check for whole-hand conditions
+    u8 suits[NUM_SUITS];
+    u8 ranks[NUM_RANKS];
+    get_played_distribution(ranks, suits);
+
+    if (hand_contains_n_of_a_kind(ranks) >= 3)
+        effect.xmult = 3;
+    return effect;
+ }
+
+static JokerEffect the_family_joker_effect(Joker *joker, Card *scored_card) {
+    JokerEffect effect = {0};
+    if (scored_card != NULL)
+        return effect; // if card != null, we are not at the end-phase of scoring yet
+    
+     // This is really inefficient but the only way at the moment to check for whole-hand conditions
+    u8 suits[NUM_SUITS];
+    u8 ranks[NUM_RANKS];
+    get_played_distribution(ranks, suits);
+
+    if (hand_contains_n_of_a_kind(ranks) >= 4)
+        effect.xmult = 4;
+    return effect;
+ }
+
+static JokerEffect the_order_joker_effect(Joker *joker, Card *scored_card) {
+    JokerEffect effect = {0};
+    if (scored_card != NULL)
+        return effect; // if card != null, we are not at the end-phase of scoring yet
+
+    u8 suits[NUM_SUITS];
+    u8 ranks[NUM_RANKS];
+    get_played_distribution(ranks, suits);
+
+    if (hand_contains_straight(ranks))
+        effect.xmult = 3;
+    return effect;
+}
+
+static JokerEffect the_tribe_joker_effect(Joker *joker, Card *scored_card) {
+    JokerEffect effect = {0};
+    if (scored_card != NULL)
+        return effect; // if card != null, we are not at the end-phase of scoring yet
+
+    u8 suits[NUM_SUITS];
+    u8 ranks[NUM_RANKS];
+    get_played_distribution(ranks, suits);
+
+    if (hand_contains_flush(suits))
+        effect.xmult = 2;
+    return effect;
+}
+
+static JokerEffect bootstraps_joker_effect(Joker *joker, Card *scored_card) {
+    JokerEffect effect = {0};
+    if (scored_card != NULL)
+        return effect; // if card != null, we are not at the end-phase of scoring yet
+
+    effect.mult = (get_money() / 5) * 2;
+
+    return effect;
+}
+
+// Using __attribute__((unused)) for jokers with no sprites yet to avoid warning
+// Remove the attribute once they have sprites
+// no graphics available but ready to be used if wanted when graphics available
+__attribute__((unused))
+static JokerEffect shoot_the_moon_joker_effect(Joker *joker, Card *scored_card) {
+    JokerEffect effect = {0};
+    if (scored_card != NULL)
+        return effect; // if card != null, we are not at the end-phase of scoring yet
+        
+    CardObject** hand = get_hand_array();
+    int hand_size = hand_get_size();
+    for (int i = 0; i < hand_size; i++ )
+    {
+        if (hand[i]->card->rank == QUEEN)
+        {
+             effect.mult += 13;
+        }
+    }
+
+    return effect;
+}
+
+// no graphics available but ready to be used if wanted when graphics available
+__attribute__((unused))
+static JokerEffect triboulet_joker_effect(Joker *joker, Card *scored_card) {
+    JokerEffect effect = {0};
+    if (scored_card == NULL)
+        return effect;
+
+    switch (scored_card->rank) {
+        case KING: case QUEEN:
+            effect.xmult = 2;
+        default:
+            break;
+    }
+
+    return effect;
+}
+
+static JokerEffect blueprint_joker_effect(Joker *joker, Card *scored_card) {
+    JokerEffect effect = {0};
+    List* jokers = get_jokers();
+    int list_size = list_get_size(jokers);
+    
+    for (int i = 0; i < list_size  - 1; i++ ) {
+        JokerObject* curr_joker_object = list_get(jokers, i);
+        if (curr_joker_object->joker == joker) {
+            JokerObject* next_joker_object = list_get(jokers, i + 1);
+            effect = joker_get_score_effect(next_joker_object->joker, scored_card);
+            break;
+        }
+    }
+
+    return effect;
+}
+
+static JokerEffect brainstorm_joker_effect(Joker *joker, Card *scored_card) {
+    JokerEffect effect = {0};
+    static bool in_brainstorm = false;
+    if (in_brainstorm)
+        return effect;
+
+    List* jokers = get_jokers();
+    JokerObject* first_joker = list_get(jokers, 0);
+
+    if (first_joker != NULL && first_joker->joker->id != JOKER_BRAINSTORM_ID) {
+        // Static var to avoid infinite blueprint + brainstorm loops
+        in_brainstorm = true;
+        effect = joker_get_score_effect(first_joker->joker, scored_card);
+        in_brainstorm = false;
+    }
 
     return effect;
 }
@@ -504,16 +656,27 @@ const JokerInfo joker_registry[] = {
     { COMMON_JOKER, 4, business_card_joker_effect },    // 27
     // Business card should be paired with Shortcut for palette optimization when it's added
     { COMMON_JOKER, 4, scary_face_joker_effect },       // 28
-    { COMMON_JOKER, 4, smiley_face_joker_effect },      // 29
+    { UNCOMMON_JOKER, 7, bootstraps_joker_effect},      // 29
+    { UNCOMMON_JOKER, 5, NULL /* Pareidolia */ },       // 30
+    { COMMON_JOKER, 6, reserved_parking_joker_effect }, // 31
+    { COMMON_JOKER, 4, abstract_joker_effect },         // 32
+    { UNCOMMON_JOKER, 6, bull_joker_effect},            // 33
+    { RARE_JOKER, 8, the_duo_joker_effect},             // 34
+    { RARE_JOKER, 8, the_trio_joker_effect},            // 35
+    { RARE_JOKER, 8, the_family_joker_effect},          // 36
+    { RARE_JOKER, 8, the_order_joker_effect},           // 37
+    { RARE_JOKER, 8, the_tribe_joker_effect},           // 38
+    { RARE_JOKER, 10, blueprint_joker_effect },         // 39
+    { RARE_JOKER, 10, brainstorm_joker_effect },        // 40
+    { COMMON_JOKER, 5, raised_fist_joker_effect },      // 41
+    { COMMON_JOKER, 4, smiley_face_joker_effect },      // 42
 
     // The following jokers don't have sprites yet, 
     // uncomment them when their sprites are added.
 #if 0
-    { COMMON_JOKER, 5, raised_fist_joker_effect },
-    { COMMON_JOKER, 6, reserved_parking_joker_effect },
 
-    { COMMON_JOKER, 4, abstract_joker_effect },
-    { UNCOMMON_JOKER, 6, bull_joker_effect},
+    { UNCOMMON_JOKER, 6, acrobat_joker_effect },
+    { COMMON_JOKER, 5, shoot_the_moon_joker_effect},
 #endif
 };
 

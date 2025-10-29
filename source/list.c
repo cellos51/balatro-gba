@@ -99,3 +99,23 @@ int list_get_size(List *list)
     }
     return list->size;
 }
+
+bool list_exists(List *list, void *value)
+{
+    if (list == NULL) return false;
+    
+    for (int i = 0; i < list->size; i++)
+    {
+        if (list->_array[i] == value)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool int_list_exists(List *list, intptr_t value)
+{
+    return list_exists(list, (void*)value);
+}

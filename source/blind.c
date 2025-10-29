@@ -1,93 +1,101 @@
 #include <tonc.h>
 
 #include "blind.h"
-#include "blinds_gfx.h"
+#include "small_blind_gfx.h"
+#include "big_blind_gfx.h"
+#include "boss_blind_gfx.h"
 #include "graphic_utils.h"
+
+// +1 is added because we'll actually be indexing at 1, but if something causes you to go to ante 0, there will still be a value there.
+static const int ante_lut[MAX_ANTE + 1] = {100, 300, 800, 2000, 5000, 11000, 20000, 35000, 50000};
 
 // Palettes for the blinds (Transparency, Text Color, Shadow, Highlight, Main Color) Use this: http://www.budmelvin.com/dev/15bitconverter.html
 static const u16 small_blind_token_palette[PAL_ROW_LEN] = {0x0000, 0x7FFF, 0x34A1, 0x5DCB, 0x5104, 0x55A0, 0x2D01, 0x34E0};
 static const u16 big_blind_token_palette[PAL_ROW_LEN] = {0x0000, 0x2527, 0x15F5, 0x36FC, 0x1E9C, 0x01B4, 0x0D0A, 0x010E};
 static const u16 boss_blind_token_palette[PAL_ROW_LEN] = {0x0000, 0x2CC9, 0x3D0D, 0x5E14, 0x5171, 0x4D0F, 0x2CC8, 0x3089}; // This variable is temporary, each boss blind will have its own unique palette
 
+
+static Blind _blind_type_map[BLIND_TYPE_MAX] =
+{
+#define BLIND_INFO(NAME, name, multi, _reward)           \
+    {                                                    \
+        .type = BLIND_TYPE_##NAME ,                      \
+        .gfx_info =                                      \
+        {                                                \
+            .tiles = name##_blind_gfxTiles,              \
+            .palette = name##_blind_token_palette,       \
+            .tid = NAME##_BLIND_TID,                     \
+            .pb = NAME##_BLIND_PB,                       \
+        },                                               \
+        .score_req_multipler = multi ,                   \
+        .reward = _reward ,                              \
+    },
+    BLIND_TYPE_INFO_TABLE
+#undef BLIND_INFO
+};
+
+static void blind_gfx_init(enum BlindType type)
+{
+    // TODO: Re-add grit copy. You need to decouple the blind graphics first.
+    // This will allow this function to change the boss graphics info
+    //GRIT_CPY(&tile_mem[4][_blind_type_map[type].pal_info.tid], tiles);
+    BlindGfxInfo* p_gfx = &_blind_type_map[type].gfx_info;
+    memcpy32(&tile_mem[4][p_gfx->tid], p_gfx->tiles, BLIND_SPRITE_COPY_SIZE);
+    memcpy16(&pal_obj_bank[p_gfx->pb], p_gfx->palette, PAL_ROW_LEN);
+}
+
+
+__attribute__((unused))
+void blind_set_boss_graphics(const unsigned int* tiles, const u16* palette)
+{
+    // TODO: This function is unused and not fully fleshed out.
+    // We need to support more boss blind graphics in the future.
+    // The idea here is that we can call this function to set the boss up to
+    // render new tiles
+    //
+    // This will eventually be in it's own map mapping graphic data to
+    // boss types.
+    
+    _blind_type_map[BLIND_TYPE_BOSS].gfx_info.tiles = tiles;
+    _blind_type_map[BLIND_TYPE_BOSS].gfx_info.palette = palette;
+    blind_gfx_init(BLIND_TYPE_BOSS);
+}
+
 void blind_init()
 {
-    // Blind graphics (fighting grit every step of the way as usual)
-    GRIT_CPY(&tile_mem[4][SMALL_BLIND_TID], blinds_gfxTiles);
+    for(int i = 0; i < BLIND_TYPE_MAX; i++)
+    {
+        blind_gfx_init(i);
+        
+    }
 
-    memcpy16(&pal_obj_mem[PAL_ROW_LEN * SMALL_BLIND_PB], &small_blind_token_palette, sizeof(small_blind_token_palette) / 2);
-    memcpy16(&pal_obj_mem[PAL_ROW_LEN * BIG_BLIND_PB], &big_blind_token_palette, sizeof(big_blind_token_palette) / 2);
-    // Boss Blind (This is temporary. Each boss blind is unique and will have to have its own graphics and palette which will probably be stored in some huge array)
-    memcpy16(&pal_obj_mem[PAL_ROW_LEN * BOSS_BLIND_PB], &boss_blind_token_palette, sizeof(boss_blind_token_palette) / 2);
+    return;
 }
 
-int blind_get_requirement(int type, int ante)
+int blind_get_requirement(enum BlindType type, int ante)
 {
-    if (ante < 0 || ante > MAX_ANTE)
-    {
-        ante = 0; // Ensure ante is within valid range
-    }
+    if (ante < 0 || ante > MAX_ANTE) ante = 0; // Ensure ante is within valid range
 
-    switch (type)
-    {
-        case SMALL_BLIND:
-            return ante_lut[ante];
-        case BIG_BLIND:
-            return (ante_lut[ante] * 3) / 2; // X1.5
-        case BOSS_BLIND:
-            return ante_lut[ante] * 2; // X2
-        default:
-            return 0; // Invalid type
-    }
+    return fx2int(_blind_type_map[type].score_req_multipler * ante_lut[ante]);
 }
 
-int blind_get_reward(int type)
+int blind_get_reward(enum BlindType type)
 {
-    switch (type)
-    {
-        case SMALL_BLIND:
-            return 3;
-        case BIG_BLIND:
-            return 4;
-        case BOSS_BLIND:
-            return 5;
-        default:
-            return 0; // Invalid type
-    }
+    return _blind_type_map[type].reward;
 }
 
-u16 blind_get_color(int type, int index)
+u16 blind_get_color(enum BlindType type, enum BlindColorIndex index)
 {
-    switch (type)
-    {
-        case SMALL_BLIND:
-            return small_blind_token_palette[index];
-        case BIG_BLIND:
-            return big_blind_token_palette[index];
-        case BOSS_BLIND:
-            return boss_blind_token_palette[index];
-        default:
-            return 0; // Invalid type
-    }
+    return _blind_type_map[type].gfx_info.palette[index];
 }
 
-Sprite *blind_token_new(int type, int x, int y, int sprite_index)
+Sprite *blind_token_new(enum BlindType type, int x, int y, int sprite_index)
 {
-    Sprite *sprite = NULL;
+    u16 a0 = ATTR0_SQUARE | ATTR0_4BPP;
+    u16 a1 = ATTR1_SIZE_32x32;
+    u32 tid = _blind_type_map[type].gfx_info.tid, pb = _blind_type_map[type].gfx_info.pb;
 
-    switch (type)
-    {
-        case SMALL_BLIND:
-            sprite = sprite_new(ATTR0_SQUARE | ATTR0_4BPP, ATTR1_SIZE_32x32, SMALL_BLIND_TID, SMALL_BLIND_PB, sprite_index);
-            break;
-        case BIG_BLIND:
-            sprite = sprite_new(ATTR0_SQUARE | ATTR0_4BPP, ATTR1_SIZE_32x32, BIG_BLIND_TID, BIG_BLIND_PB, sprite_index);
-            break;
-        case BOSS_BLIND:
-            sprite = sprite_new(ATTR0_SQUARE | ATTR0_4BPP, ATTR1_SIZE_32x32, BOSS_BLIND_TID, BOSS_BLIND_PB, sprite_index);
-            break;
-        default:
-            return NULL;
-    }
+    Sprite* sprite = sprite_new(a0, a1, tid, pb, sprite_index);
 
     sprite_position(sprite, x, y);
 
