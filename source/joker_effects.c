@@ -749,7 +749,7 @@ static JokerEffect photograph_joker_effect(Joker *joker, Card *scored_card, enum
         
         case JOKER_EVENT_ON_CARD_SCORED:
             // has a face card been encountered already, and if not, is the current scoring card a face card?
-            if (*p_first_face_index != UNDEFINED && card_is_face(scored_card))
+            if (*p_first_face_index == UNDEFINED && card_is_face(scored_card))
             {
                 *p_first_face_index = get_scored_card_index();
             }
@@ -760,7 +760,7 @@ static JokerEffect photograph_joker_effect(Joker *joker, Card *scored_card, enum
             {
                 effect.xmult = 2;
             }
-
+            break;
         default:
             break;
     }
@@ -893,6 +893,7 @@ static JokerEffect hack_joker_effect(Joker *joker, Card *scored_card, enum Joker
                     {
                         snprintf(effect.message, MAX_JOKER_MSG_BUF_LEN, "Again!");
                     }
+                    break;
             }
             break;
 

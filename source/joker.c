@@ -302,7 +302,7 @@ bool joker_object_score(JokerObject *joker_object, Card* scored_card, enum Joker
     if (joker_effect.xmult > 0)
     {
         char score_buffer[INT_MAX_DIGITS + 2];
-        snprintf(score_buffer, sizeof(score_buffer), "+%d", joker_effect.xmult);
+        snprintf(score_buffer, sizeof(score_buffer), "X%d", joker_effect.xmult);
         set_and_shift_text(score_buffer, &cursorPosX, TTE_RED_PB);
     }
     if (joker_effect.money > 0)
