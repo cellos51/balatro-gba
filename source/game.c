@@ -2159,29 +2159,6 @@ static void game_playing_ui_text_update()
     }
 }
 
-static int calculate_interest_reward()
-{
-    int reward = (money / 5) * INTEREST_PER_5; 
-    if (reward > MAX_INTEREST)
-        reward = MAX_INTEREST; 
-    return reward;
-}
-
-
-static void game_round_end_cashout()
-{
-    money += hands + blind_get_reward(current_blind) + calculate_interest_reward(); // Reward the player
-    display_money(money);
-
-    hands = max_hands; // Reset the hands to the maximum
-    discards = max_discards; // Reset the discards to the maximum
-    display_hands(hands); // Set the hands display
-    display_discards(discards); // Set the discards display
-
-    score = 0;
-    display_score(score); // Set the score display
-}
-
 static void game_playing_on_update()
 {
     // Background logic (thissss might be moved to the card'ssss logic later. I'm a sssssnake)
@@ -2218,6 +2195,20 @@ static int calculate_interest_reward()
     if (reward > MAX_INTEREST)
         reward = MAX_INTEREST; 
     return reward;
+}
+
+static void game_round_end_cashout()
+{
+    money += hands + blind_get_reward(current_blind) + calculate_interest_reward(); // Reward the player
+    display_money(money);
+
+    hands = max_hands; // Reset the hands to the maximum
+    discards = max_discards; // Reset the discards to the maximum
+    display_hands(hands); // Set the hands display
+    display_discards(discards); // Set the discards display
+
+    score = 0;
+    display_score(score); // Set the score display
 }
 
 static void game_round_end_on_exit()
