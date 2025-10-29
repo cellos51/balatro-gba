@@ -1385,8 +1385,8 @@ void game_init()
 
 void game_start()
 {
-    //set_seed(rng_seed);
-    set_seed(9); // 9 is a full house
+    set_seed(rng_seed);
+    //set_seed(9); // 9 is a full house
 
     affine_background_change_background(AFFINE_BG_GAME);
 
@@ -2754,7 +2754,6 @@ static void game_shop_create_items()
         if (bitset_get_idx(&_avail_jokers_bitset, TEST_JOKER_ID0))
         {
             joker_id = TEST_JOKER_ID0;
-            joker_idx = TEST_JOKER_ID0;
         }
         else
         #endif
@@ -2762,7 +2761,6 @@ static void game_shop_create_items()
         if (bitset_get_idx(&_avail_jokers_bitset, TEST_JOKER_ID1))
         {
             joker_id = TEST_JOKER_ID1;
-            joker_idx = TEST_JOKER_ID0;
         }
         else
         #endif
