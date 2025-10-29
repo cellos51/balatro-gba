@@ -43,10 +43,10 @@ BitsetItr bitset_itr_new(const Bitset* bitset);
 int bitset_itr_next(BitsetItr* itr);
 
 #define BITSET_DEFINE(name, capacity)                         \
-    static uint32_t name##_bitset_w[BITSET_ARRAY_SIZE] = {0}; \
+    static uint32_t name##_w[BITSET_ARRAY_SIZE] = {0};        \
     static Bitset name =                                      \
     {                                                         \
-        .w = name##_bitset_w,                                 \
+        .w = name##_w,                                        \
         .nbits = BITSET_BITS_PER_WORD,                        \
         .nwords = BITSET_ARRAY_SIZE,                          \
         .cap = capacity,                                      \
