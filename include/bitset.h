@@ -18,6 +18,8 @@ typedef struct Bitset
 typedef struct
 {
     const Bitset *bitset;
+    int word;
+    int bit;
     int itr; // the iteration we are on
 } BitsetItr;
 

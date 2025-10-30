@@ -122,6 +122,8 @@ BitsetItr bitset_itr_new(const Bitset* bitset)
     BitsetItr itr =
     {
         .bitset = bitset,
+        .word = 0,
+        .bit = 0,
         .itr = 0,
     };
 
@@ -130,5 +132,34 @@ BitsetItr bitset_itr_new(const Bitset* bitset)
 
 int bitset_itr_next(BitsetItr* itr)
 {
-    return bitset_find_idx_of_nth_set(itr->bitset, itr->itr++);
+    // So, worst case scenario for this is one bit at the end of the last
+    // word in the bitset. You would look (32 * 7) + 31 times!
+    // This can be sped up with by checking if the word is empty first.
+    // Then the worst enemy of this method would be something like a set bit at the end
+    // of every word. In that case you would need to loop 31 times maximum.
+    // So one last thing you could do is something like `bitset_get_free_idx` does with the
+    // __builtin_ctz function as well.
+    //
+    // The point being, this can be very slow, but it's simple and can be much faster. 
+    for (; itr->word < itr->bitset->nwords; itr->word++)
+    {
+        for (; itr->bit < itr->bitset->nbits; itr->bit++)
+        {
+            itr->itr++;
+            if(itr->bitset->w[itr->word] & (1 << itr->bit))
+            {
+                // if itr->bit == nbits on the next run, the for loop will handle it
+                itr->bit++;
+                // above we always make it one more than it is
+                // it's so we can return without mutating the actual iterator
+                // once it gets here. Just subtract one
+                return itr->itr - 1;
+            }
+        }
+        itr->bit = 0;
+    }
+    itr->word = 0;
+
+    return UNDEFINED;
+    //return bitset_find_idx_of_nth_set(itr->bitset, itr->itr++);
 }
