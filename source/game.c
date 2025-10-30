@@ -2067,7 +2067,7 @@ static bool check_and_score_joker_for_event(int* iteration_start, Card* played_c
     for (int k = *iteration_start; k < list_get_len(_shop_jokers_list); k++)
     {
         (*iteration_start)++;
-        JokerObject *joker = list_get_at_idx(_shop_jokers_list, k);
+        JokerObject *joker = list_get_at_idx(&_shop_jokers_list, k);
         if (joker_object_score(joker, played_card, joker_event, &chips, &mult, &money, &retrigger))
         {
             display_chips(chips);

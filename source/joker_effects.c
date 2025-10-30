@@ -852,20 +852,6 @@ static JokerEffect blueprint_joker_effect(Joker *joker, Card *scored_card, enum 
         }
     }
 
-    /*
-    int list_size = list_get_len(*jokers);
-    
-    for (int i = 0; i < list_size  - 1; i++ ) {
-        //JokerObject* curr_joker_object = POOL_AT(JokerObject, list_get_at_idx(*jokers, i));
-        JokerObject* curr_joker_object = list_get_at_idx(*jokers, i));
-        if (curr_joker_object->joker == joker) {
-            JokerObject* next_joker_object = POOL_AT(JokerObject, list_get_at_idx(*jokers, i + 1));
-            effect = joker_get_score_effect(next_joker_object->joker, scored_card, joker_event);
-            break;
-        }
-    }
-    */
-
     return effect;
 }
 
@@ -873,7 +859,6 @@ static JokerEffect blueprint_joker_effect(Joker *joker, Card *scored_card, enum 
 static JokerEffect brainstorm_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event)
 {
     JokerEffect effect = {0};
-  /*
     static bool in_brainstorm = false;
     if (in_brainstorm)
     {
@@ -881,7 +866,7 @@ static JokerEffect brainstorm_joker_effect(Joker *joker, Card *scored_card, enum
     }
 
     List* jokers = get_jokers_list();
-    JokerObject* first_joker = POOL_AT(JokerObject, list_get_at_idx(*jokers, 0));
+    JokerObject* first_joker = (JokerObject*)jokers->head->data;
 
     if (first_joker != NULL && first_joker->joker->id != JOKER_BRAINSTORM_ID)
     {
@@ -890,7 +875,6 @@ static JokerEffect brainstorm_joker_effect(Joker *joker, Card *scored_card, enum
         effect = joker_get_score_effect(first_joker->joker, scored_card, joker_event);
         in_brainstorm = false;
     }
-    */
 
     return effect;
 }
