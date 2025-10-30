@@ -2023,7 +2023,7 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                         if (retrigger)
                         {
                             retrigger = false;
-                            scored_card_index -= 1;
+                            scored_card_index--;
                         }
 
                         // So pretend "played_selections" is now called "scored_card_index" and it counts the number of cards that have been scored
@@ -2043,13 +2043,12 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
 
                             // Score card
 
-                            scored_card_index += 1; // Count the number of cards that have been scored
+                            scored_card_index++; // Count the number of cards that have been scored
 
                             if (j <= played_top && card_object_is_selected(played[j]))
                             {
                                 tte_set_pos(fx2int(played[j]->sprite_object->x) + 8, SCORED_CARD_TEXT_Y); // Offset of 16 pixels to center the text on the card
-                                // TODO fix magic number
-                                tte_set_special(TTE_BLUE_PB * 4096); // Set text color to blue from background memory
+                                tte_set_special(TTE_BLUE_PB * TTE_SPECIAL_PB_MULT_OFFSET); // Set text color to blue from background memory
 
                                 // Write the score to a character buffer variable
                                 char score_buffer[INT_MAX_DIGITS + 2]; // for '+' and null terminator
