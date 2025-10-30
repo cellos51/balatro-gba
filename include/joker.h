@@ -43,8 +43,7 @@
 #define RARE_JOKER_CHANCE 5
 #define LEGENDARY_JOKER_CHANCE 0
 
-// When does the Joker effect function take place?
-// These are just the common ones. Special Joker behaviour will be checked on a
+// These are the common Joker Events. Special Joker behaviour will be checked on a
 // Joker per Joker basis (see if it's there, then do something, e.g. Pareidolia, Baseball Card)
 enum JokerEvent
 {
