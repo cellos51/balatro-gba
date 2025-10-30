@@ -24,10 +24,12 @@ struct ListNode
      * @brief The previous @ref ListNode in the associated @ref List, NULL if at the `head` of the list
      */
     ListNode* prev;
+
     /**
      * @brief The next @ref ListNode in the associated @ref List, NULL if at the `tail` of the list
      */
     ListNode* next;
+
     /**
      * @brief Pointer to generic data stored in this node
      */
@@ -43,6 +45,7 @@ typedef struct
      * @brief The first entry in the list
      */
     ListNode* head;
+
     /**
      * @brief The last entry in the list
      */
@@ -58,6 +61,7 @@ typedef struct
      * @brief A pointer to the @ref List this is iterating through
      */
     const List* list;
+
     /**
      * @brief The current node in the list
      */
@@ -94,7 +98,6 @@ bool list_is_empty(const List* list);
  * Prepend an entry to the `head` of a @ref list
  *
  * @param list pointer to a @ref List
- *
  * @param data pointer to data to put into the @ref List
  */
 void list_push_front(List* list, void* data);
@@ -103,7 +106,6 @@ void list_push_front(List* list, void* data);
  * Append an entry to the `tail` of a @ref list
  *
  * @param list pointer to a @ref List
- *
  * @param data pointer to data to put into the @ref List
  */
 void list_push_back(List* list, void* data);
@@ -116,7 +118,6 @@ void list_push_back(List* list, void* data);
  * This is used with the @ref ListItr specifically. 
  *
  * @param list pointer to a @ref List
- *
  * @param node pointer to a @ref ListNode 
  */
 void list_remove_node(List *list, ListNode *node);
@@ -125,7 +126,6 @@ void list_remove_node(List *list, ListNode *node);
  * Get a List's node at it's nth index
  *
  * @param list pointer to a @ref List
- *
  * @param n index of the desired @ref ListNode in the list
  *
  * @return a pointer to the data at the nth @ref ListNode, or NULL if out-of-bounds
@@ -136,7 +136,6 @@ void* list_get_at_idx(const List *list, int n);
  * Remove a List's node at it's nth index
  *
  * @param list pointer to a @ref List
- *
  * @param n index of the desired @ref ListNode in the list
  *
  * @return `true` if successfully removed, `false` if out-of-bounds
