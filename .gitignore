@@ -3,3 +3,5 @@
 /.vs
 *.sln
 *.vcxproj*
+/balatro-gba/x64/**
+/tests/pool/build

@@ -33,4 +33,12 @@ static inline int get_digits_even(int n)
     return 5;
 }
 
+#define UNDEFINED -1
+
+#define NUM_ELEM_IN_ARR(arr) (sizeof(arr) / sizeof((arr)[0]))
+
+#define INT_MAX_DIGITS 10 // strlen(str(INT_MAX)) = strlen("2147483647")
+
+int int_arr_max(int int_arr[], int size);
+
 #endif // UTIL_H

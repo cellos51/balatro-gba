@@ -25,29 +25,36 @@ LIBTONC := $(DEVKITPRO)/libtonc
 # the makefile is found
 #
 #---------------------------------------------------------------------------------
-TARGET		:= $(notdir $(CURDIR))
-BUILD		:= build
-SOURCES		:= source
-INCLUDES	:= include
-DATA		:=
-MUSIC		:= audio
-GRAPHICS	:= graphics
+TARGET         := $(notdir $(CURDIR))
+BUILD          := build
+SOURCES	       := source
+INCLUDES       := include
+DATA           :=
+MUSIC          := audio
+GRAPHICS       := graphics
 
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
 ARCH	:=	-mthumb -mthumb-interwork
 
-CFLAGS	:=	-g -Wall -O2\
-		-mcpu=arm7tdmi -mtune=arm7tdmi\
-		$(ARCH)
+GIT_DIRTY := $(shell git diff-index --quiet HEAD -- || echo "-dirty")
+GIT_HASH := $(shell git rev-parse --short HEAD || echo "undef")
+GIT_C_FLAGS := -DGIT_HASH=\"$(GIT_HASH)\" -DGIT_DIRTY=\"$(GIT_DIRTY)\"
+
+CFLAGS	:= -g -O3 -Wall -Werror \
+        -mcpu=arm7tdmi -mtune=arm7tdmi \
+        -ffast-math -fomit-frame-pointer -funroll-loops \
+        $(ARCH)
+
+CFLAGS  += $(GIT_C_FLAGS)
 
 CFLAGS	+=	$(INCLUDE)
 
 CXXFLAGS	:=	$(CFLAGS) -fno-rtti -fno-exceptions
 
 ASFLAGS	:=	-g $(ARCH)
-LDFLAGS	=	-g $(ARCH) -Wl,-Map,$(notdir $*.map)
+LDFLAGS	=	-g $(ARCH) -Wl,-Map,$(notdir $*.map),--undefined=balatro_version
 
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project

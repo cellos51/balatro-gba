@@ -2,13 +2,22 @@
 #define CARD_H
 
 #include <tonc.h>
+#include <maxmod.h>
 
 #include "sprite.h"
 
+#define MAX_CARDS (NUM_SUITS * NUM_RANKS)
+#define MAX_CARDS_ON_SCREEN 16
+
+#define CARD_TID 0
+#define CARD_SPRITE_OFFSET 16
+#define CARD_PB 0
+#define CARD_STARTING_LAYER 0
+
 // Card suits
-#define HEARTS 0
-#define DIAMONDS 1
-#define CLUBS 2
+#define DIAMONDS 0
+#define CLUBS 1
+#define HEARTS 2
 #define SPADES 3
 #define NUM_SUITS 4
 
@@ -29,28 +38,23 @@
 #define NUM_RANKS 13
 #define RANK_OFFSET 2 // Because the first rank is 2 and ranks start at 0
 
+#define IMPOSSIBLY_HIGH_CARD_VALUE 100
+
 // Card types
-typedef struct
+typedef struct Card
 {
     u8 suit;
     u8 rank;
 } Card;
 
-typedef struct
+typedef struct CardObject
 {
     Card *card;
-    Sprite *sprite;
-    FIXED tx, ty; // target position
-    FIXED x, y; // position
-    FIXED vx, vy; // velocity
-    FIXED tscale;
-    FIXED scale;
-    FIXED vscale;
-    FIXED trotation; // this never gets used so i might remove it later
-    FIXED rotation;
-    FIXED vrotation;
-    bool selected;
+    SpriteObject *sprite_object;
 } CardObject;
+
+// Card functions
+void card_init();
 
 // Card methods
 Card *card_new(u8 suit, u8 rank);
@@ -62,5 +66,10 @@ CardObject *card_object_new(Card *card);
 void card_object_destroy(CardObject **card_object);
 void card_object_update(CardObject *card_object); // Update the card object position and scale
 void card_object_set_sprite(CardObject *card_object, int layer);
+void card_object_shake(CardObject* card_object, mm_word sound_id);
+
+void card_object_set_selected(CardObject* card_object, bool selected);
+bool card_object_is_selected(CardObject* card_object);
+Sprite* card_object_get_sprite(CardObject* card_object);
 
 #endif // CARD_H

@@ -1,0 +1,66 @@
+name: Build CI
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      clear_cache:
+        description: 'Clear docker cache before running'
+        type: boolean
+        default: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Get docker image cache
+        uses: actions/cache@v4
+        with:
+          path: /tmp/docker-cache
+          key: docker-images-${{ hashFiles('docker-compose.yml') }}
+
+      - name: Clear docker cache (if requested)
+        if: github.event.inputs.clear_cache == 'true'
+        run: |
+          echo "Clearing Docker cache..."
+          rm -rf /tmp/docker-cache
+          echo "Docker cache cleared"
+
+      - name: Load or pull images
+        run: |
+          if [ -f /tmp/docker-cache/balatro.tar ]; then
+            echo "Loading Image"
+            docker load -i /tmp/docker-cache/balatro.tar
+          else
+            echo "Pulling Image"
+            docker compose pull balatro
+            mkdir -p /tmp/docker-cache
+            docker save $(docker compose config | grep image: | awk '{print $2}') -o /tmp/docker-cache/balatro.tar
+          fi
+
+      - name: Export UID/GID for Compose
+        run: |
+          echo "UID=$(id -u)" >> "$GITHUB_ENV"
+          echo "GID=$(id -g)" >> "$GITHUB_ENV"
+
+      - name: Run Tests
+        run: cd tests && ./run_tests.sh
+
+      - name: Build the project
+        run: docker compose -f docker-compose.yml run --rm balatro sh -c "make -j$(nproc) && ./scripts/get_memory_map.sh"
+
+      - uses: softprops/action-gh-release@v2
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
+        with:
+          files: |
+            build/balatro-gba.gba
