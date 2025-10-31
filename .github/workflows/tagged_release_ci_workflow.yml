@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-job:
-    name: Build ROM
+    name: Run Build ROM Workflow
     uses: ./.github/workflows/build_ci_workflow.yml
     with:
       upload-build-artifact: true
