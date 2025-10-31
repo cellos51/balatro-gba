@@ -145,11 +145,7 @@ Joker *joker_new(u8 id)
     joker->value = jinfo->base_value + edition_price_lut[joker->modifier];
     joker->rarity = jinfo->rarity;
     joker->data = 0;
-
-    if (jinfo->on_joker_created)
-    {
-        jinfo->on_joker_created(joker);
-    }
+    jinfo->on_joker_created(joker);
 
     return joker;
 }
