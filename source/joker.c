@@ -266,7 +266,6 @@ void set_and_shift_text(char* str, int* cursor_pos_x, int color_pb)
 
 bool joker_object_score(JokerObject *joker_object, Card* scored_card, enum JokerEvent joker_event, int *chips, int *mult, int *money, bool *retrigger)
 {
-    // protect against NULL joker_objects
     if (joker_object == NULL)
     {
         return false;
