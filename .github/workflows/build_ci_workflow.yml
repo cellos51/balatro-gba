@@ -22,8 +22,12 @@ on:
         value: ${{ jobs.build.outputs.artifact-name }}
 
 jobs:
+  run-tests-job:
+    uses: ./.github/workflows/run_tests_ci_workflow.yml
+
   build:
     runs-on: ubuntu-latest
+    needs: run-tests-job
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -57,9 +61,6 @@ jobs:
         run: |
           echo "UID=$(id -u)" >> "$GITHUB_ENV"
           echo "GID=$(id -g)" >> "$GITHUB_ENV"
-
-      - name: Run Tests
-        run: cd tests && ./run_tests.sh
 
       - name: Build the project
         run: docker compose -f docker-compose.yml run --rm balatro sh -c "make -j$(nproc) && ./scripts/get_memory_map.sh"
