@@ -92,7 +92,8 @@ static int SHORTCUT_JOKER_COUNT = 0;
 bool is_shortcut_joker_active(void) {
     return SHORTCUT_JOKER_COUNT > 0;
 }
-
+#define STRAIGHT_AND_FLUSH_SIZE_FOUR_FINGERS 4
+#define STRAIGHT_AND_FLUSH_SIZE_DEFAULT 5
 static int FOUR_FINGERS_JOKER_COUNT = 0;
 static int STRAIGHT_AND_FLUSH_SIZE = 5;
 int get_straight_and_flush_size(void) {
@@ -113,7 +114,7 @@ static inline void joker_push(JokerObject *joker)
     // only change size when the first one is added
     if (joker->joker->id == FOUR_FINGERS_JOKER_ID) {
         if (FOUR_FINGERS_JOKER_COUNT == 0) {
-            STRAIGHT_AND_FLUSH_SIZE--;
+            STRAIGHT_AND_FLUSH_SIZE = STRAIGHT_AND_FLUSH_SIZE_FOUR_FINGERS;
         }
         FOUR_FINGERS_JOKER_COUNT++;
     }
@@ -134,7 +135,7 @@ static inline JokerObject *joker_pop()
     if (joker->joker->id == FOUR_FINGERS_JOKER_ID) {
         FOUR_FINGERS_JOKER_COUNT--;
         if (FOUR_FINGERS_JOKER_COUNT == 0) {
-            STRAIGHT_AND_FLUSH_SIZE++;
+            STRAIGHT_AND_FLUSH_SIZE = STRAIGHT_AND_FLUSH_SIZE_DEFAULT;
         }
     }
 
