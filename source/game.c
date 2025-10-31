@@ -252,54 +252,6 @@ int get_straight_and_flush_size(void)
     return straight_and_flush_size;
 }
 
-// Joker stack
-static inline void joker_push(JokerObject *joker)
-{
-    if (jokers_top >= MAX_JOKERS_HELD_SIZE - 1) return;
-    jokers[++jokers_top] = joker;
-
-    if (joker->joker->id == SHORTCUT_JOKER_ID) 
-    {
-        shortcut_joker_count++;
-    }
-
-    // In case the player gets multiple Four Fingers Jokers,
-    // only change size when the first one is added
-    if (joker->joker->id == FOUR_FINGERS_JOKER_ID) 
-    {
-        if (four_fingers_joker_count == 0) 
-        {
-            straight_and_flush_size = STRAIGHT_AND_FLUSH_SIZE_FOUR_FINGERS;
-        }
-        four_fingers_joker_count++;
-    }
-}
-
-static inline JokerObject *joker_pop()
-{
-    if (jokers_top < 0) return NULL;
-
-    JokerObject *joker = jokers[jokers_top--];
-
-    if (joker->joker->id == SHORTCUT_JOKER_ID) 
-    {
-        shortcut_joker_count--;
-    }
-
-    // In case the player gets multiple Four Fingers Jokers,
-    // and only reset the size when all of them have been removed
-    if (joker->joker->id == FOUR_FINGERS_JOKER_ID) 
-    {
-        four_fingers_joker_count--;
-        if (four_fingers_joker_count == 0) 
-        {
-            straight_and_flush_size = STRAIGHT_AND_FLUSH_SIZE_DEFAULT;
-        }
-    }
-
-    return joker;
-}
-
 // Played stack
 static inline void played_push(CardObject *card_object)
 {
@@ -394,11 +346,36 @@ bool is_joker_owned(int joker_id) {
 void add_joker(JokerObject *joker_object)
 {
     list_append(jokers, joker_object);
+
+    // TODO: Extract to on_joker_added() callback
+    // In case the player gets multiple Four Fingers Jokers,
+    // only change size when the first one is added
+    if (joker_object->joker->id == FOUR_FINGERS_JOKER_ID) 
+    {
+        if (four_fingers_joker_count == 0) 
+        {
+            straight_and_flush_size = STRAIGHT_AND_FLUSH_SIZE_FOUR_FINGERS;
+        }
+        four_fingers_joker_count++;
+    }
 }
 
 void remove_held_joker(int joker_idx)
 {
-    list_remove_by_idx(jokers, joker_idx);
+    // TODO: Extract to on_joker_removed() callback
+    JokerObject* joker_object = list_get(jokers, joker_idx);
+    // In case the player gets multiple Four Fingers Jokers,
+    // and only reset the size when all of them have been removed
+    if (joker_object->joker->id == FOUR_FINGERS_JOKER_ID) 
+    {
+        four_fingers_joker_count--;
+        if (four_fingers_joker_count == 0) 
+        {
+            straight_and_flush_size = STRAIGHT_AND_FLUSH_SIZE_DEFAULT;
+        }
+    }
+
+    list_remove_by_idx(jokers, joker_idx);        
 }
 
 int get_deck_top(void)
