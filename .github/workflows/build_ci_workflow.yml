@@ -2,60 +2,65 @@ name: Build CI
 
 on:
   push:
-    branches: 
+    branches:
       - main
+    tags:
+      - "v*"
   pull_request:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      clear_cache:
+        description: 'Clear docker cache before running'
+        type: boolean
+        default: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
-        
-      - name: Set devkitPro environment variables
-        run: |
-          # Installing to home directory to avoid permission denied on caching
-          echo "DEVKITPRO=/home/runner/devkitpro" >> $GITHUB_ENV
-          echo "DEVKITARM=/home/runner/devkitpro/devkitARM" >> $GITHUB_ENV
-          export PATH=$DEVKITARM/bin:$DEVKITPRO/tools/bin:$PATH
-          
-        # Caching to avoid excessive request to the devkitpro server from a runner because they 
-        # eventually block and result in permission denied 403.
-        # If that happens it takes like 2 hours until you can make requests again
-      - name: Cache devkitPro toolchain
-        id: cache-devkitpro
+        uses: actions/checkout@v5
+
+      - name: Get docker image cache
         uses: actions/cache@v4
         with:
-          path: /home/runner/devkitpro
-          # Using a manual key version suffix - v{num}, if changes are made that make the
-          # cache stale and require a refresh, just  bump the version number so there's
-          # a cache miss. The key needs to match in the "Save devkitPro to cache" stage
-          # so you need to bump the number there too...
-          key: devkitpro-${{ runner.os }}-v1
+          path: /tmp/docker-cache
+          key: docker-images-${{ hashFiles('docker-compose.yml') }}
 
-      - name: Set up devkitARM (if not cached)
-        if: steps.cache-devkitpro.outputs.cache-hit != 'true'
+      - name: Clear docker cache (if requested)
+        if: github.event.inputs.clear_cache == 'true'
         run: |
-          sudo apt update
-          wget https://apt.devkitpro.org/install-devkitpro-pacman
-          chmod +x install-devkitpro-pacman
-          sudo ./install-devkitpro-pacman
-          mkdir -p "$DEVKITPRO"
-          sudo dkp-pacman -Sy --noconfirm gba-dev
-          # Copy from installed directory to cacheable directory
-          sudo cp -r /opt/devkitpro "/home/runner"
-          sudo chown -R $USER:$USER "/home/runner/devkitpro"
-      - name: Save devkitPro to cache
-        if: steps.cache-devkitpro.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
-        with:
-          path: /home/runner/devkitpro
-          key: devkitpro-${{ runner.os }}-v1
+          echo "Clearing Docker cache..."
+          rm -rf /tmp/docker-cache
+          echo "Docker cache cleared"
+
+      - name: Load or pull images
+        run: |
+          if [ -f /tmp/docker-cache/balatro.tar ]; then
+            echo "Loading Image"
+            docker load -i /tmp/docker-cache/balatro.tar
+          else
+            echo "Pulling Image"
+            docker compose pull balatro
+            mkdir -p /tmp/docker-cache
+            docker save $(docker compose config | grep image: | awk '{print $2}') -o /tmp/docker-cache/balatro.tar
+          fi
+
+      - name: Export UID/GID for Compose
+        run: |
+          echo "UID=$(id -u)" >> "$GITHUB_ENV"
+          echo "GID=$(id -g)" >> "$GITHUB_ENV"
+
+      - name: Run Tests
+        run: cd tests && ./run_tests.sh
 
       - name: Build the project
-        run: |
-          make
+        run: docker compose -f docker-compose.yml run --rm balatro sh -c "make -j$(nproc) && ./scripts/get_memory_map.sh"
+
+      - uses: softprops/action-gh-release@v2
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
+        with:
+          files: |
+            build/balatro-gba.gba

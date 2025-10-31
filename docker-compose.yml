@@ -1,0 +1,8 @@
+services:
+  balatro:
+    image: devkitpro/devkitarm:latest
+    working_dir: /balatro-gba
+    volumes:
+      - ./:/balatro-gba
+    user: "${UID-1000}:${GID-1000}"
+    command: ["sh", "-c", "make -j$(nproc)"]
