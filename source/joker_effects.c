@@ -17,6 +17,8 @@ if (checked_event != restricted_event) \
     return effect; \
 }
 
+// Joker Effect functions
+
 static JokerEffect default_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event)
 {
     JokerEffect effect = {0};
@@ -593,7 +595,7 @@ static JokerEffect hanging_chad_joker_effect(Joker *joker, Card *scored_card, en
             *p_remaining_retriggers -= 1;
             if (effect.retrigger)
             {
-                snprintf(effect.message, MAX_JOKER_MSG_BUF_LEN, "Again!");
+                effect.message = "Again!";
             }
             break;
 
@@ -807,7 +809,7 @@ static JokerEffect dusk_joker_effect(Joker *joker, Card *scored_card, enum Joker
                 *p_last_retriggered_index = get_scored_card_index();
                 if (effect.retrigger)
                 {
-                    snprintf(effect.message, MAX_JOKER_MSG_BUF_LEN, "Again!");
+                    effect.message = "Again!";
                 }
             }
             
@@ -889,7 +891,7 @@ static JokerEffect hack_joker_effect(Joker *joker, Card *scored_card, enum Joker
                     *p_last_retriggered_index = get_scored_card_index();
                     if (effect.retrigger)
                     {
-                        snprintf(effect.message, MAX_JOKER_MSG_BUF_LEN, "Again!");
+                        effect.message = "Again!";
                     }
                     break;
             }
@@ -918,7 +920,7 @@ static JokerEffect seltzer_joker_effect(Joker *joker, Card *scored_card, enum Jo
             if (*p_hands_left_until_exp <= 0)
             {
                 effect.expire = true;
-                snprintf(effect.message, MAX_JOKER_MSG_BUF_LEN, "Drank!");
+                effect.message = "Drank!";
             }
             else
             {
@@ -934,7 +936,7 @@ static JokerEffect seltzer_joker_effect(Joker *joker, Card *scored_card, enum Jo
                 *p_last_retriggered_idx = get_scored_card_index();
                 if (effect.retrigger)
                 {
-                    snprintf(effect.message, MAX_JOKER_MSG_BUF_LEN, "Again!");
+                    effect.message = "Again!";
                 }
             } 
             break;
@@ -964,7 +966,7 @@ static JokerEffect sock_and_buskin_joker_effect(Joker *joker, Card *scored_card,
             *p_last_retriggered_face_index = get_scored_card_index();
             if (effect.retrigger)
             {
-                snprintf(effect.message, MAX_JOKER_MSG_BUF_LEN, "Again!");
+                effect.message = "Again!";
             }
             break;
 
@@ -974,6 +976,43 @@ static JokerEffect sock_and_buskin_joker_effect(Joker *joker, Card *scored_card,
 
     return effect;
 }
+
+// ON JOKER CREATED Callbacks
+
+// For Jokers that don't need to do anything when created
+void on_joker_created_noop(Joker *joker) {}
+
+void hanging_chad_on_joker_created(Joker *joker)
+{
+    joker->data = 2; // retriggers left, reset to 2 at round end
+}
+
+void dusk_on_joker_created(Joker *joker)
+{
+    joker->data = UNDEFINED; // previously retriggered card index
+}
+
+void hack_on_joker_created(Joker *joker)
+{
+    joker->data = UNDEFINED; // previously retriggered card index
+}
+
+void photograph_on_joker_created(Joker *joker)
+{
+    joker->data = UNDEFINED; // First scoring face card index
+}
+
+void sock_and_buskin_on_joker_created(Joker *joker)
+{
+    joker->data = UNDEFINED; // previously retriggered face card index
+}
+
+void seltzer_on_joker_created(Joker *joker)
+{
+    joker->halves.data0 = UNDEFINED; // previously retriggered card index
+    joker->halves.data1 = 10; // remaining retriggered hands
+}
+
 
 /* The index of a joker in the registry matches its ID.
  * The joker sprites are matched by ID so the position in the registry

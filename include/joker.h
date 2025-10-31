@@ -99,7 +99,7 @@ typedef struct  // These jokers are triggered after the played hand has finished
     int money;
     bool retrigger; // Retrigger played hand (e.g. "Dusk" joker, even though on the wiki it says "On Scored" it makes more sense to have it here)
     bool expire; // Joker is destroyed (food jokers)
-    char message[MAX_JOKER_MSG_BUF_LEN]; // Used to send custom messages e.g. "Extinct" or "-1" (Bananas and food Jokers)
+    char* message; // Used to send custom messages e.g. "Extinct" or "-1" (Bananas and food Jokers)
 } JokerEffect;
 
 typedef JokerEffect (*JokerEffectFunc)(Joker *joker, Card *scored_card, enum JokerEvent joker_event);
