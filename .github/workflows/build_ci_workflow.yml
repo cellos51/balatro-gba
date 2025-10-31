@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-    tags:
-      - "v*"
   pull_request:
     branches:
       - main
@@ -16,10 +14,6 @@ on:
         type: boolean
         default: false
   workflow_call:
-    outputs:
-      artifact-name:
-        description: "Name of the produced tarball"
-        value: ${{ jobs.build.outputs.artifact-name }}
 
 jobs:
   run-tests-job:
@@ -66,14 +60,9 @@ jobs:
         run: docker compose -f docker-compose.yml run --rm balatro sh -c "make -j$(nproc) && ./scripts/get_memory_map.sh"
 
       - name: 'Upload Artifact'
+        if: ${{ github.event_name == 'workflow_call' }}
         uses: actions/upload-artifact@v4
         with:
           name: build-out
           path: build
           retention-days: 5
-
-      - uses: softprops/action-gh-release@v2
-        if: ${{ startsWith(github.ref, 'refs/tags/') }}
-        with:
-          files: |
-            build/balatro-gba.gba
