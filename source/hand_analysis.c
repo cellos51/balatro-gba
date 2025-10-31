@@ -158,10 +158,7 @@ bool hand_contains_straight(u8 *ranks) {
 
             // The length of the straight ending at rank 'i' is 1 (for the card itself)
             // plus the length of the longest valid preceding straight.
-            if (prev_len1 > prev_len2)
-                longest_short_cut_at[i] = 1 + prev_len1;
-            else
-                longest_short_cut_at[i] = 1 + prev_len2;
+            longest_short_cut_at[i] = 1 + max(prev_len1, prev_len2);
 
             // If we've formed a sequence of {straight-size} or more cards, we have a straight.
             if (longest_short_cut_at[i] >= get_straight_and_flush_size())
