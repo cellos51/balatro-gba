@@ -31,8 +31,8 @@ jobs:
       - name: Deploy release
         uses: WebFreak001/deploy-nightly@v3.2.0
         with:
-          upload_url: https://uploads.github.com/repos/ricfehr3/balatro-gba/releases/257345890/assets{?name,label} 
-          release_id: 257345890 
+          upload_url: https://uploads.github.com/repos/cellos51/balatro-gba/releases/258698380/assets{?name,label}
+          release_id: 258698380
           asset_path: ./release.zip # path to archive to upload
           asset_name: nightly-gbalatro-$$-test.zip # name to upload the release as, use $$ to insert date (YYYYMMDD) and 6 letter commit hash
           asset_content_type: application/zip
