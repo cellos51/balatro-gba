@@ -23,5 +23,6 @@
 #include "joker_gfx19.h"
 #include "joker_gfx20.h"
 #include "joker_gfx21.h"
+#include "joker_gfx22.h"
 
 #endif
