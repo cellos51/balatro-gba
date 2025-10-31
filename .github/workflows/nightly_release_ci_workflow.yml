@@ -26,7 +26,7 @@ jobs:
           path: build
 
       - name: Package Release
-        run: mv build/balatro-gba.gba build/balatro-gba_nightly_$(date +'%F')_$(cat build/githash.txt).gba && zip release.zip build/*.gba
+        run: mv build/balatro-gba.gba build/balatro-gba_nightly_$(date +'%+4Y%m%d')_$(cat build/githash.txt).gba && zip release.zip build/*.gba
 
       - name: Deploy release
         uses: WebFreak001/deploy-nightly@v3.2.0
