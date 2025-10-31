@@ -15,6 +15,11 @@ on:
         description: 'Clear docker cache before running'
         type: boolean
         default: false
+  workflow_call:
+    outputs:
+      artifact-name:
+        description: "Name of the produced tarball"
+        value: ${{ jobs.build.outputs.artifact-name }}
 
 jobs:
   build:
@@ -58,6 +63,13 @@ jobs:
 
       - name: Build the project
         run: docker compose -f docker-compose.yml run --rm balatro sh -c "make -j$(nproc) && ./scripts/get_memory_map.sh"
+
+      - name: 'Upload Artifact'
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-out
+          path: build
+          retention-days: 5
 
       - uses: softprops/action-gh-release@v2
         if: ${{ startsWith(github.ref, 'refs/tags/') }}

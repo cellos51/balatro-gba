@@ -6,46 +6,24 @@ on:
   workflow_dispatch:
 
 jobs:
+  build-job:
+    uses: ./.github/workflows/build_ci_workflow.yml
+
   nightly:
     name: Deploy nightly
     strategy:
       fail-fast: false
     runs-on: ubuntu-latest
+    needs: build-job
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
-
-      - name: Get docker image cache
-        uses: actions/cache@v4
+      - name: Download the build output
+        uses: actions/download-artifact@v5
         with:
-          path: /tmp/docker-cache
-          key: docker-images-${{ hashFiles('docker-compose.yml') }}
-
-      - name: Load or pull images
-        run: |
-          if [ -f /tmp/docker-cache/balatro.tar ]; then
-            echo "Loading Image"
-            docker load -i /tmp/docker-cache/balatro.tar
-          else
-            echo "Pulling Image"
-            docker compose pull balatro
-            mkdir -p /tmp/docker-cache
-            docker save $(docker compose config | grep image: | awk '{print $2}') -o /tmp/docker-cache/balatro.tar
-          fi
-
-      - name: Export UID/GID for Compose
-        run: |
-          echo "UID=$(id -u)" >> "$GITHUB_ENV"
-          echo "GID=$(id -g)" >> "$GITHUB_ENV"
-
-      - name: Run Tests
-        run: cd tests && ./run_tests.sh
-
-      - name: Build the project
-        run: docker compose -f docker-compose.yml run --rm balatro sh -c "make -j$(nproc) && ./scripts/get_memory_map.sh"
+          name: build-out
+          path: build
 
       - name: Package Release
-        run: zip ./release.zip ./build/balatro-gba.gba build/balatro-gba.elf
+        run: zip release.zip build/balatro-gba.gba
  
       - name: Deploy release
         uses: WebFreak001/deploy-nightly@v3.2.0
@@ -53,7 +31,7 @@ jobs:
           upload_url: https://uploads.github.com/repos/ricfehr3/balatro-gba/releases/257345890/assets{?name,label} # find out this value by opening https://api.github.com/repos/<owner>/<repo>/releases in your browser and copy the full "upload_url" value including the {?name,label} part
           release_id: 257345890 # same as above (id can just be taken out the upload_url, it's used to find old releases)
           asset_path: ./release.zip # path to archive to upload
-          asset_name: release-$$.zip # name to upload the release as, use $$ to insert date (YYYYMMDD) and 6 letter commit hash
+          asset_name: release-$$-test.zip # name to upload the release as, use $$ to insert date (YYYYMMDD) and 6 letter commit hash
           asset_content_type: application/zip # required by GitHub API
           max_releases: 7 # optional, if there are more releases than this matching the asset_name, the oldest ones are going to be deleted
           ignore_hash: true # optional, if there is already a release associated with the repo's current commit, should we go ahead and upload the asset anyway.
