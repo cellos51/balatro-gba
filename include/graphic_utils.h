@@ -113,7 +113,7 @@ void main_bg_se_copy_rect_1_tile_vert(Rect se_rect, int direction);
  * se_rect dimensions are in number of tiles.
  * x and y are the coordinates in number of tiles.
  */
-void main_bg_se_copy_rect(Rect se_rect, BG_POINT pos);
+void main_bg_se_copy_rect(Rect se_rect, BG_POINT dest_pos);
 
 /* Copies a screen entry to a rect in the main background.
  * se_rect dimensions are in number of tiles.
