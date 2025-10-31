@@ -1576,7 +1576,7 @@ static void cards_in_hand_update_loop(bool* discarded_card, int* played_selectio
                         /* FALL THROUGH */
                     case ROYAL_FLUSH:
                         // Special handling because Four Fingers might be active
-                        bool final_selection[MAX_HAND_SIZE] = {false};
+                        bool final_selection[MAX_SELECTION_SIZE] = {false};
                         int min_len = get_straight_and_flush_size(); // Will be 4 if Four Fingers is in effect, otherwise 5
 
                         // if we have a flush in our hand
