@@ -67,13 +67,6 @@ enum JokerEvent
 #define PAREIDOLIA_JOKER_ID 30
 #define JOKER_BRAINSTORM_ID 40
 
-// not yet in the registry
-#define SELTZER_ID 254
-#define PHOTOGRAPH_ID 253
-#define SOCK_AND_BUSKIN_JOKER_ID 252
-#define DUSK_ID 251
-#define HACK_ID 250
-#define HANGING_CHAD_ID 247
 
 typedef struct 
 {
