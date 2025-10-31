@@ -67,7 +67,6 @@ static JokerEffect jolly_joker_effect(Joker *joker, Card *scored_card, enum Joke
 
     SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
 
-    // this Joker scores in an independent manner
     // This is really inefficient but the only way at the moment to check for whole-hand conditions
     u8 suits[NUM_SUITS];
     u8 ranks[NUM_RANKS];
@@ -719,7 +718,7 @@ static JokerEffect shoot_the_moon_joker_effect(Joker *joker, Card *scored_card, 
 {
     JokerEffect effect = {0};
 
-    // switch from CARD_SCORED to CARD_HELD when triggering held cards is implemented
+    // TODO: switch from CARD_SCORED to CARD_HELD when triggering held cards is implemented
     SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
 
     CardObject** hand = get_hand_array();
@@ -801,7 +800,6 @@ static JokerEffect dusk_joker_effect(Joker *joker, Card *scored_card, enum Joker
             break;
         
         case JOKER_EVENT_ON_CARD_SCORED:
-            // data is index of previously retriggered played card
             // Only retrigger current card if it's strictly after the last one we retriggered
             if (get_num_hands_remaining() == 0)
             {
