@@ -9,10 +9,8 @@ jobs:
   build-job:
     uses: ./.github/workflows/build_ci_workflow.yml
 
-  nightly:
-    name: Deploy nightly
-    strategy:
-      fail-fast: false
+  release:
+    name: Release Tagged Version
     runs-on: ubuntu-latest
     needs: build-job
     steps:

@@ -9,11 +9,16 @@ on:
       - main
   workflow_dispatch:
     inputs:
-      clear_cache:
+      clear-cache:
         description: 'Clear docker cache before running'
         type: boolean
         default: false
   workflow_call:
+    inputs:
+      upload-build-artifact:
+        required: true
+        type: boolean
+        default: true
 
 jobs:
   run-tests-job:
@@ -33,7 +38,7 @@ jobs:
           key: docker-images-${{ hashFiles('docker-compose.yml') }}
 
       - name: Clear docker cache (if requested)
-        if: github.event.inputs.clear_cache == 'true'
+        if: github.event.inputs.clear-cache == 'true'
         run: |
           echo "Clearing Docker cache..."
           rm -rf /tmp/docker-cache
@@ -60,7 +65,7 @@ jobs:
         run: docker compose -f docker-compose.yml run --rm balatro sh -c "make -j$(nproc) && ./scripts/get_memory_map.sh"
 
       - name: 'Upload Artifact'
-        if: ${{ github.event_name == 'workflow_call' }}
+        if: github.event.inputs.upload-build-artifact == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: build-out
