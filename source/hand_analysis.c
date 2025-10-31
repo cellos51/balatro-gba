@@ -91,7 +91,7 @@ bool hand_contains_straight(u8 *ranks) {
         // Check for ace low straight
         if (straight_size >= 2 && ranks[ACE]) {
             // With A as low, the highest rank you can use is FIVE.
-            int last_needed = TWO + (straight_size - 2);   // e.g. need=5 -> need 2..5
+            int last_needed = TWO + (straight_size - 2);   // -1 for inclusive integer distance and another -1 for the Ace e.g. need=5 -> need 2..5
             if (last_needed <= FIVE) {
                 bool ok = true;
                 for (int r = TWO; r <= last_needed; ++r)
@@ -110,7 +110,8 @@ bool hand_contains_straight(u8 *ranks) {
     } else
     {
         // Shortcut Joker is active, we have to detect straights where any card may "skip" 1 rank
-        // We do this by calculating the longest possible straight that can end on each rank
+        // We do this with a dynamic programming algorithm that calculates 
+        // the longest possible straight that can end on each rank
         // and stopping when we find one that is {straight-size} cards long
         u8 longest_short_cut_at[NUM_RANKS] = {0};
 
@@ -182,8 +183,17 @@ bool hand_contains_flush(u8 *suits) {
     return false;
 }
 
-// Returns the number of cards in the best flush found, and marks them in out_selection.
-// This is mostly from Google Gemini
+// Returns the number of cards in the best flush found or 0 if no flush of min_len is found, and marks them in out_selection.
+/**
+ * Finds the largest flush (set of cards with the same suit) in the given array of played cards.
+ * Marks the cards belonging to the best flush in the out_selection array.
+ *
+ * @param played        Array of pointers to CardObject representing played cards.
+ * @param top           Index of the top of the played stack.
+ * @param min_len       Minimum number of cards required for a flush.
+ * @param out_selection Output array of bools; set to true for cards in the best flush, false otherwise.
+ * @return              The number of cards in the best flush found, or 0 if no flush meets min_len.
+ */
 int find_flush_in_played_cards(CardObject** played, int top, int min_len, bool* out_selection) {
     if (top < 0) return 0;
     for (int i = 0; i <= top; i++) out_selection[i] = false;
@@ -216,7 +226,7 @@ int find_flush_in_played_cards(CardObject** played, int top, int min_len, bool* 
 }
 
 
-// Returns the number of cards in the best straight, marks as true them in out_selection[].
+// Returns the number of cards in the best straight or 0 if no straight of min_len is found, marks as true them in out_selection[].
 // This is mostly from Google Gemini
 int find_straight_in_played_cards(CardObject** played, int top, bool shortcut_active, int min_len, bool* out_selection) {
     if (top < 0) return 0;
@@ -235,7 +245,7 @@ int find_straight_in_played_cards(CardObject** played, int top, bool shortcut_ac
     }
 
     // --- Run DP to find longest straight ---
-    // This is nearly identical to your existing hand_contains_straight logic
+    // This is nearly identical to hand_contains_straight() logic
     int ace_low_len = ranks[ACE] ? 1 : 0;
     for (int i = 0; i < NUM_RANKS; i++) {
         if (ranks[i] > 0) {
