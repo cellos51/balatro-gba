@@ -423,7 +423,7 @@ static JokerEffect reserved_parking_joker_effect(Joker *joker, Card *scored_card
 {
     JokerEffect effect = {0};
 
-    // switch from INDEPENDENT to CARD_HELD when it's implemented
+    // TODO: switch from INDEPENDENT to CARD_HELD when it's implemented
     SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
 
     CardObject** hand = get_hand_array();
