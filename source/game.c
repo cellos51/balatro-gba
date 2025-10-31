@@ -1951,8 +1951,8 @@ static void cards_in_hand_update_loop(bool* discarded_card, int* played_selectio
     }
 }
 
-// returns true if the top level scoring function should return too
-static bool joker_scoring_loop(int* iteration_start, Card* played_card, enum JokerEvent joker_event)
+// returns true if a joker was scored, false otherwise
+static bool check_and_score_joker_for_event(int* iteration_start, Card* played_card, enum JokerEvent joker_event)
 {
     for (int k = *iteration_start; k < list_get_size(jokers); k++)
     {
@@ -2035,7 +2035,7 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
 
                             if (*played_selections > 0)
                             {
-                                if (joker_scoring_loop(&joker_scored_index, played[*played_selections - 1]->card, JOKER_EVENT_ON_CARD_SCORED))
+                                if (check_and_score_joker_for_event(&joker_scored_index, played[*played_selections - 1]->card, JOKER_EVENT_ON_CARD_SCORED))
                                 {
                                     return;
                                 }
@@ -2090,13 +2090,13 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
 
                         tte_erase_rect_wrapper(PLAYED_CARDS_SCORES_RECT);
 
-                        if (joker_scoring_loop(&joker_scored_index, NULL, JOKER_EVENT_INDEPENDENT))
+                        if (check_and_score_joker_for_event(&joker_scored_index, NULL, JOKER_EVENT_INDEPENDENT))
                         {
                             return;
                         }
 
                         // Trigger hand end effect for all jokers once they are done scoring
-                        if (joker_scoring_loop(&joker_round_end_index, NULL, JOKER_EVENT_ON_HAND_SCORED_END))
+                        if (check_and_score_joker_for_event(&joker_round_end_index, NULL, JOKER_EVENT_ON_HAND_SCORED_END))
                         {
                             return;
                         }
