@@ -16,12 +16,13 @@ on:
   workflow_call:
     inputs:
       upload-build-artifact:
-        required: true
+        required: false
         type: boolean
         default: true
 
 jobs:
   run-tests-job:
+    name: Run tests
     uses: ./.github/workflows/run_tests_ci_workflow.yml
 
   build:
