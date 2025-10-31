@@ -10,6 +10,9 @@
 
 // ON JOKER CREATED
 
+// For Jokers that don't need to do anything when created
+void on_joker_created_noop(Joker *joker) {}
+
 void hanging_chad_on_joker_created(Joker *joker)
 {
     joker->data = 2; // retriggers left, reset to 2 at round end
