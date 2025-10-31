@@ -1024,61 +1024,61 @@ void seltzer_on_joker_created(Joker *joker)
  * Otherwise the order is similar to the wiki.
  */
 const JokerInfo joker_registry[] = {
-    { COMMON_JOKER,   2, default_joker_effect,          on_joker_created_noop }, // DEFAULT_JOKER_ID = 0
-    { COMMON_JOKER,   5, greedy_joker_effect,           on_joker_created_noop }, // GREEDY_JOKER_ID  = 1
-    { COMMON_JOKER,   5, lusty_joker_effect,            on_joker_created_noop }, // etc...  2
-    { COMMON_JOKER,   5, wrathful_joker_effect,         on_joker_created_noop }, // 3
-    { COMMON_JOKER,   5, gluttonous_joker_effect,       on_joker_created_noop }, // 4
-    { COMMON_JOKER,   3, jolly_joker_effect,            on_joker_created_noop }, // 5
-    { COMMON_JOKER,   4, zany_joker_effect,             on_joker_created_noop }, // 6
-    { COMMON_JOKER,   4, mad_joker_effect,              on_joker_created_noop }, // 7
-    { COMMON_JOKER,   4, crazy_joker_effect,            on_joker_created_noop }, // 8
-    { COMMON_JOKER,   4, droll_joker_effect,            on_joker_created_noop }, // 9
-    { COMMON_JOKER,   3, sly_joker_effect,              on_joker_created_noop }, // 10
-    { COMMON_JOKER,   4, wily_joker_effect,             on_joker_created_noop }, // 11
-    { COMMON_JOKER,   4, clever_joker_effect,           on_joker_created_noop }, // 12
-    { COMMON_JOKER,   4, devious_joker_effect,          on_joker_created_noop }, // 13 
-    { COMMON_JOKER,   4, crafty_joker_effect,           on_joker_created_noop }, // 14
-    { COMMON_JOKER,   5, half_joker_effect,             on_joker_created_noop }, // 15
-    { UNCOMMON_JOKER, 8, joker_stencil_effect,          on_joker_created_noop }, // 16
-    { COMMON_JOKER,   5, banner_joker_effect,           on_joker_created_noop }, // 17
-    { COMMON_JOKER,   4, walkie_talkie_joker_effect,    on_joker_created_noop }, // 18
-    { UNCOMMON_JOKER, 8, fibonnaci_joker_effect,        on_joker_created_noop }, // 19
-    { UNCOMMON_JOKER, 6, blackboard_joker_effect,       on_joker_created_noop }, // 20
-    { COMMON_JOKER,   5, mystic_summit_joker_effect,    on_joker_created_noop }, // 21
-    { COMMON_JOKER,   4, misprint_joker_effect,         on_joker_created_noop }, // 22
-    { COMMON_JOKER,   4, even_steven_joker_effect,      on_joker_created_noop }, // 23
-    { COMMON_JOKER,   5, blue_joker_effect,             on_joker_created_noop }, // 24
-    { COMMON_JOKER,   4, odd_todd_joker_effect,         on_joker_created_noop }, // 25
-    { COMMON_JOKER,   4, scholar_joker_effect,          on_joker_created_noop }, // 26
-    { COMMON_JOKER,   4, business_card_joker_effect,    on_joker_created_noop }, // 27
+    { COMMON_JOKER,    2, default_joker_effect,          on_joker_created_noop            }, // DEFAULT_JOKER_ID = 0
+    { COMMON_JOKER,    5, greedy_joker_effect,           on_joker_created_noop            }, // GREEDY_JOKER_ID  = 1
+    { COMMON_JOKER,    5, lusty_joker_effect,            on_joker_created_noop            }, // etc...  2
+    { COMMON_JOKER,    5, wrathful_joker_effect,         on_joker_created_noop            }, // 3
+    { COMMON_JOKER,    5, gluttonous_joker_effect,       on_joker_created_noop            }, // 4
+    { COMMON_JOKER,    3, jolly_joker_effect,            on_joker_created_noop            }, // 5
+    { COMMON_JOKER,    4, zany_joker_effect,             on_joker_created_noop            }, // 6
+    { COMMON_JOKER,    4, mad_joker_effect,              on_joker_created_noop            }, // 7
+    { COMMON_JOKER,    4, crazy_joker_effect,            on_joker_created_noop            }, // 8
+    { COMMON_JOKER,    4, droll_joker_effect,            on_joker_created_noop            }, // 9
+    { COMMON_JOKER,    3, sly_joker_effect,              on_joker_created_noop            }, // 10
+    { COMMON_JOKER,    4, wily_joker_effect,             on_joker_created_noop            }, // 11
+    { COMMON_JOKER,    4, clever_joker_effect,           on_joker_created_noop            }, // 12
+    { COMMON_JOKER,    4, devious_joker_effect,          on_joker_created_noop            }, // 13 
+    { COMMON_JOKER,    4, crafty_joker_effect,           on_joker_created_noop            }, // 14
+    { COMMON_JOKER,    5, half_joker_effect,             on_joker_created_noop            }, // 15
+    { UNCOMMON_JOKER,  8, joker_stencil_effect,          on_joker_created_noop            }, // 16
+    { COMMON_JOKER,    5, banner_joker_effect,           on_joker_created_noop            }, // 17
+    { COMMON_JOKER,    4, walkie_talkie_joker_effect,    on_joker_created_noop            }, // 18
+    { UNCOMMON_JOKER,  8, fibonnaci_joker_effect,        on_joker_created_noop            }, // 19
+    { UNCOMMON_JOKER,  6, blackboard_joker_effect,       on_joker_created_noop            }, // 20
+    { COMMON_JOKER,    5, mystic_summit_joker_effect,    on_joker_created_noop            }, // 21
+    { COMMON_JOKER,    4, misprint_joker_effect,         on_joker_created_noop            }, // 22
+    { COMMON_JOKER,    4, even_steven_joker_effect,      on_joker_created_noop            }, // 23
+    { COMMON_JOKER,    5, blue_joker_effect,             on_joker_created_noop            }, // 24
+    { COMMON_JOKER,    4, odd_todd_joker_effect,         on_joker_created_noop            }, // 25
+    { COMMON_JOKER,    4, scholar_joker_effect,          on_joker_created_noop            }, // 26
+    { COMMON_JOKER,    4, business_card_joker_effect,    on_joker_created_noop            }, // 27
     // Business card should be paired with Shortcut for palette optimization when it's added
-    { COMMON_JOKER,   4, scary_face_joker_effect,       on_joker_created_noop }, // 28
-    { UNCOMMON_JOKER, 7, bootstraps_joker_effect,       on_joker_created_noop }, // 29
-    { UNCOMMON_JOKER, 5, NULL,                          on_joker_created_noop }, // 30 Pareidolia
-    { COMMON_JOKER,   6, reserved_parking_joker_effect, on_joker_created_noop }, // 31
-    { COMMON_JOKER,   4, abstract_joker_effect,         on_joker_created_noop }, // 32
-    { UNCOMMON_JOKER, 6, bull_joker_effect,             on_joker_created_noop }, // 33
-    { RARE_JOKER,     8, the_duo_joker_effect,          on_joker_created_noop }, // 34
-    { RARE_JOKER,     8, the_trio_joker_effect,         on_joker_created_noop }, // 35
-    { RARE_JOKER,     8, the_family_joker_effect,       on_joker_created_noop }, // 36
-    { RARE_JOKER,     8, the_order_joker_effect,        on_joker_created_noop }, // 37
-    { RARE_JOKER,     8, the_tribe_joker_effect,        on_joker_created_noop }, // 38
-    { RARE_JOKER,     10, blueprint_joker_effect,       on_joker_created_noop }, // 39
-    { RARE_JOKER,     10, brainstorm_joker_effect,      on_joker_created_noop }, // 40
-    { COMMON_JOKER,   5, raised_fist_joker_effect,      on_joker_created_noop }, // 41
-    { COMMON_JOKER,   4, smiley_face_joker_effect,      on_joker_created_noop }, // 42
+    { COMMON_JOKER,    4, scary_face_joker_effect,       on_joker_created_noop            }, // 28
+    { UNCOMMON_JOKER,  7, bootstraps_joker_effect,       on_joker_created_noop            }, // 29
+    { UNCOMMON_JOKER,  5, NULL,                          on_joker_created_noop            }, // 30 Pareidolia
+    { COMMON_JOKER,    6, reserved_parking_joker_effect, on_joker_created_noop            }, // 31
+    { COMMON_JOKER,    4, abstract_joker_effect,         on_joker_created_noop            }, // 32
+    { UNCOMMON_JOKER,  6, bull_joker_effect,             on_joker_created_noop            }, // 33
+    { RARE_JOKER,      8, the_duo_joker_effect,          on_joker_created_noop            }, // 34
+    { RARE_JOKER,      8, the_trio_joker_effect,         on_joker_created_noop            }, // 35
+    { RARE_JOKER,      8, the_family_joker_effect,       on_joker_created_noop            }, // 36
+    { RARE_JOKER,      8, the_order_joker_effect,        on_joker_created_noop            }, // 37
+    { RARE_JOKER,      8, the_tribe_joker_effect,        on_joker_created_noop            }, // 38
+    { RARE_JOKER,     10, blueprint_joker_effect,        on_joker_created_noop            }, // 39
+    { RARE_JOKER,     10, brainstorm_joker_effect,       on_joker_created_noop            }, // 40
+    { COMMON_JOKER,    5, raised_fist_joker_effect,      on_joker_created_noop            }, // 41
+    { COMMON_JOKER,    4, smiley_face_joker_effect,      on_joker_created_noop            }, // 42
+    { UNCOMMON_JOKER,  6, acrobat_joker_effect,          on_joker_created_noop            }, // 43
+    { UNCOMMON_JOKER,  5, dusk_joker_effect,             dusk_on_joker_created            }, // 44
+    { UNCOMMON_JOKER,  6, sock_and_buskin_joker_effect,  sock_and_buskin_on_joker_created }, // 45
+    { UNCOMMON_JOKER,  6, hack_joker_effect,             hack_on_joker_created            }, // 46
+    { COMMON_JOKER,    4, hanging_chad_joker_effect,     hanging_chad_on_joker_created    }, // 47
 
     // The following jokers don't have sprites yet, 
     // uncomment them when their sprites are added.
 #if 0
-    { COMMON_JOKER,   4, hanging_chad_joker_effect,     hanging_chad_on_joker_created },
-    { UNCOMMON_JOKER, 5, dusk_joker_effect,             dusk_on_joker_created },
-    { UNCOMMON_JOKER, 6, hack_joker_effect,             hack_on_joker_created },
     { COMMON_JOKER,   5, photograph_joker_effect,       photograph_on_joker_created },
     { UNCOMMON_JOKER, 6, seltzer_joker_effect,          seltzer_on_joker_created },
-    { UNCOMMON_JOKER, 6, sock_and_buskin_joker_effect,  sock_and_buskin_on_joker_created },
-    { UNCOMMON_JOKER, 6, acrobat_joker_effect,          on_joker_created_noop },
     { COMMON_JOKER,   5, shoot_the_moon_joker_effect,   on_joker_created_noop},
 #endif
 };
