@@ -9,6 +9,8 @@ jobs:
   build-job:
     name: Build ROM
     uses: ./.github/workflows/build_ci_workflow.yml
+    with:
+      upload-build-artifact: true
 
   release:
     name: Release Tagged Version
