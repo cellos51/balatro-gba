@@ -806,9 +806,9 @@ static JokerEffect dusk_joker_effect(Joker *joker, Card *scored_card, enum Joker
             if (get_num_hands_remaining() == 0)
             {
                 effect.retrigger = (*p_last_retriggered_index < get_scored_card_index());
-                *p_last_retriggered_index = get_scored_card_index();
                 if (effect.retrigger)
                 {
+                    *p_last_retriggered_index = get_scored_card_index();
                     effect.message = "Again!";
                 }
             }
@@ -888,9 +888,9 @@ static JokerEffect hack_joker_effect(Joker *joker, Card *scored_card, enum Joker
                 case FOUR:
                 case FIVE:
                     effect.retrigger = (*p_last_retriggered_index < get_scored_card_index());
-                    *p_last_retriggered_index = get_scored_card_index();
                     if (effect.retrigger)
                     {
+                        *p_last_retriggered_index = get_scored_card_index();
                         effect.message = "Again!";
                     }
                     break;
@@ -933,9 +933,9 @@ static JokerEffect seltzer_joker_effect(Joker *joker, Card *scored_card, enum Jo
             if (*p_hands_left_until_exp > 0)
             {
                 effect.retrigger = (*p_last_retriggered_idx < get_scored_card_index());
-                *p_last_retriggered_idx = get_scored_card_index();
                 if (effect.retrigger)
                 {
+                    *p_last_retriggered_idx = get_scored_card_index();
                     effect.message = "Again!";
                 }
             } 
@@ -963,9 +963,9 @@ static JokerEffect sock_and_buskin_joker_effect(Joker *joker, Card *scored_card,
         case JOKER_EVENT_ON_CARD_SCORED:
             // Works the same way as Dusk, but for face cards
             effect.retrigger = (*p_last_retriggered_face_index < get_scored_card_index() && card_is_face(scored_card));
-            *p_last_retriggered_face_index = get_scored_card_index();
             if (effect.retrigger)
             {
+                *p_last_retriggered_face_index = get_scored_card_index();
                 effect.message = "Again!";
             }
             break;

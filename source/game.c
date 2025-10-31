@@ -2020,10 +2020,13 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                         // If we need to retrigger, then we have scored a card previously
                         // and thus have incremented scored_card_index by 1.
                         // Take out this increment to score the previous card again
+                        // and reset the scored Joker index to 0 to go back to the beginning
                         if (retrigger)
                         {
                             retrigger = false;
                             scored_card_index--;
+                            (*played_selections)--;
+                            joker_scored_index = 0;
                         }
 
                         // So pretend "played_selections" is now called "scored_card_index" and it counts the number of cards that have been scored
