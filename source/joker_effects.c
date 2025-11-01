@@ -545,6 +545,7 @@ static JokerEffect even_steven_joker_effect(Joker *joker, Card *scored_card, enu
     return effect;
 }
 
+
 static JokerEffect odd_todd_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event)
 {
     JokerEffect effect = {0};
@@ -559,7 +560,7 @@ static JokerEffect odd_todd_joker_effect(Joker *joker, Card *scored_card, enum J
     return effect;
 }
 
-__attribute__((unused))
+
 static JokerEffect acrobat_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event)
 {
     JokerEffect effect = {0};
@@ -575,7 +576,7 @@ static JokerEffect acrobat_joker_effect(Joker *joker, Card *scored_card, enum Jo
     return effect;
 }
 
-__attribute__((unused))
+
 static JokerEffect hanging_chad_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event)
 {
     JokerEffect effect = {0};
@@ -606,6 +607,7 @@ static JokerEffect hanging_chad_joker_effect(Joker *joker, Card *scored_card, en
     return effect;
 }
 
+
 static JokerEffect the_duo_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event)
 {
     JokerEffect effect = {0};
@@ -623,7 +625,7 @@ static JokerEffect the_duo_joker_effect(Joker *joker, Card *scored_card, enum Jo
     }
 
     return effect;
- }
+}
 
 
 static JokerEffect the_trio_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event)
@@ -642,7 +644,8 @@ static JokerEffect the_trio_joker_effect(Joker *joker, Card *scored_card, enum J
         effect.xmult = 3;
     }
     return effect;
- }
+}
+
 
 static JokerEffect the_family_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event)
 {
@@ -701,6 +704,7 @@ static JokerEffect the_tribe_joker_effect(Joker *joker, Card *scored_card, enum 
     return effect;
 }
 
+
 static JokerEffect bootstraps_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event)
 {
     JokerEffect effect = {0};
@@ -711,7 +715,8 @@ static JokerEffect bootstraps_joker_effect(Joker *joker, Card *scored_card, enum
 
     return effect;
 }
-            
+
+
 // Using __attribute__((unused)) for jokers with no sprites yet to avoid warning
 // Remove the attribute once they have sprites
 // no graphics available but ready to be used if wanted when graphics available
@@ -735,6 +740,7 @@ static JokerEffect shoot_the_moon_joker_effect(Joker *joker, Card *scored_card, 
 
     return effect;
 }
+
 
 __attribute__((unused))
 static JokerEffect photograph_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event)
@@ -769,6 +775,7 @@ static JokerEffect photograph_joker_effect(Joker *joker, Card *scored_card, enum
     return effect;
 }
 
+
 // no graphics available but ready to be used if wanted when graphics available
 __attribute__((unused))
 static JokerEffect triboulet_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event)
@@ -789,7 +796,6 @@ static JokerEffect triboulet_joker_effect(Joker *joker, Card *scored_card, enum 
 }
 
 
-__attribute__((unused))
 static JokerEffect dusk_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event)
 {
     JokerEffect effect = {0};
@@ -843,6 +849,7 @@ static JokerEffect blueprint_joker_effect(Joker *joker, Card *scored_card, enum 
     return effect;
 }
 
+
 static JokerEffect brainstorm_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event)
 {
     JokerEffect effect = {0};
@@ -867,7 +874,6 @@ static JokerEffect brainstorm_joker_effect(Joker *joker, Card *scored_card, enum
 }
 
 
-__attribute__((unused))
 static JokerEffect hack_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event)
 {
     JokerEffect effect = {0};
@@ -904,6 +910,7 @@ static JokerEffect hack_joker_effect(Joker *joker, Card *scored_card, enum Joker
     return effect;
 }
 
+
 // Note: Joker expiration is not yet implemented so Seltzer cannot be made active before it does.
 __attribute__((unused))
 static JokerEffect seltzer_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event)
@@ -924,7 +931,7 @@ static JokerEffect seltzer_joker_effect(Joker *joker, Card *scored_card, enum Jo
             }
             else
             {
-                snprintf(effect.message, MAX_JOKER_MSG_BUF_LEN, "-1");
+                effect.message = "-1";
             }
             break;
         
@@ -948,7 +955,7 @@ static JokerEffect seltzer_joker_effect(Joker *joker, Card *scored_card, enum Jo
     return effect;
 }
 
-__attribute__((unused))
+
 static JokerEffect sock_and_buskin_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event)
 {
     JokerEffect effect = {0};

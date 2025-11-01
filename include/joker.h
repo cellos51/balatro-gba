@@ -58,7 +58,6 @@ enum JokerEvent
 };
 
 #define MAX_JOKER_OBJECTS 32 // The maximum number of joker objects that can be created at once
-#define MAX_JOKER_MSG_BUF_LEN 9 // strlen("Extinct!") + 1 as that is the currently the longest joker message displayed
 
 // Jokers in the game
 #define DEFAULT_JOKER_ID 0
