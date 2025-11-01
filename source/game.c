@@ -1744,8 +1744,195 @@ void card_in_hand_loop_handle_discard_and_shuffling(int card_idx, bool* discarde
     };
 }
 
+static void select_flush_and_straight_cards_in_played_hand()
+{
+    // Special handling because Four Fingers might be active
+    bool final_selection[MAX_SELECTION_SIZE] = {false};
+    int min_len = get_straight_and_flush_size(); // Will be 4 if Four Fingers is in effect, otherwise 5
+
+    // if we have a flush in our hand
+    if (hand_type == FLUSH || hand_type == STRAIGHT_FLUSH || hand_type == ROYAL_FLUSH)
+    {
+        bool flush_selection[MAX_HAND_SIZE] = {false};
+        find_flush_in_played_cards(played, played_top, min_len, flush_selection);
+        // Add the results into the final selection
+        for (int i = 0; i <= played_top; i++)
+        {
+            final_selection[i] = flush_selection[i];
+        }
+    }
+
+    // If we have a straight in our hand
+    if (hand_type == STRAIGHT || hand_type == STRAIGHT_FLUSH || hand_type == ROYAL_FLUSH)
+    {
+        bool straight_selection[MAX_HAND_SIZE] = {false};
+        find_straight_in_played_cards(played, played_top, is_shortcut_joker_active(), min_len, straight_selection);
+        // Add the results into the final selection
+        for (int i = 0; i <= played_top; i++)
+        {
+            final_selection[i] = final_selection[i] || straight_selection[i];
+        }
+        // If Four Fingers is active, pairs can happen in a valid straight
+        // If Four Fingers is not active, pairs are impossible so this will not affect things
+        select_paired_cards_in_hand(played, played_top, final_selection);
+    }
+
+    // Finally, set mark the cards as selected based final_selection
+    for (int i = 0; i <= played_top; i++)
+    {
+        if (final_selection[i])
+        {
+            card_object_set_selected(played[i], true);
+        }
+    }
+}
+
+static void select_all_five_cards_in_played_hand()
+{
+    for (int i = 0; i <= played_top; i++)
+    {
+        card_object_set_selected(played[i], true);
+    }
+}
+
+static void select_four_of_a_kind_cards_in_played_hand()
+{
+    // find four cards with the same rank
+    if (played_top >= 3) // If there are 5 cards selected we just need to find the one card that doesn't match, and select the others
+    {
+        int unmatched_index = -1;
+
+        for (int i = 0; i <= played_top; i++)
+        {
+            if (played[i]->card->rank != played[(i + 1) % played_top]->card->rank && played[i]->card->rank != played[(i + 2) % played_top]->card->rank)
+            {
+                unmatched_index = i;
+                break;
+            }
+        }
+
+        for (int i = 0; i <= played_top; i++)
+        {
+            if (i != unmatched_index)
+            {
+                card_object_set_selected(played[i], true);
+            }
+        }
+    }
+    else // If there are only 4 cards selected we know they match
+    {
+        for (int i = 0; i <= played_top; i++)
+        {
+            card_object_set_selected(played[i], true);
+        }
+    }
+}
+
+static void select_three_of_a_kind_cards_in_played_hand()
+{
+    // find three cards with the same rank
+    for (int i = 0; i <= played_top - 1; i++)
+    {
+        for (int j = i + 1; j <= played_top; j++)
+        {
+            if (played[i]->card->rank == played[j]->card->rank)
+            {
+                card_object_set_selected(played[i], true);
+                card_object_set_selected(played[j], true);
+
+                for (int k = j + 1; k <= played_top; k++)
+                {
+                    if (played[i]->card->rank == played[k]->card->rank && !card_object_is_selected(played[k]))
+                    {
+                        card_object_set_selected(played[k], true);
+                        break;
+                    }
+                }
+
+                break;
+            }
+        }
+
+        if (card_object_is_selected(played[i]))
+            break;
+    }
+}
+
+static void select_two_pair_cards_in_played_hand()
+{
+    // find two pairs of cards with the same rank
+    int i;
+
+    for (i = 0; i <= played_top - 1; i++)
+    {
+        for (int j = i + 1; j <= played_top; j++)
+        {
+            if (played[i]->card->rank == played[j]->card->rank)
+            {
+                card_object_set_selected(played[i], true);
+                card_object_set_selected(played[j], true);
+
+                break;
+            }
+        }
+
+        if (card_object_is_selected(played[i]))
+            break;
+    }
+
+    for (; i <= played_top - 1; i++) // Find second pair
+    {
+        for (int j = i + 1; j <= played_top; j++)
+        {
+            if (played[i]->card->rank == played[j]->card->rank && !card_object_is_selected(played[i]) && !card_object_is_selected(played[j]))
+            {
+                card_object_set_selected(played[i], true);
+                card_object_set_selected(played[j], true);
+                break;
+            }
+        }
+    }
+}
+
+static void select_pair_cards_in_played_hand()
+{
+    // find two cards with the same rank
+    for (int i = 0; i <= played_top - 1; i++)
+    {
+        for (int j = i + 1; j <= played_top; j++)
+        {
+            if (played[i]->card->rank == played[j]->card->rank)
+            {
+                card_object_set_selected(played[i], true);
+                card_object_set_selected(played[j], true);
+                break;
+            }
+        }
+
+        if (card_object_is_selected(played[i]))
+            break;
+    }
+}
+
+static void select_highcard_cards_in_played_hand()
+{
+    // find the card with the highest rank in the hand
+    int highest_rank_index = 0;
+
+    for (int i = 0; i <= played_top; i++)
+    {
+        if (played[i]->card->rank > played[highest_rank_index]->card->rank)
+        {
+            highest_rank_index = i;
+        }
+    }
+
+    card_object_set_selected(played[highest_rank_index], true);
+}
+
 static void cards_in_hand_update_loop(bool* discarded_card, int* played_selections, bool* sound_played)
 {
+    // TODO: Break this function up into smaller ones, Gods be good
     for (int i = hand_top + 1; i >= 0; i--) // Start from the end of the hand and work backwards because that's how Balatro does it
     {
         if (hand[i] != NULL)
@@ -1823,122 +2010,20 @@ static void cards_in_hand_update_loop(bool* discarded_card, int* played_selectio
                     {
                     case NONE:
                         break;
-                    case HIGH_CARD: // find the card with the highest rank in the hand
-                        int highest_rank_index = 0;
-
-                        for (int i = 0; i <= played_top; i++)
-                        {
-                            if (played[i]->card->rank > played[highest_rank_index]->card->rank)
-                            {
-                                highest_rank_index = i;
-                            }
-                        }
-
-                        card_object_set_selected(played[highest_rank_index], true);
+                    case HIGH_CARD: 
+                        select_highcard_cards_in_played_hand();
                         break;
-                    case PAIR: // find two cards with the same rank (Requires recursion)
-                        for (int i = 0; i <= played_top - 1; i++)
-                        {
-                            for (int j = i + 1; j <= played_top; j++)
-                            {
-                                if (played[i]->card->rank == played[j]->card->rank)
-                                {
-                                    card_object_set_selected(played[i], true);
-                                    card_object_set_selected(played[j], true);
-                                    break;
-                                }
-                            }
-
-                            if (card_object_is_selected(played[i])) break;
-                        }
+                    case PAIR: 
+                        select_pair_cards_in_played_hand();
                         break;
-                    case TWO_PAIR: // find two pairs of cards with the same rank (Requires recursion)
-                        int i;
-
-                        for (i = 0; i <= played_top - 1; i++)
-                        {
-                            for (int j = i + 1; j <= played_top; j++)
-                            {
-                                if (played[i]->card->rank == played[j]->card->rank)
-                                {
-                                    card_object_set_selected(played[i], true);
-                                    card_object_set_selected(played[j], true);
-
-                                    break;
-                                }
-                            }
-
-                            if (card_object_is_selected(played[i])) break;
-                        }
-
-                        for (; i <= played_top - 1; i++) // Find second pair
-                        {
-                            for (int j = i + 1; j <= played_top; j++)
-                            {
-                                if (played[i]->card->rank == played[j]->card->rank && !card_object_is_selected(played[i]) && !card_object_is_selected(played[j]))
-                                {
-                                    card_object_set_selected(played[i], true);
-                                    card_object_set_selected(played[j], true);
-                                    break;
-                                }
-                            }
-                        }
+                    case TWO_PAIR: 
+                        select_two_pair_cards_in_played_hand();
                         break;
-                    case THREE_OF_A_KIND: // find three cards with the same rank (requires recursion)
-                        for (int i = 0; i <= played_top - 1; i++)
-                        {
-                            for (int j = i + 1; j <= played_top; j++)
-                            {
-                                if (played[i]->card->rank == played[j]->card->rank)
-                                {
-                                    card_object_set_selected(played[i], true);
-                                    card_object_set_selected(played[j], true);
-
-                                    for (int k = j + 1; k <= played_top; k++)
-                                    {
-                                        if (played[i]->card->rank == played[k]->card->rank && !card_object_is_selected(played[k]))
-                                        {
-                                            card_object_set_selected(played[k], true);
-                                            break;
-                                        }
-                                    }
-
-                                    break;
-                                }
-                            }
-
-                            if (card_object_is_selected(played[i])) break;
-                        }
+                    case THREE_OF_A_KIND: 
+                        select_three_of_a_kind_cards_in_played_hand();
                         break;
-                    case FOUR_OF_A_KIND: // find four cards with the same rank (requires recursion)
-                        if (played_top >= 3) // If there are 5 cards selected we just need to find the one card that doesn't match, and select the others
-                        {
-                            int unmatched_index = -1;
-
-                            for (int i = 0; i <= played_top; i++)
-                            {
-                                if (played[i]->card->rank != played[(i + 1) % played_top]->card->rank && played[i]->card->rank != played[(i + 2) % played_top]->card->rank)
-                                {
-                                    unmatched_index = i;
-                                    break;
-                                }
-                            }
-
-                            for (int i = 0; i <= played_top; i++)
-                            {
-                                if (i != unmatched_index)
-                                {
-                                    card_object_set_selected(played[i], true);
-                                }
-                            }
-                        }
-                        else // If there are only 4 cards selected we know they match
-                        {
-                            for (int i = 0; i <= played_top; i++)
-                            {
-                                card_object_set_selected(played[i], true);
-                            }
-                        }
+                    case FOUR_OF_A_KIND:
+                        select_four_of_a_kind_cards_in_played_hand();
                         break;
                     case STRAIGHT:
                         /* FALL THROUGH */
@@ -1947,39 +2032,7 @@ static void cards_in_hand_update_loop(bool* discarded_card, int* played_selectio
                     case STRAIGHT_FLUSH:
                         /* FALL THROUGH */
                     case ROYAL_FLUSH:
-                        // Special handling because Four Fingers might be active
-                        bool final_selection[MAX_SELECTION_SIZE] = {false};
-                        int min_len = get_straight_and_flush_size(); // Will be 4 if Four Fingers is in effect, otherwise 5
-
-                        // if we have a flush in our hand
-                        if (hand_type == FLUSH || hand_type == STRAIGHT_FLUSH || hand_type == ROYAL_FLUSH) {
-                            bool flush_selection[MAX_HAND_SIZE] = {false};
-                            find_flush_in_played_cards(played, played_top, min_len, flush_selection);
-                            // Add the results into the final selection
-                            for (int i = 0; i <= played_top; i++) {
-                                final_selection[i] = flush_selection[i];
-                            }
-                        }
-
-                        // If we have a straight in our hand
-                        if (hand_type == STRAIGHT || hand_type == STRAIGHT_FLUSH || hand_type == ROYAL_FLUSH) {
-                            bool straight_selection[MAX_HAND_SIZE] = {false};
-                            find_straight_in_played_cards(played, played_top, is_shortcut_joker_active(), min_len, straight_selection);
-                            // Add the results into the final selection
-                            for (int i = 0; i <= played_top; i++) {
-                                final_selection[i] = final_selection[i] || straight_selection[i];
-                            }
-                            // If Four Fingers is active, pairs can happen in a valid straight
-                            // If Four Fingers is not active, pairs are impossible so this will not affect things
-                            select_paired_cards_in_hand(played, played_top, final_selection);
-                        }
-
-                        // Finally, set mark the cards as selected based final_selection
-                        for (int i = 0; i <= played_top; i++) {
-                            if (final_selection[i]) {
-                                card_object_set_selected(played[i], true);
-                            }
-                        }
+                        select_flush_and_straight_cards_in_played_hand();
                         break;
                         // ELSE FALL THROUGH
                     case FULL_HOUSE:
@@ -1988,11 +2041,8 @@ static void cards_in_hand_update_loop(bool* discarded_card, int* played_selectio
                         /* FALL THROUGH */
                     case FLUSH_HOUSE:
                         /* FALL THROUGH */
-                    case FLUSH_FIVE: // Select all played cards in the hand (This is functionally identical as the above hand types)
-                        for (int i = 0; i <= played_top; i++)
-                        {
-                            card_object_set_selected(played[i], true);
-                        }
+                    case FLUSH_FIVE: // Select all played cards in the hand
+                        select_all_five_cards_in_played_hand();
                         break;
                     }
                 }
@@ -2013,6 +2063,8 @@ static void cards_in_hand_update_loop(bool* discarded_card, int* played_selectio
 
 static void played_cards_update_loop(bool* discarded_card, int* played_selections, bool* sound_played)
 {
+    // TODO: Break this function up into smaller ones.
+
     // So this one is a bit fucking weird because I have to work kinda backwards for everything because of the order of the pushed cards from the hand to the play stack
     // (also crazy that the company that published Balatro is called "Playstack" and this is a play stack, but I digress)
     for (int i = 0; i <= played_top; i++)

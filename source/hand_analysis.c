@@ -225,7 +225,6 @@ int find_flush_in_played_cards(CardObject** played, int top, int min_len, bool* 
     return 0;
 }
 
-
 // Returns the number of cards in the best straight or 0 if no straight of min_len is found, marks as true them in out_selection[].
 // This is mostly from Google Gemini
 int find_straight_in_played_cards(CardObject** played, int top, bool shortcut_active, int min_len, bool* out_selection) {
@@ -233,7 +232,7 @@ int find_straight_in_played_cards(CardObject** played, int top, bool shortcut_ac
     for (int i = 0; i <= top; i++) out_selection[i] = false;
 
     // --- Setup for Backtracking DP ---
-    u8 dp[NUM_RANKS] = {0};
+    u8 longest_straight_at[NUM_RANKS] = {0};
     int parent[NUM_RANKS];
     for(int i=0; i<NUM_RANKS; i++) parent[i] = -1;
 
@@ -246,25 +245,29 @@ int find_straight_in_played_cards(CardObject** played, int top, bool shortcut_ac
 
     // --- Run DP to find longest straight ---
     // This is nearly identical to hand_contains_straight() logic
+    // TODO: Consolidate functions to avoid code duplication? 
+    // Might cost performance because this does a little more
     int ace_low_len = ranks[ACE] ? 1 : 0;
     for (int i = 0; i < NUM_RANKS; i++) {
         if (ranks[i] > 0) {
             int prev1 = 0, prev2 = 0;
-            int p1 = -1, p2 = -1;
+            int parent1 = -1, parent2 = -1;
 
             if (shortcut_active) {
-                if (i == TWO) { prev1 = ace_low_len; p1 = ACE; }
-                else if (i == THREE) { prev1 = dp[TWO]; p1 = TWO; prev2 = ace_low_len; p2 = ACE; }
-                else if (i == ACE) { prev1 = dp[KING]; p1 = KING; prev2 = dp[QUEEN]; p2 = QUEEN; }
-                else { prev1 = dp[i-1]; p1 = i-1; if (i > 1) { prev2 = dp[i-2]; p2 = i-2; }}
+                if (i == TWO) { prev1 = ace_low_len; parent1 = ACE; }
+                else if (i == THREE) { prev1 = longest_straight_at[TWO]; parent1 = TWO; prev2 = ace_low_len; parent2 = ACE; }
+                else if (i == ACE) { prev1 = longest_straight_at[KING]; parent1 = KING; prev2 = longest_straight_at[QUEEN]; parent2 = QUEEN; }
+                else { prev1 = longest_straight_at[i-1]; parent1 = i-1; if (i > 1) { prev2 = longest_straight_at[i-2]; parent2 = i-2; }}
             } else {
-                if (i == TWO) { prev1 = ace_low_len; p1 = ACE; }
-                else if (i == ACE) { prev1 = dp[KING]; p1 = KING; }
-                else { prev1 = dp[i-1]; p1 = i-1; }
+                if (i == TWO) { prev1 = ace_low_len; parent1 = ACE; }
+                else if (i == ACE) { prev1 = longest_straight_at[KING]; parent1 = KING; }
+                else { prev1 = longest_straight_at[i-1]; parent1 = i-1; }
             }
 
-            if(prev1 >= prev2) { dp[i] = 1 + prev1; parent[i] = p1; }
-            else { dp[i] = 1 + prev2; parent[i] = p2; }
+            // Parallels longest_short_cut_at[i] = 1 + max(prev_len1, prev_len2);
+            // in hand_contains_straight()
+            if(prev1 >= prev2) { longest_straight_at[i] = 1 + prev1; parent[i] = parent1; }
+            else { longest_straight_at[i] = 1 + prev2; parent[i] = parent2; }
         }
     }
 
@@ -272,8 +275,8 @@ int find_straight_in_played_cards(CardObject** played, int top, bool shortcut_ac
     int best_len = 0;
     int end_rank = -1;
     for (int i = 0; i < NUM_RANKS; i++) {
-        if (dp[i] >= best_len) {
-            best_len = dp[i];
+        if (longest_straight_at[i] >= best_len) {
+            best_len = longest_straight_at[i];
             end_rank = i;
         }
     }
@@ -320,7 +323,7 @@ void select_paired_cards_in_hand(CardObject** played, int played_top, bool* sele
     // If no ranks were selected initially, nothing to do
     if (!any_selected_rank) return;
 
-    // Mark any unselected card that shares a rank with the selected ranks
+    // Add any unselected card to the selection if if shares a rank with the selected ranks
     for (int i = 0; i <= played_top; i++) {
         if (played[i] && played[i]->card && !selection[i]) {
             if (rank_selected[played[i]->card->rank]) {
