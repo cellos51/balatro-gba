@@ -306,21 +306,26 @@ int find_straight_in_played_cards(CardObject** played, int top, bool shortcut_ac
 // This is used for the special case in "Four Fingers" where you can add a pair into a straight
 // (e.g. AA234 should score all 5 cards)
 void select_paired_cards_in_hand(CardObject** played, int played_top, bool* selection) {
-    bool selection_made;
-    do {
-        selection_made = false;
-        for (int i = 0; i <= played_top; i++) {
-            if (played[i] && played[i]->card && !selection[i]) { // null check
-                for (int j = 0; j <= played_top; j++) {
-                    if (selection[j] && played[j] && played[j]->card && // null check
-                        played[i]->card->rank == played[j]->card->rank
-                    ) {
-                        selection[i] = true;
-                        selection_made = true;
-                        break;
-                    }
-                }
+    // Build a set of ranks that are already selected
+    bool rank_selected[NUM_RANKS] = {0};
+    bool any_selected_rank = false;
+
+    for (int i = 0; i <= played_top; i++) {
+        if (selection[i] && played[i] && played[i]->card) {
+            rank_selected[played[i]->card->rank] = true;
+            any_selected_rank = true;
+        }
+    }
+
+    // If no ranks were selected initially, nothing to do
+    if (!any_selected_rank) return;
+
+    // Mark any unselected card that shares a rank with the selected ranks
+    for (int i = 0; i <= played_top; i++) {
+        if (played[i] && played[i]->card && !selection[i]) {
+            if (rank_selected[played[i]->card->rank]) {
+                selection[i] = true;
             }
         }
-    } while (selection_made);
+    }
 }
