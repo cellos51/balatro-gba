@@ -10,6 +10,10 @@
 #define MAX_CARD_SCORE_STR_LEN (MAX_CARD_SCORE_DIGITS + 1) // For the '+' or 'X'
 #define FRAMES(x) (((x) + game_speed - 1) / game_speed)
 
+ // TODO: Can make these dynamic to support interest-related jokers and vouchers
+#define MAX_INTEREST 5 
+#define INTEREST_PER_5 1
+
 // TODO: Turn into enum?
 #define BG_ID_CARD_SELECTING 1
 #define BG_ID_CARD_PLAYING 2
@@ -49,7 +53,8 @@ enum HandState
 enum PlayState
 {
     PLAY_PLAYING,
-    PLAY_SCORING,
+    PLAY_SCORING_CARDS,
+    PLAY_SCORING_JOKERS,
     PLAY_ENDING,
     PLAY_ENDED
 };
@@ -100,6 +105,7 @@ int             get_hand_top(void);
 int             hand_get_size(void);
 CardObject**    get_played_array(void);
 int             get_played_top(void);
+int             get_scored_card_index(void);
 List*           get_jokers(void);
 bool            is_joker_owned(int joker_id);
 bool            card_is_face(Card *card);

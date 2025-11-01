@@ -1,0 +1,43 @@
+name: Deploy Nightly
+
+permissions:
+  contents: write
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # run at 2 AM UTC
+  workflow_dispatch:
+
+jobs:
+  build-job:
+    name: Run Build ROM Workflow
+    uses: ./.github/workflows/build_ci_workflow.yml
+    with:
+      upload-build-artifact: true
+
+  nightly:
+    name: Deploy nightly
+    strategy:
+      fail-fast: false
+    runs-on: ubuntu-latest
+    needs: build-job
+    steps:
+      - name: Download the build output
+        uses: actions/download-artifact@v5
+        with:
+          name: build-out
+          path: build
+
+      - name: Package Release
+        run: mv build/balatro-gba.gba build/balatro-gba_nightly_$(date +'%+4Y%m%d')_$(cat build/githash.txt).gba && zip release.zip build/*.gba
+
+      - name: Deploy release
+        uses: WebFreak001/deploy-nightly@v3.2.0
+        with:
+          upload_url: https://uploads.github.com/repos/cellos51/balatro-gba/releases/258698380/assets{?name,label}
+          release_id: 258698380
+          asset_path: ./release.zip # path to archive to upload
+          asset_name: nightly-gbalatro-$$.zip # name to upload the release as, use $$ to insert date (YYYYMMDD) and 6 letter commit hash
+          asset_content_type: application/zip
+          max_releases: 7 
+          ignore_hash: false # Only upload unique versions

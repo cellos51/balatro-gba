@@ -112,7 +112,7 @@ void main_bg_se_move_rect_1_tile_vert(Rect se_rect, int direction)
     main_bg_se_copy_or_move_rect_1_tile_vert(se_rect, direction, true);
 }
 
-void main_bg_se_copy_rect(Rect se_rect, BG_POINT pos)
+void main_bg_se_copy_rect(Rect se_rect, BG_POINT dest_pos)
 {
     if (se_rect.left > se_rect.right || se_rect.top > se_rect.bottom)
         return;
@@ -136,7 +136,7 @@ void main_bg_se_copy_rect(Rect se_rect, BG_POINT pos)
     // Copy the tilemap to the new rect position
     for (int sy = 0; sy < height; sy++)
     {
-        memcpy16(&se_mat[MAIN_BG_SBB][pos.y + sy][pos.x],
+        memcpy16(&se_mat[MAIN_BG_SBB][dest_pos.y + sy][dest_pos.x],
                  &tile_map[sy][0],
                  width);
     }

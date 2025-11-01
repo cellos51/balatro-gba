@@ -15,9 +15,9 @@
 #define CARD_STARTING_LAYER 0
 
 // Card suits
-#define HEARTS 0
+#define DIAMONDS 0
 #define CLUBS 1
-#define DIAMONDS 2
+#define HEARTS 2
 #define SPADES 3
 #define NUM_SUITS 4
 

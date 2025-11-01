@@ -190,6 +190,8 @@ static enum BlindState blinds[BLIND_TYPE_MAX] =
 static int blind_reward = 0;
 static int hand_reward = 0;
 static int interest_reward = 0;
+static int interest_to_count = 0;
+static int interest_start_time = UNDEFINED;
 
 // Red deck default (can later be moved to a deck.h file or something)
 static int max_hands = 4;
@@ -208,10 +210,18 @@ static FIXED lerped_temp_score = 0;
 
 static int chips = 0;
 static int mult = 0;
+static bool retrigger = false;
 
 static int hand_size = 8; // Default hand size is 8
 static int cards_drawn = 0;
 static int hand_selections = 0;
+
+// Keeping track of cards scored
+static int scored_card_index = 0;
+
+// Keeping track of what Jokers are scored at each step
+static int joker_scored_index = 0;
+static int joker_round_end_index = 0;
 
 static int selection_x = 0;
 static int selection_y = 0;
@@ -306,11 +316,13 @@ static inline void reset_top_left_panel_bottom_row()
 }
 
 // get-functions, for other files to view game state (mainly for jokers)
-CardObject **get_hand_array(void) {
+CardObject **get_hand_array(void)
+{
     return hand;
 }
 
-int get_hand_top(void) {
+int get_hand_top(void)
+{
     return hand_top;
 }
 
@@ -319,19 +331,28 @@ int hand_get_size(void)
     return hand_top + 1;
 }
 
-CardObject **get_played_array(void) {
+CardObject **get_played_array(void)
+{
     return played;
 }
 
-int get_played_top(void) {
+int get_played_top(void)
+{
     return played_top;
 }
 
-List *get_jokers(void) {
+int get_scored_card_index(void)
+{
+    return scored_card_index;
+}
+
+List *get_jokers(void)
+{
     return jokers;
 }
 
-bool is_joker_owned(int joker_id) {
+bool is_joker_owned(int joker_id)
+{
     for (int k = 0; k < list_get_size(jokers); k++)
     {
         JokerObject *joker = list_get(jokers, k);
@@ -418,6 +439,7 @@ int get_money(void)
     return money;
 }
 
+
 // Consts
 
 // Rects                                       left     top     right   bottom
@@ -431,7 +453,10 @@ static const Rect POP_MENU_ANIM_RECT        = {9,       7,      24,     31 };
 // This is because when popping, the target position is blank so we just animate 
 // the whole rect so we don't have to track its position
 
-static const Rect SINGLE_BLIND_SELECT_RECT  = {9,       7,      13,     32 };
+static const Rect SINGLE_BLIND_SELECT_RECT  = {9,       7,      13,     31 };
+static const Rect BLIND_SKIP_BTN_GRAY_RECT  = {0,       24,     4,      27 };
+static const Rect BLIND_SKIP_BTN_PREANIM_DEST_RECT = {9,29,     19,     31 };
+// preanim - pre-animation rects for before the pop-up animation
 
 static const Rect HAND_BG_RECT_SELECTING    = {9,       11,     24,     17 };
 // TODO: Currently unused, remove?
@@ -483,6 +508,8 @@ static const Rect ROUND_END_BLIND_REQ_RECT  = {104,     96,     136,       UNDEF
 static const Rect ROUND_END_BLIND_REWARD_RECT = { 168,  96,     UNDEFINED, UNDEFINED };
 static const Rect ROUND_END_NUM_HANDS_RECT  = {88,      116,    UNDEFINED, UNDEFINED };
 static const Rect HAND_REWARD_RECT          = {168,     UNDEFINED, UNDEFINED, UNDEFINED };
+static const Rect ROUND_END_INTEREST_RECT   = {88,      126,    UNDEFINED, UNDEFINED };
+static const Rect INTEREST_REWARD_RECT      = {168,     UNDEFINED, UNDEFINED, UNDEFINED };
 static const Rect CASHOUT_RECT              = {88,      72,     UNDEFINED, UNDEFINED };
 static const Rect SHOP_REROLL_RECT          = {88,      96,     UNDEFINED, UNDEFINED };
 static const Rect GAME_LOSE_MSG_TEXT_RECT   = {104,     72,     UNDEFINED, UNDEFINED};
@@ -538,8 +565,10 @@ static const BG_POINT MAIN_MENU_ACE_T       = {88,      26};
 #define TM_END_DISPLAY_FIN_BLIND 30
 #define TM_END_DISPLAY_SCORE_MIN 4
 #define TM_ELLIPSIS_PRINT_MAX_TM 16
-#define TM_DISPLAY_REWARDS_CONT_WAIT 30
-#define TM_HAND_REWARD_INCR_WAIT 45
+#define TM_REWARD_INCR_INTERVAL 20
+#define TM_REWARD_DISPLAY_INTERVAL 15
+#define TM_DISPLAY_REWARDS_CONT_WAIT TM_ELLIPSIS_PRINT_MAX_TM + TM_REWARD_DISPLAY_INTERVAL
+#define TM_HAND_REWARD_INCR_WAIT TM_DISPLAY_REWARDS_CONT_WAIT + TM_REWARD_DISPLAY_INTERVAL
 #define TM_DISMISS_ROUND_END_TM 20
 #define TM_CREATE_SHOP_ITEMS_WAIT 1
 #define TM_SHIFT_SHOP_ICON_WAIT 7
@@ -549,6 +578,8 @@ static const BG_POINT MAIN_MENU_ACE_T       = {88,      26};
 #define TM_DISP_BLIND_PANEL_START 1
 #define TM_BLIND_SELECT_START 1
 #define TM_END_ANIM_SEQ 12
+
+
 
 // Palette IDs
 #define PLAY_HAND_BTN_SELECTED_BORDER_PID 1
@@ -675,7 +706,8 @@ enum HandType hand_get_type()
         res_hand_type = FLUSH;
 
     // Check for straight
-    if (hand_contains_straight(ranks)) {
+    if (hand_contains_straight(ranks))
+    {
         if (res_hand_type == FLUSH)
             res_hand_type = STRAIGHT_FLUSH;
         else
@@ -703,7 +735,8 @@ enum HandType hand_get_type()
         return FOUR_OF_A_KIND;
     }
 
-    if (n_of_a_kind == 3 && hand_contains_full_house(ranks)) {
+    if (n_of_a_kind == 3 && hand_contains_full_house(ranks))
+    {
         return FULL_HOUSE;
     }
 
@@ -718,12 +751,15 @@ enum HandType hand_get_type()
         return STRAIGHT;
     }
 
-    if (n_of_a_kind == 3) {
+    if (n_of_a_kind == 3)
+    {
         return THREE_OF_A_KIND;
     }
 
-    if (n_of_a_kind == 2) {
-        if (hand_contains_two_pair(ranks)) {
+    if (n_of_a_kind == 2)
+    {
+        if (hand_contains_two_pair(ranks))
+        {
             return TWO_PAIR;
         }
         return PAIR;
@@ -733,7 +769,8 @@ enum HandType hand_get_type()
 }
 
 // Returns true if the card is *considered* a face card
-bool card_is_face(Card *card) {
+bool card_is_face(Card *card)
+{
     // Card is a face card, or Pareidolia is present
     return (
         card->rank == JACK  ||
@@ -885,39 +922,35 @@ void change_background(int id)
 
         for (int i = 0; i < BLIND_TYPE_MAX; i++)
         {
-            if (blinds[i] != BLIND_STATE_CURRENT &&
-                (i == BLIND_TYPE_SMALL || i == BLIND_TYPE_BIG)) // Make the skip button gray
+            Rect curr_blind_rect = SINGLE_BLIND_SELECT_RECT;
+
+            // There's no gap between them
+            curr_blind_rect.left += i * rect_width(&SINGLE_BLIND_SELECT_RECT);
+            curr_blind_rect.right += i * rect_width(&SINGLE_BLIND_SELECT_RECT);
+
+            if (blinds[i] != BLIND_STATE_CURRENT && (i == BLIND_TYPE_SMALL || i == BLIND_TYPE_BIG)) // Make the skip button gray
             {
-                // TODO: Switch all the copies here to use main_bg_se_copy_rect()
-                // Note, this is difficult as the tiles to copy are not aligned.
-                int x_from = 0;
-                int y_from = 24 + (i * 4);
+                BG_POINT skip_blind_btn_pos_dest = { BLIND_SKIP_BTN_PREANIM_DEST_RECT.left, BLIND_SKIP_BTN_PREANIM_DEST_RECT.top };
+                skip_blind_btn_pos_dest.x = curr_blind_rect.left;
 
-                int x_to = 9 + (i * 5);
-                int y_to = 29;
+                Rect skip_blind_btn_rect_src = BLIND_SKIP_BTN_GRAY_RECT;
+                skip_blind_btn_rect_src.top += i * rect_height(&BLIND_SKIP_BTN_GRAY_RECT);
+                skip_blind_btn_rect_src.bottom += i * rect_height(&BLIND_SKIP_BTN_GRAY_RECT);
 
-                for (int j = 0; j < BLIND_TYPE_MAX; j++)
-                {
-                    memcpy16(&se_mem[MAIN_BG_SBB][x_to + 32 * y_to], &se_mem[MAIN_BG_SBB][x_from + 32 * y_from], 5);
-                    y_from++;
-                    y_to++;
-                }
+                main_bg_se_copy_rect(skip_blind_btn_rect_src, skip_blind_btn_pos_dest);
             }
 
-            switch(blinds[i]) {
+            switch(blinds[i])
+            {
                 case BLIND_STATE_CURRENT: // Raise the blind panel up a bit
                 {
+                    // TODO: Replace copies with main_bg_se_copy_rect() of named rects
                     int x_from = 0;
                     int y_from = 27;
 
-                    Rect blind_rect = SINGLE_BLIND_SELECT_RECT;
+                    main_bg_se_copy_rect_1_tile_vert(curr_blind_rect, SE_UP);
 
-                    // There's no gap between them
-                    blind_rect.left += i * rect_width(&SINGLE_BLIND_SELECT_RECT);
-                    blind_rect.right += i * rect_width(&SINGLE_BLIND_SELECT_RECT);
-                    main_bg_se_copy_rect_1_tile_vert(blind_rect, SE_UP);
-
-                    int x_to = blind_rect.left;
+                    int x_to = curr_blind_rect.left;
                     int y_to = 31;
 
                     if (i == BLIND_TYPE_BIG)
@@ -943,7 +976,7 @@ void change_background(int id)
                     int x_from = 0;
                     int y_from = 20;
 
-                    int x_to = 10 + (i * 5);
+                    int x_to = 10 + (i * rect_width(&SINGLE_BLIND_SELECT_RECT));
                     int y_to = 20;
 
                     memcpy16(&se_mem[MAIN_BG_SBB][x_to + 32 * y_to], &se_mem[MAIN_BG_SBB][x_from + 32 * y_from], 3);
@@ -2061,6 +2094,25 @@ static void cards_in_hand_update_loop(bool* discarded_card, int* played_selectio
     }
 }
 
+// returns true if a joker was scored, false otherwise
+static bool check_and_score_joker_for_event(int* iteration_start, Card* played_card, enum JokerEvent joker_event)
+{
+    for (int k = *iteration_start; k < list_get_size(jokers); k++)
+    {
+        (*iteration_start)++;
+        JokerObject *joker = list_get(jokers, k);
+        if (joker_object_score(joker, played_card, joker_event, &chips, &mult, &money, &retrigger))
+        {
+            display_chips(chips);
+            display_mult(mult);
+            display_money(money);
+
+            return true;
+        }
+    }
+    return false;
+}
+
 static void played_cards_update_loop(bool* discarded_card, int* played_selections, bool* sound_played)
 {
     // TODO: Break this function up into smaller ones.
@@ -2086,13 +2138,14 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
             switch (play_state)
             {
                 case PLAY_PLAYING:
+
                     if (i == 0 && (timer % FRAMES(10) == 0 || !card_object_is_selected(played[played_top - *played_selections])) && timer > FRAMES(40))
                     {
                         (*played_selections)--;
 
                         if (*played_selections == 0)
                         {
-                            play_state = PLAY_SCORING;
+                            play_state = PLAY_SCORING_CARDS;
                             timer = TM_ZERO;
                         }
                     }
@@ -2102,96 +2155,80 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                         played_y -= int2fx(10);
                     }
                     break;
-                case PLAY_SCORING:
+                
+                case PLAY_SCORING_CARDS:
+
                     if (i == 0 && (timer % FRAMES(30) == 0) && timer > FRAMES(40))
                     {
-                        // So pretend "played_selections" is now called "scored_cards" and it counts the number of cards that have been scored
-                        int scored_cards = 0;
-                        for (int j = 0; j <= played_top; j++)
+
+                        // We are about to score played Cards, then Jokers.
+                        // If we need to retrigger, then we have scored a card previously
+                        // and thus have incremented scored_card_index by 1.
+                        // Take out this increment to score the previous card again
+                        // and reset the scored Joker index to 0 to go back to the beginning
+                        if (retrigger)
+                        {
+                            retrigger = false;
+                            scored_card_index--;
+                            (*played_selections)--;
+                            joker_scored_index = 0;
+                        }
+
+                        // So pretend "played_selections" is now called "scored_card_index" and it counts the number of cards that have been scored
+                        for (int j = scored_card_index; j <= played_top+1; j++) // allow past played_top to score jokers for last played card
                         {
                             tte_erase_rect_wrapper(PLAYED_CARDS_SCORES_RECT);
 
+                            // Trigger all Jokers after each card scored
                             if (*played_selections > 0)
                             {
-                                for (int k = 0; k < list_get_size(jokers); k++)
+                                if (check_and_score_joker_for_event(&joker_scored_index, played[*played_selections - 1]->card, JOKER_EVENT_ON_CARD_SCORED))
                                 {
-                                    JokerObject *joker = list_get(jokers, k);
-                                    if (joker_object_score(joker, played[*played_selections - 1]->card, &chips, &mult, NULL, &money, NULL)) // NULLs aren't implemented yet
-                                    {
-                                        display_chips(chips);
-                                        display_mult(mult);
-                                        display_money(money);
-
-                                        return; 
-                                    }
+                                    return;
+                                }
+                            
+                                // Trigger all Jokers that have an effect when a card finishes scoring
+                                // (e.g. retriggers) after activating all the other scored_card Jokers normally
+                                joker_scored_index = 0;
+                                if (check_and_score_joker_for_event(&joker_scored_index, played[*played_selections - 1]->card, JOKER_EVENT_ON_CARD_SCORED_END))
+                                {
+                                    return;
                                 }
                             }
 
-                            if (card_object_is_selected(played[j]))
+                            // Score card
+
+                            scored_card_index++; // Count the number of cards that have been scored
+
+                            if (j <= played_top && card_object_is_selected(played[j]))
                             {
-                                scored_cards = j + 1; // Count the number of cards that have been scored
-                                if (scored_cards > *played_selections)
-                                {
-                                    for (int k = 0; k < list_get_size(jokers); k++)
-                                    {
-                                        JokerObject *joker = list_get(jokers, k);
-                                        if (joker != NULL)
-                                        {
-                                            joker->joker->processed = false; // Reset the joker's processed state for the next score
-                                        }
-                                    }
+                                tte_set_pos(fx2int(played[j]->sprite_object->x) + 8, SCORED_CARD_TEXT_Y); // Offset of 16 pixels to center the text on the card
+                                tte_set_special(TTE_BLUE_PB * TTE_SPECIAL_PB_MULT_OFFSET); // Set text color to blue from background memory
 
-                                    tte_set_pos(fx2int(played[j]->sprite_object->x) + 8, SCORED_CARD_TEXT_Y); // Offset of 16 pixels to center the text on the card
-                                    tte_set_special(0xD000); // Set text color to blue from background memory
+                                // Write the score to a character buffer variable
+                                char score_buffer[INT_MAX_DIGITS + 2]; // for '+' and null terminator
+                                snprintf(score_buffer, sizeof(score_buffer), "+%d", card_get_value(played[j]->card));
+                                tte_write(score_buffer);
 
-                                    // Write the score to a character buffer variable
-                                    char score_buffer[INT_MAX_DIGITS + 2]; // for '+' and null terminator
-                                    snprintf(score_buffer, sizeof(score_buffer), "+%d", card_get_value(played[j]->card));
-                                    tte_write(score_buffer);
+                                *played_selections = scored_card_index;
+                                card_object_shake(played[j], SFX_CARD_SELECT);
 
-                                    *played_selections = scored_cards;
-                                    card_object_shake(played[j], SFX_CARD_SELECT);
+                                // Relocated card scoring logic here
+                                chips += card_get_value(played[j]->card);
+                                display_chips(chips);
 
-                                    // Relocated card scoring logic here
-                                    chips += card_get_value(played[j]->card);
-                                    display_chips(chips);
+                                // Allow Joker scoring
+                                joker_scored_index = 0;
 
-                                    break;
-                                }
-                            }
-
-                            if (j == played_top && scored_cards == *played_selections) // Check if it's the last card 
-                            {
-                                tte_erase_rect_wrapper(PLAYED_CARDS_SCORES_RECT);
-
-                                for (int k = 0; k <= list_get_size(jokers); k++) // Independent joker scoring loop
-                                {
-                                    JokerObject *joker = list_get(jokers, k);
-                                    if (joker_object_score(joker, NULL, &chips, &mult, NULL, &money, NULL)) // NULLs aren't implemented yet
-                                    {
-                                        display_chips(chips);
-                                        display_mult(mult);
-                                        display_money(money);
-
-                                        return; // Returning was just the easiest way to break out of the loop
-                                    }
-                                }
-
-                                for (int k = 0; k <= list_get_size(jokers); k++)
-                                {
-                                    JokerObject *joker = list_get(jokers, k);
-                                    if (joker != NULL)
-                                    {
-                                        joker->joker->processed = false; // Reset the joker's processed state for the next round
-                                    }
-                                }
-
-                                play_state = PLAY_ENDING;
-                                timer = TM_ZERO;
-                                *played_selections = played_top + 1; // Reset the played selections to the top of the played stack
-                                break;
+                                return;
                             }
                         }
+
+                        // advance state after going past the last card (exited the loop without returning)
+                        play_state = PLAY_SCORING_JOKERS;
+                        joker_scored_index = 0;
+                        scored_card_index = 0; // reuse this variable for held cards
+                        return;
                     }
 
                     if (card_object_is_selected(played[i]))
@@ -2199,7 +2236,40 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                         played_y -= int2fx(10);
                     }
                     break;
+                            
+                // Score Jokers normally
+                case PLAY_SCORING_JOKERS:
+
+                    if (i == 0 && (timer % FRAMES(30) == 0) && timer > FRAMES(40))
+                    {
+
+                        tte_erase_rect_wrapper(PLAYED_CARDS_SCORES_RECT);
+
+                        if (check_and_score_joker_for_event(&joker_scored_index, NULL, JOKER_EVENT_INDEPENDENT))
+                        {
+                            return;
+                        }
+
+                        // Trigger hand end effect for all jokers once they are done scoring
+                        if (check_and_score_joker_for_event(&joker_round_end_index, NULL, JOKER_EVENT_ON_HAND_SCORED_END))
+                        {
+                            return;
+                        }
+
+                        play_state = PLAY_ENDING;
+                        timer = TM_ZERO;
+                        *played_selections = played_top + 1; // Reset the played selections to the top of the played stack
+                        break;
+                    }
+                
+                    if (card_object_is_selected(played[i]))
+                    {
+                        played_y -= int2fx(10);
+                    }
+                    break;
+
                 case PLAY_ENDING: // This is the reverse of PLAY_PLAYING. The cards get reset back to their neutral position sequentially
+
                     if (i == 0 && (timer % FRAMES(10) == 0 || !card_object_is_selected(played[played_top - *played_selections])) && timer > FRAMES(40))
                     {
                         (*played_selections)--;
@@ -2216,7 +2286,9 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                         played_y -= int2fx(10);
                     }
                     break;
+
                 case PLAY_ENDED: // Basically a copy of HAND_DISCARD
+
                     if (!*discarded_card && played[i] != NULL && timer > FRAMES(40))
                     {
                         played_x = int2fx(240);
@@ -2253,6 +2325,9 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                                 hand_selections = 0;
                                 *played_selections = 0;
                                 played_top = -1; // Reset the played stack
+                                scored_card_index = 0;
+                                joker_scored_index = 0;
+                                joker_round_end_index = 0;
                                 timer = TM_ZERO;
                                 break; // Break out of the loop to avoid accessing an invalid index
                             }
@@ -2295,20 +2370,6 @@ static void game_playing_ui_text_update()
     }
 }
 
-static void game_round_end_cashout()
-{
-    money += hands + blind_get_reward(current_blind); // Reward the player
-    display_money(money);
-
-    hands = max_hands; // Reset the hands to the maximum
-    discards = max_discards; // Reset the discards to the maximum
-    display_hands(hands); // Set the hands display
-    display_discards(discards); // Set the discards display
-
-    score = 0;
-    display_score(score); // Set the score display
-}
-
 static void game_playing_on_update()
 {
     // Background logic (thissss might be moved to the card'ssss logic later. I'm a sssssnake)
@@ -2337,6 +2398,28 @@ static void game_playing_on_update()
 	played_cards_update_loop(&discarded_card, &played_selections, &sound_played);
     
     game_playing_ui_text_update();
+}
+
+static int calculate_interest_reward()
+{
+    int reward = (money / 5) * INTEREST_PER_5; 
+    if (reward > MAX_INTEREST)
+        reward = MAX_INTEREST; 
+    return reward;
+}
+
+static void game_round_end_cashout()
+{
+    money += hands + blind_get_reward(current_blind) + calculate_interest_reward(); // Reward the player
+    display_money(money);
+
+    hands = max_hands; // Reset the hands to the maximum
+    discards = max_discards; // Reset the discards to the maximum
+    display_hands(hands); // Set the hands display
+    display_discards(discards); // Set the discards display
+
+    score = 0;
+    display_score(score); // Set the score display
 }
 
 static void game_round_end_on_exit()
@@ -2372,6 +2455,9 @@ static void game_round_end_start()
         timer = TM_ZERO; // Reset the timer
         blind_reward = blind_get_reward(current_blind);
         hand_reward = hands;
+        interest_reward = calculate_interest_reward();
+        interest_to_count = interest_reward;
+        interest_start_time = UNDEFINED;
     }
 }
 
@@ -2485,22 +2571,19 @@ static void game_round_end_panel_exit()
 static void game_round_end_display_rewards()
 {
     int hand_y = 0;
-    
-    // TODO: Implement interest
-    //int interest_y = 0;
-    
+    int interest_y = 0;
+
     if (hands > 0)
     {
         hand_y = 1;
     }
-    
-    // TODO: implement interest
-    // if (interest > 0)
-    // {
-    //     interest_y = 1 + hand_y;
-    // }
-    
-    if (hand_reward <= 0 && interest_reward <= 0) // Once all rewards are accounted for go to the next state
+
+    if (interest_reward > 0)
+    {
+        interest_y = 1 + hand_y;
+    }
+
+    if (hand_reward <= 0 && interest_to_count <= 0) // Once all rewards are accounted for go to the next state
     {
         timer = TM_ZERO; // Reset the timer
         state_info[game_state].substate = DISPLAY_CASHOUT; // Go to the next state
@@ -2531,11 +2614,33 @@ static void game_round_end_display_rewards()
     
             tte_printf("#{P:%d,%d; cx:0x%X000}%d #{cx:0x%X000}Hands", ROUND_END_NUM_HANDS_RECT.left, ROUND_END_NUM_HANDS_RECT.top, TTE_BLUE_PB,  hand_reward, TTE_WHITE_PB); // Print the hand reward
         }
-        else if (timer > TM_HAND_REWARD_INCR_WAIT && timer % FRAMES(20) == 0) // After 15 frames, every 20 frames, increment the hand reward text until the hand reward variable is depleted
+        else if (timer > TM_HAND_REWARD_INCR_WAIT && timer % FRAMES(TM_REWARD_DISPLAY_INTERVAL) == 0) // After 15 frames, every 20 frames, increment the hand reward text until the hand reward variable is depleted
         {
             int y = (13 + hand_y) * TILE_SIZE;
             hand_reward--;
             tte_printf("#{P:%d, %d; cx:0x%X000}$%d", HAND_REWARD_RECT.left, y, TTE_YELLOW_PB, hands - hand_reward); // Print the hand reward
+            if (hand_reward == 0)
+            {
+                interest_start_time = timer + TM_REWARD_DISPLAY_INTERVAL; // Time to start printing the interest gained
+            }
+        }
+    }
+    else if (timer >= interest_start_time && interest_to_count > 0 && interest_start_time != -1)
+    {
+        if (timer == interest_start_time) // Expand the black part of the panel down by one tile again
+        {
+            Rect single_line_rect = ROUND_END_MENU_RECT;
+            single_line_rect.top = 12 + interest_y;
+            single_line_rect.bottom = single_line_rect.top + 1;
+            main_bg_se_copy_rect_1_tile_vert(single_line_rect, SE_DOWN);
+
+            tte_printf("#{P:%d,%d; cx:0x%X000}%d #{cx:0x%X000}Interest", ROUND_END_INTEREST_RECT.left, ROUND_END_INTEREST_RECT.top, TTE_YELLOW_PB, interest_reward, TTE_WHITE_PB);
+        }
+        else if (timer > interest_start_time + 15 && timer % FRAMES(20) == 0) // After 15 frames, every 20 frames, increment the interest reward text until the interest reward variable is depleted
+        {
+            int y = (13 + interest_y) * TILE_SIZE;
+            interest_to_count--;
+            tte_printf("#{P:%d, %d; cx:0x%X000}$%d", INTEREST_REWARD_RECT.left, y, TTE_YELLOW_PB, interest_reward - interest_to_count);
         }
     }
 }
@@ -2564,14 +2669,17 @@ static void game_round_end_display_cashout()
         BG_POINT bottom_point = {6, 31};
         main_bg_se_fill_rect_with_se(main_bg_se_get_se(bottom_point), bottom_rect);
     
-        tte_printf("#{P:%d, %d; cx:0x%X000}Cash Out: $%d", CASHOUT_RECT.left, CASHOUT_RECT.top, TTE_WHITE_PB, hands + blind_get_reward(current_blind)); // Print the cash out amount
+        int cashout_amount = hands + blind_get_reward(current_blind) + calculate_interest_reward();
+
+        bool omit_space = cashout_amount >= 10;
+        tte_printf("#{P:%d, %d; cx:0x%X000}Cash Out:%s$%d", CASHOUT_RECT.left, CASHOUT_RECT.top, TTE_WHITE_PB, omit_space ? "" : " " , cashout_amount);
     }
     else if (timer > FRAMES(40) && key_hit(SELECT_CARD)) // Wait until the player presses A to cash out
     {
         game_round_end_cashout();
     
         state_info[game_state].substate = DISMISS_ROUND_END_PANEL; // Go to the next state
-        timer = TM_ZERO; // Reset the timer
+        timer = TM_ZERO;
     
         obj_hide(round_end_blind_token->obj); // Hide the blind token object
         tte_erase_rect_wrapper(BLIND_TOKEN_TEXT_RECT); // Erase the blind token text

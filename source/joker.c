@@ -144,7 +144,8 @@ Joker *joker_new(u8 id)
     joker->modifier = BASE_EDITION; // TODO: Make this a parameter
     joker->value = jinfo->base_value + edition_price_lut[joker->modifier];
     joker->rarity = jinfo->rarity;
-    joker->processed = false;
+    joker->data = 0;
+    jinfo->on_joker_created(joker);
 
     return joker;
 }
@@ -155,12 +156,12 @@ void joker_destroy(Joker **joker)
     *joker = NULL;
 }
 
-JokerEffect joker_get_score_effect(Joker *joker, Card *scored_card)
+JokerEffect joker_get_score_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event)
 {
     const JokerInfo *jinfo = get_joker_registry_entry(joker->id);
-    if (!jinfo || jinfo->effect == NULL) return (JokerEffect){0};
+    if (!jinfo || jinfo->joker_effect == NULL) return (JokerEffect){0};
 
-    return jinfo->effect(joker, scored_card);
+    return jinfo->joker_effect(joker, scored_card, joker_event);
 }
 
 int joker_get_sell_value(const Joker* joker)
@@ -248,68 +249,76 @@ void joker_object_shake(JokerObject *joker_object, mm_word sound_id)
     sprite_object_shake(joker_object->sprite_object, sound_id);
 }
 
-bool joker_object_score(JokerObject *joker_object, Card* scored_card, int *chips, int *mult, int *xmult, int *money, bool *retrigger)
+void set_and_shift_text(char* str, int* cursor_pos_x, int color_pb)
 {
-    if (joker_object->joker->processed == true) return false; // If the joker has already been processed, return false
+    tte_set_pos(*cursor_pos_x, JOKER_SCORE_TEXT_Y);
+    tte_set_special(color_pb * TTE_SPECIAL_PB_MULT_OFFSET);
+    tte_write(str);
 
-    JokerEffect joker_effect = joker_get_score_effect(joker_object->joker, scored_card);
+    // + 1 For space
+    const int joker_score_display_offset_px = (MAX_CARD_SCORE_STR_LEN + 1)*TTE_CHAR_SIZE;
+    *cursor_pos_x += joker_score_display_offset_px;
+}
 
-    if (memcmp(&joker_effect, &(JokerEffect){0}, sizeof(JokerEffect)) != 0)
+bool joker_object_score(JokerObject *joker_object, Card* scored_card, enum JokerEvent joker_event, int *chips, int *mult, int *money, bool *retrigger)
+{
+    if (joker_object == NULL)
     {
-        *chips += joker_effect.chips;
-        *mult += joker_effect.mult;
-        *mult *= joker_effect.xmult > 0 ? joker_effect.xmult : 1; // if xmult is zero, DO NOT multiply by it
-        *money += joker_effect.money;
-        // TODO: Retrigger
-
-        const int joker_score_display_offset_px = (MAX_CARD_SCORE_STR_LEN + 1)*TTE_CHAR_SIZE;
-        // + 1 For space
-
-        int cursorPosX = fx2int(joker_object->sprite_object->x) + 8; // Offset of 16 pixels to center the text on the card
-        if (joker_effect.chips > 0)
-        {
-            char score_buffer[INT_MAX_DIGITS + 2]; // For '+' and null terminator
-            tte_set_pos(cursorPosX, JOKER_SCORE_TEXT_Y);
-            tte_set_special(0xD000); // Blue
-            snprintf(score_buffer, sizeof(score_buffer), "+%d", joker_effect.chips);
-            tte_write(score_buffer);
-            cursorPosX += joker_score_display_offset_px;
-        }
-        if (joker_effect.mult > 0)
-        {
-            char score_buffer[INT_MAX_DIGITS + 2];
-            tte_set_pos(cursorPosX, JOKER_SCORE_TEXT_Y);
-            tte_set_special(0xE000); // Red
-            snprintf(score_buffer, sizeof(score_buffer), "+%d", joker_effect.mult);
-            tte_write(score_buffer);
-            cursorPosX += joker_score_display_offset_px;
-        }
-        if (joker_effect.xmult > 0)
-        {
-            char score_buffer[INT_MAX_DIGITS + 2];
-            tte_set_pos(cursorPosX, JOKER_SCORE_TEXT_Y);
-            tte_set_special(0xE000); // Red
-            snprintf(score_buffer, sizeof(score_buffer), "X%d", joker_effect.xmult);
-            tte_write(score_buffer);
-            cursorPosX += joker_score_display_offset_px;
-        }
-        if (joker_effect.money > 0)
-        {
-            char score_buffer[INT_MAX_DIGITS + 2];
-            tte_set_pos(cursorPosX, JOKER_SCORE_TEXT_Y);
-            tte_set_special(0xC000); // Yellow
-            snprintf(score_buffer, sizeof(score_buffer), "+%d", joker_effect.money);
-            tte_write(score_buffer);
-            cursorPosX += joker_score_display_offset_px;
-        }
-
-        joker_object->joker->processed = true; // Mark the joker as processed
-        joker_object_shake(joker_object, SFX_CARD_SELECT); // TODO: Add a sound effect for scoring the joker
-
-        return true;
+        return false;
     }
 
-    return false;
+    JokerEffect joker_effect = joker_get_score_effect(joker_object->joker, scored_card, joker_event);
+
+    if (memcmp(&joker_effect, &(JokerEffect){0}, sizeof(JokerEffect)) == 0)
+    {
+        return false;
+    }
+
+    *chips    += joker_effect.chips;
+    *mult     += joker_effect.mult;
+    *mult     *= joker_effect.xmult > 0 ? joker_effect.xmult : 1; // if xmult is zero, DO NOT multiply by it
+    *money    += joker_effect.money;
+    *retrigger = joker_effect.retrigger;
+    // joker_effect.message will have been set if the Joker had anything custom to say
+
+    int cursorPosX = fx2int(joker_object->sprite_object->x) + 8; // Offset of 16 pixels to center the text on the card
+    if (joker_effect.chips > 0)
+    {
+        char score_buffer[INT_MAX_DIGITS + 2]; // For '+' and null terminator
+        snprintf(score_buffer, sizeof(score_buffer), "+%d", joker_effect.chips);
+        set_and_shift_text(score_buffer, &cursorPosX, TTE_BLUE_PB);
+    }
+    if (joker_effect.mult > 0)
+    {
+        char score_buffer[INT_MAX_DIGITS + 2];
+        snprintf(score_buffer, sizeof(score_buffer), "+%d", joker_effect.mult);
+        set_and_shift_text(score_buffer, &cursorPosX, TTE_RED_PB);
+    }
+    if (joker_effect.xmult > 0)
+    {
+        char score_buffer[INT_MAX_DIGITS + 2];
+        snprintf(score_buffer, sizeof(score_buffer), "X%d", joker_effect.xmult);
+        set_and_shift_text(score_buffer, &cursorPosX, TTE_RED_PB);
+    }
+    if (joker_effect.money > 0)
+    {
+        char score_buffer[INT_MAX_DIGITS + 2];
+        snprintf(score_buffer, sizeof(score_buffer), "+%d", joker_effect.money);
+        set_and_shift_text(score_buffer, &cursorPosX, TTE_YELLOW_PB);
+    }
+    // custom message for Jokers (including retriggers where Jokers will say "Again!")
+    if (joker_effect.message[0] != '\0') // Message is not empty
+    {
+        set_and_shift_text(joker_effect.message, &cursorPosX, TTE_WHITE_PB);
+    }
+    if (joker_effect.expire)
+    {
+        // TODO make Jokers expire
+    }
+
+    joker_object_shake(joker_object, SFX_CARD_SELECT); // TODO: Add a sound effect for scoring the joker
+
+    return true;
 }
 
 void joker_object_set_selected(JokerObject* joker_object, bool selected)

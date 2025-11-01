@@ -33,6 +33,7 @@
 #define TTE_BLUE_PB     13  // 0xD
 #define TTE_RED_PB      14  // 0xE
 #define TTE_WHITE_PB    15  // 0xF
+#define TTE_SPECIAL_PB_MULT_OFFSET 0x1000 //TODO: Change to a better name?
 
 #define TEXT_CLR_YELLOW RGB15(31, 20, 0)    // 0x029F
 #define TEXT_CLR_BLUE   RGB15(0, 18, 31)    // 0x7E40
@@ -113,7 +114,7 @@ void main_bg_se_copy_rect_1_tile_vert(Rect se_rect, int direction);
  * se_rect dimensions are in number of tiles.
  * x and y are the coordinates in number of tiles.
  */
-void main_bg_se_copy_rect(Rect se_rect, BG_POINT pos);
+void main_bg_se_copy_rect(Rect se_rect, BG_POINT dest_pos);
 
 /* Copies a screen entry to a rect in the main background.
  * se_rect dimensions are in number of tiles.
