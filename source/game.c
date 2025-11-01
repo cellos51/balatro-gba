@@ -219,6 +219,7 @@ static int scored_card_index = 0;
 
 // Keeping track of what Jokers are scored at each step
 static int joker_scored_index = 0;
+static int joker_scored_end_index = 0;
 static int joker_round_end_index = 0;
 
 static int selection_x = 0;
@@ -2027,6 +2028,7 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                             scored_card_index--;
                             (*played_selections)--;
                             joker_scored_index = 0;
+                            joker_scored_end_index = 0;
                         }
 
                         // So pretend "played_selections" is now called "scored_card_index" and it counts the number of cards that have been scored
@@ -2035,10 +2037,16 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                             tte_erase_rect_wrapper(PLAYED_CARDS_SCORES_RECT);
 
                             // Trigger all Jokers after each card scored
-
                             if (*played_selections > 0)
                             {
                                 if (check_and_score_joker_for_event(&joker_scored_index, played[*played_selections - 1]->card, JOKER_EVENT_ON_CARD_SCORED))
+                                {
+                                    return;
+                                }
+                            
+                                // Trigger all Jokers that have an effect when a card finishes scoring
+                                // (e.g. retriggers) after triggering all the other Jokers normally
+                                if (check_and_score_joker_for_event(&joker_scored_end_index, played[*played_selections - 1]->card, JOKER_EVENT_ON_CARD_SCORED_END))
                                 {
                                     return;
                                 }
@@ -2067,6 +2075,7 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
 
                                 // Allow Joker scoring
                                 joker_scored_index = 0;
+                                joker_scored_end_index = 0;
 
                                 return;
                             }

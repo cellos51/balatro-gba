@@ -591,7 +591,7 @@ static JokerEffect hanging_chad_joker_effect(Joker *joker, Card *scored_card, en
         // No need to check if this is the first card scored or not
         // p_remaining_retriggers will always reach 0 on the first card, then retrigger
         // will be false and scoring will go onto the next card
-        case JOKER_EVENT_ON_CARD_SCORED:
+        case JOKER_EVENT_ON_CARD_SCORED_END:
             effect.retrigger = (*p_remaining_retriggers > 0);
             *p_remaining_retriggers -= 1;
             if (effect.retrigger)
@@ -807,7 +807,7 @@ static JokerEffect dusk_joker_effect(Joker *joker, Card *scored_card, enum Joker
             *p_last_retriggered_index = UNDEFINED;
             break;
         
-        case JOKER_EVENT_ON_CARD_SCORED:
+        case JOKER_EVENT_ON_CARD_SCORED_END:
             // Only retrigger current card if it's strictly after the last one we retriggered
             if (get_num_hands_remaining() == 0)
             {
@@ -885,7 +885,7 @@ static JokerEffect hack_joker_effect(Joker *joker, Card *scored_card, enum Joker
             *p_last_retriggered_index = UNDEFINED;
             break;
         
-        case JOKER_EVENT_ON_CARD_SCORED:
+        case JOKER_EVENT_ON_CARD_SCORED_END:
             // Works the same way as Dusk, but check what rank the card is
             switch (scored_card->rank)
             {
@@ -935,7 +935,7 @@ static JokerEffect seltzer_joker_effect(Joker *joker, Card *scored_card, enum Jo
             }
             break;
         
-        case JOKER_EVENT_ON_CARD_SCORED:
+        case JOKER_EVENT_ON_CARD_SCORED_END:
             // Works the same way as Dusk, but if it can still trigger
             if (*p_hands_left_until_exp > 0)
             {
@@ -967,7 +967,7 @@ static JokerEffect sock_and_buskin_joker_effect(Joker *joker, Card *scored_card,
             *p_last_retriggered_face_index = UNDEFINED;
             break;
         
-        case JOKER_EVENT_ON_CARD_SCORED:
+        case JOKER_EVENT_ON_CARD_SCORED_END:
             // Works the same way as Dusk, but for face cards
             effect.retrigger = (*p_last_retriggered_face_index < get_scored_card_index() && card_is_face(scored_card));
             if (effect.retrigger)
