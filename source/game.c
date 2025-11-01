@@ -358,6 +358,11 @@ void add_joker(JokerObject *joker_object)
         }
         four_fingers_joker_count++;
     }
+
+    if (joker_object->joker->id == SHORTCUT_JOKER_ID) 
+    {
+        shortcut_joker_count++;
+    }
 }
 
 void remove_held_joker(int joker_idx)
@@ -373,6 +378,11 @@ void remove_held_joker(int joker_idx)
         {
             straight_and_flush_size = STRAIGHT_AND_FLUSH_SIZE_DEFAULT;
         }
+    }
+
+    if (joker_object->joker->id == SHORTCUT_JOKER_ID) 
+    {
+        shortcut_joker_count--;
     }
 
     list_remove_by_idx(jokers, joker_idx);        
