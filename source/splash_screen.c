@@ -4,8 +4,12 @@
 
 #include "graphic_utils.h"
 #include "game.h"
+#include "def_state_info_table.h" // Required for GAME_STATE_DEBUG_SCREEN
 #include "maxmod.h"
 #include "soundbank.h"
+
+// Button combination to activate the debug screen.
+#define DEBUG_SCREEN_ACTIVATION_COMBO (KEY_L | KEY_R | KEY_A | KEY_B)
 
 static const Rect COUNTDOWN_TIMER_RECT = {208, 144, 240, 152};
 static uint timer = 0;
@@ -23,19 +27,26 @@ void splash_screen_on_update()
 {
     timer++;
 
-    if (timer < SPLASH_DURATION_FRAMES)
+    // Check for debug screen activation (L+R+A+B held down).
+    // This check takes priority over the normal splash screen flow.
+    if ((key_curr_state() & DEBUG_SCREEN_ACTIVATION_COMBO) == DEBUG_SCREEN_ACTIVATION_COMBO)
     {
-        tte_erase_rect_wrapper(COUNTDOWN_TIMER_RECT);
-        tte_printf("#{P:%d,%d; cx:0xF000}%d", COUNTDOWN_TIMER_RECT.left, COUNTDOWN_TIMER_RECT.top, 1 + (SPLASH_DURATION_FRAMES - timer) / SPLASH_FPS);
-
-        if (!key_hit(KEY_ANY))
-        {
-            return;
-        }
+        game_change_state(GAME_STATE_DEBUG_SCREEN);
+        tte_erase_screen();
+        return;
     }
 
-    game_change_state(GAME_STATE_MAIN_MENU);
-    tte_erase_screen();
+    // Check for normal transition to main menu (timer expired or any key pressed).
+    if (timer >= SPLASH_DURATION_FRAMES || key_hit(KEY_ANY))
+    {
+        game_change_state(GAME_STATE_MAIN_MENU);
+        tte_erase_screen();
+        return;
+    }
+
+    // If no transition occurred, update the countdown timer on screen.
+    tte_erase_rect_wrapper(COUNTDOWN_TIMER_RECT);
+    tte_printf("#{P:%d,%d; cx:0xF000}%d", COUNTDOWN_TIMER_RECT.left, COUNTDOWN_TIMER_RECT.top, 1 + (SPLASH_DURATION_FRAMES - timer) / SPLASH_FPS);
 }
 
 void splash_screen_on_exit()
