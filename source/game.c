@@ -234,7 +234,6 @@ static List _active_jokers_list;
 static List _discarded_jokers_list;
 
 BITSET_DEFINE(_avail_jokers_bitset, 256)
-
 static List _shop_jokers_list;
 
 // Stacks
@@ -265,6 +264,37 @@ static int straight_and_flush_size = STRAIGHT_AND_FLUSH_SIZE_DEFAULT;
 int get_straight_and_flush_size(void) 
 {
     return straight_and_flush_size;
+}
+
+static inline void _set_shop_joker_avail(int joker_id, bool avail)
+{
+    bitset_set_idx(&_avail_jokers_bitset, joker_id, avail);
+}
+
+__attribute__((unused))
+static inline bool _get_shop_joker_avail(int joker_id)
+{
+    return bitset_get_idx(&_avail_jokers_bitset, joker_id);
+}
+
+static inline int _get_num_shop_jokers_avail(void)
+{
+    return bitset_num_set_bits(&_avail_jokers_bitset);
+}
+
+static inline void _reset_shop_jokers(void)
+{
+    int num_jokers = get_joker_registry_size();
+    bitset_clear(&_avail_jokers_bitset);
+    for(int i = 0; i < num_jokers; i++)
+    {
+        bitset_set_idx(&_avail_jokers_bitset, i, true);
+    }
+}
+
+static inline bool _no_avail_jokers(void)
+{
+    return bitset_is_empty(&_avail_jokers_bitset);
 }
 
 // Played stack
@@ -1343,14 +1373,7 @@ void game_change_state(enum GameState new_game_state)
 
 void jokers_available_to_shop_init()
 {
-    int num_defined_jokers = get_joker_registry_size();
-
-    bitset_clear(&_avail_jokers_bitset);
-    
-    for (intptr_t i = 0; i < num_defined_jokers; i++)
-    {
-        bitset_set_idx(&_avail_jokers_bitset, i, true);
-    }
+    _reset_shop_jokers();
 }
 
 void game_init()
@@ -2700,7 +2723,7 @@ static int game_shop_get_random_joker_idx()
     int joker_rarity = joker_get_random_rarity();
         
     // Now determine how many jokers are available based on the rarity
-    int jokers_avail_size = bitset_num_set_bits(&_avail_jokers_bitset);
+    int jokers_avail_size = _get_num_shop_jokers_avail();
     int matching_indices[jokers_avail_size];
     int match_count = 0;
 
@@ -2738,11 +2761,8 @@ static int game_shop_get_random_joker_idx()
 static void game_shop_create_items()
 {
     tte_erase_rect_wrapper(SHOP_PRICES_TEXT_RECT);
-    if (bitset_is_empty(&_avail_jokers_bitset))
-    {
-        // No jokers to create
-        return;
-    }
+
+    if (_no_avail_jokers()) return;
 
     list_destroy(&_shop_jokers_list);
     _shop_jokers_list = list_new();
@@ -2751,14 +2771,14 @@ static void game_shop_create_items()
     {
         intptr_t joker_id = 0;
         #ifdef TEST_JOKER_ID0 // Allow defining an ID for a joker to always appear in shop and be tested
-        if (bitset_get_idx(&_avail_jokers_bitset, TEST_JOKER_ID0))
+        if (_get_shop_joker_avail(TEST_JOKER_ID0))
         {
             joker_id = TEST_JOKER_ID0;
         }
         else
         #endif
         #ifdef TEST_JOKER_ID1
-        if (bitset_get_idx(&_avail_jokers_bitset, TEST_JOKER_ID1))
+        if (_get_shop_joker_avail(TEST_JOKER_ID1))
         {
             joker_id = TEST_JOKER_ID1;
         }
@@ -2767,7 +2787,7 @@ static void game_shop_create_items()
         {
             joker_id = game_shop_get_random_joker_idx();
         }
-        bitset_set_idx(&_avail_jokers_bitset, joker_id, false);
+        _set_shop_joker_avail(joker_id, false);
         
         JokerObject *joker_object = joker_object_new(joker_new(joker_id));
 
@@ -2832,7 +2852,7 @@ static void game_shop_reroll(int *reroll_cost)
 
         if (joker_object != NULL)
         {
-            bitset_set_idx(&_avail_jokers_bitset, joker_object->joker->id, true);
+            _set_shop_joker_avail(joker_object->joker->id, true);
             joker_object_destroy(&joker_object); // Destroy the joker object if it exists
         }
     }
@@ -2895,19 +2915,19 @@ void joker_start_discard_animation(JokerObject *joker_object)
     list_push_back(&_discarded_jokers_list, joker_object);
 }
 
-void game_sell_joker(int joker_idx)
+void game_sell_joker(int joker_id)
 {
-    if (joker_idx < 0 || joker_idx > list_get_len(_active_jokers_list))
+    if (joker_id < 0 || joker_id > list_get_len(_active_jokers_list))
         return;
     
-    JokerObject* joker_object = (JokerObject*)list_get_at_idx(&_active_jokers_list, joker_idx);
+    JokerObject* joker_object = (JokerObject*)list_get_at_idx(&_active_jokers_list, joker_id);
     money += joker_get_sell_value(joker_object->joker);
     display_money(money);
     erase_price_under_sprite_object(joker_object->sprite_object);
 
-    list_remove_at_idx(&_active_jokers_list, joker_idx);
+    list_remove_at_idx(&_active_jokers_list, joker_id);
     
-    bitset_set_idx(&_avail_jokers_bitset, joker_idx, true);
+    _set_shop_joker_avail(joker_id, true);
 
     joker_start_discard_animation(joker_object);
 }
@@ -3185,7 +3205,7 @@ static void game_shop_on_exit()
         if (joker_object != NULL)
         {
             // Make the joker available back to shop
-            bitset_set_idx(&_avail_jokers_bitset, joker_object->joker->id, true);
+            _set_shop_joker_avail(joker_object->joker->id, true);
         }
         joker_object_destroy(&joker_object); // Destroy the joker objects
     }
