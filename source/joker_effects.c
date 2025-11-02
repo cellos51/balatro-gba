@@ -415,11 +415,9 @@ static JokerEffect raised_fist_joker_effect(Joker *joker, Card *scored_card, enu
             int hand_size = hand_get_size();
             for (int i = 0; i < hand_size; i++ )
             {
-                // We check for bigger or equal, this way we end up with the
-                // rightmost card in case of equality (this is how Balatro does it)
                 u8 value = card_get_value(hand[i]->card);
                 u8 lowest_value = card_get_value(hand[*p_lowest_value_index]->card);
-                if (lowest_value >= value)
+                if (lowest_value > value)
                 {
                     *p_lowest_value_index = i;
                 }

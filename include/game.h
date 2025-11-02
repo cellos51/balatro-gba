@@ -49,6 +49,7 @@ enum HandState
 enum PlayState
 {
     PLAY_PLAYING,
+    PLAY_BEFORE_SCORING,
     PLAY_SCORING_CARDS,
     PLAY_SCORING_HELD,
     PLAY_SCORING_JOKERS,
