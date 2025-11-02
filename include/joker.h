@@ -131,7 +131,7 @@ JokerObject *joker_object_new(Joker *joker);
 void joker_object_destroy(JokerObject **joker_object);
 void joker_object_update(JokerObject *joker_object);
 void joker_object_shake(JokerObject *joker_object, mm_word sound_id); // This doesn't actually score anything, it just performs an animation and plays a sound effect
-bool joker_object_score(JokerObject *joker_object, Card* scored_card, enum JokerEvent joker_event, int *chips, int *mult, int *money, bool *retrigger); // This scores the joker and returns true if it was scored successfully (Card = NULL means the joker is independent and not scored by a card)
+bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum JokerEvent joker_event, int *chips, int *mult, int *money, bool *retrigger); // This scores the joker and returns true if it was scored successfully (Card = NULL means the joker is independent and not scored by a card)
 
 void joker_object_set_selected(JokerObject* joker_object, bool selected);
 bool joker_object_is_selected(JokerObject* joker_object);

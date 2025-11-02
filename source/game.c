@@ -541,6 +541,7 @@ static const Rect TEMP_SCORE_RECT           = {8,       64,     64,     72  };
 static const Rect SCORE_RECT                = {32,      48,     64,     56  };
 
 static const Rect PLAYED_CARDS_SCORES_RECT  = {72,      48,     240,    56  };
+static const Rect HELD_CARDS_SCORES_RECT    = {72,      108,    240,    116 };
 static const Rect BLIND_TOKEN_TEXT_RECT     = {80,      72,     200,    160 };
 static const Rect MONEY_TEXT_RECT           = {8,       120,    64,     128 };
 static const Rect CHIPS_TEXT_RECT           = {8,       80,     32,     88  };
@@ -2181,13 +2182,13 @@ static void cards_in_hand_update_loop(bool* discarded_card, int* played_selectio
 }
 
 // returns true if a joker was scored, false otherwise
-static bool check_and_score_joker_for_event(ListItr* starting_joker_itr, Card* played_card, enum JokerEvent joker_event)
+static bool check_and_score_joker_for_event(ListItr* starting_joker_itr, CardObject* card_object, enum JokerEvent joker_event)
 {
     JokerObject* joker;
 
     while((joker = list_itr_next(starting_joker_itr)))
     {
-        if (joker_object_score(joker, played_card, joker_event, &chips, &mult, &money, &retrigger))
+        if (joker_object_score(joker, card_object, joker_event, &chips, &mult, &money, &retrigger))
         {
             display_chips();
             display_mult();
@@ -2284,7 +2285,7 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                             // Trigger all Jokers after each card scored
                             if (*played_selections > 0)
                             {
-                                if (check_and_score_joker_for_event(&_joker_scored_itr, played[*played_selections - 1]->card, JOKER_EVENT_ON_CARD_SCORED))
+                                if (check_and_score_joker_for_event(&_joker_scored_itr, played[*played_selections - 1], JOKER_EVENT_ON_CARD_SCORED))
                                 {
                                     return;
                                 }
@@ -2292,7 +2293,7 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                                 // Trigger all Jokers that have an effect when a card finishes scoring
                                 // (e.g. retriggers) after activating all the other scored_card Jokers normally
                                 _joker_scored_itr = list_itr_create(&_owned_jokers_list);
-                                if (check_and_score_joker_for_event(&_joker_scored_itr, played[*played_selections - 1]->card, JOKER_EVENT_ON_CARD_SCORED_END))
+                                if (check_and_score_joker_for_event(&_joker_scored_itr, played[*played_selections - 1], JOKER_EVENT_ON_CARD_SCORED_END))
                                 {
                                     return;
                                 }
@@ -2343,12 +2344,13 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
 
                     if (i == 0 && (timer % FRAMES(30) == 0) && timer > FRAMES(40))
                     {
+                        tte_erase_rect_wrapper(HELD_CARDS_SCORES_RECT);
+
                         // Go through all held cards and see if they activate Jokers
                         for ( ; scored_card_index >= 0; scored_card_index--)
                         {
-                            tte_erase_rect_wrapper(PLAYED_CARDS_SCORES_RECT);
 
-                            if (check_and_score_joker_for_event(&_joker_scored_itr, hand[scored_card_index]->card, JOKER_EVENT_ON_CARD_HELD))
+                            if (check_and_score_joker_for_event(&_joker_scored_itr, hand[scored_card_index], JOKER_EVENT_ON_CARD_HELD))
                             {
                                 card_object_shake(hand[scored_card_index], SFX_CARD_SELECT);
                                 return;
