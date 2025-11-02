@@ -270,7 +270,6 @@ static JokerEffect joker_stencil_effect(Joker *joker, Card *scored_card, enum Jo
     List* jokers = get_jokers_list();
 
     // +1 xmult per empty joker slot...
-    //int num_jokers = list_get_size(jokers);
     int num_jokers = list_get_len(*jokers);
 
     effect.xmult = (MAX_JOKERS_HELD_SIZE) - num_jokers;
@@ -281,7 +280,6 @@ static JokerEffect joker_stencil_effect(Joker *joker, Card *scored_card, enum Jo
 
     while((ln = list_itr_next(&itr)))
     {
-        //JokerObject* joker_object = POOL_AT(JokerObject, ln->elem_idx);
         JokerObject* joker_object = ln->data;
         if (joker_object->joker->id == JOKER_STENCIL_ID) effect.xmult++;
     }

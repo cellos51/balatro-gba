@@ -161,5 +161,4 @@ int bitset_itr_next(BitsetItr* itr)
     itr->word = 0;
 
     return UNDEFINED;
-    //return bitset_find_idx_of_nth_set(itr->bitset, itr->itr++);
 }

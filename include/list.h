@@ -13,6 +13,8 @@
 
 #include <stdbool.h>
 
+#define MAX_LIST_NODES 128
+
 typedef struct ListNode ListNode;
 
 /**

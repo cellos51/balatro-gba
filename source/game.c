@@ -2734,7 +2734,6 @@ static int game_shop_get_random_joker_idx()
     intptr_t joker_id = UNDEFINED;
     while((joker_id = bitset_itr_next(&itr)) != UNDEFINED)
     {
-        //intptr_t joker_id = int_list_get(jokers_available_to_shop, i);
         const JokerInfo *info = get_joker_registry_entry(joker_id); 
         if (info->rarity == joker_rarity)
         {

@@ -69,8 +69,6 @@ enum JokerEvent
 #define FOUR_FINGERS_JOKER_ID 48
 
 
-#include "list.h"
-
 typedef struct 
 {
     u8 id; // Unique ID for the joker, used to identify different jokers
