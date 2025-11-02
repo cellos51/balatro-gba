@@ -426,8 +426,10 @@ static const Rect BOSS_BLIND_TITLE_SRC_RECT = {0,       27,     8,      27 };
 static const Rect CASHOUT_DEST_RECT =         {10,      8,      23,     10 };
 static const BG_POINT CASHOUT_SRC_3X3_RECT_POS =   {5,  29};
 static const BG_POINT GAME_OVER_SRC_RECT_3X3_POS = {25, 29};
-static const Rect GAME_OVER_DIALOG_DEST_RECT= {11,      21,      23,     26};
-static const Rect GAME_OVER_ANIM_RECT       = {11,      8,       23,     26};
+static const Rect GAME_OVER_DIALOG_DEST_RECT= {11,      21,      23,     27};
+static const Rect GAME_OVER_ANIM_RECT       = {11,      8,       23,     27};
+static const BG_POINT NEW_RUN_BTN_DEST_POS  = {15,      25};
+static const Rect NEW_RUN_BTN_SRC_RECT      = {0,       30,      4,      31};
 
 // Rects for TTE (in pixels)
 static const Rect HAND_SIZE_RECT            = {128,     128,    152,    160 }; // Seems to include both SELECT and PLAYING
@@ -460,7 +462,7 @@ static const Rect ROUND_END_NUM_HANDS_RECT  = {88,      116,    UNDEFINED, UNDEF
 static const Rect HAND_REWARD_RECT          = {168,     UNDEFINED, UNDEFINED, UNDEFINED };
 static const Rect ROUND_END_INTEREST_RECT   = {88,      126,    UNDEFINED, UNDEFINED };
 static const Rect INTEREST_REWARD_RECT      = {168,     UNDEFINED, UNDEFINED, UNDEFINED };
-static const Rect CASHOUT_TEXT_RECT              = {88,      72,     UNDEFINED, UNDEFINED };
+static const Rect CASHOUT_TEXT_RECT         = {88,      72,     UNDEFINED, UNDEFINED };
 static const Rect SHOP_REROLL_RECT          = {88,      96,     UNDEFINED, UNDEFINED };
 static const Rect GAME_LOSE_MSG_TEXT_RECT   = {104,     72,     UNDEFINED, UNDEFINED};
 // 1 character to the right of GAME_LOSE
@@ -1287,6 +1289,7 @@ static void game_over_init()
     // Clears the round end menu
     main_bg_se_clear_rect(POP_MENU_ANIM_RECT);
     main_bg_se_copy_expand_3x3_rect(GAME_OVER_DIALOG_DEST_RECT, GAME_OVER_SRC_RECT_3X3_POS);
+    main_bg_se_copy_rect(NEW_RUN_BTN_SRC_RECT, NEW_RUN_BTN_DEST_POS);
 }
 
 static void game_lose_on_init()
@@ -3321,7 +3324,7 @@ static void game_lose_on_update()
         tte_printf("#{P:%d,%d; cx:0x%X000}GAME OVER", GAME_LOSE_MSG_TEXT_RECT.left, GAME_LOSE_MSG_TEXT_RECT.top, TTE_RED_PB);
     }
 
-    if (key_hit(KEY_ANY)) game_change_state(GAME_STATE_BLIND_SELECT);
+    if (key_hit(KEY_A)) game_change_state(GAME_STATE_BLIND_SELECT);
 }
 
 // This function isn't set in stone. This is just a placeholder
@@ -3380,7 +3383,7 @@ static void game_win_on_update()
         tte_printf("#{P:%d,%d; cx:0x%X000}YOU WIN", GAME_WIN_MSG_TEXT_RECT.left, GAME_WIN_MSG_TEXT_RECT.top, TTE_BLUE_PB);
     }
 
-    if (key_hit(KEY_ANY)) game_change_state(GAME_STATE_BLIND_SELECT);
+    if (key_hit(KEY_A)) game_change_state(GAME_STATE_BLIND_SELECT);
 }
 
 void game_update()
