@@ -1074,7 +1074,7 @@ const JokerInfo joker_registry[] = {
     { COMMON_JOKER,    4, even_steven_joker_effect,      on_joker_created_noop            }, // 23
     { COMMON_JOKER,    5, blue_joker_effect,             on_joker_created_noop            }, // 24
     { COMMON_JOKER,    4, odd_todd_joker_effect,         on_joker_created_noop            }, // 25
-    { COMMON_JOKER,    4, scholar_joker_effect,          on_joker_created_noop            }, // 26
+    { UNCOMMON_JOKER,  7, NULL, /* Shortcut */           on_joker_created_noop            }, // 26
     { COMMON_JOKER,    4, business_card_joker_effect,    on_joker_created_noop            }, // 27
     // Business card should be paired with Shortcut for palette optimization when it's added
     { COMMON_JOKER,    4, scary_face_joker_effect,       on_joker_created_noop            }, // 28
@@ -1097,6 +1097,8 @@ const JokerInfo joker_registry[] = {
     { UNCOMMON_JOKER,  6, sock_and_buskin_joker_effect,  sock_and_buskin_on_joker_created }, // 45
     { UNCOMMON_JOKER,  6, hack_joker_effect,             hack_on_joker_created            }, // 46
     { COMMON_JOKER,    4, hanging_chad_joker_effect,     hanging_chad_on_joker_created    }, // 47
+    { UNCOMMON_JOKER,  7, NULL,/* Four Fingers */        on_joker_created_noop            }, // 48
+    { COMMON_JOKER,    4, scholar_joker_effect,          on_joker_created_noop            }, // 49
 
     // The following jokers don't have sprites yet, 
     // uncomment them when their sprites are added.

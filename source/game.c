@@ -190,6 +190,8 @@ static enum BlindState blinds[BLIND_TYPE_MAX] =
 static int blind_reward = 0;
 static int hand_reward = 0;
 static int interest_reward = 0;
+static int interest_to_count = 0;
+static int interest_start_time = UNDEFINED;
 
 // Red deck default (can later be moved to a deck.h file or something)
 static int max_hands = 4;
@@ -242,6 +244,23 @@ static int deck_top = -1;
 
 static Card *discard_pile[MAX_DECK_SIZE] = {NULL};
 static int discard_top = -1;
+
+// Joker Special Variables
+static int shortcut_joker_count = 0;
+
+bool is_shortcut_joker_active(void) 
+{
+    return shortcut_joker_count > 0;
+}
+#define STRAIGHT_AND_FLUSH_SIZE_FOUR_FINGERS 4
+#define STRAIGHT_AND_FLUSH_SIZE_DEFAULT 5
+static int four_fingers_joker_count = 0;
+static int straight_and_flush_size = STRAIGHT_AND_FLUSH_SIZE_DEFAULT;
+
+int get_straight_and_flush_size(void) 
+{
+    return straight_and_flush_size;
+}
 
 // Played stack
 static inline void played_push(CardObject *card_object)
@@ -348,11 +367,46 @@ bool is_joker_owned(int joker_id)
 void add_joker(JokerObject *joker_object)
 {
     list_append(jokers, joker_object);
+
+    // TODO: Extract to on_joker_added() callback
+    // In case the player gets multiple Four Fingers Jokers,
+    // only change size when the first one is added
+    if (joker_object->joker->id == FOUR_FINGERS_JOKER_ID) 
+    {
+        if (four_fingers_joker_count == 0) 
+        {
+            straight_and_flush_size = STRAIGHT_AND_FLUSH_SIZE_FOUR_FINGERS;
+        }
+        four_fingers_joker_count++;
+    }
+
+    if (joker_object->joker->id == SHORTCUT_JOKER_ID) 
+    {
+        shortcut_joker_count++;
+    }
 }
 
 void remove_held_joker(int joker_idx)
 {
-    list_remove_by_idx(jokers, joker_idx);
+    // TODO: Extract to on_joker_removed() callback
+    JokerObject* joker_object = list_get(jokers, joker_idx);
+    // In case the player gets multiple Four Fingers Jokers,
+    // and only reset the size when all of them have been removed
+    if (joker_object->joker->id == FOUR_FINGERS_JOKER_ID) 
+    {
+        four_fingers_joker_count--;
+        if (four_fingers_joker_count == 0) 
+        {
+            straight_and_flush_size = STRAIGHT_AND_FLUSH_SIZE_DEFAULT;
+        }
+    }
+
+    if (joker_object->joker->id == SHORTCUT_JOKER_ID) 
+    {
+        shortcut_joker_count--;
+    }
+
+    list_remove_by_idx(jokers, joker_idx);        
 }
 
 int get_deck_top(void)
@@ -399,7 +453,10 @@ static const Rect POP_MENU_ANIM_RECT        = {9,       7,      24,     31 };
 // This is because when popping, the target position is blank so we just animate 
 // the whole rect so we don't have to track its position
 
-static const Rect SINGLE_BLIND_SELECT_RECT  = {9,       7,      13,     32 };
+static const Rect SINGLE_BLIND_SELECT_RECT  = {9,       7,      13,     31 };
+static const Rect BLIND_SKIP_BTN_GRAY_RECT  = {0,       24,     4,      27 };
+static const Rect BLIND_SKIP_BTN_PREANIM_DEST_RECT = {9,29,     19,     31 };
+// preanim - pre-animation rects for before the pop-up animation
 
 static const Rect HAND_BG_RECT_SELECTING    = {9,       11,     24,     17 };
 // TODO: Currently unused, remove?
@@ -451,6 +508,8 @@ static const Rect ROUND_END_BLIND_REQ_RECT  = {104,     96,     136,       UNDEF
 static const Rect ROUND_END_BLIND_REWARD_RECT = { 168,  96,     UNDEFINED, UNDEFINED };
 static const Rect ROUND_END_NUM_HANDS_RECT  = {88,      116,    UNDEFINED, UNDEFINED };
 static const Rect HAND_REWARD_RECT          = {168,     UNDEFINED, UNDEFINED, UNDEFINED };
+static const Rect ROUND_END_INTEREST_RECT   = {88,      126,    UNDEFINED, UNDEFINED };
+static const Rect INTEREST_REWARD_RECT      = {168,     UNDEFINED, UNDEFINED, UNDEFINED };
 static const Rect CASHOUT_RECT              = {88,      72,     UNDEFINED, UNDEFINED };
 static const Rect SHOP_REROLL_RECT          = {88,      96,     UNDEFINED, UNDEFINED };
 static const Rect GAME_LOSE_MSG_TEXT_RECT   = {104,     72,     UNDEFINED, UNDEFINED};
@@ -506,8 +565,10 @@ static const BG_POINT MAIN_MENU_ACE_T       = {88,      26};
 #define TM_END_DISPLAY_FIN_BLIND 30
 #define TM_END_DISPLAY_SCORE_MIN 4
 #define TM_ELLIPSIS_PRINT_MAX_TM 16
-#define TM_DISPLAY_REWARDS_CONT_WAIT 30
-#define TM_HAND_REWARD_INCR_WAIT 45
+#define TM_REWARD_INCR_INTERVAL 20
+#define TM_REWARD_DISPLAY_INTERVAL 15
+#define TM_DISPLAY_REWARDS_CONT_WAIT TM_ELLIPSIS_PRINT_MAX_TM + TM_REWARD_DISPLAY_INTERVAL
+#define TM_HAND_REWARD_INCR_WAIT TM_DISPLAY_REWARDS_CONT_WAIT + TM_REWARD_DISPLAY_INTERVAL
 #define TM_DISMISS_ROUND_END_TM 20
 #define TM_CREATE_SHOP_ITEMS_WAIT 1
 #define TM_SHIFT_SHOP_ICON_WAIT 7
@@ -517,6 +578,8 @@ static const BG_POINT MAIN_MENU_ACE_T       = {88,      26};
 #define TM_DISP_BLIND_PANEL_START 1
 #define TM_BLIND_SELECT_START 1
 #define TM_END_ANIM_SEQ 12
+
+
 
 // Palette IDs
 #define PLAY_HAND_BTN_SELECTED_BORDER_PID 1
@@ -651,14 +714,6 @@ enum HandType hand_get_type()
             res_hand_type = STRAIGHT;
     }
 
-    // Check for royal flush vs regular straight flush
-    if (res_hand_type == STRAIGHT_FLUSH)
-    {
-        if (ranks[TEN] && ranks[JACK] && ranks[QUEEN] && ranks[KING] && ranks[ACE])
-            return ROYAL_FLUSH;
-        return STRAIGHT_FLUSH;
-    }
-
     // The following can be optimized better but not sure how much it matters
     u8 n_of_a_kind = hand_contains_n_of_a_kind(ranks);
 
@@ -671,8 +726,14 @@ enum HandType hand_get_type()
         return FIVE_OF_A_KIND;
     }
 
-    if (n_of_a_kind == 4)
-    {
+    // Check for royal flush vs regular straight flush
+    if (res_hand_type == STRAIGHT_FLUSH) {
+        if (ranks[TEN] && ranks[JACK] && ranks[QUEEN] && ranks[KING] && ranks[ACE])
+            return ROYAL_FLUSH;
+        return STRAIGHT_FLUSH;
+    }
+
+    if (n_of_a_kind == 4) {
         return FOUR_OF_A_KIND;
     }
 
@@ -681,10 +742,15 @@ enum HandType hand_get_type()
         return FULL_HOUSE;
     }
 
-    // Flush is more valuable than the remaining hand types, so return now
-    if (res_hand_type == FLUSH)
-    {
+    // Flush and Straight are more valuable than the remaining hand types, so return them now
+    if (res_hand_type == FLUSH) {
+        if (n_of_a_kind >= 5) {
+            return FLUSH_HOUSE;
+        }
         return FLUSH;
+    }
+    if (res_hand_type == STRAIGHT) {
+        return STRAIGHT;
     }
 
     if (n_of_a_kind == 3)
@@ -858,40 +924,35 @@ void change_background(int id)
 
         for (int i = 0; i < BLIND_TYPE_MAX; i++)
         {
-            if (blinds[i] != BLIND_STATE_CURRENT &&
-                (i == BLIND_TYPE_SMALL || i == BLIND_TYPE_BIG)) // Make the skip button gray
+            Rect curr_blind_rect = SINGLE_BLIND_SELECT_RECT;
+
+            // There's no gap between them
+            curr_blind_rect.left += i * rect_width(&SINGLE_BLIND_SELECT_RECT);
+            curr_blind_rect.right += i * rect_width(&SINGLE_BLIND_SELECT_RECT);
+
+            if (blinds[i] != BLIND_STATE_CURRENT && (i == BLIND_TYPE_SMALL || i == BLIND_TYPE_BIG)) // Make the skip button gray
             {
-                // TODO: Switch all the copies here to use main_bg_se_copy_rect()
-                // Note, this is difficult as the tiles to copy are not aligned.
-                int x_from = 0;
-                int y_from = 24 + (i * 4);
+                BG_POINT skip_blind_btn_pos_dest = { BLIND_SKIP_BTN_PREANIM_DEST_RECT.left, BLIND_SKIP_BTN_PREANIM_DEST_RECT.top };
+                skip_blind_btn_pos_dest.x = curr_blind_rect.left;
 
-                int x_to = 9 + (i * 5);
-                int y_to = 29;
+                Rect skip_blind_btn_rect_src = BLIND_SKIP_BTN_GRAY_RECT;
+                skip_blind_btn_rect_src.top += i * rect_height(&BLIND_SKIP_BTN_GRAY_RECT);
+                skip_blind_btn_rect_src.bottom += i * rect_height(&BLIND_SKIP_BTN_GRAY_RECT);
 
-                for (int j = 0; j < BLIND_TYPE_MAX; j++)
-                {
-                    memcpy16(&se_mem[MAIN_BG_SBB][x_to + 32 * y_to], &se_mem[MAIN_BG_SBB][x_from + 32 * y_from], 5);
-                    y_from++;
-                    y_to++;
-                }
+                main_bg_se_copy_rect(skip_blind_btn_rect_src, skip_blind_btn_pos_dest);
             }
 
             switch(blinds[i])
             {
                 case BLIND_STATE_CURRENT: // Raise the blind panel up a bit
                 {
+                    // TODO: Replace copies with main_bg_se_copy_rect() of named rects
                     int x_from = 0;
                     int y_from = 27;
 
-                    Rect blind_rect = SINGLE_BLIND_SELECT_RECT;
+                    main_bg_se_copy_rect_1_tile_vert(curr_blind_rect, SE_UP);
 
-                    // There's no gap between them
-                    blind_rect.left += i * rect_width(&SINGLE_BLIND_SELECT_RECT);
-                    blind_rect.right += i * rect_width(&SINGLE_BLIND_SELECT_RECT);
-                    main_bg_se_copy_rect_1_tile_vert(blind_rect, SE_UP);
-
-                    int x_to = blind_rect.left;
+                    int x_to = curr_blind_rect.left;
                     int y_to = 31;
 
                     if (i == BLIND_TYPE_BIG)
@@ -917,7 +978,7 @@ void change_background(int id)
                     int x_from = 0;
                     int y_from = 20;
 
-                    int x_to = 10 + (i * 5);
+                    int x_to = 10 + (i * rect_width(&SINGLE_BLIND_SELECT_RECT));
                     int y_to = 20;
 
                     memcpy16(&se_mem[MAIN_BG_SBB][x_to + 32 * y_to], &se_mem[MAIN_BG_SBB][x_from + 32 * y_from], 3);
@@ -1718,8 +1779,195 @@ void card_in_hand_loop_handle_discard_and_shuffling(int card_idx, bool* discarde
     };
 }
 
+static void select_flush_and_straight_cards_in_played_hand()
+{
+    // Special handling because Four Fingers might be active
+    bool final_selection[MAX_SELECTION_SIZE] = {false};
+    int min_len = get_straight_and_flush_size(); // Will be 4 if Four Fingers is in effect, otherwise 5
+
+    // if we have a flush in our hand
+    if (hand_type == FLUSH || hand_type == STRAIGHT_FLUSH || hand_type == ROYAL_FLUSH)
+    {
+        bool flush_selection[MAX_HAND_SIZE] = {false};
+        find_flush_in_played_cards(played, played_top, min_len, flush_selection);
+        // Add the results into the final selection
+        for (int i = 0; i <= played_top; i++)
+        {
+            final_selection[i] = flush_selection[i];
+        }
+    }
+
+    // If we have a straight in our hand
+    if (hand_type == STRAIGHT || hand_type == STRAIGHT_FLUSH || hand_type == ROYAL_FLUSH)
+    {
+        bool straight_selection[MAX_HAND_SIZE] = {false};
+        find_straight_in_played_cards(played, played_top, is_shortcut_joker_active(), min_len, straight_selection);
+        // Add the results into the final selection
+        for (int i = 0; i <= played_top; i++)
+        {
+            final_selection[i] = final_selection[i] || straight_selection[i];
+        }
+        // If Four Fingers is active, pairs can happen in a valid straight
+        // If Four Fingers is not active, pairs are impossible so this will not affect things
+        select_paired_cards_in_hand(played, played_top, final_selection);
+    }
+
+    // Finally, set mark the cards as selected based final_selection
+    for (int i = 0; i <= played_top; i++)
+    {
+        if (final_selection[i])
+        {
+            card_object_set_selected(played[i], true);
+        }
+    }
+}
+
+static void select_all_five_cards_in_played_hand()
+{
+    for (int i = 0; i <= played_top; i++)
+    {
+        card_object_set_selected(played[i], true);
+    }
+}
+
+static void select_four_of_a_kind_cards_in_played_hand()
+{
+    // find four cards with the same rank
+    if (played_top >= 3) // If there are 5 cards selected we just need to find the one card that doesn't match, and select the others
+    {
+        int unmatched_index = -1;
+
+        for (int i = 0; i <= played_top; i++)
+        {
+            if (played[i]->card->rank != played[(i + 1) % played_top]->card->rank && played[i]->card->rank != played[(i + 2) % played_top]->card->rank)
+            {
+                unmatched_index = i;
+                break;
+            }
+        }
+
+        for (int i = 0; i <= played_top; i++)
+        {
+            if (i != unmatched_index)
+            {
+                card_object_set_selected(played[i], true);
+            }
+        }
+    }
+    else // If there are only 4 cards selected we know they match
+    {
+        for (int i = 0; i <= played_top; i++)
+        {
+            card_object_set_selected(played[i], true);
+        }
+    }
+}
+
+static void select_three_of_a_kind_cards_in_played_hand()
+{
+    // find three cards with the same rank
+    for (int i = 0; i <= played_top - 1; i++)
+    {
+        for (int j = i + 1; j <= played_top; j++)
+        {
+            if (played[i]->card->rank == played[j]->card->rank)
+            {
+                card_object_set_selected(played[i], true);
+                card_object_set_selected(played[j], true);
+
+                for (int k = j + 1; k <= played_top; k++)
+                {
+                    if (played[i]->card->rank == played[k]->card->rank && !card_object_is_selected(played[k]))
+                    {
+                        card_object_set_selected(played[k], true);
+                        break;
+                    }
+                }
+
+                break;
+            }
+        }
+
+        if (card_object_is_selected(played[i]))
+            break;
+    }
+}
+
+static void select_two_pair_cards_in_played_hand()
+{
+    // find two pairs of cards with the same rank
+    int i;
+
+    for (i = 0; i <= played_top - 1; i++)
+    {
+        for (int j = i + 1; j <= played_top; j++)
+        {
+            if (played[i]->card->rank == played[j]->card->rank)
+            {
+                card_object_set_selected(played[i], true);
+                card_object_set_selected(played[j], true);
+
+                break;
+            }
+        }
+
+        if (card_object_is_selected(played[i]))
+            break;
+    }
+
+    for (; i <= played_top - 1; i++) // Find second pair
+    {
+        for (int j = i + 1; j <= played_top; j++)
+        {
+            if (played[i]->card->rank == played[j]->card->rank && !card_object_is_selected(played[i]) && !card_object_is_selected(played[j]))
+            {
+                card_object_set_selected(played[i], true);
+                card_object_set_selected(played[j], true);
+                break;
+            }
+        }
+    }
+}
+
+static void select_pair_cards_in_played_hand()
+{
+    // find two cards with the same rank
+    for (int i = 0; i <= played_top - 1; i++)
+    {
+        for (int j = i + 1; j <= played_top; j++)
+        {
+            if (played[i]->card->rank == played[j]->card->rank)
+            {
+                card_object_set_selected(played[i], true);
+                card_object_set_selected(played[j], true);
+                break;
+            }
+        }
+
+        if (card_object_is_selected(played[i]))
+            break;
+    }
+}
+
+static void select_highcard_cards_in_played_hand()
+{
+    // find the card with the highest rank in the hand
+    int highest_rank_index = 0;
+
+    for (int i = 0; i <= played_top; i++)
+    {
+        if (played[i]->card->rank > played[highest_rank_index]->card->rank)
+        {
+            highest_rank_index = i;
+        }
+    }
+
+    card_object_set_selected(played[highest_rank_index], true);
+}
+
 static void cards_in_hand_update_loop(bool* discarded_card, int* played_selections, bool* sound_played)
 {
+    // TODO: Break this function up into smaller ones, Gods be good
     for (int i = hand_top + 1; i >= 0; i--) // Start from the end of the hand and work backwards because that's how Balatro does it
     {
         if (hand[i] != NULL)
@@ -1797,142 +2045,39 @@ static void cards_in_hand_update_loop(bool* discarded_card, int* played_selectio
                     {
                     case NONE:
                         break;
-                    case HIGH_CARD: // find the card with the highest rank in the hand
-                        int highest_rank_index = 0;
-
-                        for (int i = 0; i <= played_top; i++)
-                        {
-                            if (played[i]->card->rank > played[highest_rank_index]->card->rank)
-                            {
-                                highest_rank_index = i;
-                            }
-                        }
-
-                        card_object_set_selected(played[highest_rank_index], true);
+                    case HIGH_CARD: 
+                        select_highcard_cards_in_played_hand();
                         break;
-                    case PAIR: // find two cards with the same rank (Requires recursion)
-                        for (int i = 0; i <= played_top - 1; i++)
-                        {
-                            for (int j = i + 1; j <= played_top; j++)
-                            {
-                                if (played[i]->card->rank == played[j]->card->rank)
-                                {
-                                    card_object_set_selected(played[i], true);
-                                    card_object_set_selected(played[j], true);
-                                    break;
-                                }
-                            }
-
-                            if (card_object_is_selected(played[i])) break;
-                        }
+                    case PAIR: 
+                        select_pair_cards_in_played_hand();
                         break;
-                    case TWO_PAIR: // find two pairs of cards with the same rank (Requires recursion)
-                        int i;
-
-                        for (i = 0; i <= played_top - 1; i++)
-                        {
-                            for (int j = i + 1; j <= played_top; j++)
-                            {
-                                if (played[i]->card->rank == played[j]->card->rank)
-                                {
-                                    card_object_set_selected(played[i], true);
-                                    card_object_set_selected(played[j], true);
-
-                                    break;
-                                }
-                            }
-
-                            if (card_object_is_selected(played[i])) break;
-                        }
-
-                        for (; i <= played_top - 1; i++) // Find second pair
-                        {
-                            for (int j = i + 1; j <= played_top; j++)
-                            {
-                                if (played[i]->card->rank == played[j]->card->rank && !card_object_is_selected(played[i]) && !card_object_is_selected(played[j]))
-                                {
-                                    card_object_set_selected(played[i], true);
-                                    card_object_set_selected(played[j], true);
-                                    break;
-                                }
-                            }
-                        }
+                    case TWO_PAIR: 
+                        select_two_pair_cards_in_played_hand();
                         break;
-                    case THREE_OF_A_KIND: // find three cards with the same rank (requires recursion)
-                        for (int i = 0; i <= played_top - 1; i++)
-                        {
-                            for (int j = i + 1; j <= played_top; j++)
-                            {
-                                if (played[i]->card->rank == played[j]->card->rank)
-                                {
-                                    card_object_set_selected(played[i], true);
-                                    card_object_set_selected(played[j], true);
-
-                                    for (int k = j + 1; k <= played_top; k++)
-                                    {
-                                        if (played[i]->card->rank == played[k]->card->rank && !card_object_is_selected(played[k]))
-                                        {
-                                            card_object_set_selected(played[k], true);
-                                            break;
-                                        }
-                                    }
-
-                                    break;
-                                }
-                            }
-
-                            if (card_object_is_selected(played[i])) break;
-                        }
+                    case THREE_OF_A_KIND: 
+                        select_three_of_a_kind_cards_in_played_hand();
                         break;
-                    case FOUR_OF_A_KIND: // find four cards with the same rank (requires recursion)
-                        if (played_top >= 3) // If there are 5 cards selected we just need to find the one card that doesn't match, and select the others
-                        {
-                            int unmatched_index = -1;
-
-                            for (int i = 0; i <= played_top; i++)
-                            {
-                                if (played[i]->card->rank != played[(i + 1) % played_top]->card->rank && played[i]->card->rank != played[(i + 2) % played_top]->card->rank)
-                                {
-                                    unmatched_index = i;
-                                    break;
-                                }
-                            }
-
-                            for (int i = 0; i <= played_top; i++)
-                            {
-                                if (i != unmatched_index)
-                                {
-                                    card_object_set_selected(played[i], true);
-                                }
-                            }
-                        }
-                        else // If there are only 4 cards selected we know they match
-                        {
-                            for (int i = 0; i <= played_top; i++)
-                            {
-                                card_object_set_selected(played[i], true);
-                            }
-                        }
+                    case FOUR_OF_A_KIND:
+                        select_four_of_a_kind_cards_in_played_hand();
                         break;
                     case STRAIGHT:
                         /* FALL THROUGH */
                     case FLUSH:
                         /* FALL THROUGH */
-                    case FULL_HOUSE:
-                        /* FALL THROUGH */
                     case STRAIGHT_FLUSH:
                         /* FALL THROUGH */
                     case ROYAL_FLUSH:
+                        select_flush_and_straight_cards_in_played_hand();
+                        break;
+                        // ELSE FALL THROUGH
+                    case FULL_HOUSE:
                         /* FALL THROUGH */
                     case FIVE_OF_A_KIND:
                         /* FALL THROUGH */
                     case FLUSH_HOUSE:
                         /* FALL THROUGH */
-                    case FLUSH_FIVE: // Select all played cards in the hand (This is functionally identical as the above hand types)
-                        for (int i = 0; i <= played_top; i++)
-                        {
-                            card_object_set_selected(played[i], true);
-                        }
+                    case FLUSH_FIVE: // Select all played cards in the hand
+                        select_all_five_cards_in_played_hand();
                         break;
                     }
                 }
@@ -1972,6 +2117,8 @@ static bool check_and_score_joker_for_event(int* iteration_start, Card* played_c
 
 static void played_cards_update_loop(bool* discarded_card, int* played_selections, bool* sound_played)
 {
+    // TODO: Break this function up into smaller ones.
+
     // So this one is a bit fucking weird because I have to work kinda backwards for everything because of the order of the pushed cards from the hand to the play stack
     // (also crazy that the company that published Balatro is called "Playstack" and this is a play stack, but I digress)
     for (int i = 0; i <= played_top; i++)
@@ -2268,20 +2415,6 @@ static void game_playing_ui_text_update()
     }
 }
 
-static void game_round_end_cashout()
-{
-    money += hands + blind_get_reward(current_blind); // Reward the player
-    display_money(money);
-
-    hands = max_hands; // Reset the hands to the maximum
-    discards = max_discards; // Reset the discards to the maximum
-    display_hands(hands); // Set the hands display
-    display_discards(discards); // Set the discards display
-
-    score = 0;
-    display_score(score); // Set the score display
-}
-
 static void game_playing_on_update()
 {
     // Background logic (thissss might be moved to the card'ssss logic later. I'm a sssssnake)
@@ -2310,6 +2443,28 @@ static void game_playing_on_update()
 	played_cards_update_loop(&discarded_card, &played_selections, &sound_played);
     
     game_playing_ui_text_update();
+}
+
+static int calculate_interest_reward()
+{
+    int reward = (money / 5) * INTEREST_PER_5; 
+    if (reward > MAX_INTEREST)
+        reward = MAX_INTEREST; 
+    return reward;
+}
+
+static void game_round_end_cashout()
+{
+    money += hands + blind_get_reward(current_blind) + calculate_interest_reward(); // Reward the player
+    display_money(money);
+
+    hands = max_hands; // Reset the hands to the maximum
+    discards = max_discards; // Reset the discards to the maximum
+    display_hands(hands); // Set the hands display
+    display_discards(discards); // Set the discards display
+
+    score = 0;
+    display_score(score); // Set the score display
 }
 
 static void game_round_end_on_exit()
@@ -2345,6 +2500,9 @@ static void game_round_end_start()
         timer = TM_ZERO; // Reset the timer
         blind_reward = blind_get_reward(current_blind);
         hand_reward = hands;
+        interest_reward = calculate_interest_reward();
+        interest_to_count = interest_reward;
+        interest_start_time = UNDEFINED;
     }
 }
 
@@ -2458,22 +2616,19 @@ static void game_round_end_panel_exit()
 static void game_round_end_display_rewards()
 {
     int hand_y = 0;
-    
-    // TODO: Implement interest
-    //int interest_y = 0;
-    
+    int interest_y = 0;
+
     if (hands > 0)
     {
         hand_y = 1;
     }
-    
-    // TODO: implement interest
-    // if (interest > 0)
-    // {
-    //     interest_y = 1 + hand_y;
-    // }
-    
-    if (hand_reward <= 0 && interest_reward <= 0) // Once all rewards are accounted for go to the next state
+
+    if (interest_reward > 0)
+    {
+        interest_y = 1 + hand_y;
+    }
+
+    if (hand_reward <= 0 && interest_to_count <= 0) // Once all rewards are accounted for go to the next state
     {
         timer = TM_ZERO; // Reset the timer
         state_info[game_state].substate = DISPLAY_CASHOUT; // Go to the next state
@@ -2504,11 +2659,33 @@ static void game_round_end_display_rewards()
     
             tte_printf("#{P:%d,%d; cx:0x%X000}%d #{cx:0x%X000}Hands", ROUND_END_NUM_HANDS_RECT.left, ROUND_END_NUM_HANDS_RECT.top, TTE_BLUE_PB,  hand_reward, TTE_WHITE_PB); // Print the hand reward
         }
-        else if (timer > TM_HAND_REWARD_INCR_WAIT && timer % FRAMES(20) == 0) // After 15 frames, every 20 frames, increment the hand reward text until the hand reward variable is depleted
+        else if (timer > TM_HAND_REWARD_INCR_WAIT && timer % FRAMES(TM_REWARD_DISPLAY_INTERVAL) == 0) // After 15 frames, every 20 frames, increment the hand reward text until the hand reward variable is depleted
         {
             int y = (13 + hand_y) * TILE_SIZE;
             hand_reward--;
             tte_printf("#{P:%d, %d; cx:0x%X000}$%d", HAND_REWARD_RECT.left, y, TTE_YELLOW_PB, hands - hand_reward); // Print the hand reward
+            if (hand_reward == 0)
+            {
+                interest_start_time = timer + TM_REWARD_DISPLAY_INTERVAL; // Time to start printing the interest gained
+            }
+        }
+    }
+    else if (timer >= interest_start_time && interest_to_count > 0 && interest_start_time != -1)
+    {
+        if (timer == interest_start_time) // Expand the black part of the panel down by one tile again
+        {
+            Rect single_line_rect = ROUND_END_MENU_RECT;
+            single_line_rect.top = 12 + interest_y;
+            single_line_rect.bottom = single_line_rect.top + 1;
+            main_bg_se_copy_rect_1_tile_vert(single_line_rect, SE_DOWN);
+
+            tte_printf("#{P:%d,%d; cx:0x%X000}%d #{cx:0x%X000}Interest", ROUND_END_INTEREST_RECT.left, ROUND_END_INTEREST_RECT.top, TTE_YELLOW_PB, interest_reward, TTE_WHITE_PB);
+        }
+        else if (timer > interest_start_time + 15 && timer % FRAMES(20) == 0) // After 15 frames, every 20 frames, increment the interest reward text until the interest reward variable is depleted
+        {
+            int y = (13 + interest_y) * TILE_SIZE;
+            interest_to_count--;
+            tte_printf("#{P:%d, %d; cx:0x%X000}$%d", INTEREST_REWARD_RECT.left, y, TTE_YELLOW_PB, interest_reward - interest_to_count);
         }
     }
 }
@@ -2537,14 +2714,17 @@ static void game_round_end_display_cashout()
         BG_POINT bottom_point = {6, 31};
         main_bg_se_fill_rect_with_se(main_bg_se_get_se(bottom_point), bottom_rect);
     
-        tte_printf("#{P:%d, %d; cx:0x%X000}Cash Out: $%d", CASHOUT_RECT.left, CASHOUT_RECT.top, TTE_WHITE_PB, hands + blind_get_reward(current_blind)); // Print the cash out amount
+        int cashout_amount = hands + blind_get_reward(current_blind) + calculate_interest_reward();
+
+        bool omit_space = cashout_amount >= 10;
+        tte_printf("#{P:%d, %d; cx:0x%X000}Cash Out:%s$%d", CASHOUT_RECT.left, CASHOUT_RECT.top, TTE_WHITE_PB, omit_space ? "" : " " , cashout_amount);
     }
     else if (timer > FRAMES(40) && key_hit(SELECT_CARD)) // Wait until the player presses A to cash out
     {
         game_round_end_cashout();
     
         state_info[game_state].substate = DISMISS_ROUND_END_PANEL; // Go to the next state
-        timer = TM_ZERO; // Reset the timer
+        timer = TM_ZERO;
     
         obj_hide(round_end_blind_token->obj); // Hide the blind token object
         tte_erase_rect_wrapper(BLIND_TOKEN_TEXT_RECT); // Erase the blind token text

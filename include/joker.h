@@ -67,6 +67,9 @@ enum JokerEvent
 #define JOKER_STENCIL_ID 16
 #define PAREIDOLIA_JOKER_ID 30
 #define JOKER_BRAINSTORM_ID 40
+#define SHORTCUT_JOKER_ID 26 
+#define FOUR_FINGERS_JOKER_ID 48
+
 
 
 typedef struct 

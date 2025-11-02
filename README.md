@@ -25,6 +25,14 @@ This **tech-demo/proof of concept** is strictly limited in content to a minimal 
 [![Balatro on Xbox](https://custom-icon-badges.demolab.com/badge/Balatro%20on%20Xbox-107C10.svg?logo=xbox&logoColor=white)](https://www.xbox.com/en-US/games/store/balatro/9PK087LNGJC5)
 [![Balatro on Humble Bundle](https://img.shields.io/badge/Balatro%20on%20Humble%20Bundle-%23494F5C.svg?logo=HumbleBundle&logoColor=white)](https://www.humblebundle.com/store/balatro?srsltid=AfmBOoqS2De8T4kizzWxJS1pbvQosJ_bYCl4qvC6LA1YLPAh4sZ8vJqO)
 
+---
+
+<a href="https://github.com/cellos51/balatro-gba/releases/">
+  <img src="https://img.shields.io/badge/Download_ROMs_from_the_Releases_tab-8A2BE2?&logo=github" alt="Download ROM" width="500">
+</a>
+
+---
+
 <!-- The Gif is a little blurry but I think it looks fine -->
 <img src="example.gif" alt="Example GIF" width="800">
 
