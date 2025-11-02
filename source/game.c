@@ -233,7 +233,8 @@ static bool sort_by_suit = false;
 static List _active_jokers_list;
 static List _discarded_jokers_list;
 
-BITSET_DEFINE(_avail_jokers_bitset, 256)
+#define MAX_JOKERS_IN_BITMAP 64
+BITSET_DEFINE(_avail_jokers_bitset, MAX_JOKERS_IN_BITMAP)
 static List _shop_jokers_list;
 
 // Stacks
