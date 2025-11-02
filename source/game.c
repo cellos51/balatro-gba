@@ -2718,7 +2718,7 @@ void erase_price_under_sprite_object(SpriteObject *sprite_object)
     tte_erase_rect_wrapper(price_rect);
 }
 
-static int game_shop_get_random_joker_idx()
+static int game_shop_get_rand_available_joker_id(void)
 {
     // Roll for what rarity the joker will be
     int joker_rarity = joker_get_random_rarity();
@@ -2785,7 +2785,7 @@ static void game_shop_create_items()
         else
         #endif
         {
-            joker_id = game_shop_get_random_joker_idx();
+            joker_id = game_shop_get_rand_available_joker_id();
         }
         _set_shop_joker_avail(joker_id, false);
         
