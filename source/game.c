@@ -2080,9 +2080,10 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                         }
 
                         // advance state after going past the last card (exited the loop without returning)
-                        play_state = PLAY_SCORING_JOKERS;
+                        play_state = PLAY_SCORING_HELD;
+                        // reuse these variables for held cards
                         joker_scored_index = 0;
-                        scored_card_index = 0; // reuse this variable for held cards
+                        scored_card_index = 0;
                         return;
                     }
 
@@ -2091,7 +2092,36 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                         played_y -= int2fx(10);
                     }
                     break;
-                            
+                
+                case PLAY_SCORING_HELD:
+
+                    if (i == 0 && (timer % FRAMES(30) == 0) && timer > FRAMES(40))
+                    {
+                        int hand_size = hand_get_size();
+                        for (int i = scored_card_index; i < hand_size; i++)
+                        {
+                            tte_erase_rect_wrapper(PLAYED_CARDS_SCORES_RECT);
+
+                            if (check_and_score_joker_for_event(&joker_scored_index, hand[i]->card, JOKER_EVENT_ON_CARD_HELD))
+                            {
+                                card_object_shake(hand[i], SFX_CARD_SELECT);
+                                return;
+                            }
+                            scored_card_index++;
+                        }
+
+                        play_state = PLAY_SCORING_JOKERS;
+                        joker_scored_index = 0;
+                        scored_card_index = 0;
+                        return;
+                    }
+
+                    if (card_object_is_selected(played[i]))
+                    {
+                        played_y -= int2fx(10);
+                    }
+                    break;
+
                 // Score Jokers normally
                 case PLAY_SCORING_JOKERS:
 
