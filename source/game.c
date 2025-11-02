@@ -458,7 +458,7 @@ static const Rect ROUND_END_NUM_HANDS_RECT  = {88,      116,    UNDEFINED, UNDEF
 static const Rect HAND_REWARD_RECT          = {168,     UNDEFINED, UNDEFINED, UNDEFINED };
 static const Rect ROUND_END_INTEREST_RECT   = {88,      126,    UNDEFINED, UNDEFINED };
 static const Rect INTEREST_REWARD_RECT      = {168,     UNDEFINED, UNDEFINED, UNDEFINED };
-static const Rect CASHOUT_RECT              = {88,      72,     UNDEFINED, UNDEFINED };
+static const Rect CASHOUT_TEXT_RECT              = {88,      72,     UNDEFINED, UNDEFINED };
 static const Rect SHOP_REROLL_RECT          = {88,      96,     UNDEFINED, UNDEFINED };
 static const Rect GAME_LOSE_MSG_TEXT_RECT   = {104,     72,     UNDEFINED, UNDEFINED};
 // 1 character to the right oF GAME_LOSE
@@ -2510,30 +2510,33 @@ static void game_round_end_display_cashout()
 {
     if (timer == FRAMES(40)) // Put the "cash out" button onto the round end panel
     {
-        Rect left_rect = {4, 29, 4, 31};
-        BG_POINT left_point = {10, 8};
-        main_bg_se_copy_rect(left_rect, left_point);
+        /* I wanted to replace all of these with main_bg_se_copy_expand_3x3_rect but the source rect is 3x4
+         * and changing it to 3x3 messes up grit's palette mapping...
+         */
+        const Rect cashout_btn_left_rect_src = {5, 29, 5, 31};
+        const BG_POINT cashout_btn_left_point_dest = {10, 8};
+        main_bg_se_copy_rect(cashout_btn_left_rect_src, cashout_btn_left_point_dest);
     
-        Rect right_rect = {7, 29, 7, 31};
-        BG_POINT right_point = {23, 8};
-        main_bg_se_copy_rect(right_rect, right_point);
+        const Rect cashout_btn_right_rect_src = {8, 29, 8, 31};
+        const BG_POINT cashout_btn_right_point_dest = {23, 8};
+        main_bg_se_copy_rect(cashout_btn_right_rect_src, cashout_btn_right_point_dest);
     
-        Rect top_rect = {11, 8, 22, 8};
-        BG_POINT top_point = {6, 29};
-        main_bg_se_fill_rect_with_se(main_bg_se_get_se(top_point), top_rect);
+        const Rect cashout_btn_top_rect_dest = {11, 8, 22, 8};
+        const BG_POINT cashout_btn_top_point_src = {7, 29};
+        main_bg_se_fill_rect_with_se(main_bg_se_get_se(cashout_btn_top_point_src), cashout_btn_top_rect_dest);
     
-        Rect middle_rect = {11, 9, 22, 9};
-        BG_POINT middle_point = {6, 30};
-        main_bg_se_fill_rect_with_se(main_bg_se_get_se(middle_point), middle_rect);
+        const Rect cashout_btn_middle_rect_dest = {11, 9, 22, 9};
+        const BG_POINT cashout_btn_middle_point_src = {7, 30};
+        main_bg_se_fill_rect_with_se(main_bg_se_get_se(cashout_btn_middle_point_src), cashout_btn_middle_rect_dest);
     
-        Rect bottom_rect = {11, 10, 22, 10};
-        BG_POINT bottom_point = {6, 31};
-        main_bg_se_fill_rect_with_se(main_bg_se_get_se(bottom_point), bottom_rect);
+        const Rect cashout_btn_bottom_rect_dest = {11, 10, 22, 10};
+        const BG_POINT cashout_btn_bottom_point_src = {7, 31};
+        main_bg_se_fill_rect_with_se(main_bg_se_get_se(cashout_btn_bottom_point_src), cashout_btn_bottom_rect_dest);
     
         int cashout_amount = hands + blind_get_reward(current_blind) + calculate_interest_reward();
 
         bool omit_space = cashout_amount >= 10;
-        tte_printf("#{P:%d, %d; cx:0x%X000}Cash Out:%s$%d", CASHOUT_RECT.left, CASHOUT_RECT.top, TTE_WHITE_PB, omit_space ? "" : " " , cashout_amount);
+        tte_printf("#{P:%d, %d; cx:0x%X000}Cash Out:%s$%d", CASHOUT_TEXT_RECT.left, CASHOUT_TEXT_RECT.top, TTE_WHITE_PB, omit_space ? "" : " " , cashout_amount);
     }
     else if (timer > FRAMES(40) && key_hit(SELECT_CARD)) // Wait until the player presses A to cash out
     {
