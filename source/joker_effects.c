@@ -441,7 +441,6 @@ static JokerEffect reserved_parking_joker_effect(Joker *joker, Card *scored_card
 {
     JokerEffect effect = {0};
 
-    // TODO: switch from INDEPENDENT to CARD_HELD when it's implemented
     SCORE_ON_EVENT_ONLY(JOKER_EVENT_ON_CARD_HELD, joker_event, effect)
 
     if ((random() % 2 == 0) && card_is_face(scored_card))
@@ -736,7 +735,6 @@ static JokerEffect shoot_the_moon_joker_effect(Joker *joker, Card *scored_card, 
 {
     JokerEffect effect = {0};
 
-    // TODO: switch from CARD_SCORED to CARD_HELD when triggering held cards is implemented
     SCORE_ON_EVENT_ONLY(JOKER_EVENT_ON_CARD_HELD, joker_event, effect)
 
     if (scored_card->rank == QUEEN)
