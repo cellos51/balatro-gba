@@ -426,9 +426,9 @@ static const Rect BOSS_BLIND_TITLE_SRC_RECT = {0,       27,     8,      27 };
 static const Rect CASHOUT_DEST_RECT =         {10,      8,      23,     10 };
 static const BG_POINT CASHOUT_SRC_3X3_RECT_POS =   {5,  29};
 static const BG_POINT GAME_OVER_SRC_RECT_3X3_POS = {25, 29};
-static const Rect GAME_OVER_DIALOG_DEST_RECT= {11,      21,      23,     27};
-static const Rect GAME_OVER_ANIM_RECT       = {11,      8,       23,     27};
-static const BG_POINT NEW_RUN_BTN_DEST_POS  = {15,      25};
+static const Rect GAME_OVER_DIALOG_DEST_RECT= {11,      21,      23,     28};
+static const Rect GAME_OVER_ANIM_RECT       = {11,      8,       23,     28};
+static const BG_POINT NEW_RUN_BTN_DEST_POS  = {15,      26};
 static const Rect NEW_RUN_BTN_SRC_RECT      = {0,       30,      4,      31};
 
 // Rects for TTE (in pixels)
