@@ -532,7 +532,7 @@ static const BG_POINT MAIN_MENU_ACE_T       = {88,      26};
 
 
 // Palette IDs
-#define PLAY_HAND_BTN_SELECTED_BORDER_PID 1
+#define PLAY_HAND_BTN_BORDER_PID 1
 #define BOSS_BLIND_PRIMARY_PID 1
 #define BLIND_BG_SHADOW_PID 2
 #define MAIN_MENU_PLAY_BUTTON_OUTLINE_PID 2
@@ -543,12 +543,12 @@ static const BG_POINT MAIN_MENU_ACE_T       = {88,      26};
 #define NEXT_ROUND_BTN_SELECTED_BORDER_PID 5
 #define SHOP_PANEL_SHADOW_PID 6
 #define BOSS_BLIND_SHADOW_PID 7
-#define PLAY_HAND_BTN_PID 7
+#define PLAY_HAND_BTN_PID 6
 #define REROLL_BTN_SELECTED_BORDER_PID 7
 #define SHOP_LIGHTS_1_PID 8
-#define DISCARD_BTN_SELECTED_BORDER_PID 9
+#define DISCARD_BTN_BORDER_PID 9
 #define BLIND_SKIP_BTN_SELECTED_BORDER_PID 10
-#define DISCARD_BTN_PID 12 
+#define DISCARD_BTN_PID 7 
 #define SHOP_LIGHTS_2_PID 14
 #define BLIND_SELECT_BTN_PID 15
 #define NEXT_ROUND_BTN_PID 16 
@@ -782,8 +782,8 @@ void change_background(int id)
             memset16(&pal_bg_mem[BLIND_BG_SHADOW_PID], blind_get_color(current_blind, BLIND_BACKGROUND_SHADOW_COLOR_INDEX), 1);
 
             // Copy the Play Hand and Discard button colors to their selection highlights
-            memcpy16(&pal_bg_mem[PLAY_HAND_BTN_SELECTED_BORDER_PID], &pal_bg_mem[PLAY_HAND_BTN_PID], 1);
-            memcpy16(&pal_bg_mem[DISCARD_BTN_SELECTED_BORDER_PID], &pal_bg_mem[DISCARD_BTN_PID], 1);
+            memcpy16(&pal_bg_mem[PLAY_HAND_BTN_BORDER_PID], &pal_bg_mem[PLAY_HAND_BTN_PID], 1);
+            memcpy16(&pal_bg_mem[DISCARD_BTN_BORDER_PID], &pal_bg_mem[DISCARD_BTN_PID], 1);
         }
     }
     else if (id == BG_ID_CARD_PLAYING)
@@ -1456,8 +1456,8 @@ static void game_playing_process_hand_select_input()
     {
         if (discard_button_highlighted == false) // Play button logic
         {
-            memset16(&pal_bg_mem[PLAY_HAND_BTN_SELECTED_BORDER_PID], HIGHLIGHT_COLOR, 1);
-            memcpy16(&pal_bg_mem[DISCARD_BTN_SELECTED_BORDER_PID], &pal_bg_mem[DISCARD_BTN_PID], 1);
+            memset16(&pal_bg_mem[PLAY_HAND_BTN_BORDER_PID], HIGHLIGHT_COLOR, 1);
+            memcpy16(&pal_bg_mem[DISCARD_BTN_BORDER_PID], &pal_bg_mem[DISCARD_BTN_PID], 1);
 
             if (key_hit(SELECT_CARD) && hands > 0 && hand_play())
             {
@@ -1470,8 +1470,8 @@ static void game_playing_process_hand_select_input()
         else // Discard button logic
         {
 			// 7 is score and play hand button color
-            memcpy16(&pal_bg_mem[PLAY_HAND_BTN_SELECTED_BORDER_PID], &pal_bg_mem[PLAY_HAND_BTN_PID], 1);
-            memset16(&pal_bg_mem[DISCARD_BTN_SELECTED_BORDER_PID], HIGHLIGHT_COLOR, 1);
+            memcpy16(&pal_bg_mem[PLAY_HAND_BTN_BORDER_PID], &pal_bg_mem[PLAY_HAND_BTN_PID], 1);
+            memset16(&pal_bg_mem[DISCARD_BTN_BORDER_PID], HIGHLIGHT_COLOR, 1);
 
             if (key_hit(SELECT_CARD) && discards > 0 && hand_discard())
             {
@@ -1486,8 +1486,8 @@ static void game_playing_process_hand_select_input()
     }
     else if (selection_y == 0) // On row of cards
     {
-        memcpy16(&pal_bg_mem[PLAY_HAND_BTN_SELECTED_BORDER_PID], &pal_bg_mem[PLAY_HAND_BTN_PID], 1); // Play button highlight color
-        memcpy16(&pal_bg_mem[DISCARD_BTN_SELECTED_BORDER_PID], &pal_bg_mem[DISCARD_BTN_PID], 1); // Discard button highlight color
+        memcpy16(&pal_bg_mem[PLAY_HAND_BTN_BORDER_PID], &pal_bg_mem[PLAY_HAND_BTN_PID], 1); // Play button highlight color
+        memcpy16(&pal_bg_mem[DISCARD_BTN_BORDER_PID], &pal_bg_mem[DISCARD_BTN_PID], 1); // Discard button highlight color
         
         if (key_hit(SELECT_CARD))
         {
