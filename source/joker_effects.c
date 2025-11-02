@@ -399,23 +399,40 @@ static JokerEffect blue_joker_effect(Joker *joker, Card *scored_card, enum Joker
 static JokerEffect raised_fist_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event)
 {
     JokerEffect effect = {0};
-    
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
 
-    // Find the lowest rank card in hand
-    // Aces are always considered high value, even in an ace-low straight
-    u8 lowest_value = IMPOSSIBLY_HIGH_CARD_VALUE;
-    CardObject** hand = get_hand_array();
-    int hand_size = hand_get_size();
-    for (int i = 0; i < hand_size; i++ )
+    s32* p_lowest_value_index = &(joker->data);
+
+    switch (joker_event)
     {
-        u8 value = card_get_value(hand[i]->card);
-        if (lowest_value > value)
-            lowest_value = value;
-    }
+        // Use this event to compute the index of the lowest value card only once.
+        // Aces are always considered high value, even in an ace-low straight
+        case JOKER_EVENT_ON_HAND_PLAYED:
+            // initialized at 0 but accessed only if
+            // hand_size > 0 so we're never out of bounds 
+            *p_lowest_value_index = 0;
+            CardObject** hand = get_hand_array();
+            int hand_size = hand_get_size();
+            for (int i = 0; i < hand_size; i++ )
+            {
+                u8 value = card_get_value(hand[i]->card);
+                u8 lowest_value = card_get_value(hand[*p_lowest_value_index]->card);
+                if (lowest_value > value)
+                {
+                    *p_lowest_value_index = i;
+                }
+            }
+            break;
 
-    if (lowest_value != IMPOSSIBLY_HIGH_CARD_VALUE)
-        effect.mult = lowest_value * 2;
+        case JOKER_EVENT_ON_CARD_HELD:
+            if (get_scored_card_index() == *p_lowest_value_index)
+            {
+                effect.mult = 2 * card_get_value(scored_card);
+            }
+            break;
+
+        default:
+            break;
+    }
 
     return effect;
 } 
