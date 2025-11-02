@@ -39,7 +39,7 @@ struct ListNode
 /**
  * @brief A doubly-linked list
  */
-typedef struct
+typedef struct List
 {
     /**
      * @brief The first entry in the list
