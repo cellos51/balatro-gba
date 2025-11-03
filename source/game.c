@@ -1472,7 +1472,6 @@ static void game_playing_process_hand_select_input()
         }
         else // Discard button logic
         {
-			// 7 is score and play hand button color
             memcpy16(&pal_bg_mem[PLAY_HAND_BTN_BORDER_PID], &pal_bg_mem[PLAY_HAND_BTN_PID], 1);
             memset16(&pal_bg_mem[DISCARD_BTN_BORDER_PID], HIGHLIGHT_COLOR, 1);
 
