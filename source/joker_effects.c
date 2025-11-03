@@ -407,18 +407,19 @@ static JokerEffect raised_fist_joker_effect(Joker *joker, Card *scored_card, enu
         // Use this event to compute the index of the lowest value card only once.
         // Aces are always considered high value, even in an ace-low straight
         case JOKER_EVENT_ON_HAND_PLAYED:
-            // initialized at 0 but accessed only if
+            // index initialized at 0 but accessed only if
             // hand_size > 0 so we're never out of bounds 
             *p_lowest_value_index = 0;
+            u8 lowest_value = IMPOSSIBLY_HIGH_CARD_VALUE;
             CardObject** hand = get_hand_array();
             int hand_size = hand_get_size();
             for (int i = 0; i < hand_size; i++ )
             {
                 u8 value = card_get_value(hand[i]->card);
-                u8 lowest_value = card_get_value(hand[*p_lowest_value_index]->card);
                 if (lowest_value > value)
                 {
                     *p_lowest_value_index = i;
+                    lowest_value = value;
                 }
             }
             break;
