@@ -52,6 +52,11 @@ typedef struct List
      * @brief The last entry in the list
      */
     ListNode* tail;
+
+    /**
+     * @brief Number of elements in list
+     */
+    int len;
 } List;
 
 /**

@@ -5,8 +5,8 @@
 
 List list_new(void)
 {
-    List head = { .head = NULL, .tail = NULL};
-    return head;
+    List list = { .head = NULL, .tail = NULL, .len = 0 };
+    return list;
 }
 
 void list_destroy(List* list)
@@ -23,11 +23,12 @@ void list_destroy(List* list)
 
     list->head = NULL;
     list->tail = NULL;
+    list->len = 0;
 }
 
 bool list_is_empty(const List* list)
 {
-    return list->head == NULL;
+    return list->len == 0;
 }
 
 void list_push_front(List *list, void* data)
@@ -48,6 +49,8 @@ void list_push_front(List *list, void* data)
     }
 
     list->head = node;
+
+    list->len++;
 }
 
 void list_push_back(List *list, void* data)
@@ -67,6 +70,8 @@ void list_push_back(List *list, void* data)
     }
 
     list->tail = node;
+
+    list->len++;
 }
 
 void list_remove_node(List *list, ListNode *node)
@@ -93,6 +98,8 @@ void list_remove_node(List *list, ListNode *node)
     }
 
     POOL_FREE(ListNode, node);
+
+    list->len--;
 }
 
 ListItr list_itr_new(const List* list)
@@ -108,7 +115,8 @@ ListItr list_itr_new(const List* list)
 
 ListNode* list_itr_next(ListItr* itr)
 {
-    if(!itr->current_node) { return NULL; };
+    if(!itr->current_node) return NULL;
+
     ListNode* ln = itr->current_node;
 
     if(ln->next)
@@ -123,21 +131,12 @@ ListNode* list_itr_next(ListItr* itr)
 
 int list_get_len(const List* list)
 {
-    int len = 0;
-    ListItr itr = list_itr_new(list);
-    ListNode* ln;
-
-    while((ln = list_itr_next(&itr)))
-    {
-        len++;
-    }
-
-    return len;
+    return list->len;
 }
 
 void* list_get_at_idx(const List* list, int n)
 {
-    if(n >= list_get_len(list)) return NULL;
+    if(n >= list_get_len(list) || n < 0) return NULL;
 
     int len = 0;
     ListItr itr = list_itr_new(list);
@@ -153,7 +152,7 @@ void* list_get_at_idx(const List* list, int n)
 
 bool list_remove_at_idx(List* list, int n)
 {
-    if(n >= list_get_len(list)) return NULL;
+    if(n >= list_get_len(list) || n < 0) return false;
 
     int len = 0;
     ListItr itr = list_itr_new(list);

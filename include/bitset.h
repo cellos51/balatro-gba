@@ -55,7 +55,7 @@ typedef struct Bitset
 /**
  * @brief An iterator into a @ref Bitset
  *
- * This iterator will parse and find the next index to a '1' bit as effeciently as possible.
+ * This iterator will parse and find the next index to a '1' bit as efficiently as possible.
  *
  * There is no implementation of the following (yet):
  *  - Reverse iteration

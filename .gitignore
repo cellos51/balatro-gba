@@ -5,3 +5,4 @@
 *.vcxproj*
 /balatro-gba/x64/**
 /tests/pool/build
+/tests/list/build

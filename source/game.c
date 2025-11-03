@@ -2088,10 +2088,10 @@ static void cards_in_hand_update_loop(bool* discarded_card, int* played_selectio
 // returns true if a joker was scored, false otherwise
 static bool check_and_score_joker_for_event(int* iteration_start, Card* played_card, enum JokerEvent joker_event)
 {
-    for (int k = *iteration_start; k < list_get_len(&_shop_jokers_list); k++)
+    for (int k = *iteration_start; k < list_get_len(&_active_jokers_list); k++)
     {
         (*iteration_start)++;
-        JokerObject *joker = list_get_at_idx(&_shop_jokers_list, k);
+        JokerObject *joker = list_get_at_idx(&_active_jokers_list, k);
         if (joker_object_score(joker, played_card, joker_event, &chips, &mult, &money, &retrigger))
         {
             display_chips(chips);
@@ -2917,7 +2917,7 @@ void joker_start_discard_animation(JokerObject *joker_object)
 
 void game_sell_joker(int joker_id)
 {
-    if (joker_id < 0 || joker_id > list_get_len(&_active_jokers_list))
+    if (joker_id < 0 || joker_id >= list_get_len(&_active_jokers_list))
         return;
     
     JokerObject* joker_object = (JokerObject*)list_get_at_idx(&_active_jokers_list, joker_id);
@@ -2927,7 +2927,7 @@ void game_sell_joker(int joker_id)
 
     list_remove_at_idx(&_active_jokers_list, joker_id);
     
-    _set_shop_joker_avail(joker_id, true);
+    _set_shop_joker_avail(joker_object->joker->id, true);
 
     joker_start_discard_animation(joker_object);
 }
