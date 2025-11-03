@@ -583,18 +583,18 @@ static const BG_POINT MAIN_MENU_ACE_T       = {88,      26};
 
 
 // Palette IDs
-#define PLAY_HAND_BTN_SELECTED_BORDER_PID 1
+#define PLAY_HAND_BTN_SELECTED_BORDER_PID 7
 #define BOSS_BLIND_PRIMARY_PID 1
-#define BLIND_BG_SHADOW_PID 2
+#define BLIND_BG_SHADOW_PID 5
 #define MAIN_MENU_PLAY_BUTTON_OUTLINE_PID 2
 #define REROLL_BTN_PID 3
-#define BLIND_BG_SECONDARY_PID 5
+#define BLIND_BG_SECONDARY_PID 18
 #define BLIND_SKIP_BTN_PID 5 
 #define MAIN_MENU_PLAY_BUTTON_MAIN_COLOR_PID 5
 #define NEXT_ROUND_BTN_SELECTED_BORDER_PID 5
 #define SHOP_PANEL_SHADOW_PID 6
 #define BOSS_BLIND_SHADOW_PID 7
-#define PLAY_HAND_BTN_PID 7
+#define PLAY_HAND_BTN_PID 6
 #define REROLL_BTN_SELECTED_BORDER_PID 7
 #define SHOP_LIGHTS_1_PID 8
 #define DISCARD_BTN_SELECTED_BORDER_PID 9
@@ -2370,37 +2370,56 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
     }
 }
 
-static const Rect score_flame_frames[9] = {
-    {27, 20, 29, 20},
-    {27, 21, 29, 21},
-    {27, 22, 29, 22},
-    {27, 23, 29, 23},
-    {27, 24, 29, 24},
-    {27, 25, 29, 25},
-    {27, 26, 29, 26},
-    {27, 27, 29, 27},
-    {27, 28, 29, 28},
+static const Rect score_flame_chips_frames[9] = {
+    {26, 20, 28, 20},
+    {26, 21, 28, 21},
+    {26, 22, 28, 22},
+    {26, 23, 28, 23},
+    {26, 24, 28, 24},
+    {26, 25, 28, 25},
+    {26, 26, 28, 26},
+    {26, 27, 28, 27},
+    {26, 28, 28, 28},
+};
+
+static const Rect score_flame_mult_frames[9] = {
+    {29, 20, 31, 20},
+    {29, 21, 31, 21},
+    {29, 22, 31, 22},
+    {29, 23, 31, 23},
+    {29, 24, 31, 24},
+    {29, 25, 31, 25},
+    {29, 26, 31, 26},
+    {29, 27, 31, 27},
+    {29, 28, 31, 28},
 };
 
 static const BG_POINT score_flame_chips = {1, 9};
+static const BG_POINT score_flame_mult  = {5, 9};
 
 static void process_flaming_score()
 {
-    static u8 flame_score_frame = 0;
+    static u8 flame_score_chips_frame = 0;
+    static u8 flame_score_mult_frame  = 4;
     
     // animate flames at 10FPS = change sprites every 6 frames
     if (score_flames_active)
     {
-        if (timer % 6 == 0)
+        if (timer % 5 == 0)
         {
             // cycling through 8 frames total
-            flame_score_frame = (flame_score_frame + 1) % 8;
-            main_bg_se_copy_rect(score_flame_frames[flame_score_frame + 1], score_flame_chips);
+            flame_score_chips_frame = (flame_score_chips_frame + 1) % 8;
+            flame_score_mult_frame  = (flame_score_mult_frame  + 1) % 8;
+            // chips flame (blue)
+            main_bg_se_copy_rect(score_flame_chips_frames[flame_score_chips_frame + 1], score_flame_chips);
+            // mult flame (red)
+            main_bg_se_copy_rect(score_flame_mult_frames[flame_score_mult_frame  + 1], score_flame_mult);
         }
     }
     else
     {
-        main_bg_se_copy_rect(score_flame_frames[0], score_flame_chips);
+        main_bg_se_copy_rect(score_flame_chips_frames[0], score_flame_chips);
+        main_bg_se_copy_rect(score_flame_mult_frames[0], score_flame_mult);
     }
 
     return;
