@@ -293,7 +293,9 @@ int main(void)
     printf("Testing list complete exercise.\n");
     push_back_three_remove_push_front_three_entries();
 
-    printf("All list tests passed :)\n");
+    printf("---------------------------------------------------------\n");
+    printf("List Tests Passed :)\n");
+    printf("---------------------------------------------------------\n");
 
     return 0;
 }
