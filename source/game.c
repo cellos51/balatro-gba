@@ -496,7 +496,7 @@ static const Rect score_flame_chips_frames[9] = {
                                               {26,      27,      28,     27},
                                               {26,      28,      28,     28},
 };
-static const Rect sore_flame_mult_frames[9] = {
+static const Rect score_flame_mult_frames[9] = {
                                               {29,      20,      31,     20},
                                               {29,      21,      31,     21},
                                               {29,      22,      31,     22},
