@@ -120,10 +120,10 @@ ListNode* list_itr_next(ListItr* itr)
     return ln;
 }
 
-int list_get_len(List list)
+int list_get_len(const List* list)
 {
     int len = 0;
-    ListItr itr = list_itr_new(&list);
+    ListItr itr = list_itr_new(list);
     ListNode* ln;
 
     while((ln = list_itr_next(&itr)))

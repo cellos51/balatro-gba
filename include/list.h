@@ -151,7 +151,7 @@ bool list_remove_at_idx(List *list, int n);
  *
  * @return The number of elements in the list
  */
-int list_get_len(List list);
+int list_get_len(const List* list);
 
 /**
  * Create a new @ref ListItr

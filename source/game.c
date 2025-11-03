@@ -2088,7 +2088,7 @@ static void cards_in_hand_update_loop(bool* discarded_card, int* played_selectio
 // returns true if a joker was scored, false otherwise
 static bool check_and_score_joker_for_event(int* iteration_start, Card* played_card, enum JokerEvent joker_event)
 {
-    for (int k = *iteration_start; k < list_get_len(_shop_jokers_list); k++)
+    for (int k = *iteration_start; k < list_get_len(&_shop_jokers_list); k++)
     {
         (*iteration_start)++;
         JokerObject *joker = list_get_at_idx(&_shop_jokers_list, k);
@@ -2881,7 +2881,7 @@ static void game_shop_reroll(int *reroll_cost)
 
 static int jokers_sel_row_get_size()
 {
-    return list_get_len(_active_jokers_list);
+    return list_get_len(&_active_jokers_list);
 }
 
 static void jokers_sel_row_on_selection_changed(SelectionGrid *selection_grid,
@@ -2917,7 +2917,7 @@ void joker_start_discard_animation(JokerObject *joker_object)
 
 void game_sell_joker(int joker_id)
 {
-    if (joker_id < 0 || joker_id > list_get_len(_active_jokers_list))
+    if (joker_id < 0 || joker_id > list_get_len(&_active_jokers_list))
         return;
     
     JokerObject* joker_object = (JokerObject*)list_get_at_idx(&_active_jokers_list, joker_id);
@@ -2945,7 +2945,7 @@ static void jokers_sel_row_on_key_hit(SelectionGrid* selection_grid, Selection* 
 // Shop input
 static int shop_top_row_get_size()
 {
-    return list_get_len(_shop_jokers_list) + 1; // + 1 to account for next round button
+    return list_get_len(&_shop_jokers_list) + 1; // + 1 to account for next round button
 }
 
 static void add_to_held_jokers(JokerObject *joker_object)
@@ -2990,7 +2990,7 @@ static void shop_top_row_on_key_hit(SelectionGrid* selection_grid, Selection* se
         int shop_joker_idx = selection->x - 1; // - 1 to account for next round button
         JokerObject *joker_object = (JokerObject*)list_get_at_idx(&_shop_jokers_list, shop_joker_idx);
         if (joker_object == NULL 
-            || list_get_len(_active_jokers_list) >= MAX_JOKERS_HELD_SIZE
+            || list_get_len(&_active_jokers_list) >= MAX_JOKERS_HELD_SIZE
             || money < joker_object->joker->value)
         {
             return;
@@ -3459,7 +3459,7 @@ static void held_jokers_update_loop()
 
     FIXED hand_x = int2fx(HELD_JOKERS_POS.x);
 
-    int jokers_top = list_get_len(_active_jokers_list) - 1;
+    int jokers_top = list_get_len(&_active_jokers_list) - 1;
     for (int i = jokers_top; i >= 0; i--)
     {
         JokerObject *joker = (JokerObject*)list_get_at_idx(&_active_jokers_list, i);
