@@ -108,8 +108,9 @@ ListItr list_itr_new(const List* list)
 
 ListNode* list_itr_next(ListItr* itr)
 {
-    ListNode* ln = itr->current_node;
     if(!itr->current_node) { return NULL; };
+    ListNode* ln = itr->current_node;
+
     if(ln->next)
     {
         itr->current_node = ln->next;
@@ -136,6 +137,8 @@ int list_get_len(const List* list)
 
 void* list_get_at_idx(const List* list, int n)
 {
+    if(n >= list_get_len(list)) return NULL;
+
     int len = 0;
     ListItr itr = list_itr_new(list);
     ListNode* ln;
@@ -150,6 +153,8 @@ void* list_get_at_idx(const List* list, int n)
 
 bool list_remove_at_idx(List* list, int n)
 {
+    if(n >= list_get_len(list)) return NULL;
+
     int len = 0;
     ListItr itr = list_itr_new(list);
     ListNode* ln;
