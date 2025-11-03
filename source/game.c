@@ -475,9 +475,13 @@ static const Rect TOP_LEFT_PANEL_ANIM_RECT  = {0,       0,      8,      4  };
 static const BG_POINT TOP_LEFT_BLIND_TITLE_POINT = {0,  21, };
 static const Rect BIG_BLIND_TITLE_SRC_RECT  = {0,       26,     8,      26 };
 static const Rect BOSS_BLIND_TITLE_SRC_RECT = {0,       27,     8,      27 };
+static const Rect CASHOUT_DEST_RECT =         {10,      8,      23,     10 };
+static const BG_POINT CASHOUT_SRC_3X3_RECT_POS =   {5,  29};
 static const BG_POINT GAME_OVER_SRC_RECT_3X3_POS = {25, 29};
-static const Rect GAME_OVER_DIALOG_DEST_RECT= {11,      21,      23,     26};
-static const Rect GAME_OVER_ANIM_RECT       = {11,      8,       23,     26};
+static const Rect GAME_OVER_DIALOG_DEST_RECT= {11,      21,      23,     28};
+static const Rect GAME_OVER_ANIM_RECT       = {11,      8,       23,     28};
+static const BG_POINT NEW_RUN_BTN_DEST_POS  = {15,      26};
+static const Rect NEW_RUN_BTN_SRC_RECT      = {0,       30,      4,      31};
 
 // Rects for TTE (in pixels)
 static const Rect HAND_SIZE_RECT            = {128,     128,    152,    160 }; // Seems to include both SELECT and PLAYING
@@ -510,10 +514,10 @@ static const Rect ROUND_END_NUM_HANDS_RECT  = {88,      116,    UNDEFINED, UNDEF
 static const Rect HAND_REWARD_RECT          = {168,     UNDEFINED, UNDEFINED, UNDEFINED };
 static const Rect ROUND_END_INTEREST_RECT   = {88,      126,    UNDEFINED, UNDEFINED };
 static const Rect INTEREST_REWARD_RECT      = {168,     UNDEFINED, UNDEFINED, UNDEFINED };
-static const Rect CASHOUT_RECT              = {88,      72,     UNDEFINED, UNDEFINED };
+static const Rect CASHOUT_TEXT_RECT         = {88,      72,     UNDEFINED, UNDEFINED };
 static const Rect SHOP_REROLL_RECT          = {88,      96,     UNDEFINED, UNDEFINED };
 static const Rect GAME_LOSE_MSG_TEXT_RECT   = {104,     72,     UNDEFINED, UNDEFINED};
-// 1 character to the right oF GAME_LOSE
+// 1 character to the right of GAME_LOSE
 static const Rect GAME_WIN_MSG_TEXT_RECT    = {112,      72,     UNDEFINED, UNDEFINED};
 
 static const BG_POINT HELD_JOKERS_POS       = {108,     10};
@@ -582,7 +586,7 @@ static const BG_POINT MAIN_MENU_ACE_T       = {88,      26};
 
 
 // Palette IDs
-#define PLAY_HAND_BTN_SELECTED_BORDER_PID 1
+#define PLAY_HAND_BTN_BORDER_PID 1
 #define BOSS_BLIND_PRIMARY_PID 1
 #define BLIND_BG_SHADOW_PID 2
 #define MAIN_MENU_PLAY_BUTTON_OUTLINE_PID 2
@@ -593,12 +597,12 @@ static const BG_POINT MAIN_MENU_ACE_T       = {88,      26};
 #define NEXT_ROUND_BTN_SELECTED_BORDER_PID 5
 #define SHOP_PANEL_SHADOW_PID 6
 #define BOSS_BLIND_SHADOW_PID 7
-#define PLAY_HAND_BTN_PID 7
+#define PLAY_HAND_BTN_PID 6
 #define REROLL_BTN_SELECTED_BORDER_PID 7
 #define SHOP_LIGHTS_1_PID 8
-#define DISCARD_BTN_SELECTED_BORDER_PID 9
+#define DISCARD_BTN_BORDER_PID 9
 #define BLIND_SKIP_BTN_SELECTED_BORDER_PID 10
-#define DISCARD_BTN_PID 12 
+#define DISCARD_BTN_PID 7 
 #define SHOP_LIGHTS_2_PID 14
 #define BLIND_SELECT_BTN_PID 15
 #define NEXT_ROUND_BTN_PID 16 
@@ -833,8 +837,8 @@ void change_background(int id)
             memset16(&pal_bg_mem[BLIND_BG_SHADOW_PID], blind_get_color(current_blind, BLIND_BACKGROUND_SHADOW_COLOR_INDEX), 1);
 
             // Copy the Play Hand and Discard button colors to their selection highlights
-            memcpy16(&pal_bg_mem[PLAY_HAND_BTN_SELECTED_BORDER_PID], &pal_bg_mem[PLAY_HAND_BTN_PID], 1);
-            memcpy16(&pal_bg_mem[DISCARD_BTN_SELECTED_BORDER_PID], &pal_bg_mem[DISCARD_BTN_PID], 1);
+            memcpy16(&pal_bg_mem[PLAY_HAND_BTN_BORDER_PID], &pal_bg_mem[PLAY_HAND_BTN_PID], 1);
+            memcpy16(&pal_bg_mem[DISCARD_BTN_BORDER_PID], &pal_bg_mem[DISCARD_BTN_PID], 1);
         }
     }
     else if (id == BG_ID_CARD_PLAYING)
@@ -1338,6 +1342,7 @@ static void game_over_init()
     // Clears the round end menu
     main_bg_se_clear_rect(POP_MENU_ANIM_RECT);
     main_bg_se_copy_expand_3x3_rect(GAME_OVER_DIALOG_DEST_RECT, GAME_OVER_SRC_RECT_3X3_POS);
+    main_bg_se_copy_rect(NEW_RUN_BTN_SRC_RECT, NEW_RUN_BTN_DEST_POS);
 }
 
 static void game_lose_on_init()
@@ -1507,8 +1512,8 @@ static void game_playing_process_hand_select_input()
     {
         if (discard_button_highlighted == false) // Play button logic
         {
-            memset16(&pal_bg_mem[PLAY_HAND_BTN_SELECTED_BORDER_PID], HIGHLIGHT_COLOR, 1);
-            memcpy16(&pal_bg_mem[DISCARD_BTN_SELECTED_BORDER_PID], &pal_bg_mem[DISCARD_BTN_PID], 1);
+            memset16(&pal_bg_mem[PLAY_HAND_BTN_BORDER_PID], HIGHLIGHT_COLOR, 1);
+            memcpy16(&pal_bg_mem[DISCARD_BTN_BORDER_PID], &pal_bg_mem[DISCARD_BTN_PID], 1);
 
             if (key_hit(SELECT_CARD) && hands > 0 && hand_play())
             {
@@ -1520,9 +1525,8 @@ static void game_playing_process_hand_select_input()
         }
         else // Discard button logic
         {
-			// 7 is score and play hand button color
-            memcpy16(&pal_bg_mem[PLAY_HAND_BTN_SELECTED_BORDER_PID], &pal_bg_mem[PLAY_HAND_BTN_PID], 1);
-            memset16(&pal_bg_mem[DISCARD_BTN_SELECTED_BORDER_PID], HIGHLIGHT_COLOR, 1);
+            memcpy16(&pal_bg_mem[PLAY_HAND_BTN_BORDER_PID], &pal_bg_mem[PLAY_HAND_BTN_PID], 1);
+            memset16(&pal_bg_mem[DISCARD_BTN_BORDER_PID], HIGHLIGHT_COLOR, 1);
 
             if (key_hit(SELECT_CARD) && discards > 0 && hand_discard())
             {
@@ -1537,8 +1541,8 @@ static void game_playing_process_hand_select_input()
     }
     else if (selection_y == 0) // On row of cards
     {
-        memcpy16(&pal_bg_mem[PLAY_HAND_BTN_SELECTED_BORDER_PID], &pal_bg_mem[PLAY_HAND_BTN_PID], 1); // Play button highlight color
-        memcpy16(&pal_bg_mem[DISCARD_BTN_SELECTED_BORDER_PID], &pal_bg_mem[DISCARD_BTN_PID], 1); // Discard button highlight color
+        memcpy16(&pal_bg_mem[PLAY_HAND_BTN_BORDER_PID], &pal_bg_mem[PLAY_HAND_BTN_PID], 1); // Play button highlight color
+        memcpy16(&pal_bg_mem[DISCARD_BTN_BORDER_PID], &pal_bg_mem[DISCARD_BTN_PID], 1); // Discard button highlight color
         
         if (key_hit(SELECT_CARD))
         {
@@ -2649,30 +2653,12 @@ static void game_round_end_display_cashout()
 {
     if (timer == FRAMES(40)) // Put the "cash out" button onto the round end panel
     {
-        Rect left_rect = {4, 29, 4, 31};
-        BG_POINT left_point = {10, 8};
-        main_bg_se_copy_rect(left_rect, left_point);
-    
-        Rect right_rect = {7, 29, 7, 31};
-        BG_POINT right_point = {23, 8};
-        main_bg_se_copy_rect(right_rect, right_point);
-    
-        Rect top_rect = {11, 8, 22, 8};
-        BG_POINT top_point = {6, 29};
-        main_bg_se_fill_rect_with_se(main_bg_se_get_se(top_point), top_rect);
-    
-        Rect middle_rect = {11, 9, 22, 9};
-        BG_POINT middle_point = {6, 30};
-        main_bg_se_fill_rect_with_se(main_bg_se_get_se(middle_point), middle_rect);
-    
-        Rect bottom_rect = {11, 10, 22, 10};
-        BG_POINT bottom_point = {6, 31};
-        main_bg_se_fill_rect_with_se(main_bg_se_get_se(bottom_point), bottom_rect);
+        main_bg_se_copy_expand_3x3_rect(CASHOUT_DEST_RECT, CASHOUT_SRC_3X3_RECT_POS);
     
         int cashout_amount = hands + blind_get_reward(current_blind) + calculate_interest_reward();
 
         bool omit_space = cashout_amount >= 10;
-        tte_printf("#{P:%d, %d; cx:0x%X000}Cash Out:%s$%d", CASHOUT_RECT.left, CASHOUT_RECT.top, TTE_WHITE_PB, omit_space ? "" : " " , cashout_amount);
+        tte_printf("#{P:%d, %d; cx:0x%X000}Cash Out:%s$%d", CASHOUT_TEXT_RECT.left, CASHOUT_TEXT_RECT.top, TTE_WHITE_PB, omit_space ? "" : " " , cashout_amount);
     }
     else if (timer > FRAMES(40) && key_hit(SELECT_CARD)) // Wait until the player presses A to cash out
     {
@@ -3476,7 +3462,7 @@ static void game_lose_on_update()
         tte_printf("#{P:%d,%d; cx:0x%X000}GAME OVER", GAME_LOSE_MSG_TEXT_RECT.left, GAME_LOSE_MSG_TEXT_RECT.top, TTE_RED_PB);
     }
 
-    if (key_hit(KEY_ANY)) game_change_state(GAME_STATE_BLIND_SELECT);
+    if (key_hit(KEY_A)) game_change_state(GAME_STATE_BLIND_SELECT);
 }
 
 // This function isn't set in stone. This is just a placeholder
@@ -3535,7 +3521,7 @@ static void game_win_on_update()
         tte_printf("#{P:%d,%d; cx:0x%X000}YOU WIN", GAME_WIN_MSG_TEXT_RECT.left, GAME_WIN_MSG_TEXT_RECT.top, TTE_BLUE_PB);
     }
 
-    if (key_hit(KEY_ANY)) game_change_state(GAME_STATE_BLIND_SELECT);
+    if (key_hit(KEY_A)) game_change_state(GAME_STATE_BLIND_SELECT);
 }
 
 void game_update()
