@@ -107,9 +107,9 @@ int main(void)
     printf("Testing Pool Fill and Empty.\n");
     if(!test_fill_and_empty()) return UNDEFINED;
 
-    printf("---------------------------------------------------------\n");
-    printf("Pool Tests Passed\n");
-    printf("---------------------------------------------------------\n");
+    printf("-------------------------------------------------------------------------------\n");
+    printf("Pool Tests Passed :)\n");
+    printf("-------------------------------------------------------------------------------\n");
     printf("Testing execution time for fun :)\n\n");
 
     timestamp_t t1 = get_time();
