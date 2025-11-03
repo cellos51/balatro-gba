@@ -485,7 +485,8 @@ static const BG_POINT NEW_RUN_BTN_DEST_POS  = {15,      26};
 static const Rect NEW_RUN_BTN_SRC_RECT      = {0,       30,      4,      31};
 
 // Flaming score animation frames
-static const Rect score_flame_chips_frames[9] = {
+#define NB_SCORE_FLAMES_FRAMES 8
+static const Rect score_flame_chips_frames[NB_SCORE_FLAMES_FRAMES + 1] = {
                                               {26,      20,      28,     20},
                                               {26,      21,      28,     21},
                                               {26,      22,      28,     22},
@@ -496,7 +497,7 @@ static const Rect score_flame_chips_frames[9] = {
                                               {26,      27,      28,     27},
                                               {26,      28,      28,     28},
 };
-static const Rect score_flame_mult_frames[9] = {
+static const Rect score_flame_mult_frames[NB_SCORE_FLAMES_FRAMES + 1] = {
                                               {29,      20,      31,     20},
                                               {29,      21,      31,     21},
                                               {29,      22,      31,     22},
@@ -2399,29 +2400,33 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
     }
 }
 
+// update flames animation every 5 frames for 12FPS
+#define SCORE_FLAMES_ANIM_FREQ 5
+
 static void process_flaming_score()
 {
     static u8 flame_score_chips_frame = 0;
-    static u8 flame_score_mult_frame  = 4;
+    static u8 flame_score_mult_frame  = NB_SCORE_FLAMES_FRAMES / 2; // offset mult flames animation by half the number of frames for them to not play in sync
     
-    // animate flames at 12FPS = change sprites every 5 frames
     if (score_flames_active)
     {
-        if (timer % 5 == 0)
+		// animate flames at 12FPS = change sprites every 5 frames
+        if (timer % SCORE_FLAMES_ANIM_FREQ == 0)
         {
             // cycling through 8 frames total
-            flame_score_chips_frame = (flame_score_chips_frame + 1) % 8;
-            flame_score_mult_frame  = (flame_score_mult_frame  + 1) % 8;
+            flame_score_chips_frame = (flame_score_chips_frame + 1) % NB_SCORE_FLAMES_FRAMES;
+            flame_score_mult_frame  = (flame_score_mult_frame  + 1) % NB_SCORE_FLAMES_FRAMES;
             // chips flame (blue)
             main_bg_se_copy_rect(score_flame_chips_frames[flame_score_chips_frame + 1], score_flame_chips);
             // mult flame (red)
-            main_bg_se_copy_rect(score_flame_mult_frames[flame_score_mult_frame   + 1], score_flame_mult);
+            main_bg_se_copy_rect(score_flame_mult_frames [flame_score_mult_frame  + 1], score_flame_mult);
         }
     }
     else
     {
+		// clear flames if the condition is not met
         main_bg_se_copy_rect(score_flame_chips_frames[0], score_flame_chips);
-        main_bg_se_copy_rect(score_flame_mult_frames[0], score_flame_mult);
+        main_bg_se_copy_rect(score_flame_mult_frames [0], score_flame_mult);
     }
 }
 
