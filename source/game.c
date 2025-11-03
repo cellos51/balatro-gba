@@ -484,6 +484,32 @@ static const Rect GAME_OVER_ANIM_RECT       = {11,      8,       23,     28};
 static const BG_POINT NEW_RUN_BTN_DEST_POS  = {15,      26};
 static const Rect NEW_RUN_BTN_SRC_RECT      = {0,       30,      4,      31};
 
+// Flaming score animation frames
+static const Rect score_flame_chips_frames[9] = {
+                                              {26,      20,      28,     20},
+                                              {26,      21,      28,     21},
+                                              {26,      22,      28,     22},
+                                              {26,      23,      28,     23},
+                                              {26,      24,      28,     24},
+                                              {26,      25,      28,     25},
+                                              {26,      26,      28,     26},
+                                              {26,      27,      28,     27},
+                                              {26,      28,      28,     28},
+};
+static const Rect sore_flame_mult_frames[9] = {
+                                              {29,      20,      31,     20},
+                                              {29,      21,      31,     21},
+                                              {29,      22,      31,     22},
+                                              {29,      23,      31,     23},
+                                              {29,      24,      31,     24},
+                                              {29,      25,      31,     25},
+                                              {29,      26,      31,     26},
+                                              {29,      27,      31,     27},
+                                              {29,      28,      31,     28},
+};
+static const BG_POINT score_flame_chips     = {1,       9};
+static const BG_POINT score_flame_mult      = {5,       9};
+
 // Rects for TTE (in pixels)
 static const Rect HAND_SIZE_RECT            = {128,     128,    152,    160 }; // Seems to include both SELECT and PLAYING
 static const Rect HAND_SIZE_RECT_SELECT     = {128,     128,    152,    136 };
@@ -1094,7 +1120,6 @@ void check_flaming_score()
         // stop flaming score
         score_flames_active = false;
     }
-    return;
 }
 
 void display_chips()
@@ -2374,39 +2399,12 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
     }
 }
 
-static const Rect score_flame_chips_frames[9] = {
-    {26, 20, 28, 20},
-    {26, 21, 28, 21},
-    {26, 22, 28, 22},
-    {26, 23, 28, 23},
-    {26, 24, 28, 24},
-    {26, 25, 28, 25},
-    {26, 26, 28, 26},
-    {26, 27, 28, 27},
-    {26, 28, 28, 28},
-};
-
-static const Rect score_flame_mult_frames[9] = {
-    {29, 20, 31, 20},
-    {29, 21, 31, 21},
-    {29, 22, 31, 22},
-    {29, 23, 31, 23},
-    {29, 24, 31, 24},
-    {29, 25, 31, 25},
-    {29, 26, 31, 26},
-    {29, 27, 31, 27},
-    {29, 28, 31, 28},
-};
-
-static const BG_POINT score_flame_chips = {1, 9};
-static const BG_POINT score_flame_mult  = {5, 9};
-
 static void process_flaming_score()
 {
     static u8 flame_score_chips_frame = 0;
     static u8 flame_score_mult_frame  = 4;
     
-    // animate flames at 10FPS = change sprites every 6 frames
+    // animate flames at 12FPS = change sprites every 5 frames
     if (score_flames_active)
     {
         if (timer % 5 == 0)
@@ -2417,7 +2415,7 @@ static void process_flaming_score()
             // chips flame (blue)
             main_bg_se_copy_rect(score_flame_chips_frames[flame_score_chips_frame + 1], score_flame_chips);
             // mult flame (red)
-            main_bg_se_copy_rect(score_flame_mult_frames[flame_score_mult_frame  + 1], score_flame_mult);
+            main_bg_se_copy_rect(score_flame_mult_frames[flame_score_mult_frame   + 1], score_flame_mult);
         }
     }
     else
@@ -2425,8 +2423,6 @@ static void process_flaming_score()
         main_bg_se_copy_rect(score_flame_chips_frames[0], score_flame_chips);
         main_bg_se_copy_rect(score_flame_mult_frames[0], score_flame_mult);
     }
-
-    return;
 }
 
 static void game_playing_ui_text_update()
@@ -2451,7 +2447,7 @@ static void game_playing_ui_text_update()
         last_deck_size = deck_get_size();
     }
 
-    // animate score flames if we ecceed the score requirement
+    // animate score flames if we exceed the score requirement
     process_flaming_score();
 }
 
