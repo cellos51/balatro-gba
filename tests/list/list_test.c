@@ -282,13 +282,18 @@ void push_back_three_remove_push_front_three_entries(void)
 
 int main(void)
 {
+    printf("Testing creating and destroying a list.\n");
     create_and_destroy_list();
 
+    printf("Testing push back.\n");
     push_back_one_entry();
 
+    printf("Testing push front.\n");
     push_front_one_entry();
-
+    printf("Testing list complete exercise.\n");
     push_back_three_remove_push_front_three_entries();
+
+    printf("All list tests passed :)\n");
 
     return 0;
 }
