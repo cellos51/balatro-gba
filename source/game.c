@@ -2766,6 +2766,9 @@ static int game_shop_get_rand_available_joker_id(void)
         
     // Now determine how many jokers are available based on the rarity
     int jokers_avail_size = _get_num_shop_jokers_avail();
+
+    if(jokers_avail_size == 0) return UNDEFINED;
+
     int matching_indices[jokers_avail_size];
     int match_count = 0;
 
@@ -2784,17 +2787,9 @@ static int game_shop_get_rand_available_joker_id(void)
         i++;
     }
 
-    int selected_joker_id = 0;
-    if (match_count > 0)
-    {
-        // If we counted at least one joker with matching rarity, pick one of them randomly
-        selected_joker_id = matching_indices[random() % match_count];
-    }
-    else
-    {
-        // Didn't find any jokers of matching rarity, just pick one at random instead
-        selected_joker_id = random() % jokers_avail_size;
-    }
+    int selected_joker_id = (match_count > 0) ?
+                                matching_indices[random() % match_count] :
+                                bitset_find_idx_of_nth_set(&_avail_jokers_bitset, random() % jokers_avail_size);
 
     return selected_joker_id;
 }
@@ -2828,6 +2823,10 @@ static void game_shop_create_items()
         {
             joker_id = game_shop_get_rand_available_joker_id();
         }
+
+        // If for some reason only no joker is left, don't make another
+        if(joker_id == UNDEFINED) break;
+
         _set_shop_joker_avail(joker_id, false);
         
         JokerObject *joker_object = joker_object_new(joker_new(joker_id));
