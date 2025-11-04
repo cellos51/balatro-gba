@@ -205,6 +205,7 @@ static int ante = 0;
 static int money = 0;
 static int score = 0;
 static int temp_score = 0; // This is the score that shows in the same spot as the hand type.
+static bool score_flames_active = false;
 static FIXED lerped_score = 0;
 static FIXED lerped_temp_score = 0;
 
@@ -483,6 +484,15 @@ static const Rect GAME_OVER_ANIM_RECT       = {11,      8,       23,     28};
 static const BG_POINT NEW_RUN_BTN_DEST_POS  = {15,      26};
 static const Rect NEW_RUN_BTN_SRC_RECT      = {0,       30,      4,      31};
 
+// Flaming score animation frames
+#define SCORE_FLAMES_ANIM_FREQ  5 // animation will run at 12FPS
+#define NUM_SCORE_FLAMES_FRAMES 8 // Chips and Mult flame frames are next to one another
+#define SCORE_FLAME_FRAME_WIDTH 3 // so we only need to offset to get the next ones
+static const Rect SCORE_FLAME_RESET         = {26,      20,      28,     20};
+static const Rect SCORE_FLAME_FRAMES_START  = {26,      21,      28,     21};
+static const BG_POINT SCORE_FLAME_CHIPS_POS = {1,       9};
+static const BG_POINT SCORE_FLAME_MULT_POS  = {5,       9};
+
 // Rects for TTE (in pixels)
 static const Rect HAND_SIZE_RECT            = {128,     128,    152,    160 }; // Seems to include both SELECT and PLAYING
 static const Rect HAND_SIZE_RECT_SELECT     = {128,     128,    152,    136 };
@@ -586,28 +596,28 @@ static const BG_POINT MAIN_MENU_ACE_T       = {88,      26};
 
 
 // Palette IDs
-#define PLAY_HAND_BTN_BORDER_PID 1
 #define BOSS_BLIND_PRIMARY_PID 1
-#define BLIND_BG_SHADOW_PID 2
 #define MAIN_MENU_PLAY_BUTTON_OUTLINE_PID 2
 #define REROLL_BTN_PID 3
-#define BLIND_BG_SECONDARY_PID 5
 #define BLIND_SKIP_BTN_PID 5 
 #define MAIN_MENU_PLAY_BUTTON_MAIN_COLOR_PID 5
 #define NEXT_ROUND_BTN_SELECTED_BORDER_PID 5
+#define BLIND_BG_SHADOW_PID 5
 #define SHOP_PANEL_SHADOW_PID 6
-#define BOSS_BLIND_SHADOW_PID 7
 #define PLAY_HAND_BTN_PID 6
+#define BOSS_BLIND_SHADOW_PID 7
+#define PLAY_HAND_BTN_BORDER_PID 7
 #define REROLL_BTN_SELECTED_BORDER_PID 7
 #define SHOP_LIGHTS_1_PID 8
-#define DISCARD_BTN_BORDER_PID 9
+#define DISCARD_BTN_BORDER_PID 8
 #define BLIND_SKIP_BTN_SELECTED_BORDER_PID 10
-#define DISCARD_BTN_PID 7 
+#define DISCARD_BTN_PID 13
 #define SHOP_LIGHTS_2_PID 14
 #define BLIND_SELECT_BTN_PID 15
 #define NEXT_ROUND_BTN_PID 16 
 #define SHOP_LIGHTS_3_PID 17
 #define BLIND_SELECT_BTN_SELECTED_BORDER_PID 18
+#define BLIND_BG_SECONDARY_PID 18
 #define BLIND_BG_PRIMARY_PID 19
 #define REWARD_PANEL_BORDER_PID 19
 #define SHOP_LIGHTS_4_PID 22
@@ -1076,18 +1086,45 @@ void display_money(int value)
     tte_printf("#{P:%d,%d; cx:0x%X000}$%d", x_offset, MONEY_TEXT_RECT.top, TTE_YELLOW_PB, value);
 }
 
-void display_chips(int value)
+// Show/Hide flaming score effect if we will score
+// more than the required amount or not
+void check_flaming_score()
+{
+    int curr_score = chips * mult;
+    int required_score = blind_get_requirement(current_blind, ante);
+    if (curr_score >= required_score && !score_flames_active)
+    {
+        // start flaming score
+        score_flames_active = true;
+        return;
+    }
+    if (curr_score < required_score && score_flames_active)
+    {
+        // stop flaming score and clear rect
+        score_flames_active = false;
+
+        Rect reset_rect = SCORE_FLAME_RESET;
+        main_bg_se_copy_rect(reset_rect, SCORE_FLAME_CHIPS_POS);
+        reset_rect.left  += SCORE_FLAME_FRAME_WIDTH;
+        reset_rect.right += SCORE_FLAME_FRAME_WIDTH;
+        main_bg_se_copy_rect(reset_rect, SCORE_FLAME_MULT_POS);
+    }
+}
+
+void display_chips()
 {
     Rect chips_text_rect = CHIPS_TEXT_RECT;
     tte_erase_rect_wrapper(CHIPS_TEXT_RECT);
-    update_text_rect_to_right_align_num(&chips_text_rect, value, OVERFLOW_LEFT);
-    tte_printf("#{P:%d,%d; cx:0x%X000;}%d", chips_text_rect.left, chips_text_rect.top, TTE_WHITE_PB, value);
+    update_text_rect_to_right_align_num(&chips_text_rect, chips, OVERFLOW_LEFT);
+    tte_printf("#{P:%d,%d; cx:0x%X000;}%d", chips_text_rect.left, chips_text_rect.top, TTE_WHITE_PB, chips);
+    check_flaming_score();
 }
 
-void display_mult(int value)
+void display_mult()
 {
     tte_erase_rect_wrapper(MULT_TEXT_RECT);
-    tte_printf("#{P:%d,%d; cx:0x%X000;}%d", MULT_TEXT_RECT.left, MULT_TEXT_RECT.top, TTE_WHITE_PB, value); // Mult
+    tte_printf("#{P:%d,%d; cx:0x%X000;}%d", MULT_TEXT_RECT.left, MULT_TEXT_RECT.top, TTE_WHITE_PB, mult);
+    check_flaming_score();
 }
 
 void display_round(int value)
@@ -1131,8 +1168,8 @@ void set_hand()
     mult = hand.mult;
 
     print_hand_type(hand.display_name);
-    display_chips(chips);
-    display_mult(mult);
+    display_chips();
+    display_mult();
 }
 
 void card_draw()
@@ -1452,8 +1489,8 @@ void game_start()
     display_round(round); // Set the round display
     display_score(score); // Set the score display
 
-    display_chips(chips); // Set the chips display
-    display_mult(mult); // Set the multiplier display
+    display_chips(); // Set the chips display
+    display_mult(); // Set the multiplier display
 
     display_hands(hands); // Hand
     display_discards(discards); // Discard
@@ -1581,8 +1618,8 @@ static void game_playing_process_input_and_state()
 
             chips = 0;
             mult = 0;
-            display_mult(mult);
-            display_chips(chips);
+            display_mult();
+            display_chips();
         }
     }
     else if (play_state == PLAY_ENDED)
@@ -2107,8 +2144,8 @@ static bool check_and_score_joker_for_event(int* iteration_start, Card* played_c
         JokerObject *joker = list_get(jokers, k);
         if (joker_object_score(joker, played_card, joker_event, &chips, &mult, &money, &retrigger))
         {
-            display_chips(chips);
-            display_mult(mult);
+            display_chips();
+            display_mult();
             display_money(money);
 
             return true;
@@ -2219,7 +2256,7 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
 
                                 // Relocated card scoring logic here
                                 chips += card_get_value(played[j]->card);
-                                display_chips(chips);
+                                display_chips();
 
                                 // Allow Joker scoring
                                 joker_scored_index = 0;
@@ -2374,6 +2411,30 @@ static void game_playing_ui_text_update()
     }
 }
 
+static void game_playing_process_flaming_score()
+{
+    static u8 flame_score_frame = 0;
+    
+    if (score_flames_active)
+    {
+        if (timer % SCORE_FLAMES_ANIM_FREQ == 0)
+        {
+            Rect frame_rect = SCORE_FLAME_FRAMES_START;
+            flame_score_frame = (flame_score_frame + 1) % NUM_SCORE_FLAMES_FRAMES;
+
+            // chips flame (blue)
+            frame_rect.top    += flame_score_frame;
+            frame_rect.bottom += flame_score_frame;
+            main_bg_se_copy_rect(frame_rect, SCORE_FLAME_CHIPS_POS);
+
+            // mult flame (red)
+            frame_rect.left  += SCORE_FLAME_FRAME_WIDTH;
+            frame_rect.right += SCORE_FLAME_FRAME_WIDTH;
+            main_bg_se_copy_rect(frame_rect, SCORE_FLAME_MULT_POS);
+        }
+    }
+}
+
 static void game_playing_on_update()
 {
     // Background logic (thissss might be moved to the card'ssss logic later. I'm a sssssnake)
@@ -2402,6 +2463,9 @@ static void game_playing_on_update()
 	played_cards_update_loop(&discarded_card, &played_selections, &sound_played);
     
     game_playing_ui_text_update();
+
+    // animate score flames if we exceed the score requirement
+    game_playing_process_flaming_score();
 }
 
 static int calculate_interest_reward()
@@ -3492,8 +3556,8 @@ static void game_over_on_exit()
 
     display_round(round);
     display_score(score);
-    display_chips(chips);
-    display_mult(mult);
+    display_chips();
+    display_mult();
     display_hands(hands);
     display_discards(discards);
     display_money(money);
