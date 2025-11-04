@@ -485,31 +485,13 @@ static const BG_POINT NEW_RUN_BTN_DEST_POS  = {15,      26};
 static const Rect NEW_RUN_BTN_SRC_RECT      = {0,       30,      4,      31};
 
 // Flaming score animation frames
-#define NB_SCORE_FLAMES_FRAMES 8
-static const Rect score_flame_chips_frames[NB_SCORE_FLAMES_FRAMES + 1] = {
-                                              {26,      20,      28,     20},
-                                              {26,      21,      28,     21},
-                                              {26,      22,      28,     22},
-                                              {26,      23,      28,     23},
-                                              {26,      24,      28,     24},
-                                              {26,      25,      28,     25},
-                                              {26,      26,      28,     26},
-                                              {26,      27,      28,     27},
-                                              {26,      28,      28,     28},
-};
-static const Rect score_flame_mult_frames[NB_SCORE_FLAMES_FRAMES + 1] = {
-                                              {29,      20,      31,     20},
-                                              {29,      21,      31,     21},
-                                              {29,      22,      31,     22},
-                                              {29,      23,      31,     23},
-                                              {29,      24,      31,     24},
-                                              {29,      25,      31,     25},
-                                              {29,      26,      31,     26},
-                                              {29,      27,      31,     27},
-                                              {29,      28,      31,     28},
-};
-static const BG_POINT score_flame_chips     = {1,       9};
-static const BG_POINT score_flame_mult      = {5,       9};
+#define SCORE_FLAMES_ANIM_FREQ  5 // animation will run at 12FPS
+#define NUM_SCORE_FLAMES_FRAMES 8 // Chips and Mult flame frames are next to one another
+#define SCORE_FLAME_FRAME_WIDTH 3 // so we only need to offset to get the next ones
+static const Rect SCORE_FLAME_RESET         = {26,      20,      28,     20};
+static const Rect SCORE_FLAME_FRAMES_START  = {26,      21,      28,     21};
+static const BG_POINT SCORE_FLAME_CHIPS_POS = {1,       9};
+static const BG_POINT SCORE_FLAME_MULT_POS  = {5,       9};
 
 // Rects for TTE (in pixels)
 static const Rect HAND_SIZE_RECT            = {128,     128,    152,    160 }; // Seems to include both SELECT and PLAYING
@@ -1118,8 +1100,14 @@ void check_flaming_score()
     }
     if (curr_score < required_score && score_flames_active)
     {
-        // stop flaming score
+        // stop flaming score and clear rect
         score_flames_active = false;
+
+        Rect reset_rect = SCORE_FLAME_RESET;
+        main_bg_se_copy_rect(reset_rect, SCORE_FLAME_CHIPS_POS);
+        reset_rect.left  += SCORE_FLAME_FRAME_WIDTH;
+        reset_rect.right += SCORE_FLAME_FRAME_WIDTH;
+        main_bg_se_copy_rect(reset_rect, SCORE_FLAME_MULT_POS);
     }
 }
 
@@ -2400,36 +2388,6 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
     }
 }
 
-// update flames animation every 5 frames for 12FPS
-#define SCORE_FLAMES_ANIM_FREQ 5
-
-static void process_flaming_score()
-{
-    static u8 flame_score_chips_frame = 0;
-    static u8 flame_score_mult_frame  = NB_SCORE_FLAMES_FRAMES / 2; // offset mult flames animation by half the number of frames for them to not play in sync
-    
-    if (score_flames_active)
-    {
-		// animate flames at 12FPS = change sprites every 5 frames
-        if (timer % SCORE_FLAMES_ANIM_FREQ == 0)
-        {
-            // cycling through 8 frames total
-            flame_score_chips_frame = (flame_score_chips_frame + 1) % NB_SCORE_FLAMES_FRAMES;
-            flame_score_mult_frame  = (flame_score_mult_frame  + 1) % NB_SCORE_FLAMES_FRAMES;
-            // chips flame (blue)
-            main_bg_se_copy_rect(score_flame_chips_frames[flame_score_chips_frame + 1], score_flame_chips);
-            // mult flame (red)
-            main_bg_se_copy_rect(score_flame_mult_frames [flame_score_mult_frame  + 1], score_flame_mult);
-        }
-    }
-    else
-    {
-		// clear flames if the condition is not met
-        main_bg_se_copy_rect(score_flame_chips_frames[0], score_flame_chips);
-        main_bg_se_copy_rect(score_flame_mult_frames [0], score_flame_mult);
-    }
-}
-
 static void game_playing_ui_text_update()
 {
     static int last_hand_size = 0;
@@ -2451,9 +2409,30 @@ static void game_playing_ui_text_update()
         last_hand_size = hand_get_size();
         last_deck_size = deck_get_size();
     }
+}
 
-    // animate score flames if we exceed the score requirement
-    process_flaming_score();
+static void game_playing_process_flaming_score()
+{
+    static u8 flame_score_frame = 0;
+    
+    if (score_flames_active)
+    {
+        if (timer % SCORE_FLAMES_ANIM_FREQ == 0)
+        {
+            Rect frame_rect = SCORE_FLAME_FRAMES_START;
+            flame_score_frame = (flame_score_frame + 1) % NUM_SCORE_FLAMES_FRAMES;
+
+            // chips flame (blue)
+            frame_rect.top    += flame_score_frame;
+            frame_rect.bottom += flame_score_frame;
+            main_bg_se_copy_rect(frame_rect, SCORE_FLAME_CHIPS_POS);
+
+            // mult flame (red)
+            frame_rect.left  += SCORE_FLAME_FRAME_WIDTH;
+            frame_rect.right += SCORE_FLAME_FRAME_WIDTH;
+            main_bg_se_copy_rect(frame_rect, SCORE_FLAME_MULT_POS);
+        }
+    }
 }
 
 static void game_playing_on_update()
@@ -2484,6 +2463,9 @@ static void game_playing_on_update()
 	played_cards_update_loop(&discarded_card, &played_selections, &sound_played);
     
     game_playing_ui_text_update();
+
+    // animate score flames if we exceed the score requirement
+    game_playing_process_flaming_score();
 }
 
 static int calculate_interest_reward()
