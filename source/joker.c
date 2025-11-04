@@ -15,7 +15,6 @@
 
 #define JOKER_SCORE_TEXT_Y 48
 #define NUM_JOKERS_PER_SPRITESHEET 2
-#define MAX_DEFINABLE_JOKERS 150
 
 static const unsigned int *joker_gfxTiles[] =
 {
