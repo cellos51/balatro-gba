@@ -2311,7 +2311,7 @@ static void played_cards_update_loop(bool* discarded_card, bool* sound_played)
                                 u8 card_value = card_get_value(scored_card_object->card);
 
                                 // Write the score to a character buffer variable
-                                char score_buffer[INT_MAX_DIGITS + 2]; // for '+' and null terminator
+                                char score_buffer[UINT_MAX_DIGITS + 2]; // for '+' and null terminator
                                 snprintf(score_buffer, sizeof(score_buffer), "+%d", card_value);
                                 tte_write(score_buffer);
 
