@@ -2278,15 +2278,17 @@ static bool play_scoring_cards_update()
             tte_set_pos(fx2int(scored_card_object->sprite_object->x) + TILE_SIZE, SCORED_CARD_TEXT_Y); // Offset of 1 tile to keep the text on the card
             tte_set_special(TTE_BLUE_PB * TTE_SPECIAL_PB_MULT_OFFSET); // Set text color to blue from background memory
 
+            u8 card_value = card_get_value(scored_card_object->card);
+
             // Write the score to a character buffer variable
             char score_buffer[INT_MAX_DIGITS + 2]; // for '+' and null terminator
-            snprintf(score_buffer, sizeof(score_buffer), "+%d", card_get_value(scored_card_object->card));
+            snprintf(score_buffer, sizeof(score_buffer), "+%d", card_value);
             tte_write(score_buffer);
 
             card_object_shake(scored_card_object, SFX_CARD_SELECT);
 
             // Relocated card scoring logic here
-            chips += card_get_value(scored_card_object->card);
+            chips = U32_PROTECTED_ADD(chips, card_value);
             display_chips();
 
             // Allow Joker scoring
