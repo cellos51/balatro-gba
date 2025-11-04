@@ -222,7 +222,7 @@ static int hand_selections = 0;
 static int scored_card_index = 0;
 
 // Keeping track of what Jokers are scored at each step
-static ListItr joker_scored_itr;
+static ListItr _joker_scored_itr;
 
 static int selection_x = 0;
 static int selection_y = 0;
@@ -2204,7 +2204,7 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                             retrigger = false;
                             scored_card_index--;
                             (*played_selections)--;
-                            joker_scored_itr = list_itr_new(&_owned_jokers_list);
+                            _joker_scored_itr = list_itr_new(&_owned_jokers_list);
                         }
 
                         // So pretend "played_selections" is now called "scored_card_index" and it counts the number of cards that have been scored
@@ -2215,15 +2215,15 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                             // Trigger all Jokers after each card scored
                             if (*played_selections > 0)
                             {
-                                if (check_and_score_joker_for_event(&joker_scored_itr, played[*played_selections - 1]->card, JOKER_EVENT_ON_CARD_SCORED))
+                                if (check_and_score_joker_for_event(&_joker_scored_itr, played[*played_selections - 1]->card, JOKER_EVENT_ON_CARD_SCORED))
                                 {
                                     return;
                                 }
                             
                                 // Trigger all Jokers that have an effect when a card finishes scoring
                                 // (e.g. retriggers) after activating all the other scored_card Jokers normally
-                                joker_scored_itr = list_itr_new(&_owned_jokers_list);
-                                if (check_and_score_joker_for_event(&joker_scored_itr, played[*played_selections - 1]->card, JOKER_EVENT_ON_CARD_SCORED_END))
+                                _joker_scored_itr = list_itr_new(&_owned_jokers_list);
+                                if (check_and_score_joker_for_event(&_joker_scored_itr, played[*played_selections - 1]->card, JOKER_EVENT_ON_CARD_SCORED_END))
                                 {
                                     return;
                                 }
@@ -2251,7 +2251,7 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                                 display_chips(chips);
 
                                 // Allow Joker scoring
-                                joker_scored_itr = list_itr_new(&_owned_jokers_list);
+                                _joker_scored_itr = list_itr_new(&_owned_jokers_list);
 
                                 return;
                             }
@@ -2259,7 +2259,7 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
 
                         // advance state after going past the last card (exited the loop without returning)
                         play_state = PLAY_SCORING_JOKERS;
-                        joker_scored_itr = list_itr_new(&_owned_jokers_list);
+                        _joker_scored_itr = list_itr_new(&_owned_jokers_list);
                         scored_card_index = 0; // reuse this variable for held cards
                         return;
                     }
@@ -2278,7 +2278,7 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
 
                         tte_erase_rect_wrapper(PLAYED_CARDS_SCORES_RECT);
 
-                        if (check_and_score_joker_for_event(&joker_scored_itr, NULL, JOKER_EVENT_INDEPENDENT))
+                        if (check_and_score_joker_for_event(&_joker_scored_itr, NULL, JOKER_EVENT_INDEPENDENT))
                         {
                             return;
                         }
