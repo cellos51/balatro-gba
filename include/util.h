@@ -33,6 +33,9 @@ static inline int get_digits_even(int n)
     return 5;
 }
 
+// max score
+#define NANEINF 0xFFFFFFFF // UINT32_MAX = 2^32-1
+
 #define UNDEFINED -1
 
 #define NUM_ELEM_IN_ARR(arr) (sizeof(arr) / sizeof((arr)[0]))
