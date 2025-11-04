@@ -33,14 +33,40 @@ static inline int get_digits_even(int n)
     return 5;
 }
 
-// max score
-#define NANEINF 0xFFFFFFFF // UINT32_MAX = 2^32-1
+// Avoid uint overflow when add/multiplying score
+#define U32_PROTECTED_ADD(a, b) (   \
+    (a > (UINT32_MAX - b))          \
+        ? UINT32_MAX                \
+        : (a + b)                   \
+)
+#define U16_PROTECTED_ADD(a, b) (   \
+    (a > (UINT16_MAX - b))          \
+        ? UINT16_MAX                \
+        : (a + b)                   \
+)
+#define U32_PROTECTED_MULT(a, b) (  \
+    (a == 0 || b == 0)              \
+        ? 0                         \
+        : (a > (UINT32_MAX / b)     \
+            ? UINT32_MAX            \
+            : a * b                 \
+        )                           \
+)
+#define U16_PROTECTED_MULT(a, b) (  \
+    (a == 0 || b == 0)              \
+        ? 0                         \
+        : (a > (UINT16_MAX / b)     \
+            ? UINT16_MAX            \
+            : a * b                 \
+        )                           \
+)
 
 #define UNDEFINED -1
 
 #define NUM_ELEM_IN_ARR(arr) (sizeof(arr) / sizeof((arr)[0]))
 
-#define INT_MAX_DIGITS 11 // strlen(str(INT_MAX)) = strlen("-2147483647")
+#define INT_MAX_DIGITS  11 // strlen(str(INT_MAX)) = strlen("-2147483647")
+#define UINT_MAX_DIGITS 10 // strlen(str(UINT32_MAX)) = strlen("4294967295")
 
 int int_arr_max(int int_arr[], int size);
 

@@ -278,15 +278,9 @@ bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum
     }
 
     // protect chips and mult against overflow
-    *chips    += min(joker_effect.chips, NANEINF - *chips);
-    *mult     += min(joker_effect.mult,  NANEINF - *mult);
-    // if xmult is zero, DO NOT multiply by it
-    if (joker_effect.xmult > 0)
-    {
-        // divisions are expansive but we have no other
-        // choice here and we won't do them often
-        *mult = (NANEINF / joker_effect.xmult >= *mult) ? *mult * joker_effect.xmult : NANEINF;        
-    }
+    *chips = U32_PROTECTED_ADD (joker_effect.chips, *chips);
+    *mult  = U32_PROTECTED_ADD (joker_effect.mult,  *mult);
+    *mult  = U32_PROTECTED_MULT(joker_effect.xmult, *mult); // xmult == 0 case is handled by the macro
     
     *money    += joker_effect.money;
     *retrigger = joker_effect.retrigger;
@@ -310,19 +304,19 @@ bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum
     if (joker_effect.chips > 0)
     {
         char score_buffer[INT_MAX_DIGITS + 2]; // For '+' and null terminator
-        snprintf(score_buffer, sizeof(score_buffer), "+%ld", joker_effect.chips);
+        snprintf(score_buffer, sizeof(score_buffer), "+%lu", joker_effect.chips);
         set_and_shift_text(score_buffer, &cursorPosX, &cursorPosY, TTE_BLUE_PB);
     }
     if (joker_effect.mult > 0)
     {
         char score_buffer[INT_MAX_DIGITS + 2];
-        snprintf(score_buffer, sizeof(score_buffer), "+%ld", joker_effect.mult);
+        snprintf(score_buffer, sizeof(score_buffer), "+%lu", joker_effect.mult);
         set_and_shift_text(score_buffer, &cursorPosX, &cursorPosY, TTE_RED_PB);
     }
     if (joker_effect.xmult > 0)
     {
         char score_buffer[INT_MAX_DIGITS + 2];
-        snprintf(score_buffer, sizeof(score_buffer), "X%ld", joker_effect.xmult);
+        snprintf(score_buffer, sizeof(score_buffer), "X%lu", joker_effect.xmult);
         set_and_shift_text(score_buffer, &cursorPosX, &cursorPosY, TTE_RED_PB);
     }
     if (joker_effect.money > 0)
