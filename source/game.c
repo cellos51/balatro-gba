@@ -1091,7 +1091,7 @@ void display_temp_score(u32 value)
 {
     int x_offset = 40 - get_digits_even(value) * TILE_SIZE;
     tte_erase_rect_wrapper(TEMP_SCORE_RECT);
-    tte_printf("#{P:%d,%d; cx:0x%X000}%ld", x_offset, TEMP_SCORE_RECT.top, TTE_WHITE_PB, value);
+    tte_printf("#{P:%d,%d; cx:0x%X000}%lu", x_offset, TEMP_SCORE_RECT.top, TTE_WHITE_PB, value);
 }
 
 void display_score(u32 value)
@@ -1120,7 +1120,7 @@ void display_score(u32 value)
     int rect_width = SCORE_RECT.right - SCORE_RECT.left;
     int x_offset = SCORE_RECT.left + (rect_width - text_width) / 2;
     
-    tte_printf("#{P:%d,48; cx:0x%X000}%ld%c", x_offset, TTE_WHITE_PB, display_value, score_suffix);
+    tte_printf("#{P:%d,48; cx:0x%X000}%lu%c", x_offset, TTE_WHITE_PB, display_value, score_suffix);
 }
 
 void display_money(int value)
@@ -1160,14 +1160,14 @@ void display_chips()
     Rect chips_text_rect = CHIPS_TEXT_RECT;
     tte_erase_rect_wrapper(CHIPS_TEXT_RECT);
     update_text_rect_to_right_align_num(&chips_text_rect, chips, OVERFLOW_LEFT);
-    tte_printf("#{P:%d,%d; cx:0x%X000;}%ld", chips_text_rect.left, chips_text_rect.top, TTE_WHITE_PB, chips);
+    tte_printf("#{P:%d,%d; cx:0x%X000;}%lu", chips_text_rect.left, chips_text_rect.top, TTE_WHITE_PB, chips);
     check_flaming_score();
 }
 
 void display_mult()
 {
     tte_erase_rect_wrapper(MULT_TEXT_RECT);
-    tte_printf("#{P:%d,%d; cx:0x%X000;}%ld", MULT_TEXT_RECT.left, MULT_TEXT_RECT.top, TTE_WHITE_PB, mult);
+    tte_printf("#{P:%d,%d; cx:0x%X000;}%lu", MULT_TEXT_RECT.left, MULT_TEXT_RECT.top, TTE_WHITE_PB, mult);
     check_flaming_score();
 }
 
@@ -1655,7 +1655,7 @@ static void game_playing_process_input_and_state()
         if (mult > 0)
         {
             // protect against score overflow
-            temp_score = (NANEINF / mult >= chips) ? chips * mult : NANEINF;
+            temp_score = U32_PROTECTED_MULT(chips, mult);
             lerped_temp_score = int2fx(temp_score);
             lerped_score = int2fx(score);
 
@@ -1691,7 +1691,7 @@ static void game_playing_process_input_and_state()
         }
         else
         {
-            score += temp_score;
+            score = U32_PROTECTED_ADD(score, temp_score);
             temp_score = 0;
             lerped_temp_score = 0;
             lerped_score = 0;
@@ -2318,7 +2318,7 @@ static void played_cards_update_loop(bool* discarded_card, bool* sound_played)
                                 card_object_shake(scored_card_object, SFX_CARD_SELECT);
 
                                 // protect chips against overflow
-                                chips += min((u32)card_value, (u32)(NANEINF - chips));
+                                chips = U32_PROTECTED_ADD(chips, card_value);
                                 display_chips();
 
                                 // Allow Joker scoring
