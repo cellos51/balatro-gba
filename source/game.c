@@ -2902,7 +2902,7 @@ static void game_shop_reroll(int *reroll_cost)
 
     game_shop_create_items();
     
-    itr = list_itr_new(&_owned_jokers_list);
+    itr = list_itr_new(&_shop_jokers_list);
 
     while((ln = list_itr_next(&itr)))
     {
