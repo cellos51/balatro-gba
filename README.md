@@ -116,16 +116,17 @@ Disregard Steps 3-4 and instead click the green code button on the main reposito
 > Apple Silicon: https://pkg.devkitpro.org/packages/macos-installers/devkitpro-pacman-installer.arm64.pkg
 
 > Intel: https://pkg.devkitpro.org/packages/macos-installers/devkitpro-pacman-installer.x86_64.pkg
- 
 
-2.) Verify that devkitPro is installed in '/opt/devkitpro'
+2.) Run `sudo dkp-pacman -S gba-dev`
 
-3.) Add the following to your .bashrc or .zshrc (or export the variables in your shell session): 
+3.) Verify that devkitPro is installed in '/opt/devkitpro'
+
+4.) Add the following to your .bashrc or .zshrc (or export the variables in your shell session): 
 - export DEVKITPRO=/opt/devkitpro
 - export DEVKITARM=$DEVKITPRO/devkitARM
 - export PATH=$PATH:$DEVKITPRO/tools/bin:$DEVKITPRO/pacman/bin
 
-4.) Follow instructions from Windows tutorial step 4
+5.) Follow instructions from Windows tutorial step 4
 
 ## **Common Issues:**
 
