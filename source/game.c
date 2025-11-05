@@ -1600,6 +1600,8 @@ static void game_playing_process_hand_select_input()
     }
 }
 
+#define SCORE_LERP_STEP 32
+
 static void game_playing_process_input_and_state()
 {
     if (hand_state == HAND_SELECT)
@@ -1624,8 +1626,9 @@ static void game_playing_process_input_and_state()
     }
     else if (play_state == PLAY_ENDED)
     {
-        lerped_temp_score -= int2fx(temp_score * get_game_speed())/ 40;
-        lerped_score += int2fx(temp_score * get_game_speed()) / 40;
+        // TODO: Why is this using fixed point?
+        lerped_temp_score -= int2fx(temp_score * get_game_speed()) / SCORE_LERP_STEP;
+        lerped_score += int2fx(temp_score * get_game_speed()) / SCORE_LERP_STEP;
 
         if (lerped_temp_score > 0)
         {
