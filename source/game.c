@@ -171,6 +171,7 @@ static enum HandState hand_state = HAND_DRAW;
 static enum PlayState play_state = PLAY_STARTING;
 
 static enum HandType hand_type = NONE;
+static ContainedHandTypes contained_hands = {0};
 
 static CardObject *main_menu_ace = NULL;
 
@@ -746,88 +747,114 @@ void sort_cards()
     }
 }
 
-enum HandType hand_get_type()
+void hand_get_type()
 {
-    enum HandType res_hand_type = NONE;
+    hand_type = NONE;
 
     // Idk if this is how Balatro does it but this is how I'm doing it
     if (hand_selections == 0 || hand_state == HAND_DISCARD)
     {
-        res_hand_type = NONE;
-        return res_hand_type;
+        hand_type = NONE;
+        return;
     }
 
-    res_hand_type = HIGH_CARD;
+    hand_type = HIGH_CARD;
+    contained_hands.HIGH_CARD = 1;
 
     u8 suits[NUM_SUITS];
     u8 ranks[NUM_RANKS];
     get_hand_distribution(ranks, suits);
 
-    // Check for flush
-    if (hand_contains_flush(suits))
-        res_hand_type = FLUSH;
-
-    // Check for straight
-    if (hand_contains_straight(ranks))
-    {
-        if (res_hand_type == FLUSH)
-            res_hand_type = STRAIGHT_FLUSH;
-        else
-            res_hand_type = STRAIGHT;
-    }
-
     // The following can be optimized better but not sure how much it matters
     u8 n_of_a_kind = hand_contains_n_of_a_kind(ranks);
 
-    if (n_of_a_kind >= 5) {
-        if (res_hand_type == FLUSH) {
-            return FLUSH_FIVE;
-        }
-        return FIVE_OF_A_KIND;
-    }
-
-    // Check for royal flush vs regular straight flush
-    if (res_hand_type == STRAIGHT_FLUSH) {
-        if (ranks[TEN] && ranks[JACK] && ranks[QUEEN] && ranks[KING] && ranks[ACE])
-            return ROYAL_FLUSH;
-        return STRAIGHT_FLUSH;
-    }
-
-    if (n_of_a_kind == 4) {
-        return FOUR_OF_A_KIND;
-    }
-
-    if (n_of_a_kind == 3 && hand_contains_full_house(ranks))
+    // Pair and 2 Pair
+    if (n_of_a_kind >= 2)
     {
-        return FULL_HOUSE;
-    }
+        hand_type = PAIR;
+        contained_hands.PAIR = 1;
 
-    // Flush and Straight are more valuable than the remaining hand types, so return them now
-    if (res_hand_type == FLUSH) {
-        if (n_of_a_kind >= 5) {
-            return FLUSH_HOUSE;
-        }
-        return FLUSH;
-    }
-    if (res_hand_type == STRAIGHT) {
-        return STRAIGHT;
-    }
-
-    if (n_of_a_kind == 3)
-    {
-        return THREE_OF_A_KIND;
-    }
-
-    if (n_of_a_kind == 2)
-    {
         if (hand_contains_two_pair(ranks))
         {
-            return TWO_PAIR;
+            hand_type = TWO_PAIR;
+            contained_hands.TWO_PAIR = 1;
         }
-        return PAIR;
     }
 
-    return res_hand_type; // should be HIGH_CARD
+    // 3 OAK
+    if (n_of_a_kind >= 3)
+    {
+        hand_type = THREE_OF_A_KIND;
+        contained_hands.THREE_OF_A_KIND = 1;
+    }
+
+    // Straight
+    if (hand_contains_straight(ranks))
+    {
+        hand_type = STRAIGHT;
+        contained_hands.STRAIGHT = 1;
+    }
+
+    // Flush
+    if (hand_contains_flush(suits))
+    {
+        hand_type = FLUSH;
+        contained_hands.FLUSH = 1;
+    }
+
+    // Full House
+    if (n_of_a_kind >= 3 && hand_contains_full_house(ranks))
+    {
+        hand_type = FULL_HOUSE;
+        contained_hands.FULL_HOUSE = 1;
+    }
+
+    // 4 OAK
+    if (n_of_a_kind >= 4)
+    {
+        hand_type = FOUR_OF_A_KIND;
+        contained_hands.FOUR_OF_A_KIND = 1;
+    }
+
+    // Straight Flush
+    if (contained_hands.STRAIGHT && contained_hands.FLUSH)
+    {
+        hand_type = STRAIGHT_FLUSH;
+        contained_hands.STRAIGHT_FLUSH = 1;
+    }
+
+    // Royal Flush
+    if (contained_hands.STRAIGHT_FLUSH)
+    {
+        if (ranks[TEN] && ranks[JACK] && ranks[QUEEN] && ranks[KING] && ranks[ACE])
+        {
+            hand_type = ROYAL_FLUSH;
+            contained_hands.ROYAL_FLUSH = 1;
+        }
+    }
+
+    // 5 OAK
+    if (n_of_a_kind >= 5)
+    {
+        hand_type = FIVE_OF_A_KIND;
+        contained_hands.FIVE_OF_A_KIND = 1;
+    }
+
+    // Flush House and Five
+    if (contained_hands.FLUSH)
+    {
+        if (contained_hands.FULL_HOUSE)
+        {
+            hand_type = FLUSH_HOUSE;
+            contained_hands.FLUSH_HOUSE = 1;
+        }
+
+        if (contained_hands.FIVE_OF_A_KIND)
+        {
+            hand_type = FLUSH_FIVE;
+            contained_hands.FLUSH_FIVE = 1;
+        }
+    }
 }
 
 // Returns true if the card is *considered* a face card
@@ -1208,7 +1235,7 @@ static void print_hand_type(const char* hand_type_str)
 void set_hand()
 {
     tte_erase_rect_wrapper(HAND_TYPE_RECT);
-    hand_type = hand_get_type();
+    hand_get_type();
 
     HandValues hand = hand_base_values[hand_type];
 
