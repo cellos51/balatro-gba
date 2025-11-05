@@ -95,7 +95,26 @@ enum HandType
     FLUSH_FIVE
 };
 
-typedef struct
+// Store all contained hands to optimize "whole hand condition" Jokers
+typedef struct ContainedHandTypes
+{
+    unsigned short int HIGH_CARD       : 1;
+    unsigned short int PAIR            : 1;
+    unsigned short int TWO_PAIR        : 1;
+    unsigned short int THREE_OF_A_KIND : 1;
+    unsigned short int FOUR_OF_A_KIND  : 1;
+    unsigned short int STRAIGHT        : 1;
+    unsigned short int FLUSH           : 1;
+    unsigned short int FULL_HOUSE      : 1;
+    unsigned short int STRAIGHT_FLUSH  : 1;
+    unsigned short int ROYAL_FLUSH     : 1;
+    unsigned short int FIVE_OF_A_KIND  : 1;
+    unsigned short int FLUSH_HOUSE     : 1;
+    unsigned short int FLUSH_FIVE      : 1;
+    unsigned short int PADDING : 3;
+} ContainedHandTypes;
+
+typedef struct 
 {
     int substate;
     void (*on_init)();
