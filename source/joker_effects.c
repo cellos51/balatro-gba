@@ -446,7 +446,7 @@ static JokerEffect reserved_parking_joker_effect(Joker *joker, Card *scored_card
 
     if ((random() % 2 == 0) && card_is_face(scored_card))
     {
-        effect.money += 1;
+        effect.money++;
     }
     
     return effect;

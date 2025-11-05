@@ -281,8 +281,7 @@ bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum
     *retrigger = joker_effect.retrigger;
     // joker_effect.message will have been set if the Joker had anything custom to say
 
-    // display the text on top of the card instead of below the Joker for Held Cards effects
-    int cursorPosX = 8; // Offset of 16 pixels to center the text on the card
+    int cursorPosX = 8; // Offset of one tile to better center the text on the card
     int cursorPosY = 0;
     if (joker_event != JOKER_EVENT_ON_CARD_HELD)
     {
@@ -291,6 +290,7 @@ bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum
     }
     else
     {
+        // display the text on top of the card instead of below the Joker for Held Cards effects
         // scored_card cannot be NULL here because of the joker event
         cursorPosX += fx2int(card_object->sprite_object->x);
         cursorPosY = HELD_CARD_SCORE_TEXT_Y;
