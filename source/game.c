@@ -2123,16 +2123,12 @@ static void cards_in_hand_update_loop(bool* discarded_card, int* played_selectio
 }
 
 // returns true if a joker was scored, false otherwise
-//static bool check_and_score_joker_for_event(int* iteration_start, Card* played_card, enum JokerEvent joker_event)
 static bool check_and_score_joker_for_event(ListItr* itr, Card* played_card, enum JokerEvent joker_event)
 {
     ListNode* ln;
 
-    //for (int k = *iteration_start; k < list_get_len(&_owned_jokers_list); k++)
     while((ln = list_itr_next(itr)))
     {
-        //(*iteration_start)++;
-        //JokerObject *joker = list_get_at_idx(&_owned_jokers_list, k);
         JokerObject *joker = (JokerObject*)ln->data;
         if (joker_object_score(joker, played_card, joker_event, &chips, &mult, &money, &retrigger))
         {
@@ -2769,7 +2765,9 @@ static int game_shop_get_rand_available_joker_id(void)
 
     if(jokers_avail_size == 0) return UNDEFINED;
 
-    int matching_indices[jokers_avail_size];
+    int matching_joker_ids[jokers_avail_size];
+    int fallback_random_idx = random() % jokers_avail_size;
+    int fallback_random_joker_id = UNDEFINED;
     int match_count = 0;
 
     BitsetItr itr = bitset_itr_new(&_avail_jokers_bitset);
@@ -2778,18 +2776,17 @@ static int game_shop_get_rand_available_joker_id(void)
     int joker_id = UNDEFINED;
     while((joker_id = bitset_itr_next(&itr)) != UNDEFINED)
     {
+        if(i++ == fallback_random_idx) fallback_random_joker_id = joker_id;
         const JokerInfo *info = get_joker_registry_entry(joker_id); 
         if (info->rarity == joker_rarity)
         {
-            matching_indices[match_count] = i;
-            match_count++;
+            matching_joker_ids[match_count++] = joker_id;
         }
-        i++;
     }
 
     int selected_joker_id = (match_count > 0) ?
-                                matching_indices[random() % match_count] :
-                                bitset_find_idx_of_nth_set(&_avail_jokers_bitset, random() % jokers_avail_size);
+                                matching_joker_ids[random() % match_count] :
+                                fallback_random_joker_id;
 
     return selected_joker_id;
 }
