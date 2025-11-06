@@ -2677,7 +2677,7 @@ static void game_round_end_print_hand_reward(int hand_y_offset)
             TTE_BLUE_PB, hand_reward, TTE_WHITE_PB
         );
     }
-    else if (timer > TM_HAND_REWARD_INCR_WAIT && timer % FRAMES(TM_REWARD_INCREMENT_INTERVAL) == 0) // Increment the interest reward text until the interest reward variable is depleted
+    else if (timer > TM_HAND_REWARD_INCR_WAIT && timer % FRAMES(TM_REWARD_INCREMENT_INTERVAL) == 0) // Increment the hand reward text until the hand reward variable is depleted
     {
         hand_reward--;
         tte_printf(
