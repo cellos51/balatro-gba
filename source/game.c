@@ -467,6 +467,7 @@ static enum HandState hand_state = HAND_DRAW;
 static enum PlayState play_state = PLAY_STARTING;
 
 static enum HandType hand_type = NONE;
+static ContainedHandTypes contained_hands = {0};
 
 static CardObject* main_menu_ace = NULL;
 
@@ -1045,6 +1046,11 @@ void display_mult(void)
     check_flaming_score();
 }
 
+ContainedHandTypes* get_contained_hands(void)
+{
+    return &contained_hands;
+}
+
 // idx_a and idx_b are assumed to be valid indexes within the hand array
 // no checks will be performed here for performance's sake
 static inline void swap_cards_in_hand(int idx_a, int idx_b)
@@ -1171,8 +1177,9 @@ static void sort_cards(void)
 
 void hand_get_type(void)
 {
-    static ContainedHandTypes contained_hands = {0};
+    // resetting all hand info
     hand_type = NONE;
+    memcpy16(&contained_hands, 0, sizeof(contained_hands));
 
     // Idk if this is how Balatro does it but this is how I'm doing it
     if (hand_selections == 0 || hand_state == HAND_DISCARD)
