@@ -278,9 +278,13 @@ bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum
     }
 
     // protect chips and mult against overflow
-    *chips = U32_PROTECTED_ADD (*chips, joker_effect.chips);
-    *mult  = U32_PROTECTED_ADD (*mult,  joker_effect.mult);
-    *mult  = U32_PROTECTED_MULT(*mult,  joker_effect.xmult); // xmult == 0 case is handled by the macro
+    *chips = U32_PROTECTED_ADD(*chips, joker_effect.chips);
+    *mult  = U32_PROTECTED_ADD(*mult,  joker_effect.mult);
+    // If xMult is 0 DON'T multiply by it!
+    if (joker_effect.xmult > 0)
+    {
+        *mult = U32_PROTECTED_MULT(*mult, joker_effect.xmult);
+    }
     
     *money    += joker_effect.money;
     *retrigger = joker_effect.retrigger;
