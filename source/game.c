@@ -538,7 +538,7 @@ static const BG_POINT MAIN_MENU_ACE_T       = {88,      26};
 // Pixel sizes
 #define ITEM_SHOP_Y               71
 #define ROUND_END_REWARD_AMOUNT_X 168
-#define ROUND_END_REWARD_TEXT_X   88    
+#define ROUND_END_REWARD_TEXT_X   88
 #define SCORED_CARD_TEXT_Y        48
 
 // SE sizes
