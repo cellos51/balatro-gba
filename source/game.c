@@ -441,6 +441,11 @@ int get_money(void)
     return money;
 }
 
+ContainedHandTypes* get_contained_hands(void)
+{
+    return &contained_hands;
+}
+
 
 // Consts
 
@@ -701,7 +706,9 @@ void sort_cards()
 
 void hand_get_type()
 {
+    // resetting all hand info
     hand_type = NONE;
+    memcpy16(&contained_hands, 0, sizeof(contained_hands));
 
     // Idk if this is how Balatro does it but this is how I'm doing it
     if (hand_selections == 0 || hand_state == HAND_DISCARD)
@@ -1312,6 +1319,7 @@ int deck_get_max_size()
 
 void deck_shuffle()
 {
+    return;
     for (int i = deck_top; i > 0; i--) 
     {
         int j = rand() % (i + 1);
