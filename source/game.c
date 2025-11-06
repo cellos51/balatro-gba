@@ -483,6 +483,7 @@ static const Rect GAME_OVER_DIALOG_DEST_RECT= {11,      21,      23,     28};
 static const Rect GAME_OVER_ANIM_RECT       = {11,      8,       23,     28};
 static const BG_POINT NEW_RUN_BTN_DEST_POS  = {15,      26};
 static const Rect NEW_RUN_BTN_SRC_RECT      = {0,       30,      4,      31};
+static const BG_POINT ROUND_END_REWARDS_ELLIPSIS_POS = {10, 13};
 
 // Flaming score animation frames
 #define SCORE_FLAMES_ANIM_FREQ  5 // animation will run at 12FPS
@@ -520,10 +521,6 @@ static const Rect ROUND_TEXT_RECT           = {48,      144,    UNDEFINED, UNDEF
 static const Rect ANTE_TEXT_RECT            = {8,       144,    UNDEFINED, UNDEFINED };
 static const Rect ROUND_END_BLIND_REQ_RECT  = {104,     96,     136,       UNDEFINED };
 static const Rect ROUND_END_BLIND_REWARD_RECT = { 168,  96,     UNDEFINED, UNDEFINED };
-static const Rect ROUND_END_NUM_HANDS_RECT  = {88,      116,    UNDEFINED, UNDEFINED };
-static const Rect HAND_REWARD_RECT          = {168,     UNDEFINED, UNDEFINED, UNDEFINED };
-static const Rect ROUND_END_INTEREST_RECT   = {88,      126,    UNDEFINED, UNDEFINED };
-static const Rect INTEREST_REWARD_RECT      = {168,     UNDEFINED, UNDEFINED, UNDEFINED };
 static const Rect CASHOUT_TEXT_RECT         = {88,      72,     UNDEFINED, UNDEFINED };
 static const Rect SHOP_REROLL_RECT          = {88,      96,     UNDEFINED, UNDEFINED };
 static const Rect GAME_LOSE_MSG_TEXT_RECT   = {104,     72,     UNDEFINED, UNDEFINED};
@@ -538,7 +535,14 @@ static const BG_POINT CARD_DISCARD_PNT      = {240,     70};
 static const BG_POINT HAND_START_POS        = {120,     90};
 static const BG_POINT MAIN_MENU_ACE_T       = {88,      26};
 
-#define ITEM_SHOP_Y 71 // TODO: Needs to be a rect?
+// Pixel sizes
+#define ITEM_SHOP_Y               71
+#define ROUND_END_REWARD_AMOUNT_X 168
+#define ROUND_END_REWARD_TEXT_X   88
+#define SCORED_CARD_TEXT_Y        48
+
+// SE sizes
+#define ROUND_END_BLACK_PANEL_INIT_BOTTOM_SE 12
 
 #define MAIN_MENU_BUTTONS 2
 #define MAIN_MENU_IMPLEMENTED_BUTTONS 1 // Remove this once all buttons are implemented
@@ -546,8 +550,6 @@ static const BG_POINT MAIN_MENU_ACE_T       = {88,      26};
 //TODO: Properly define and use
 #define MENU_POP_OUT_ANIM_FRAMES 20
 #define GAME_OVER_ANIM_FRAMES 15
-
-#define SCORED_CARD_TEXT_Y 48
 
 #define HIGHLIGHT_COLOR 0xFFFF
 #define SHOP_LIGHTS_1_CLR 0xFFFF
@@ -575,14 +577,15 @@ static const BG_POINT MAIN_MENU_ACE_T       = {88,      26};
 #define TM_ZERO 0
 #define TM_RESET_STATIC_VARS 30
 #define TM_END_POP_MENU_ANIM 13
-#define TM_START_ROUND_END_MENU_AMIN 1
+#define TM_START_ROUND_END_REWARDS_ANIM 1
 #define TM_END_DISPLAY_FIN_BLIND 30
 #define TM_END_DISPLAY_SCORE_MIN 4
-#define TM_ELLIPSIS_PRINT_MAX_TM 16
-#define TM_REWARD_INCR_INTERVAL 20
+#define TM_REWARDS_ELLIPSIS_PRINT_START 2
+#define TM_REWARDS_ELLIPSIS_PRINT_END 16
 #define TM_REWARD_DISPLAY_INTERVAL 15
-#define TM_DISPLAY_REWARDS_CONT_WAIT TM_ELLIPSIS_PRINT_MAX_TM + TM_REWARD_DISPLAY_INTERVAL
+#define TM_DISPLAY_REWARDS_CONT_WAIT TM_REWARDS_ELLIPSIS_PRINT_END + TM_REWARD_DISPLAY_INTERVAL
 #define TM_HAND_REWARD_INCR_WAIT TM_DISPLAY_REWARDS_CONT_WAIT + TM_REWARD_DISPLAY_INTERVAL
+#define TM_REWARD_INCREMENT_INTERVAL 20
 #define TM_DISMISS_ROUND_END_TM 20
 #define TM_CREATE_SHOP_ITEMS_WAIT 1
 #define TM_SHIFT_SHOP_ICON_WAIT 7
@@ -2550,6 +2553,14 @@ static void game_round_end_start_expand_popup()
     }
 }
 
+static void game_round_end_extend_black_panel_down(int black_panel_bottom)
+{
+    Rect single_line_rect = ROUND_END_MENU_RECT;
+    single_line_rect.bottom = black_panel_bottom;
+    single_line_rect.top = single_line_rect.bottom - 1;
+    main_bg_se_copy_rect_1_tile_vert(single_line_rect, SE_DOWN);
+}
+
 static void game_round_end_display_finished_blind()
 {
     obj_unhide(round_end_blind_token->obj, 0);
@@ -2563,12 +2574,9 @@ static void game_round_end_display_finished_blind()
     
     tte_printf("#{P:%d,%d; cx:0x%X000}%d", blind_req_rect.left, blind_req_rect.top, TTE_RED_PB, blind_req);
     
-    if (timer == TM_START_ROUND_END_MENU_AMIN)
+    if (timer == TM_START_ROUND_END_REWARDS_ANIM)
     {
-        Rect single_line_rect = ROUND_END_MENU_RECT;
-        single_line_rect.top = 11;
-        single_line_rect.bottom = single_line_rect.top + 1;
-        main_bg_se_copy_rect_1_tile_vert(single_line_rect, SE_DOWN);
+        game_round_end_extend_black_panel_down(ROUND_END_BLACK_PANEL_INIT_BOTTOM_SE);
     }
     
     if (timer >= TM_END_DISPLAY_FIN_BLIND)
@@ -2646,80 +2654,107 @@ static void game_round_end_panel_exit()
     }
 }
 
+static void game_round_end_print_separator_ellipsis()
+{
+    int x = (ROUND_END_REWARDS_ELLIPSIS_POS.x + timer - TM_REWARDS_ELLIPSIS_PRINT_START) * TILE_SIZE;
+    int y = (ROUND_END_REWARDS_ELLIPSIS_POS.y) * TILE_SIZE;
+
+    tte_printf("#{P:%d,%d; cx:0x%X000}.", x, y, TTE_WHITE_PB);
+}
+
+// TODO: Allow for more generic rewards and consolidate with game_round_end_print_interest_reward()
+static void game_round_end_print_hand_reward(int hand_y_offset)
+{
+    int hand_y = ROUND_END_REWARDS_ELLIPSIS_POS.y + hand_y_offset;
+    if (timer == TM_DISPLAY_REWARDS_CONT_WAIT)
+    {
+        game_round_end_extend_black_panel_down(hand_y);
+
+        tte_printf(
+            "#{P:%d,%d; cx:0x%X000}%d #{cx:0x%X000}Hands", 
+            ROUND_END_REWARD_TEXT_X, hand_y * TILE_SIZE, 
+            TTE_BLUE_PB, hand_reward, TTE_WHITE_PB
+        );
+    }
+    else if (timer > TM_HAND_REWARD_INCR_WAIT && timer % FRAMES(TM_REWARD_INCREMENT_INTERVAL) == 0) // Increment the hand reward text until the hand reward variable is depleted
+    {
+        hand_reward--;
+        tte_printf(
+            "#{P:%d, %d; cx:0x%X000}$%d", 
+            ROUND_END_REWARD_AMOUNT_X, hand_y * TILE_SIZE, 
+            TTE_YELLOW_PB, hands - hand_reward
+        );
+        if (hand_reward == 0)
+        {
+            interest_start_time = timer + TM_REWARD_DISPLAY_INTERVAL;
+        }
+    }
+}
+
+static void game_round_end_print_interest_reward(int interest_y_offset)
+{
+    int interest_y = ROUND_END_REWARDS_ELLIPSIS_POS.y + interest_y_offset;
+
+    if (timer == interest_start_time)
+    {
+        game_round_end_extend_black_panel_down(interest_y);
+
+        tte_printf(
+            "#{P:%d,%d; cx:0x%X000}%d #{cx:0x%X000}Interest", 
+            ROUND_END_REWARD_TEXT_X, interest_y * TILE_SIZE, 
+            TTE_YELLOW_PB, interest_reward, TTE_WHITE_PB
+        );
+    }
+    else if (timer > interest_start_time + TM_REWARD_DISPLAY_INTERVAL && timer % FRAMES(TM_REWARD_INCREMENT_INTERVAL) == 0) // Increment the interest reward text until the interest reward variable is depleted
+    {
+        interest_to_count--;
+        tte_printf(
+            "#{P:%d, %d; cx:0x%X000}$%d", 
+            ROUND_END_REWARD_AMOUNT_X, interest_y * TILE_SIZE, 
+            TTE_YELLOW_PB, interest_reward - interest_to_count
+        );
+    }
+}
+
 static void game_round_end_display_rewards()
 {
-    int hand_y = 0;
-    int interest_y = 0;
+    int hand_y_offset = 0;
+    int interest_y_offset = 0;
 
     if (hands > 0)
     {
-        hand_y = 1;
+        hand_y_offset = 1;
+    }
+    else
+    {
+        interest_start_time = TM_DISPLAY_REWARDS_CONT_WAIT;
     }
 
     if (interest_reward > 0)
     {
-        interest_y = 1 + hand_y;
+        interest_y_offset = hand_y_offset + 1;
     }
 
     if (hand_reward <= 0 && interest_to_count <= 0) // Once all rewards are accounted for go to the next state
     {
-        timer = TM_ZERO; // Reset the timer
-        state_info[game_state].substate = DISPLAY_CASHOUT; // Go to the next state
+        timer = TM_ZERO;
+        state_info[game_state].substate = DISPLAY_CASHOUT;
     }
-    else if (timer == TM_START_ROUND_END_MENU_AMIN) // Expand the black part of the panel down by one tile
+    else if (timer == TM_START_ROUND_END_REWARDS_ANIM)
     {
-        Rect single_line_rect = ROUND_END_MENU_RECT;
-        single_line_rect.top = 12;
-        single_line_rect.bottom = single_line_rect.top + 1;
-        main_bg_se_copy_rect_1_tile_vert(single_line_rect, SE_DOWN);
+        game_round_end_extend_black_panel_down(ROUND_END_REWARDS_ELLIPSIS_POS.y);
     }
-    else if (timer < TM_ELLIPSIS_PRINT_MAX_TM) // Use TTE to print '.' until the end of the panel width
+    else if (timer < TM_REWARDS_ELLIPSIS_PRINT_END)
     {
-        // Print the separator dots
-        int x = (8 + timer) * TILE_SIZE;
-        int y = (13) * TILE_SIZE;
-    
-        tte_printf("#{P:%d,%d; cx:0x%X000}.", x, y, TTE_WHITE_PB); 
+        game_round_end_print_separator_ellipsis();
     }
-    else if (timer >= TM_DISPLAY_REWARDS_CONT_WAIT && hand_reward > 0) // Wait an additional 15 frames since the last sequenced action
+    else if (timer >= TM_DISPLAY_REWARDS_CONT_WAIT && hand_reward > 0)
     {
-        if (timer == TM_DISPLAY_REWARDS_CONT_WAIT) // Expand the black part of the panel down by one tile again
-        {
-            Rect single_line_rect = ROUND_END_MENU_RECT;
-            single_line_rect.top = 12 + hand_y;
-            single_line_rect.bottom = single_line_rect.top + 1;
-            main_bg_se_copy_rect_1_tile_vert(single_line_rect, SE_DOWN);
-    
-            tte_printf("#{P:%d,%d; cx:0x%X000}%d #{cx:0x%X000}Hands", ROUND_END_NUM_HANDS_RECT.left, ROUND_END_NUM_HANDS_RECT.top, TTE_BLUE_PB,  hand_reward, TTE_WHITE_PB); // Print the hand reward
-        }
-        else if (timer > TM_HAND_REWARD_INCR_WAIT && timer % FRAMES(TM_REWARD_DISPLAY_INTERVAL) == 0) // After 15 frames, every 20 frames, increment the hand reward text until the hand reward variable is depleted
-        {
-            int y = (13 + hand_y) * TILE_SIZE;
-            hand_reward--;
-            tte_printf("#{P:%d, %d; cx:0x%X000}$%d", HAND_REWARD_RECT.left, y, TTE_YELLOW_PB, hands - hand_reward); // Print the hand reward
-            if (hand_reward == 0)
-            {
-                interest_start_time = timer + TM_REWARD_DISPLAY_INTERVAL; // Time to start printing the interest gained
-            }
-        }
+        game_round_end_print_hand_reward(hand_y_offset);
     }
-    else if (timer >= interest_start_time && interest_to_count > 0 && interest_start_time != -1)
+    else if (interest_start_time != UNDEFINED && timer >= interest_start_time && interest_to_count > 0)
     {
-        if (timer == interest_start_time) // Expand the black part of the panel down by one tile again
-        {
-            Rect single_line_rect = ROUND_END_MENU_RECT;
-            single_line_rect.top = 12 + interest_y;
-            single_line_rect.bottom = single_line_rect.top + 1;
-            main_bg_se_copy_rect_1_tile_vert(single_line_rect, SE_DOWN);
-
-            tte_printf("#{P:%d,%d; cx:0x%X000}%d #{cx:0x%X000}Interest", ROUND_END_INTEREST_RECT.left, ROUND_END_INTEREST_RECT.top, TTE_YELLOW_PB, interest_reward, TTE_WHITE_PB);
-        }
-        else if (timer > interest_start_time + 15 && timer % FRAMES(20) == 0) // After 15 frames, every 20 frames, increment the interest reward text until the interest reward variable is depleted
-        {
-            int y = (13 + interest_y) * TILE_SIZE;
-            interest_to_count--;
-            tte_printf("#{P:%d, %d; cx:0x%X000}$%d", INTEREST_REWARD_RECT.left, y, TTE_YELLOW_PB, interest_reward - interest_to_count);
-        }
+        game_round_end_print_interest_reward(interest_y_offset);
     }
 }
 
