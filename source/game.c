@@ -1367,7 +1367,6 @@ int deck_get_max_size()
 
 void deck_shuffle()
 {
-    return;
     for (int i = deck_top; i > 0; i--) 
     {
         int j = rand() % (i + 1);
