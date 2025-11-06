@@ -2282,7 +2282,7 @@ static bool play_scoring_cards_update()
 
             // Write the score to a character buffer variable
             char score_buffer[INT_MAX_DIGITS + 2]; // for '+' and null terminator
-            snprintf(score_buffer, sizeof(score_buffer), "+%d", card_value);
+            snprintf(score_buffer, sizeof(score_buffer), "+%hhu", card_value);
             tte_write(score_buffer);
 
             card_object_shake(scored_card_object, SFX_CARD_SELECT);
