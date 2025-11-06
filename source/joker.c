@@ -256,7 +256,7 @@ void set_and_shift_text(char* str, int* cursor_pos_x, int* cursor_pos_y, int col
     tte_write(str);
 
     // + 1 For space
-    const int joker_score_display_offset_px = (MAX_CARD_SCORE_STR_LEN + 1)*TTE_CHAR_SIZE;
+    const int joker_score_display_offset_px = (strlen(str) + 1)*TTE_CHAR_SIZE;
     *cursor_pos_x += joker_score_display_offset_px;
 }
 

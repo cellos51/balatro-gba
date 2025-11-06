@@ -6,8 +6,6 @@
 #define MAX_JOKERS_HELD_SIZE 5 // This doesn't account for negatives right now.
 #define MAX_SHOP_JOKERS 2 // TODO: Make this dynamic and allow for other items besides jokers
 #define MAX_SELECTION_SIZE 5
-#define MAX_CARD_SCORE_DIGITS 2 // Current digit limit for score received from cards including mult etc. from jokers
-#define MAX_CARD_SCORE_STR_LEN (MAX_CARD_SCORE_DIGITS + 1) // For the '+' or 'X'
 #define FRAMES(x) (((x) + game_speed - 1) / game_speed)
 
  // TODO: Can make these dynamic to support interest-related jokers and vouchers
