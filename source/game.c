@@ -1600,6 +1600,11 @@ static void game_playing_process_hand_select_input()
     }
 }
 
+/* This needs to stay a power of 2 and small enough
+ * for the lerping to be done before the next hand is drawn.
+ */ 
+#define NUM_SCORE_LERP_STEPS 32
+
 static void game_playing_process_input_and_state()
 {
     if (hand_state == HAND_SELECT)
@@ -1624,8 +1629,13 @@ static void game_playing_process_input_and_state()
     }
     else if (play_state == PLAY_ENDED)
     {
-        lerped_temp_score -= int2fx(temp_score * get_game_speed())/ 40;
-        lerped_score += int2fx(temp_score * get_game_speed()) / 40;
+        /* Using fixed point in case the score is lower than NUM_SCORE_LERP_STEPS and then
+         * then the division rounds it down to 0 and it's never added to the total.
+         * The operation is equivalent to 
+         * fxdiv(int2fx(temp_score * get_game_speed()), int2fx(NUM_SCORE_LERP_STEPS))
+         */
+        lerped_temp_score -= int2fx(temp_score * get_game_speed()) / NUM_SCORE_LERP_STEPS;
+        lerped_score += int2fx(temp_score * get_game_speed()) / NUM_SCORE_LERP_STEPS;
 
         if (lerped_temp_score > 0)
         {
