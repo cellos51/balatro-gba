@@ -75,12 +75,7 @@ static JokerEffect jolly_joker_effect(Joker *joker, Card *scored_card, enum Joke
 
     SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
 
-    // This is really inefficient but the only way at the moment to check for whole-hand conditions
-    u8 suits[NUM_SUITS];
-    u8 ranks[NUM_RANKS];
-    get_played_distribution(ranks, suits);
-
-    if (hand_contains_n_of_a_kind(ranks) >= 2)
+    if (get_contained_hands()->PAIR)
     {
         effect.mult = 8;
     }
@@ -94,12 +89,7 @@ static JokerEffect zany_joker_effect(Joker *joker, Card *scored_card, enum Joker
 
     SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
 
-    // This is really inefficient but the only way at the moment to check for whole-hand conditions
-    u8 suits[NUM_SUITS];
-    u8 ranks[NUM_RANKS];
-    get_played_distribution(ranks, suits);
-
-    if (hand_contains_n_of_a_kind(ranks) >= 3)
+    if (get_contained_hands()->THREE_OF_A_KIND)
     {
         effect.mult = 12;
     }
@@ -113,11 +103,7 @@ static JokerEffect mad_joker_effect(Joker *joker, Card *scored_card, enum JokerE
 
     SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
 
-    u8 suits[NUM_SUITS];
-    u8 ranks[NUM_RANKS];
-    get_played_distribution(ranks, suits);
-
-    if (hand_contains_two_pair(ranks))
+    if (get_contained_hands()->TWO_PAIR)
     {
         effect.mult = 10;
     }
@@ -131,11 +117,7 @@ static JokerEffect crazy_joker_effect(Joker *joker, Card *scored_card, enum Joke
 
     SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
 
-    u8 suits[NUM_SUITS];
-    u8 ranks[NUM_RANKS];
-    get_played_distribution(ranks, suits);
-
-    if (hand_contains_straight(ranks))
+    if (get_contained_hands()->STRAIGHT)
     {
         effect.mult = 12;
     }
@@ -149,11 +131,7 @@ static JokerEffect droll_joker_effect(Joker *joker, Card *scored_card, enum Joke
 
     SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
 
-    u8 suits[NUM_SUITS];
-    u8 ranks[NUM_RANKS];
-    get_played_distribution(ranks, suits);
-
-    if (hand_contains_flush(suits))
+    if (get_contained_hands()->FLUSH)
     {
         effect.mult = 10;
     }
@@ -167,11 +145,7 @@ static JokerEffect sly_joker_effect(Joker *joker, Card *scored_card, enum JokerE
 
     SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
 
-    u8 suits[NUM_SUITS];
-    u8 ranks[NUM_RANKS];
-    get_played_distribution(ranks, suits);
-
-    if (hand_contains_n_of_a_kind(ranks) >= 2)
+    if (get_contained_hands()->PAIR)
     {
         effect.chips = 50;
     }
@@ -185,11 +159,7 @@ static JokerEffect wily_joker_effect(Joker *joker, Card *scored_card, enum Joker
 
     SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
 
-    u8 suits[NUM_SUITS];
-    u8 ranks[NUM_RANKS];
-    get_played_distribution(ranks, suits);
-
-    if (hand_contains_n_of_a_kind(ranks) >= 3)
+    if (get_contained_hands()->THREE_OF_A_KIND)
     {
         effect.chips = 100;
     }
@@ -203,11 +173,7 @@ static JokerEffect clever_joker_effect(Joker *joker, Card *scored_card, enum Jok
 
     SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
 
-    u8 suits[NUM_SUITS];
-    u8 ranks[NUM_RANKS];
-    get_played_distribution(ranks, suits);
-
-    if (hand_contains_two_pair(ranks))
+    if (get_contained_hands()->TWO_PAIR)
     {
         effect.chips = 80;
     }
@@ -221,11 +187,7 @@ static JokerEffect devious_joker_effect(Joker *joker, Card *scored_card, enum Jo
 
     SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
 
-    u8 suits[NUM_SUITS];
-    u8 ranks[NUM_RANKS];
-    get_played_distribution(ranks, suits);
-
-    if (hand_contains_straight(ranks))
+    if (get_contained_hands()->STRAIGHT)
     {
         effect.chips = 100;
     }
@@ -239,11 +201,7 @@ static JokerEffect crafty_joker_effect(Joker *joker, Card *scored_card, enum Jok
 
     SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
 
-    u8 suits[NUM_SUITS];
-    u8 ranks[NUM_RANKS];
-    get_played_distribution(ranks, suits);
-
-    if (hand_contains_flush(suits))
+    if (get_contained_hands()->FLUSH)
     {
         effect.chips = 80;
     }
@@ -630,12 +588,7 @@ static JokerEffect the_duo_joker_effect(Joker *joker, Card *scored_card, enum Jo
 
     SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
     
-    // This is really inefficient but the only way at the moment to check for whole-hand conditions
-    u8 suits[NUM_SUITS];
-    u8 ranks[NUM_RANKS];
-    get_played_distribution(ranks, suits);
-
-    if (hand_contains_n_of_a_kind(ranks) >= 2)
+    if (get_contained_hands()->PAIR)
     {
         effect.xmult = 2;
     }
@@ -650,12 +603,7 @@ static JokerEffect the_trio_joker_effect(Joker *joker, Card *scored_card, enum J
 
     SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
 
-    // This is really inefficient but the only way at the moment to check for whole-hand conditions
-    u8 suits[NUM_SUITS];
-    u8 ranks[NUM_RANKS];
-    get_played_distribution(ranks, suits);
-
-    if (hand_contains_n_of_a_kind(ranks) >= 3)
+    if (get_contained_hands()->THREE_OF_A_KIND)
     {
         effect.xmult = 3;
     }
@@ -669,12 +617,7 @@ static JokerEffect the_family_joker_effect(Joker *joker, Card *scored_card, enum
 
     SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
     
-    // This is really inefficient but the only way at the moment to check for whole-hand conditions
-    u8 suits[NUM_SUITS];
-    u8 ranks[NUM_RANKS];
-    get_played_distribution(ranks, suits);
-
-    if (hand_contains_n_of_a_kind(ranks) >= 4)
+    if (get_contained_hands()->FOUR_OF_A_KIND)
     {
         effect.xmult = 4;
     }
@@ -689,11 +632,7 @@ static JokerEffect the_order_joker_effect(Joker *joker, Card *scored_card, enum 
 
     SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
 
-    u8 suits[NUM_SUITS];
-    u8 ranks[NUM_RANKS];
-    get_played_distribution(ranks, suits);
-
-    if (hand_contains_straight(ranks))
+    if (get_contained_hands()->STRAIGHT)
     {
         effect.xmult = 3;
     }
@@ -708,11 +647,7 @@ static JokerEffect the_tribe_joker_effect(Joker *joker, Card *scored_card, enum 
 
     SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
 
-    u8 suits[NUM_SUITS];
-    u8 ranks[NUM_RANKS];
-    get_played_distribution(ranks, suits);
-
-    if (hand_contains_flush(suits))
+    if (get_contained_hands()->FLUSH)
     {
         effect.xmult = 2;
     }
