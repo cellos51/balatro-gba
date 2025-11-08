@@ -2954,17 +2954,17 @@ void joker_start_discard_animation(JokerObject *joker_object)
     list_push_back(&_discarded_jokers_list, joker_object);
 }
 
-void game_sell_joker(int joker_id)
+void game_sell_joker(int joker_idx)
 {
-    if (joker_id < 0 || joker_id >= list_get_len(&_owned_jokers_list))
+    if (joker_idx < 0 || joker_idx >= list_get_len(&_owned_jokers_list))
         return;
     
-    JokerObject* joker_object = (JokerObject*)list_get_at_idx(&_owned_jokers_list, joker_id);
+    JokerObject* joker_object = (JokerObject*)list_get_at_idx(&_owned_jokers_list, joker_idx);
     money += joker_get_sell_value(joker_object->joker);
     display_money(money);
     erase_price_under_sprite_object(joker_object->sprite_object);
 
-    list_remove_at_idx(&_owned_jokers_list, joker_id);
+    list_remove_at_idx(&_owned_jokers_list, joker_idx);
     
     _set_shop_joker_avail(joker_object->joker->id, true);
 
