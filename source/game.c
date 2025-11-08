@@ -224,6 +224,8 @@ static int scored_card_index = 0;
 
 // Keeping track of what Jokers are scored at each step
 static ListItr _joker_scored_itr;
+static ListItr _joker_card_scored_end_itr;
+static ListItr _joker_round_end_itr;
 
 static int selection_x = 0;
 static int selection_y = 0;
@@ -2277,13 +2279,14 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                             _joker_scored_itr = list_itr_create(&_owned_jokers_list);
                         }
 
-                        // So pretend "played_selections" is now called "scored_card_index" and it counts the number of cards that have been scored
-                        for (int j = scored_card_index; j <= played_top+1; j++) // allow past played_top to score jokers for last played card
-                        {
-                            tte_erase_rect_wrapper(PLAYED_CARDS_SCORES_RECT);
+                        tte_erase_rect_wrapper(PLAYED_CARDS_SCORES_RECT);
 
-                            // Trigger all Jokers after each card scored
-                            if (*played_selections > 0)
+                        // Trigger all Jokers after each card scored. Scoring -1 because scored_card_index
+                        // has already been incremented and we are activating Jokers for the previous scored card
+
+                        if (scored_card_index > 0 && card_object_is_selected(played[scored_card_index-1]))
+                        {
+                            if (check_and_score_joker_for_event(&_joker_scored_itr, played[*played_selections - 1]->card, JOKER_EVENT_ON_CARD_SCORED))
                             {
                                 if (check_and_score_joker_for_event(&_joker_scored_itr, played[*played_selections - 1], JOKER_EVENT_ON_CARD_SCORED))
                                 {
@@ -2298,33 +2301,43 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                                     return;
                                 }
                             }
-
-                            // Score card
-
-                            scored_card_index++; // Count the number of cards that have been scored
-
-                            if (j <= played_top && card_object_is_selected(played[j]))
+                        
+                            // Trigger all Jokers that have an effect when a card finishes scoring
+                            // (e.g. retriggers) after activating all the other scored_card Jokers normally
+                            if (check_and_score_joker_for_event(&_joker_card_scored_end_itr, played[*played_selections - 1]->card, JOKER_EVENT_ON_CARD_SCORED_END))
                             {
-                                tte_set_pos(fx2int(played[j]->sprite_object->x) + 8, SCORED_CARD_TEXT_Y); // Offset of 16 pixels to center the text on the card
+                                return;
+                            }
+                        }
+
+                        // Score card
+                        CardObject* scored_card_object = played[scored_card_index];
+
+                        if (scored_card_index <= played_top)
+                        {
+                            if (card_object_is_selected(scored_card_object))
+                            {
+                                tte_set_pos(fx2int(scored_card_object->sprite_object->x) + 8, SCORED_CARD_TEXT_Y); // Offset of 1 tile to keep the text on the card
                                 tte_set_special(TTE_BLUE_PB * TTE_SPECIAL_PB_MULT_OFFSET); // Set text color to blue from background memory
 
                                 // Write the score to a character buffer variable
                                 char score_buffer[INT_MAX_DIGITS + 2]; // for '+' and null terminator
-                                snprintf(score_buffer, sizeof(score_buffer), "+%d", card_get_value(played[j]->card));
+                                snprintf(score_buffer, sizeof(score_buffer), "+%d", card_get_value(scored_card_object->card));
                                 tte_write(score_buffer);
 
-                                *played_selections = scored_card_index;
-                                card_object_shake(played[j], SFX_CARD_SELECT);
+                                card_object_shake(scored_card_object, SFX_CARD_SELECT);
 
                                 // Relocated card scoring logic here
-                                chips += card_get_value(played[j]->card);
+                                chips += card_get_value(scored_card_object->card);
                                 display_chips();
 
                                 // Allow Joker scoring
                                 _joker_scored_itr = list_itr_create(&_owned_jokers_list);
-
-                                return;
+                                _joker_card_scored_end_itr = list_itr_create(&_owned_jokers_list);
                             }
+
+                            scored_card_index++; // Count the number of cards that have been scored
+                            return;
                         }
 
                         play_state = PLAY_SCORING_HELD;
@@ -2381,15 +2394,14 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                         }
 
                         // Trigger hand end effect for all jokers once they are done scoring
-                        ListItr round_end_itr = list_itr_create(&_owned_jokers_list);
-                        if (check_and_score_joker_for_event(&round_end_itr, NULL, JOKER_EVENT_ON_HAND_SCORED_END))
+                        if (check_and_score_joker_for_event(&_joker_round_end_itr, NULL, JOKER_EVENT_ON_HAND_SCORED_END))
                         {
                             return;
                         }
 
                         play_state = PLAY_ENDING;
                         timer = TM_ZERO;
-                        *played_selections = played_top + 1; // Reset the played selections to the top of the played stack
+                        scored_card_index = played_top + 1; // Reset the played selections to the top of the played stack
                         break;
                     }
                 
@@ -2401,18 +2413,18 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
 
                 case PLAY_ENDING: // This is the reverse of PLAY_PLAYING. The cards get reset back to their neutral position sequentially
 
-                    if (i == 0 && (timer % FRAMES(10) == 0 || !card_object_is_selected(played[played_top - *played_selections])) && timer > FRAMES(40))
+                    if (i == 0 && (timer % FRAMES(10) == 0 || !card_object_is_selected(played[played_top - scored_card_index])) && timer > FRAMES(40))
                     {
-                        (*played_selections)--;
+                        scored_card_index--;
 
-                        if (*played_selections == 0)
+                        if (scored_card_index == 0)
                         {
                             play_state = PLAY_ENDED;
                             timer = TM_ZERO;
                         }
                     }
 
-                    if (card_object_is_selected(played[i]) && played_top - i <= *played_selections - 1)
+                    if (card_object_is_selected(played[i]) && played_top - i <= scored_card_index - 1)
                     {
                         played_y -= int2fx(10);
                     }
