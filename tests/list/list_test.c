@@ -159,14 +159,19 @@ void push_back_three_remove_push_front_three_entries(void)
     assert(list_get_len(&my_cool_list) == 3);
 
     // now use an iterator to examine each node
+    int* data;
+
     ListItr list_itr = list_itr_create(&my_cool_list);
-    ListNode* ln;
+
     int itr = 0;
-    ListNode* prev_ln;
-    while((ln = list_itr_next(&list_itr)))
+
+    ListNode* prev_ln = NULL;
+
+    while((data = list_itr_next(&list_itr)))
     {
-        assert(ln != NULL);
-        assert(ln->data == &test_data[itr]);
+        assert(data != NULL);
+        assert(data == &test_data[itr]);
+        ListNode* ln = list_itr.current_node;
         switch(itr)
         {
             case 0:
@@ -202,12 +207,13 @@ void push_back_three_remove_push_front_three_entries(void)
     assert(list_get_len(&my_cool_list) == 2);
 
     list_itr = list_itr_create(&my_cool_list);
-    ln = NULL;
+    data = NULL;
     itr = 0;
     prev_ln = NULL;
-    while((ln = list_itr_next(&list_itr)))
+    while((data = list_itr_next(&list_itr)))
     {
-        assert(ln != NULL);
+        assert(data != NULL);
+        ListNode* ln = list_itr.current_node;
         switch(itr)
         {
             case 0:
@@ -220,7 +226,7 @@ void push_back_three_remove_push_front_three_entries(void)
                 assert(ln->next == NULL);
                 assert(ln->prev->next == ln);
                 assert(ln->prev == prev_ln);
-                list_remove_node(&my_cool_list, ln);
+                list_itr_remove_node_current(&list_itr);
                 break;
             default:
                 assert(false); // shouldn't get here
@@ -241,12 +247,13 @@ void push_back_three_remove_push_front_three_entries(void)
     // now, the list should be in the order...
     // test_data[2] -> test_data[1] -> test_data[0] -> test_data[0]
     list_itr = list_itr_create(&my_cool_list);
-    ln = NULL;
+    data = NULL;
     itr = 0;
-    prev_ln = NULL;
-    while((ln = list_itr_next(&list_itr)))
+    while((data = list_itr_next(&list_itr)))
     {
-        assert(ln != NULL);
+        assert(data != NULL);
+        ListNode* ln = list_itr.current_node;
+
         switch(itr)
         {
             case 0:
@@ -266,7 +273,6 @@ void push_back_three_remove_push_front_three_entries(void)
                 break;
         }
         itr++;
-        prev_ln = ln;
     }
 
     assert(list_get_len(&my_cool_list) == 4);

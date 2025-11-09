@@ -67,10 +67,17 @@ typedef struct
     /**
      * @brief A pointer to the @ref List this is iterating through
      */
-    const List* list;
+    List* list;
 
     /**
-     * @brief The current node in the list
+     * @brief The next node in the list
+     */
+    ListNode* next_node;
+
+    /**
+     * @brief The current node in the list iterator
+     *
+     * The node of the most recently returned data from  @ref list_itr_next() .
      */
     ListNode* current_node;
 } ListItr;
@@ -122,18 +129,6 @@ void list_push_front(List* list, void* data);
 void list_push_back(List* list, void* data);
 
 /**
- * Remove a node from a list.
- *
- * Remove a @ref ListNode from a @ref List. There are no checks to ensure that the
- * passed `node` is actually part of the passed `list`. Handle with care.
- * This is used with the @ref ListItr specifically. 
- *
- * @param list pointer to a @ref List
- * @param node pointer to a @ref ListNode 
- */
-void list_remove_node(List *list, ListNode *node);
-
-/**
  * Get a List's node at it's nth index
  *
  * @param list pointer to a @ref List
@@ -141,7 +136,7 @@ void list_remove_node(List *list, ListNode *node);
  *
  * @return a pointer to the data at the nth @ref ListNode, or NULL if out-of-bounds
  */
-void* list_get_at_idx(const List *list, int n);
+void* list_get_at_idx(List *list, int n);
 
 /**
  * Remove a List's node at it's nth index
@@ -169,15 +164,22 @@ int list_get_len(const List* list);
  *
  * @return A new @ref ListItr
  */
-ListItr list_itr_create(const List* list);
+ListItr list_itr_create(List* list);
 
 /**
- * Get the next entry in a @ref ListItr
+ * Get the next data entry in a @ref ListItr
  *
  * @param itr pointer to the @ref ListItr
  *
- * @return A pointer to the next @ref ListNode if valid, otherwise return NULL.
+ * @return A pointer to the data pointer at the next @ref ListNode if valid, otherwise return NULL.
  */
-ListNode* list_itr_next(ListItr* itr);
+void* list_itr_next(ListItr* itr);
+
+/**
+ * Remove the previous @ListNode from the iterator
+ *
+ * @param itr pointer to the @ref ListItr
+ */
+void list_itr_remove_node_current(ListItr* itr);
 
 #endif

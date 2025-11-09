@@ -3,6 +3,32 @@
 #include "list.h"
 #include "pool.h"
 
+/**
+ * Remove a node from a list.
+ *
+ * Remove a @ref ListNode from a @ref List. There are no checks to ensure that the
+ * passed `node` is actually part of the passed `list`. Handle with care.
+ * This is used with the @ref ListItr specifically. 
+ *
+ * @param list pointer to a @ref List
+ * @param node pointer to a @ref ListNode 
+ */
+static void _list_remove_node(List *list, ListNode *node);
+
+/**
+ * Get the next @ref ListNode in a @ref ListItr
+ *
+ * Note: Use of this function outside of testing is strongly discouraged. Unless
+ * you really want to access the @ref ListNode itself, it's preferred to just use
+ * @ref list_itr_next .
+ *
+ * @param itr pointer to the @ref ListItr
+ *
+ * @return A pointer to the @ref ListNode in the itr, otherwise return NULL.
+ */
+static ListNode* _list_itr_node_next(ListItr* itr);
+
+
 List list_create(void)
 {
     List list = { .head = NULL, .tail = NULL, .len = 0 };
@@ -16,7 +42,7 @@ void list_clear(List* list)
     ListItr itr = list_itr_create(list);
     ListNode* ln;
 
-    while((ln = list_itr_next(&itr)))
+    while((ln = _list_itr_node_next(&itr)))
     {
        POOL_FREE(ListNode, ln);
     }
@@ -74,7 +100,7 @@ void list_push_back(List *list, void* data)
     list->len++;
 }
 
-void list_remove_node(List *list, ListNode *node)
+static void _list_remove_node(List *list, ListNode *node)
 {
     if(node->prev && !node->next) // end of list
     {
@@ -102,49 +128,22 @@ void list_remove_node(List *list, ListNode *node)
     list->len--;
 }
 
-ListItr list_itr_create(const List* list)
-{
-    ListItr itr =
-    {
-        .list = list,
-        .current_node = !list_is_empty(list) ? list->head : NULL,
-    };
-
-    return itr;
-}
-
-ListNode* list_itr_next(ListItr* itr)
-{
-    if(!itr->current_node) return NULL;
-
-    ListNode* ln = itr->current_node;
-
-    if(ln->next)
-    {
-        itr->current_node = ln->next;
-        return ln;
-    }
-
-    itr->current_node = NULL;
-    return ln;
-}
-
 int list_get_len(const List* list)
 {
     return list->len;
 }
 
-void* list_get_at_idx(const List* list, int n)
+void* list_get_at_idx(List* list, int n)
 {
     if(n >= list_get_len(list) || n < 0) return NULL;
 
     int curr_idx = 0;
     ListItr itr = list_itr_create(list);
-    ListNode* ln;
+    void* data = NULL;
 
-    while((ln = list_itr_next(&itr)))
+    while((data = list_itr_next(&itr)))
     {
-        if (n == curr_idx++) return ln->data;
+        if (n == curr_idx++) return data;
     }
 
     return NULL;
@@ -158,13 +157,56 @@ bool list_remove_at_idx(List* list, int n)
     ListItr itr = list_itr_create(list);
     ListNode* ln;
 
-    while((ln = list_itr_next(&itr)))
+    while((ln = _list_itr_node_next(&itr)))
     {
         if(n == len++)
         {
-            list_remove_node(list, ln);
+            _list_remove_node(list, ln);
             return true;
         }
     }
     return false;
+}
+
+ListItr list_itr_create(List* list)
+{
+    ListItr itr =
+    {
+        .list = list,
+        .next_node = !list_is_empty(list) ? list->head : NULL,
+        .current_node = NULL,
+    };
+
+    return itr;
+}
+
+void* list_itr_next(ListItr* itr)
+{
+    ListNode* ln = _list_itr_node_next(itr);
+    return ln ? ln->data : NULL;
+}
+
+static ListNode* _list_itr_node_next(ListItr* itr)
+{
+    if(!itr->next_node) return NULL;
+
+    itr->current_node = itr->next_node;
+
+    ListNode* ln = itr->next_node;
+
+    if(ln->next)
+    {
+        itr->next_node = ln->next;
+        return ln;
+    }
+
+    itr->next_node = NULL;
+    return ln;
+}
+
+void list_itr_remove_node_current(ListItr* itr)
+{
+    ListNode* tmp_prev = itr->current_node->prev;
+    _list_remove_node(itr->list, itr->current_node);
+    itr->current_node = tmp_prev;
 }
