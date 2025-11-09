@@ -2310,10 +2310,11 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                         }
 
                         // Score card
-                        CardObject* scored_card_object = played[scored_card_index];
 
                         if (scored_card_index <= played_top)
                         {
+                            CardObject* scored_card_object = played[scored_card_index];
+
                             if (card_object_is_selected(scored_card_object))
                             {
                                 tte_set_pos(fx2int(scored_card_object->sprite_object->x) + 8, SCORED_CARD_TEXT_Y); // Offset of 1 tile to keep the text on the card
@@ -2341,6 +2342,10 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                             do
                             {
                                 scored_card_index++;
+                                if (scored_card_index > played_top)
+                                {
+                                    return;
+                                }
                             }
                             while (!card_object_is_selected(played[scored_card_index]));
 
