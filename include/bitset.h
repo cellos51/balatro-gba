@@ -107,7 +107,7 @@ bool bitset_get_idx(Bitset *bm, int idx);
 // Get the next free (set to 0) index in the bitset.
 // It also sets the bit which it maybe should do... It really shouldn't do two things
 // But it's such a fast operation idk. // TODO: decide what you wanna do
-int bitset_get_free_idx(Bitset *bitset);
+int bitset_allocate_idx(Bitset *bitset);
 
 /**
  * @brief Clear the bitset, all to 0
@@ -147,16 +147,16 @@ int bitset_num_set_bits(Bitset *bitset);
 int bitset_find_idx_of_nth_set(const Bitset *bitset, int n);
 
 /**
- * @brief Get a new @ref BitsetItr
+ * @brief Declare a @ref BitsetItr
  *
  * @param bitset A @ref Bitset to operate on
  *
  * @return A newly constructed BitsetItr
  */
-BitsetItr bitset_itr_new(const Bitset* bitset);
+BitsetItr bitset_itr_declare(const Bitset* bitset);
 
 /**
- * @brief Get the next index from a @ref BitsetItr
+ * @brief Get the index of the next set bit in the bitset from a @ref BitsetItr
  *
  * @param itr A @ref BitsetItr to operate on
  *

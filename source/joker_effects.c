@@ -275,7 +275,7 @@ static JokerEffect joker_stencil_effect(Joker *joker, Card *scored_card, enum Jo
     effect.xmult = (MAX_JOKERS_HELD_SIZE) - num_jokers;
 
     // ...and also each stencil_joker adds +1 xmult
-    ListItr itr = list_itr_new(jokers);
+    ListItr itr = list_itr_declare(jokers);
     ListNode* ln;
 
     while((ln = list_itr_next(&itr)))
@@ -833,7 +833,7 @@ static JokerEffect blueprint_joker_effect(Joker *joker, Card *scored_card, enum 
     JokerEffect effect = {0};
     List* jokers = get_jokers_list();
 
-    ListItr itr = list_itr_new(jokers);
+    ListItr itr = list_itr_declare(jokers);
     ListNode* ln;
 
     while((ln = list_itr_next(&itr)))
@@ -864,7 +864,7 @@ static JokerEffect brainstorm_joker_effect(Joker *joker, Card *scored_card, enum
     }
 
     List* jokers = get_jokers_list();
-    JokerObject* first_joker = (JokerObject*)jokers->head->data;
+    JokerObject* first_joker = list_get_at_idx(jokers, 0);
 
     if (first_joker != NULL && first_joker->joker->id != JOKER_BRAINSTORM_ID)
     {

@@ -3,17 +3,17 @@
 #include "list.h"
 #include "pool.h"
 
-List list_new(void)
+List list_declare(void)
 {
     List list = { .head = NULL, .tail = NULL, .len = 0 };
     return list;
 }
 
-void list_destroy(List* list)
+void list_clear(List* list)
 {
     if(list_is_empty(list)) return;
 
-    ListItr itr = list_itr_new(list);
+    ListItr itr = list_itr_declare(list);
     ListNode* ln;
 
     while((ln = list_itr_next(&itr)))
@@ -102,7 +102,7 @@ void list_remove_node(List *list, ListNode *node)
     list->len--;
 }
 
-ListItr list_itr_new(const List* list)
+ListItr list_itr_declare(const List* list)
 {
     ListItr itr =
     {
@@ -138,13 +138,13 @@ void* list_get_at_idx(const List* list, int n)
 {
     if(n >= list_get_len(list) || n < 0) return NULL;
 
-    int len = 0;
-    ListItr itr = list_itr_new(list);
+    int curr_idx = 0;
+    ListItr itr = list_itr_declare(list);
     ListNode* ln;
 
     while((ln = list_itr_next(&itr)))
     {
-        if (n == len++) return ln->data;
+        if (n == curr_idx++) return ln->data;
     }
 
     return NULL;
@@ -155,7 +155,7 @@ bool list_remove_at_idx(List* list, int n)
     if(n >= list_get_len(list) || n < 0) return false;
 
     int len = 0;
-    ListItr itr = list_itr_new(list);
+    ListItr itr = list_itr_declare(list);
     ListNode* ln;
 
     while((ln = list_itr_next(&itr)))

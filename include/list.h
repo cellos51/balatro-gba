@@ -76,21 +76,25 @@ typedef struct
 } ListItr;
 
 /**
- * Create a new list.
+ * Declare a list.
+ *
+ * If the list is being re-declared, the list must be freed with @ref list_destroy.
+ *
+ * While this function does not allocate memory for the list itself, the list does allocate memory for each element.
  *
  * @return A @ref List with head and tail reset.
  */
-List list_new(void);
+List list_declare(void);
 
 /**
- * Destroy a list.
+ * Clear a list.
  *
  * Go through the list and free each node and set the `head` and `tail` to `NULL`.
  * Note, it doesn't "free" the data at the node.
  *
- * @param list pointer to a @ref List to destroy
+ * @param list pointer to a @ref List to clear
  */
-void list_destroy(List* list);
+void list_clear(List* list);
 
 /**
  * Check if a list is empty
@@ -159,13 +163,13 @@ bool list_remove_at_idx(List *list, int n);
 int list_get_len(const List* list);
 
 /**
- * Create a new @ref ListItr
+ * Declare a @ref ListItr
  *
  * @param list pointer to a @ref List
  *
  * @return A new @ref ListItr
  */
-ListItr list_itr_new(const List* list);
+ListItr list_itr_declare(const List* list);
 
 /**
  * Get the next entry in a @ref ListItr

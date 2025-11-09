@@ -23,7 +23,7 @@ void bitset_set_idx(Bitset *bitset, int idx, bool on)
     }
 }
 
-int bitset_get_free_idx(Bitset *bitset)
+int bitset_allocate_idx(Bitset *bitset)
 {
     for (uint32_t i = 0; i < bitset->nwords; i++)
     {
@@ -117,7 +117,7 @@ int bitset_find_idx_of_nth_set(const Bitset *bitset, int n)
     return UNDEFINED;
 }
 
-BitsetItr bitset_itr_new(const Bitset* bitset)
+BitsetItr bitset_itr_declare(const Bitset* bitset)
 {
     BitsetItr itr =
     {
@@ -137,7 +137,7 @@ int bitset_itr_next(BitsetItr* itr)
     // This can be sped up with by checking if the word is empty first.
     // Then the worst enemy of this method would be something like a set bit at the end
     // of every word. In that case you would need to loop 31 times maximum.
-    // So one last thing you could do is something like `bitset_get_free_idx` does with the
+    // So one last thing you could do is something like `bitset_allocate_idx` does with the
     // __builtin_ctz function as well.
     //
     // The point being, this can be very slow, but it's simple and can be much faster. 

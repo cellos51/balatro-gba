@@ -33,7 +33,7 @@
     };                                                                      \
     type * pool_get_##type()                                                \
     {                                                                       \
-        int free_offset = bitset_get_free_idx(type##_pool.bitset);          \
+        int free_offset = bitset_allocate_idx(type##_pool.bitset);          \
         if(free_offset == -1) return NULL;                                  \
         return &type##_pool.objects[free_offset];                           \
     }                                                                       \

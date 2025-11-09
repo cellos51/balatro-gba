@@ -380,12 +380,14 @@ int get_scored_card_index(void)
     return scored_card_index;
 }
 
-List* get_jokers_list(void) {
+List* get_jokers_list(void)
+{
     return &_owned_jokers_list;
 }
 
-bool is_joker_owned(int joker_id) {
-    ListItr itr = list_itr_new(&_owned_jokers_list);
+bool is_joker_owned(int joker_id)
+{
+    ListItr itr = list_itr_declare(&_owned_jokers_list);
     ListNode* ln;
 
     while((ln = list_itr_next(&itr)))
@@ -421,10 +423,10 @@ void add_joker(JokerObject *joker_object)
     }
 }
 
-void remove_held_joker(int joker_id)
+void remove_held_joker(JokerObject* joker_object, int shop_joker_idx)
 {
     // TODO: Extract to on_joker_removed() callback
-    JokerObject* joker_object = list_get_at_idx(&_owned_jokers_list, joker_id);
+    //JokerObject* joker_object = list_get_at_idx(&_owned_jokers_list, joker_id);
     // In case the player gets multiple Four Fingers Jokers,
     // and only reset the size when all of them have been removed
     if (joker_object->joker->id == FOUR_FINGERS_JOKER_ID) 
@@ -441,7 +443,8 @@ void remove_held_joker(int joker_id)
         shortcut_joker_count--;
     }
 
-    list_remove_at_idx(&_owned_jokers_list, joker_id);        
+    _set_shop_joker_avail(joker_object->joker->id, true);
+    list_remove_at_idx(&_owned_jokers_list, shop_joker_idx);
 }
 
 int get_deck_top(void)
@@ -1417,9 +1420,10 @@ void jokers_available_to_shop_init()
 void game_init()
 {
     // Initialize all jokers list once
-    _owned_jokers_list = list_new();
-    _discarded_jokers_list = list_new();
-    _shop_jokers_list = list_new();
+    _owned_jokers_list = list_declare();
+    _discarded_jokers_list = list_declare();
+    _shop_jokers_list = list_declare();
+    _joker_scored_itr = list_itr_declare(&_owned_jokers_list);
 
     jokers_available_to_shop_init();
 
@@ -2123,11 +2127,11 @@ static void cards_in_hand_update_loop(bool* discarded_card, int* played_selectio
 }
 
 // returns true if a joker was scored, false otherwise
-static bool check_and_score_joker_for_event(ListItr* itr, Card* played_card, enum JokerEvent joker_event)
+static bool check_and_score_joker_for_event(ListItr* starting_joker_itr, Card* played_card, enum JokerEvent joker_event)
 {
     ListNode* ln;
 
-    while((ln = list_itr_next(itr)))
+    while((ln = list_itr_next(starting_joker_itr)))
     {
         JokerObject *joker = (JokerObject*)ln->data;
         if (joker_object_score(joker, played_card, joker_event, &chips, &mult, &money, &retrigger))
@@ -2200,7 +2204,7 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                             retrigger = false;
                             scored_card_index--;
                             (*played_selections)--;
-                            _joker_scored_itr = list_itr_new(&_owned_jokers_list);
+                            _joker_scored_itr = list_itr_declare(&_owned_jokers_list);
                         }
 
                         // So pretend "played_selections" is now called "scored_card_index" and it counts the number of cards that have been scored
@@ -2218,7 +2222,7 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                             
                                 // Trigger all Jokers that have an effect when a card finishes scoring
                                 // (e.g. retriggers) after activating all the other scored_card Jokers normally
-                                _joker_scored_itr = list_itr_new(&_owned_jokers_list);
+                                _joker_scored_itr = list_itr_declare(&_owned_jokers_list);
                                 if (check_and_score_joker_for_event(&_joker_scored_itr, played[*played_selections - 1]->card, JOKER_EVENT_ON_CARD_SCORED_END))
                                 {
                                     return;
@@ -2247,7 +2251,7 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                                 display_chips(chips);
 
                                 // Allow Joker scoring
-                                _joker_scored_itr = list_itr_new(&_owned_jokers_list);
+                                _joker_scored_itr = list_itr_declare(&_owned_jokers_list);
 
                                 return;
                             }
@@ -2255,7 +2259,7 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
 
                         // advance state after going past the last card (exited the loop without returning)
                         play_state = PLAY_SCORING_JOKERS;
-                        _joker_scored_itr = list_itr_new(&_owned_jokers_list);
+                        _joker_scored_itr = list_itr_declare(&_owned_jokers_list);
                         scored_card_index = 0; // reuse this variable for held cards
                         return;
                     }
@@ -2280,7 +2284,7 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                         }
 
                         // Trigger hand end effect for all jokers once they are done scoring
-                        ListItr round_end_itr = list_itr_new(&_owned_jokers_list);
+                        ListItr round_end_itr = list_itr_declare(&_owned_jokers_list);
                         if (check_and_score_joker_for_event(&round_end_itr, NULL, JOKER_EVENT_ON_HAND_SCORED_END))
                         {
                             return;
@@ -2356,6 +2360,7 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                                 *played_selections = 0;
                                 played_top = -1; // Reset the played stack
                                 scored_card_index = 0;
+                                _joker_scored_itr = list_itr_declare(&_owned_jokers_list);
                                 timer = TM_ZERO;
                                 break; // Break out of the loop to avoid accessing an invalid index
                             }
@@ -2770,7 +2775,7 @@ static int game_shop_get_rand_available_joker_id(void)
     int fallback_random_joker_id = UNDEFINED;
     int match_count = 0;
 
-    BitsetItr itr = bitset_itr_new(&_avail_jokers_bitset);
+    BitsetItr itr = bitset_itr_declare(&_avail_jokers_bitset);
 
     int i = 0;
     int joker_id = UNDEFINED;
@@ -2797,8 +2802,8 @@ static void game_shop_create_items()
 
     if (_no_avail_jokers()) return;
 
-    list_destroy(&_shop_jokers_list);
-    _shop_jokers_list = list_new();
+    list_clear(&_shop_jokers_list);
+    _shop_jokers_list = list_declare();
 
     for (int i = 0; i < MAX_SHOP_JOKERS; i++)
     {
@@ -2880,7 +2885,7 @@ static void game_shop_reroll(int *reroll_cost)
     money -= *reroll_cost;
     display_money(money); // Update the money display
 
-    ListItr itr = list_itr_new(&_shop_jokers_list);
+    ListItr itr = list_itr_declare(&_shop_jokers_list);
     ListNode* ln;
 
     while((ln = list_itr_next(&itr)))
@@ -2894,12 +2899,12 @@ static void game_shop_reroll(int *reroll_cost)
         }
     }
 
-    list_destroy(&_shop_jokers_list);
-    _shop_jokers_list = list_new();
+    list_clear(&_shop_jokers_list);
+    _shop_jokers_list = list_declare();
 
     game_shop_create_items();
     
-    itr = list_itr_new(&_shop_jokers_list);
+    itr = list_itr_declare(&_shop_jokers_list);
 
     while((ln = list_itr_next(&itr)))
     {
@@ -2964,9 +2969,7 @@ void game_sell_joker(int joker_idx)
     display_money(money);
     erase_price_under_sprite_object(joker_object->sprite_object);
 
-    list_remove_at_idx(&_owned_jokers_list, joker_idx);
-    
-    _set_shop_joker_avail(joker_object->joker->id, true);
+    remove_held_joker(joker_object, joker_idx);
 
     joker_start_discard_animation(joker_object);
 }
@@ -3056,7 +3059,7 @@ static void shop_top_row_on_selection_changed(SelectionGrid* selection_grid, int
         }
         else 
         {
-            int idx = prev_selection->x - 1;
+            int idx = prev_selection->x - 1;  // -1 to account for next round button
             JokerObject *joker_object = (JokerObject*)list_get_at_idx(&_shop_jokers_list, idx);
             sprite_object_set_focus(joker_object->sprite_object, false); 
             // -1 to account for next round button
@@ -3072,7 +3075,7 @@ static void shop_top_row_on_selection_changed(SelectionGrid* selection_grid, int
         }
         else 
         {
-            int idx = new_selection->x - 1;
+            int idx = new_selection->x - 1; // -1 to account for next round button
             JokerObject *joker_object = (JokerObject*)list_get_at_idx(&_shop_jokers_list, idx);
             sprite_object_set_focus(joker_object->sprite_object, true); 
         }
@@ -3171,7 +3174,7 @@ static void game_shop_outro()
     {
         tte_erase_rect_wrapper(SHOP_PRICES_TEXT_RECT); // Erase the shop prices text
 
-        ListItr itr = list_itr_new(&_shop_jokers_list);
+        ListItr itr = list_itr_declare(&_shop_jokers_list);
         ListNode* ln;
         while((ln = list_itr_next(&itr)))
         {
@@ -3205,7 +3208,7 @@ static void game_shop_on_update()
 
     if (!list_is_empty(&_shop_jokers_list))
     {
-        ListItr itr = list_itr_new(&_shop_jokers_list);
+        ListItr itr = list_itr_declare(&_shop_jokers_list);
         ListNode* ln;
         while((ln = list_itr_next(&itr)))
         {
@@ -3235,7 +3238,7 @@ static void game_shop_on_update()
 
 static void game_shop_on_exit()
 {
-    ListItr itr = list_itr_new(&_shop_jokers_list);
+    ListItr itr = list_itr_declare(&_shop_jokers_list);
     ListNode* ln;
 
     while((ln = list_itr_next(&itr)))
@@ -3249,7 +3252,7 @@ static void game_shop_on_exit()
         joker_object_destroy(&joker_object); // Destroy the joker objects
     }
 
-    list_destroy(&_shop_jokers_list);
+    list_clear(&_shop_jokers_list);
     
     increment_blind(BLIND_STATE_DEFEATED); // TODO: Move to game_round_end()?
 }
@@ -3468,7 +3471,7 @@ static void discarded_jokers_update_loop()
         return;
     }
 
-    ListItr itr = list_itr_new(&_discarded_jokers_list);
+    ListItr itr = list_itr_declare(&_discarded_jokers_list);
     ListNode* ln;
     while((ln = list_itr_next(&itr)))
     {
@@ -3498,7 +3501,7 @@ static void held_jokers_update_loop()
 
     FIXED hand_x = int2fx(HELD_JOKERS_POS.x);
 
-    ListItr itr = list_itr_new(&_owned_jokers_list);
+    ListItr itr = list_itr_declare(&_owned_jokers_list);
     ListNode* ln;
     int jokers_top = list_get_len(&_owned_jokers_list) - 1;
     int i = 0;
@@ -3541,7 +3544,7 @@ static void game_lose_on_update()
 // util we decide what we want to do after a game over.
 static void game_over_on_exit()
 {
-    ListItr itr = list_itr_new(&_owned_jokers_list);
+    ListItr itr = list_itr_declare(&_owned_jokers_list);
     ListNode* ln;
 
     while((ln = list_itr_next(&itr)))
@@ -3561,9 +3564,9 @@ static void game_over_on_exit()
     sprite_destroy(&blind_select_tokens[BLIND_TYPE_BIG]);
     sprite_destroy(&blind_select_tokens[BLIND_TYPE_BOSS]);
 
-    list_destroy(&_owned_jokers_list);
-    list_destroy(&_discarded_jokers_list);
-    list_destroy(&_shop_jokers_list);
+    list_clear(&_owned_jokers_list);
+    list_clear(&_discarded_jokers_list);
+    list_clear(&_shop_jokers_list);
 
     game_init();
 
