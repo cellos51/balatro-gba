@@ -117,7 +117,7 @@ int bitset_find_idx_of_nth_set(const Bitset *bitset, int n)
     return UNDEFINED;
 }
 
-BitsetItr bitset_itr_declare(const Bitset* bitset)
+BitsetItr bitset_itr_create(const Bitset* bitset)
 {
     BitsetItr itr =
     {

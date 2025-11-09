@@ -76,15 +76,15 @@ typedef struct
 } ListItr;
 
 /**
- * Declare a list.
+ * Create a list.
  *
- * If the list is being re-declared, the list must be freed with @ref list_destroy.
+ * If you are recreating and existing list, the list must be freed with @ref list_clear.
  *
  * While this function does not allocate memory for the list itself, the list does allocate memory for each element.
  *
  * @return A @ref List with head and tail reset.
  */
-List list_declare(void);
+List list_create(void);
 
 /**
  * Clear a list.
@@ -169,7 +169,7 @@ int list_get_len(const List* list);
  *
  * @return A new @ref ListItr
  */
-ListItr list_itr_declare(const List* list);
+ListItr list_itr_create(const List* list);
 
 /**
  * Get the next entry in a @ref ListItr

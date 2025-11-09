@@ -5,13 +5,13 @@
 #include <stdio.h>
 
 // As simple as it gets, just needs to be initialized correctly
-// - list_declare
+// - list_create
 // - list_is_empty
 // - list_get_len
 // - list_clear
 void create_and_clear_list(void)
 {
-    List my_cool_list = list_declare();
+    List my_cool_list = list_create();
 
     // verify no data 
     assert(my_cool_list.head == NULL);
@@ -26,7 +26,7 @@ void create_and_clear_list(void)
 
 // Push back one entry, make sure it looks as expected
 // tests:
-// - list_declare
+// - list_create
 // - list_push_back
 // - list_is_empty
 // - list_get_len
@@ -34,7 +34,7 @@ void create_and_clear_list(void)
 // - list_clear
 void push_back_one_entry(void)
 {
-    List my_cool_list = list_declare();
+    List my_cool_list = list_create();
 
     // verify no data 
     assert(my_cool_list.head == NULL);
@@ -69,7 +69,7 @@ void push_back_one_entry(void)
 }
 
 // Push front one entry, make sure it looks as expected
-// - list_declare
+// - list_create
 // - list_push_front
 // - list_is_empty
 // - list_get_len
@@ -77,7 +77,7 @@ void push_back_one_entry(void)
 // - list_clear
 void push_front_one_entry(void)
 {
-    List my_cool_list = list_declare();
+    List my_cool_list = list_create();
 
     // verify no data 
     assert(my_cool_list.head == NULL);
@@ -123,19 +123,19 @@ void push_front_one_entry(void)
 // Lastly, push to the front the same 3 entries and verify the state of the list
 // before detroying.
 //
-// - list_declare
+// - list_create
 // - list_push_front
 // - list_is_empty
 // - list_get_len
 // - list_get_at_idx
 // - list_remove_at_idx
 // - list_remove_node
-// - list_itr_declare
+// - list_itr_create
 // - list_itr_next
 // - list_clear
 void push_back_three_remove_push_front_three_entries(void)
 {
-    List my_cool_list = list_declare();
+    List my_cool_list = list_create();
 
     // verify no data 
     assert(my_cool_list.head == NULL);
@@ -159,7 +159,7 @@ void push_back_three_remove_push_front_three_entries(void)
     assert(list_get_len(&my_cool_list) == 3);
 
     // now use an iterator to examine each node
-    ListItr list_itr = list_itr_declare(&my_cool_list);
+    ListItr list_itr = list_itr_create(&my_cool_list);
     ListNode* ln;
     int itr = 0;
     ListNode* prev_ln;
@@ -201,7 +201,7 @@ void push_back_three_remove_push_front_three_entries(void)
     assert(!list_remove_at_idx(&my_cool_list, 2));
     assert(list_get_len(&my_cool_list) == 2);
 
-    list_itr = list_itr_declare(&my_cool_list);
+    list_itr = list_itr_create(&my_cool_list);
     ln = NULL;
     itr = 0;
     prev_ln = NULL;
@@ -240,7 +240,7 @@ void push_back_three_remove_push_front_three_entries(void)
 
     // now, the list should be in the order...
     // test_data[2] -> test_data[1] -> test_data[0] -> test_data[0]
-    list_itr = list_itr_declare(&my_cool_list);
+    list_itr = list_itr_create(&my_cool_list);
     ln = NULL;
     itr = 0;
     prev_ln = NULL;

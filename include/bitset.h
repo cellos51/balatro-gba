@@ -153,7 +153,7 @@ int bitset_find_idx_of_nth_set(const Bitset *bitset, int n);
  *
  * @return A newly constructed BitsetItr
  */
-BitsetItr bitset_itr_declare(const Bitset* bitset);
+BitsetItr bitset_itr_create(const Bitset* bitset);
 
 /**
  * @brief Get the index of the next set bit in the bitset from a @ref BitsetItr

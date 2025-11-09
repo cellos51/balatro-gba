@@ -3,7 +3,7 @@
 #include "list.h"
 #include "pool.h"
 
-List list_declare(void)
+List list_create(void)
 {
     List list = { .head = NULL, .tail = NULL, .len = 0 };
     return list;
@@ -13,7 +13,7 @@ void list_clear(List* list)
 {
     if(list_is_empty(list)) return;
 
-    ListItr itr = list_itr_declare(list);
+    ListItr itr = list_itr_create(list);
     ListNode* ln;
 
     while((ln = list_itr_next(&itr)))
@@ -102,7 +102,7 @@ void list_remove_node(List *list, ListNode *node)
     list->len--;
 }
 
-ListItr list_itr_declare(const List* list)
+ListItr list_itr_create(const List* list)
 {
     ListItr itr =
     {
@@ -139,7 +139,7 @@ void* list_get_at_idx(const List* list, int n)
     if(n >= list_get_len(list) || n < 0) return NULL;
 
     int curr_idx = 0;
-    ListItr itr = list_itr_declare(list);
+    ListItr itr = list_itr_create(list);
     ListNode* ln;
 
     while((ln = list_itr_next(&itr)))
@@ -155,7 +155,7 @@ bool list_remove_at_idx(List* list, int n)
     if(n >= list_get_len(list) || n < 0) return false;
 
     int len = 0;
-    ListItr itr = list_itr_declare(list);
+    ListItr itr = list_itr_create(list);
     ListNode* ln;
 
     while((ln = list_itr_next(&itr)))
