@@ -180,6 +180,6 @@ void* list_itr_next(ListItr* itr);
  *
  * @param itr pointer to the @ref ListItr
  */
-void list_itr_remove_node_current(ListItr* itr);
+void list_itr_remove_current_node(ListItr* itr);
 
 #endif

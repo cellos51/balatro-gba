@@ -1,8 +1,7 @@
 
 CC := gcc
 CFLAGS := -I../../include -I. \
-          -g -O3 -Wall -Werror -DPOOLS_TEST_ENV=yes
-
+          -g -O3 -Wall -Werror
 SRC            := bitset_test.c         \
                   ../../source/bitset.c
 OUT            := build/bitset_test 

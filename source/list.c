@@ -44,7 +44,7 @@ void list_clear(List* list)
 
     while((ln = _list_itr_node_next(&itr)))
     {
-       POOL_FREE(ListNode, ln);
+        POOL_FREE(ListNode, ln);
     }
 
     list->head = NULL;
@@ -204,7 +204,7 @@ static ListNode* _list_itr_node_next(ListItr* itr)
     return ln;
 }
 
-void list_itr_remove_node_current(ListItr* itr)
+void list_itr_remove_current_node(ListItr* itr)
 {
     ListNode* tmp_prev = itr->current_node->prev;
     _list_remove_node(itr->list, itr->current_node);

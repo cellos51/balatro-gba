@@ -3471,7 +3471,7 @@ static void discarded_jokers_update_loop()
         if (joker_object->sprite_object->x == joker_object->sprite_object->tx
             && joker_object->sprite_object->y == joker_object->sprite_object->ty)
         {
-            list_itr_remove_node_current(&itr);
+            list_itr_remove_current_node(&itr);
             joker_object_destroy(&joker_object);
         }
 

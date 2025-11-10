@@ -226,7 +226,7 @@ void push_back_three_remove_push_front_three_entries(void)
                 assert(ln->next == NULL);
                 assert(ln->prev->next == ln);
                 assert(ln->prev == prev_ln);
-                list_itr_remove_node_current(&list_itr);
+                list_itr_remove_current_node(&list_itr);
                 break;
             default:
                 assert(false); // shouldn't get here
