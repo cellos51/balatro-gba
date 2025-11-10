@@ -16,5 +16,6 @@ run_test() {
     cd - 2>&1 > /dev/null
 }
 
+run_test bitset
 run_test pool
 run_test list

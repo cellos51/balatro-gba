@@ -129,10 +129,10 @@ void push_front_one_entry(void)
 // - list_get_len
 // - list_get_at_idx
 // - list_remove_at_idx
-// - list_remove_node
 // - list_itr_create
 // - list_itr_next
 // - list_clear
+// - list_itr_remove_node_current;
 void push_back_three_remove_push_front_three_entries(void)
 {
     List my_cool_list = list_create();

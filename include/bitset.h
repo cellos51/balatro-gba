@@ -27,6 +27,12 @@
 #define BITSET_ARRAY_SIZE     8
 
 /**
+ * @def BITSET_MAX_BITS
+ * @brief Maximum number of bits in a bitset
+ */
+#define BITSET_MAX_BITS BITSET_BITS_PER_WORD * BITSET_ARRAY_SIZE
+
+/**
  * @brief A bitset spread across multiple `uint32_t` words
  */
 typedef struct Bitset
@@ -102,7 +108,7 @@ void bitset_set_idx(Bitset *bitset, int idx, bool on);
  *
  * @return the value of the flag as `true` or `false`
  */
-bool bitset_get_idx(Bitset *bm, int idx);
+bool bitset_get_idx(Bitset *bitset, int idx);
 
 // Get the next free (set to 0) index in the bitset.
 // It also sets the bit which it maybe should do... It really shouldn't do two things

@@ -88,24 +88,26 @@ int bitset_num_set_bits(Bitset *bitset)
 
 int bitset_find_idx_of_nth_set(const Bitset *bitset, int n)
 {
-    int tracker, prev_tracker = 0;
+    int tracker = 0;
+    int prev_tracker = 0;
+
     for(int i = 0; i < bitset->nwords; i++)
     {
-        tracker = __builtin_popcount(bitset->w[i]);
+        tracker += __builtin_popcount(bitset->w[i]);
 
         if(tracker > n)
         {
             // The index is here somewhere
-            int base = prev_tracker - 1; // this one is to count the 1's not the offset
+            int base = prev_tracker - 1; // this one is to count the 1's not the offset, underflow to -1 is good for finding the 0 index
             int offset = bitset->nbits * i; // this one is for the actual offset we want to map the id to
             for (int j = 0; j < bitset->nbits; j++)
             {
                 if(base == n)
                 {
-                    return offset;
+                    return offset - 1;
                 }
+                base += (bitset->w[i] >> j) & 0x01;
                 offset++;
-                base += (bitset->w[i] << j) & 0x01;
             }
 
             break;
