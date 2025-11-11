@@ -2275,7 +2275,6 @@ static void played_cards_update_loop(bool* discarded_card, bool* sound_played)
                         {
                             retrigger = false;
                             scored_card_index = previous_scored_card_index;
-                            _joker_scored_itr = list_itr_create(&_owned_jokers_list);
                         }
 
                         tte_erase_rect_wrapper(PLAYED_CARDS_SCORES_RECT);
