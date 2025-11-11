@@ -2267,11 +2267,11 @@ static void played_cards_update_loop(bool* discarded_card, bool* sound_played)
 
                     if (i == 0 && (timer % FRAMES(30) == 0) && timer > FRAMES(40))
                     {
-                        // We are about to score played Cards, then Jokers.
-                        // If we need to retrigger, then we have scored a card previously
-                        // and thus have incremented scored_card_index by 1.
-                        // Take out this increment to score the previous card again
-                        // and reset the scored Joker index to 0 to go back to the beginning
+                        // We are about to score played Cards, then Jokers. If we
+                        // need to retrigger, then we have scored a card previously
+                        // and thus have incremented scored_card_index until we found a scoring card.
+                        // Go back to the last scored card to score it again and
+                        // reset the scored Joker index to 0 to go back to the beginning
                         if (retrigger)
                         {
                             retrigger = false;
