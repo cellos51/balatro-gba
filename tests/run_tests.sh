@@ -2,12 +2,20 @@
 
 set -eu
 
-run_pool_test() {
-    cd pool
-    make clean
-    make
-    ./build/pool_test
-    cd - > /dev/null 
+run_test() {
+    name="$1"
+
+    echo "==============================================================================="
+    echo "Running test for: $1"
+    echo "==============================================================================="
+
+    cd "$name" 2>&1 > /dev/null
+    make clean > /dev/null
+    make > /dev/null
+    ./build/"$name"_test
+    cd - 2>&1 > /dev/null
 }
 
-run_pool_test
+run_test bitset
+run_test pool
+run_test list

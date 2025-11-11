@@ -4,4 +4,6 @@
 *.sln
 *.vcxproj*
 /balatro-gba/x64/**
+/tests/bitset/build
+/tests/list/build
 /tests/pool/build

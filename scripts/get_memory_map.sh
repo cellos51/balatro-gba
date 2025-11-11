@@ -55,23 +55,22 @@ for name in $(get_pool_names); do
             sed -E 's@ +@ @g; s@^ @@'              | \
             tr -d '\n'                               \
         )"
-    output_bm="$(                                    \
+    output_bitset="$(                                \
             "$READELF" -sW "$ELF_FILE"             | \
-            grep -E "${name}_bitmap_w"             | \
+            grep -E "${name}_bitset_w"             | \
             grep OBJECT                            | \
             sed -E 's@ +@ @g; s@^ @@'              | \
             tr -d '\n'                               \
         )"
 
-
     address="$(cut -d ' ' -f 2 <<< $output_pool)"
     pool_size="$(cut -d ' ' -f 3 <<< $output_pool)"
     func_size="$(cut -d ' ' -f 3 <<< $output_func)"
-    bm_size="$(cut -d ' ' -f 3 <<< $output_bm)"
+    bitset_size="$(cut -d ' ' -f 3 <<< $output_bitset)"
     
-    TOTAL_BYTES=$(( TOTAL_BYTES + pool_size + func_size + bm_size ))
+    TOTAL_BYTES=$(( TOTAL_BYTES + pool_size + func_size + bitset_size ))
 
-    printf "%-16s| 0x%8s | %-10u | %-10u | %-10u \n" "$name" "$address" "$pool_size" "$func_size" "$bm_size"
+    printf "%-16s| 0x%8s | %-10u | %-10u | %-10u \n" "$name" "$address" "$pool_size" "$func_size" "$bitset_size"
 done
 
 print_line_break

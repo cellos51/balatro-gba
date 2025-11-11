@@ -1,121 +1,213 @@
-#include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include "list.h"
-#include "util.h"
+#include "pool.h"
 
-List *list_new(int init_size) {
-    List *list = (List *)malloc(sizeof(List));
-    if (list == NULL) return NULL;
-    list->_array = (void **)malloc(sizeof(void*) * init_size);
-    if (!list->_array) 
-    {
-        free(list);
-        return NULL;
-    }
-    list->size = 0;
-    list->allocated_size = init_size;
+/**
+ * Remove a node from a list.
+ *
+ * Remove a @ref ListNode from a @ref List. There are no checks to ensure that the
+ * passed `node` is actually part of the passed `list`. Handle with care.
+ * This is used with the @ref ListItr specifically. 
+ *
+ * @param list pointer to a @ref List
+ * @param node pointer to a @ref ListNode 
+ */
+static void _list_remove_node(List *list, ListNode *node);
+
+/**
+ * Get the next @ref ListNode in a @ref ListItr
+ *
+ * Note: Use of this function outside of testing is strongly discouraged. Unless
+ * you really want to access the @ref ListNode itself, it's preferred to just use
+ * @ref list_itr_next .
+ *
+ * @param itr pointer to the @ref ListItr
+ *
+ * @return A pointer to the @ref ListNode in the itr, otherwise return NULL.
+ */
+static ListNode* _list_itr_node_next(ListItr* itr);
+
+
+List list_create(void)
+{
+    List list = { .head = NULL, .tail = NULL, .len = 0 };
     return list;
 }
 
-void list_destroy(List **list) {
-    if (list == NULL || *list == NULL)
-        return; 
+void list_clear(List* list)
+{
+    if(list_is_empty(list)) return;
+
+    ListItr itr = list_itr_create(list);
+    ListNode* ln;
+
+    while((ln = _list_itr_node_next(&itr)))
     {
-        free((*list)->_array);
-        free(*list);
+        POOL_FREE(ListNode, ln);
     }
 
-    *list = NULL;
+    list->head = NULL;
+    list->tail = NULL;
+    list->len = 0;
 }
 
-bool int_list_append(List *list, intptr_t value) 
+bool list_is_empty(const List* list)
 {
-    return list_append(list, (void*)value);
+    return list->len == 0;
 }
 
-bool list_append(List *list, void *value)
+void list_push_front(List *list, void* data)
 {
-    if (list->size >= list->allocated_size) 
+    ListNode *node = POOL_GET(ListNode);
+
+    node->data = data;
+    node->prev = NULL;
+    node->next = list->head;
+
+    if (list_is_empty(list))
     {
-        int new_size = list->allocated_size * 2;
-        void **new_arr = (void **)realloc(list->_array, sizeof(void*) * new_size);
-        if (new_arr == NULL) 
-            return false;
-        list->_array = new_arr;
-        list->allocated_size = new_size;
+        list->tail = node;
+    }
+    else
+    {
+        list->head->prev = node;
     }
 
-    list->_array[list->size++] = value;
-    return true;
+    list->head = node;
+
+    list->len++;
 }
 
-bool list_remove_by_idx(List *list, int index) {
-    if (index < 0 || index >= list->size) 
-        return false;
-    for (int i = index; i < list->size - 1; ++i) 
-    {
-        list->_array[i] = list->_array[i + 1];
-    }
-    list->size--;
-    return true;
-}
-
-bool list_remove_by_value(List *list, void* value)
+void list_push_back(List *list, void* data)
 {
-    for (int i = 0; i < list->size; i++)
+    ListNode* node = POOL_GET(ListNode);
+    node->data = data;
+    node->prev = list->tail;
+    node->next = NULL;
+
+    if (list_is_empty(list))
     {
-        if (list->_array[i] == value)
+        list->head = node;
+    }
+    else
+    {
+        list->tail->next = node;
+    }
+
+    list->tail = node;
+
+    list->len++;
+}
+
+static void _list_remove_node(List *list, ListNode *node)
+{
+    if(node->prev && !node->next) // end of list
+    {
+        node->prev->next = NULL;
+        list->tail = node->prev;
+    }
+    else if(node->prev && node->next) // somewhere in between
+    {
+        node->prev->next = node->next;
+        node->next->prev = node->prev;
+    }
+    else if(node->next && !node->prev) // beginning of list
+    {
+        node->next->prev = NULL;
+        list->head = node->next;
+    }
+    else if(!node->prev && !node->next) // only element in list
+    {
+        list->head = NULL;
+        list->tail = NULL;
+    }
+
+    POOL_FREE(ListNode, node);
+
+    list->len--;
+}
+
+int list_get_len(const List* list)
+{
+    return list->len;
+}
+
+void* list_get_at_idx(List* list, int n)
+{
+    if(n >= list_get_len(list) || n < 0) return NULL;
+
+    int curr_idx = 0;
+    ListItr itr = list_itr_create(list);
+    void* data = NULL;
+
+    while((data = list_itr_next(&itr)))
+    {
+        if (n == curr_idx++) return data;
+    }
+
+    return NULL;
+}
+
+bool list_remove_at_idx(List* list, int n)
+{
+    if(n >= list_get_len(list) || n < 0) return false;
+
+    int len = 0;
+    ListItr itr = list_itr_create(list);
+    ListNode* ln;
+
+    while((ln = _list_itr_node_next(&itr)))
+    {
+        if(n == len++)
         {
-            return list_remove_by_idx(list, i);
-        }
-    }
-
-    return false;
-}
-
-bool int_list_remove_by_value(List *list, intptr_t value)
-{
-    return list_remove_by_value(list, (void*)value);
-}
-
-void* list_get(List *list, int index)
-{
-    if (index < 0 || index >= list->size) 
-        return NULL;
-    return list->_array[index];
-}
-
-intptr_t int_list_get(List *list, int index) 
-{
-    return (intptr_t)list_get(list, index);
-}
-
-int list_get_size(List *list)
-{
-    if (list == NULL)
-    {
-        return UNDEFINED;
-    }
-    return list->size;
-}
-
-bool list_exists(List *list, void *value)
-{
-    if (list == NULL) return false;
-    
-    for (int i = 0; i < list->size; i++)
-    {
-        if (list->_array[i] == value)
-        {
+            _list_remove_node(list, ln);
             return true;
         }
     }
-
     return false;
 }
 
-bool int_list_exists(List *list, intptr_t value)
+ListItr list_itr_create(List* list)
 {
-    return list_exists(list, (void*)value);
+    ListItr itr =
+    {
+        .list = list,
+        .next_node = !list_is_empty(list) ? list->head : NULL,
+        .current_node = NULL,
+    };
+
+    return itr;
+}
+
+void* list_itr_next(ListItr* itr)
+{
+    ListNode* ln = _list_itr_node_next(itr);
+    return ln ? ln->data : NULL;
+}
+
+static ListNode* _list_itr_node_next(ListItr* itr)
+{
+    if(!itr->next_node) return NULL;
+
+    itr->current_node = itr->next_node;
+
+    ListNode* ln = itr->next_node;
+
+    if(ln->next)
+    {
+        itr->next_node = ln->next;
+        return ln;
+    }
+
+    itr->next_node = NULL;
+    return ln;
+}
+
+void list_itr_remove_current_node(ListItr* itr)
+{
+    if(!itr || !itr->current_node) return;
+    ListNode* tmp_prev = itr->current_node->prev;
+    _list_remove_node(itr->list, itr->current_node);
+    itr->current_node = tmp_prev;
 }

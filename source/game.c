@@ -1,9 +1,11 @@
 #include "game.h"
 
 #include <maxmod.h>
+#include <stdint.h>
 #include <tonc.h>
 #include <stdlib.h>
 
+#include "bitset.h"
 #include "tonc_memdef.h"
 #include "util.h"
 #include "sprite.h"
@@ -221,17 +223,18 @@ static int hand_selections = 0;
 static int scored_card_index = 0;
 
 // Keeping track of what Jokers are scored at each step
-static int joker_scored_index = 0;
-static int joker_round_end_index = 0;
+static ListItr _joker_scored_itr;
 
 static int selection_x = 0;
 static int selection_y = 0;
 
 static bool sort_by_suit = false;
 
-static List *jokers = NULL;
-static List *discarded_jokers = NULL;
-static List *jokers_available_to_shop; // List of joker IDs
+static List _owned_jokers_list;
+static List _discarded_jokers_list;
+
+BITSET_DEFINE(_avail_jokers_bitset, MAX_DEFINABLE_JOKERS)
+static List _shop_jokers_list;
 
 // Stacks
 static CardObject *played[MAX_SELECTION_SIZE] = {NULL};
@@ -261,6 +264,37 @@ static int straight_and_flush_size = STRAIGHT_AND_FLUSH_SIZE_DEFAULT;
 int get_straight_and_flush_size(void) 
 {
     return straight_and_flush_size;
+}
+
+static inline void _set_shop_joker_avail(int joker_id, bool avail)
+{
+    bitset_set_idx(&_avail_jokers_bitset, joker_id, avail);
+}
+
+__attribute__((unused))
+static inline bool _get_shop_joker_avail(int joker_id)
+{
+    return bitset_get_idx(&_avail_jokers_bitset, joker_id);
+}
+
+static inline int _get_num_shop_jokers_avail(void)
+{
+    return bitset_num_set_bits(&_avail_jokers_bitset);
+}
+
+static inline void _reset_shop_jokers(void)
+{
+    int num_jokers = get_joker_registry_size();
+    bitset_clear(&_avail_jokers_bitset);
+    for(int i = 0; i < num_jokers; i++)
+    {
+        bitset_set_idx(&_avail_jokers_bitset, i, true);
+    }
+}
+
+static inline bool _no_avail_jokers(void)
+{
+    return bitset_is_empty(&_avail_jokers_bitset);
 }
 
 // Played stack
@@ -347,16 +381,18 @@ int get_scored_card_index(void)
     return scored_card_index;
 }
 
-List *get_jokers(void)
+List* get_jokers_list(void)
 {
-    return jokers;
+    return &_owned_jokers_list;
 }
 
 bool is_joker_owned(int joker_id)
 {
-    for (int k = 0; k < list_get_size(jokers); k++)
+    ListItr itr = list_itr_create(&_owned_jokers_list);
+    JokerObject* joker;
+
+    while((joker = list_itr_next(&itr)))
     {
-        JokerObject *joker = list_get(jokers, k);
         if (joker->joker->id == joker_id)
         {
             return true;
@@ -367,7 +403,7 @@ bool is_joker_owned(int joker_id)
 
 void add_joker(JokerObject *joker_object)
 {
-    list_append(jokers, joker_object);
+    list_push_back(&_owned_jokers_list, joker_object);
 
     // TODO: Extract to on_joker_added() callback
     // In case the player gets multiple Four Fingers Jokers,
@@ -387,10 +423,10 @@ void add_joker(JokerObject *joker_object)
     }
 }
 
-void remove_held_joker(int joker_idx)
+void remove_owned_joker(int owned_joker_idx)
 {
     // TODO: Extract to on_joker_removed() callback
-    JokerObject* joker_object = list_get(jokers, joker_idx);
+    JokerObject* joker_object = list_get_at_idx(&_owned_jokers_list, owned_joker_idx);
     // In case the player gets multiple Four Fingers Jokers,
     // and only reset the size when all of them have been removed
     if (joker_object->joker->id == FOUR_FINGERS_JOKER_ID) 
@@ -407,7 +443,8 @@ void remove_held_joker(int joker_idx)
         shortcut_joker_count--;
     }
 
-    list_remove_by_idx(jokers, joker_idx);        
+    _set_shop_joker_avail(joker_object->joker->id, true);
+    list_remove_at_idx(&_owned_jokers_list, owned_joker_idx);
 }
 
 int get_deck_top(void)
@@ -1421,25 +1458,19 @@ void game_change_state(enum GameState new_game_state)
 
 void jokers_available_to_shop_init()
 {
-    int num_defined_jokers = get_joker_registry_size();
-    jokers_available_to_shop = list_new(num_defined_jokers);
-    for (intptr_t i = 0; i < num_defined_jokers; i++)
-    {
-        // Add all joker IDs sequentially
-        int_list_append(jokers_available_to_shop, i);
-    }
+    _reset_shop_jokers();
 }
 
 void game_init()
 {
+    // Initialize all jokers list once
+    _owned_jokers_list = list_create();
+    _discarded_jokers_list = list_create();
+    _shop_jokers_list = list_create();
+    // TODO: Move this to an initialization of the play scoring states
+    _joker_scored_itr = list_itr_create(&_owned_jokers_list);
+
     jokers_available_to_shop_init();
-
-    // Initialize jokers list
-    if (jokers) list_destroy(&jokers);
-    jokers = list_new(MAX_JOKERS_HELD_SIZE);
-
-    if (discarded_jokers != NULL) list_destroy(&discarded_jokers);
-    discarded_jokers = list_new(MAX_JOKERS_HELD_SIZE);
 
     hands = max_hands;
     discards = max_discards;
@@ -1465,6 +1496,7 @@ void game_init()
 void game_start()
 {
     set_seed(rng_seed);
+    //set_seed(9); // 9 is a full house
 
     affine_background_change_background(AFFINE_BG_GAME);
 
@@ -2149,12 +2181,12 @@ static void cards_in_hand_update_loop(bool* discarded_card, int* played_selectio
 }
 
 // returns true if a joker was scored, false otherwise
-static bool check_and_score_joker_for_event(int* iteration_start, Card* played_card, enum JokerEvent joker_event)
+static bool check_and_score_joker_for_event(ListItr* starting_joker_itr, Card* played_card, enum JokerEvent joker_event)
 {
-    for (int k = *iteration_start; k < list_get_size(jokers); k++)
+    JokerObject* joker;
+
+    while((joker = list_itr_next(starting_joker_itr)))
     {
-        (*iteration_start)++;
-        JokerObject *joker = list_get(jokers, k);
         if (joker_object_score(joker, played_card, joker_event, &chips, &mult, &money, &retrigger))
         {
             display_chips();
@@ -2225,7 +2257,7 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                             retrigger = false;
                             scored_card_index--;
                             (*played_selections)--;
-                            joker_scored_index = 0;
+                            _joker_scored_itr = list_itr_create(&_owned_jokers_list);
                         }
 
                         // So pretend "played_selections" is now called "scored_card_index" and it counts the number of cards that have been scored
@@ -2236,15 +2268,15 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                             // Trigger all Jokers after each card scored
                             if (*played_selections > 0)
                             {
-                                if (check_and_score_joker_for_event(&joker_scored_index, played[*played_selections - 1]->card, JOKER_EVENT_ON_CARD_SCORED))
+                                if (check_and_score_joker_for_event(&_joker_scored_itr, played[*played_selections - 1]->card, JOKER_EVENT_ON_CARD_SCORED))
                                 {
                                     return;
                                 }
                             
                                 // Trigger all Jokers that have an effect when a card finishes scoring
                                 // (e.g. retriggers) after activating all the other scored_card Jokers normally
-                                joker_scored_index = 0;
-                                if (check_and_score_joker_for_event(&joker_scored_index, played[*played_selections - 1]->card, JOKER_EVENT_ON_CARD_SCORED_END))
+                                _joker_scored_itr = list_itr_create(&_owned_jokers_list);
+                                if (check_and_score_joker_for_event(&_joker_scored_itr, played[*played_selections - 1]->card, JOKER_EVENT_ON_CARD_SCORED_END))
                                 {
                                     return;
                                 }
@@ -2272,7 +2304,7 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                                 display_chips();
 
                                 // Allow Joker scoring
-                                joker_scored_index = 0;
+                                _joker_scored_itr = list_itr_create(&_owned_jokers_list);
 
                                 return;
                             }
@@ -2280,7 +2312,7 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
 
                         // advance state after going past the last card (exited the loop without returning)
                         play_state = PLAY_SCORING_JOKERS;
-                        joker_scored_index = 0;
+                        _joker_scored_itr = list_itr_create(&_owned_jokers_list);
                         scored_card_index = 0; // reuse this variable for held cards
                         return;
                     }
@@ -2299,13 +2331,14 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
 
                         tte_erase_rect_wrapper(PLAYED_CARDS_SCORES_RECT);
 
-                        if (check_and_score_joker_for_event(&joker_scored_index, NULL, JOKER_EVENT_INDEPENDENT))
+                        if (check_and_score_joker_for_event(&_joker_scored_itr, NULL, JOKER_EVENT_INDEPENDENT))
                         {
                             return;
                         }
 
                         // Trigger hand end effect for all jokers once they are done scoring
-                        if (check_and_score_joker_for_event(&joker_round_end_index, NULL, JOKER_EVENT_ON_HAND_SCORED_END))
+                        ListItr round_end_itr = list_itr_create(&_owned_jokers_list);
+                        if (check_and_score_joker_for_event(&round_end_itr, NULL, JOKER_EVENT_ON_HAND_SCORED_END))
                         {
                             return;
                         }
@@ -2380,8 +2413,7 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                                 *played_selections = 0;
                                 played_top = -1; // Reset the played stack
                                 scored_card_index = 0;
-                                joker_scored_index = 0;
-                                joker_round_end_index = 0;
+                                _joker_scored_itr = list_itr_create(&_owned_jokers_list);
                                 timer = TM_ZERO;
                                 break; // Break out of the loop to avoid accessing an invalid index
                             }
@@ -2795,7 +2827,6 @@ static void game_round_end_dismiss_round_end_panel()
 }
 
 // Shop
-static List *shop_jokers = NULL;
 #define REROLL_BASE_COST 5 // Base cost for rerolling the shop items
 static int reroll_cost = REROLL_BASE_COST;
 
@@ -2823,78 +2854,76 @@ void erase_price_under_sprite_object(SpriteObject *sprite_object)
     tte_erase_rect_wrapper(price_rect);
 }
 
-static int game_shop_get_random_joker_idx()
+static int game_shop_get_rand_available_joker_id(void)
 {
     // Roll for what rarity the joker will be
     int joker_rarity = joker_get_random_rarity();
         
     // Now determine how many jokers are available based on the rarity
-    int jokers_avail_size = list_get_size(jokers_available_to_shop);
-    int matching_indices[jokers_avail_size];
+    int jokers_avail_size = _get_num_shop_jokers_avail();
+
+    if(jokers_avail_size == 0) return UNDEFINED;
+
+    int matching_joker_ids[jokers_avail_size];
+    int fallback_random_idx = random() % jokers_avail_size;
+    int fallback_random_joker_id = UNDEFINED;
     int match_count = 0;
 
-    for (int i = 0; i < jokers_avail_size; i++)
+    BitsetItr itr = bitset_itr_create(&_avail_jokers_bitset);
+
+    int i = 0;
+    int joker_id = UNDEFINED;
+    while((joker_id = bitset_itr_next(&itr)) != UNDEFINED)
     {
-        intptr_t joker_id = int_list_get(jokers_available_to_shop, i);
+        if(i++ == fallback_random_idx) fallback_random_joker_id = joker_id;
         const JokerInfo *info = get_joker_registry_entry(joker_id); 
         if (info->rarity == joker_rarity)
         {
-            matching_indices[match_count] = i;
-            match_count++;
+            matching_joker_ids[match_count++] = joker_id;
         }
     }
 
-    int selected_joker_idx = 0;
-    if (match_count > 0)
-    {
-        // If we counted at least one joker with matching rarity, pick one of them randomly
-        selected_joker_idx = matching_indices[random() % match_count];
-    }
-    else
-    {
-        // Didn't find any jokers of matching rarity, just pick one at random instead
-        selected_joker_idx = random() % jokers_avail_size;
-    }
+    int selected_joker_id = (match_count > 0) ?
+                                matching_joker_ids[random() % match_count] :
+                                fallback_random_joker_id;
 
-    return selected_joker_idx;
+    return selected_joker_id;
 }
 
 static void game_shop_create_items()
 {
     tte_erase_rect_wrapper(SHOP_PRICES_TEXT_RECT);
-    if (list_get_size(jokers_available_to_shop) == 0)
-    {
-        // No jokers to create
-        return;
-    }
 
-    shop_jokers = list_new(MAX_SHOP_JOKERS);
+    if (_no_avail_jokers()) return;
+
+    list_clear(&_shop_jokers_list);
+    _shop_jokers_list = list_create();
 
     for (int i = 0; i < MAX_SHOP_JOKERS; i++)
     {
-        intptr_t joker_id = 0;
+        int joker_id = 0;
         #ifdef TEST_JOKER_ID0 // Allow defining an ID for a joker to always appear in shop and be tested
-        if (int_list_exists(jokers_available_to_shop, TEST_JOKER_ID0))
+        if (_get_shop_joker_avail(TEST_JOKER_ID0))
         {
             joker_id = TEST_JOKER_ID0;
-            int_list_remove_by_value(jokers_available_to_shop, joker_id);
         }
         else
         #endif
         #ifdef TEST_JOKER_ID1
-        if (int_list_exists(jokers_available_to_shop, TEST_JOKER_ID1))
+        if (_get_shop_joker_avail(TEST_JOKER_ID1))
         {
             joker_id = TEST_JOKER_ID1;
-            int_list_remove_by_value(jokers_available_to_shop, joker_id);
         }
         else
         #endif
         {
-            int joker_idx = game_shop_get_random_joker_idx();
-            joker_id = int_list_get(jokers_available_to_shop, joker_idx);
-            list_remove_by_idx(jokers_available_to_shop, joker_idx);
+            joker_id = game_shop_get_rand_available_joker_id();
         }
-        
+
+        // If for some reason only no joker is left, don't make another
+        if(joker_id == UNDEFINED) break;
+
+        _set_shop_joker_avail(joker_id, false);
         
         JokerObject *joker_object = joker_object_new(joker_new(joker_id));
 
@@ -2906,7 +2935,8 @@ static void game_shop_create_items()
         print_price_under_sprite_object(joker_object->sprite_object, joker_object->joker->value);
 
         sprite_position(joker_object_get_sprite(joker_object), fx2int(joker_object->sprite_object->x), fx2int(joker_object->sprite_object->y));
-        list_append(shop_jokers, joker_object);
+
+        list_push_back(&_shop_jokers_list, joker_object);
     }
 }
 
@@ -2948,23 +2978,28 @@ static void game_shop_reroll(int *reroll_cost)
 {
     money -= *reroll_cost;
     display_money(money); // Update the money display
-    for (int i = 0; i < list_get_size(shop_jokers); i++)
+
+    ListItr itr = list_itr_create(&_shop_jokers_list);
+    JokerObject* joker_object;
+
+    while((joker_object = list_itr_next(&itr)))
     {
-        JokerObject *joker_object = list_get(shop_jokers, i);
         if (joker_object != NULL)
         {
-            int_list_append(jokers_available_to_shop, joker_object->joker->id);
+            _set_shop_joker_avail(joker_object->joker->id, true);
             joker_object_destroy(&joker_object); // Destroy the joker object if it exists
         }
     }
 
-    list_destroy(&shop_jokers);
+    list_clear(&_shop_jokers_list);
+    _shop_jokers_list = list_create();
 
     game_shop_create_items();
     
-    for (int i = 0; i < list_get_size(shop_jokers); i++)
+    itr = list_itr_create(&_shop_jokers_list);
+
+    while((joker_object = list_itr_next(&itr)))
     {
-        JokerObject *joker_object = list_get(shop_jokers, i);
         if (joker_object != NULL)
         {
             joker_object->sprite_object->y = joker_object->sprite_object->ty; // Set the y position to the target position
@@ -2978,7 +3013,7 @@ static void game_shop_reroll(int *reroll_cost)
 
 static int jokers_sel_row_get_size()
 {
-    return list_get_size(jokers);
+    return list_get_len(&_owned_jokers_list);
 }
 
 static void jokers_sel_row_on_selection_changed(SelectionGrid *selection_grid,
@@ -2988,16 +3023,22 @@ static void jokers_sel_row_on_selection_changed(SelectionGrid *selection_grid,
 {
     if (prev_selection->y == row_idx)
     {
-        JokerObject* joker_object = list_get(jokers, prev_selection->x);
-        erase_price_under_sprite_object(joker_object->sprite_object);
-        sprite_object_set_focus(joker_object->sprite_object, false);
+        JokerObject* joker_object = (JokerObject*)list_get_at_idx(&_owned_jokers_list, prev_selection->x);
+        if(joker_object != NULL)
+        {
+            erase_price_under_sprite_object(joker_object->sprite_object);
+            sprite_object_set_focus(joker_object->sprite_object, false);
+        }
     }
 
     if (new_selection->y == row_idx)
     {
-        JokerObject* joker_object = list_get(jokers, new_selection->x);
-        sprite_object_set_focus(joker_object->sprite_object, true);
-        print_price_under_sprite_object(joker_object->sprite_object, joker_get_sell_value(joker_object->joker));
+        JokerObject* joker_object = (JokerObject*)list_get_at_idx(&_owned_jokers_list, new_selection->x);
+        if(joker_object != NULL)
+        {
+            sprite_object_set_focus(joker_object->sprite_object, true);
+            print_price_under_sprite_object(joker_object->sprite_object, joker_get_sell_value(joker_object->joker));
+        }
     }
 }
 
@@ -3005,21 +3046,20 @@ void joker_start_discard_animation(JokerObject *joker_object)
 {
     joker_object->sprite_object->tx = int2fx(JOKER_DISCARD_TARGET.x);
     joker_object->sprite_object->ty = int2fx(JOKER_DISCARD_TARGET.y);
-    list_append(discarded_jokers, joker_object);
+    list_push_back(&_discarded_jokers_list, joker_object);
 }
 
 void game_sell_joker(int joker_idx)
 {
-    if (joker_idx < 0 || joker_idx > list_get_size(jokers))
+    if (joker_idx < 0 || joker_idx >= list_get_len(&_owned_jokers_list))
         return;
     
-    JokerObject *joker_object = list_get(jokers, joker_idx);
+    JokerObject* joker_object = (JokerObject*)list_get_at_idx(&_owned_jokers_list, joker_idx);
     money += joker_get_sell_value(joker_object->joker);
     display_money(money);
     erase_price_under_sprite_object(joker_object->sprite_object);
 
-    remove_held_joker(joker_idx);
-    int_list_append(jokers_available_to_shop, (intptr_t)joker_object->joker->id);
+    remove_owned_joker(joker_idx);
 
     joker_start_discard_animation(joker_object);
 }
@@ -3037,7 +3077,7 @@ static void jokers_sel_row_on_key_hit(SelectionGrid* selection_grid, Selection* 
 // Shop input
 static int shop_top_row_get_size()
 {
-    return list_get_size(shop_jokers) + 1; // + 1 to account for next round button
+    return list_get_len(&_shop_jokers_list) + 1; // + 1 to account for next round button
 }
 
 static void add_to_held_jokers(JokerObject *joker_object)
@@ -3048,14 +3088,14 @@ static void add_to_held_jokers(JokerObject *joker_object)
 
 static void game_shop_buy_joker(int shop_joker_idx)
 {
-    JokerObject *joker_object = list_get(shop_jokers, shop_joker_idx);
+    JokerObject *joker_object = (JokerObject*)list_get_at_idx(&_shop_jokers_list, shop_joker_idx);
 
     money -= joker_object->joker->value; // Deduct the money spent on the joker
     display_money(money);                // Update the money display
     erase_price_under_sprite_object(joker_object->sprite_object);
     sprite_object_set_focus(joker_object->sprite_object, false);
     add_to_held_jokers(joker_object);
-    list_remove_by_idx(shop_jokers, shop_joker_idx); // Remove the joker from the shop
+    list_remove_at_idx(&_shop_jokers_list, shop_joker_idx); // Remove the joker from the shop
 }
 
 static void shop_top_row_on_key_hit(SelectionGrid* selection_grid, Selection* selection)
@@ -3080,9 +3120,9 @@ static void shop_top_row_on_key_hit(SelectionGrid* selection_grid, Selection* se
     else 
     {
         int shop_joker_idx = selection->x - 1; // - 1 to account for next round button
-        JokerObject *joker_object = list_get(shop_jokers, shop_joker_idx);
+        JokerObject *joker_object = (JokerObject*)list_get_at_idx(&_shop_jokers_list, shop_joker_idx);
         if (joker_object == NULL 
-            || list_get_size(jokers) >= MAX_JOKERS_HELD_SIZE
+            || list_get_len(&_owned_jokers_list) >= MAX_JOKERS_HELD_SIZE
             || money < joker_object->joker->value)
         {
             return;
@@ -3109,8 +3149,9 @@ static void shop_top_row_on_selection_changed(SelectionGrid* selection_grid, int
         }
         else 
         {
-            JokerObject *joker = list_get(shop_jokers, prev_selection->x - 1);
-            sprite_object_set_focus(joker->sprite_object, false); 
+            int idx = prev_selection->x - 1;  // -1 to account for next round button
+            JokerObject *joker_object = (JokerObject*)list_get_at_idx(&_shop_jokers_list, idx);
+            sprite_object_set_focus(joker_object->sprite_object, false); 
             // -1 to account for next round button
         }
     }
@@ -3124,9 +3165,9 @@ static void shop_top_row_on_selection_changed(SelectionGrid* selection_grid, int
         }
         else 
         {
-            JokerObject *joker = list_get(shop_jokers, new_selection->x - 1);
-            sprite_object_set_focus(joker->sprite_object, true); 
-            // -1 to account for next round button
+            int idx = new_selection->x - 1; // -1 to account for next round button
+            JokerObject *joker_object = (JokerObject*)list_get_at_idx(&_shop_jokers_list, idx);
+            sprite_object_set_focus(joker_object->sprite_object, true); 
         }
     }
 }
@@ -3223,9 +3264,10 @@ static void game_shop_outro()
     {
         tte_erase_rect_wrapper(SHOP_PRICES_TEXT_RECT); // Erase the shop prices text
 
-        for (int i = 0; i < list_get_size(shop_jokers); i++)
+        ListItr itr = list_itr_create(&_shop_jokers_list);
+        JokerObject* joker_object;
+        while((joker_object = list_itr_next(&itr)))
         {
-            JokerObject *joker_object = list_get(shop_jokers, i);
             if (joker_object != NULL)
             {
                 joker_object->sprite_object->ty = int2fx(160);
@@ -3253,11 +3295,12 @@ static void game_shop_on_update()
 {
     change_background(BG_ID_SHOP);
 
-    if (shop_jokers != NULL)
+    if (!list_is_empty(&_shop_jokers_list))
     {
-        for (int i = 0; i < list_get_size(shop_jokers); i++)
+        ListItr itr = list_itr_create(&_shop_jokers_list);
+        JokerObject* joker_object;
+        while((joker_object = list_itr_next(&itr)))
         {
-            JokerObject *joker_object = list_get(shop_jokers, i);
             if (joker_object != NULL)
             {
                 joker_object_update(joker_object);
@@ -3283,18 +3326,20 @@ static void game_shop_on_update()
 
 static void game_shop_on_exit()
 {
-    for (int i = 0; i < list_get_size(shop_jokers); i++)
+    ListItr itr = list_itr_create(&_shop_jokers_list);
+    JokerObject* joker_object;
+
+    while((joker_object = list_itr_next(&itr)))
     {
-        JokerObject* joker_object = list_get(shop_jokers, i);
         if (joker_object != NULL)
         {
-            // Make the joker available back to shop                    
-            int_list_append(jokers_available_to_shop, (intptr_t)joker_object->joker->id);
+            // Make the joker available back to shop
+            _set_shop_joker_avail(joker_object->joker->id, true);
         }
         joker_object_destroy(&joker_object); // Destroy the joker objects
     }
-    
-    list_destroy(&shop_jokers);
+
+    list_clear(&_shop_jokers_list);
     
     increment_blind(BLIND_STATE_DEFEATED); // TODO: Move to game_round_end()?
 }
@@ -3509,20 +3554,23 @@ static void game_main_menu_on_update()
 
 static void discarded_jokers_update_loop()
 {
-    if (discarded_jokers == NULL)
+    if(list_is_empty(&_discarded_jokers_list)) {
         return;
-    
-    // Iterating backwards because of removal within loop
-    for (int i = list_get_size(discarded_jokers) - 1; i >= 0; i--)
+    }
+
+    ListItr itr = list_itr_create(&_discarded_jokers_list);
+    JokerObject* joker_object;
+
+    while((joker_object = list_itr_next(&itr)))
     {
-        JokerObject* joker_object = list_get(discarded_jokers, i);
         joker_object_update(joker_object);
         if (joker_object->sprite_object->x == joker_object->sprite_object->tx
             && joker_object->sprite_object->y == joker_object->sprite_object->ty)
         {
-            list_remove_by_idx(discarded_jokers, i);
-            joker_object_destroy(&joker_object);        
+            list_itr_remove_current_node(&itr);
+            joker_object_destroy(&joker_object);
         }
+
     }
 }
 
@@ -3539,11 +3587,13 @@ static void held_jokers_update_loop()
 
     FIXED hand_x = int2fx(HELD_JOKERS_POS.x);
 
-    int jokers_top = list_get_size(jokers) - 1;
-    for (int i = jokers_top; i >= 0; i--)
+    ListItr itr = list_itr_create(&_owned_jokers_list);
+    JokerObject* joker;
+    int jokers_top = list_get_len(&_owned_jokers_list) - 1;
+    int i = 0;
+    while((joker = list_itr_next(&itr)))
     {
-        JokerObject *joker = list_get(jokers, i);
-        joker->sprite_object->tx = hand_x - int2fx(spacing_lut[jokers_top][i]);
+        joker->sprite_object->tx = hand_x - int2fx(spacing_lut[jokers_top][i++]);
 
         joker_object_update(joker);
     }
@@ -3579,9 +3629,11 @@ static void game_lose_on_update()
 // util we decide what we want to do after a game over.
 static void game_over_on_exit()
 {
-    for (int i = 0; i < list_get_size(jokers); i ++)
+    ListItr itr = list_itr_create(&_owned_jokers_list);
+    JokerObject* joker_object;
+
+    while((joker_object = list_itr_next(&itr)))
     {
-        JokerObject *joker_object = list_get(jokers, i);
         joker_object_destroy(&joker_object);
     }
 
@@ -3595,7 +3647,10 @@ static void game_over_on_exit()
     sprite_destroy(&blind_select_tokens[BLIND_TYPE_SMALL]);
     sprite_destroy(&blind_select_tokens[BLIND_TYPE_BIG]);
     sprite_destroy(&blind_select_tokens[BLIND_TYPE_BOSS]);
-    list_destroy(&jokers_available_to_shop);
+
+    list_clear(&_owned_jokers_list);
+    list_clear(&_discarded_jokers_list);
+    list_clear(&_shop_jokers_list);
 
     game_init();
 
