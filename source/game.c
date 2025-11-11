@@ -422,10 +422,10 @@ void add_joker(JokerObject *joker_object)
     }
 }
 
-void remove_held_joker(JokerObject* joker_object, int shop_joker_idx)
+void remove_owned_joker(int owned_joker_idx)
 {
     // TODO: Extract to on_joker_removed() callback
-    //JokerObject* joker_object = list_get_at_idx(&_owned_jokers_list, joker_id);
+    JokerObject* joker_object = list_get_at_idx(&_owned_jokers_list, owned_joker_idx);
     // In case the player gets multiple Four Fingers Jokers,
     // and only reset the size when all of them have been removed
     if (joker_object->joker->id == FOUR_FINGERS_JOKER_ID) 
@@ -443,7 +443,7 @@ void remove_held_joker(JokerObject* joker_object, int shop_joker_idx)
     }
 
     _set_shop_joker_avail(joker_object->joker->id, true);
-    list_remove_at_idx(&_owned_jokers_list, shop_joker_idx);
+    list_remove_at_idx(&_owned_jokers_list, owned_joker_idx);
 }
 
 int get_deck_top(void)
@@ -1422,6 +1422,7 @@ void game_init()
     _owned_jokers_list = list_create();
     _discarded_jokers_list = list_create();
     _shop_jokers_list = list_create();
+    // TODO: Move this to an initialization of the play scoring states
     _joker_scored_itr = list_itr_create(&_owned_jokers_list);
 
     jokers_available_to_shop_init();
@@ -2963,7 +2964,7 @@ void game_sell_joker(int joker_idx)
     display_money(money);
     erase_price_under_sprite_object(joker_object->sprite_object);
 
-    remove_held_joker(joker_object, joker_idx);
+    remove_owned_joker(joker_idx);
 
     joker_start_discard_animation(joker_object);
 }

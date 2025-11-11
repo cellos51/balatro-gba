@@ -206,6 +206,7 @@ static ListNode* _list_itr_node_next(ListItr* itr)
 
 void list_itr_remove_current_node(ListItr* itr)
 {
+    if(!itr || !itr->current_node) return;
     ListNode* tmp_prev = itr->current_node->prev;
     _list_remove_node(itr->list, itr->current_node);
     itr->current_node = tmp_prev;

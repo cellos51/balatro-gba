@@ -85,9 +85,8 @@ typedef struct
 /**
  * Create a list.
  *
- * If you are recreating and existing list, the list must be freed with @ref list_clear.
- *
  * While this function does not allocate memory for the list itself, the list does allocate memory for each element.
+ * So every created list must be freed with @ref list_clear to ensure the list's nodes are deleted properly.
  *
  * @return A @ref List with head and tail reset.
  */
@@ -176,7 +175,10 @@ ListItr list_itr_create(List* list);
 void* list_itr_next(ListItr* itr);
 
 /**
- * Remove the previous @ListNode from the iterator
+ * Remove the current @ref ListNode from the iterator.
+ *
+ * The "current node" corresponds to the list node associated with the
+ * most recently returned valu from @ref list_itr_next()
  *
  * @param itr pointer to the @ref ListItr
  */
