@@ -2053,7 +2053,7 @@ static void select_highcard_cards_in_played_hand()
     card_object_set_selected(played[highest_rank_index], true);
 }
 
-static void cards_in_hand_update_loop(bool* discarded_card, int* played_selections, bool* sound_played)
+static void cards_in_hand_update_loop(bool* discarded_card, bool* sound_played)
 {
     // TODO: Break this function up into smaller ones, Gods be good
     for (int i = hand_top + 1; i >= 0; i--) // Start from the end of the hand and work backwards because that's how Balatro does it
@@ -2127,7 +2127,7 @@ static void cards_in_hand_update_loop(bool* discarded_card, int* played_selectio
                     cards_drawn = 0;
                     hand_selections = 0;
                     timer = TM_ZERO;
-                    *played_selections = played_top + 1;
+                    scored_card_index = played_top + 1;
 
                     switch (hand_type) // select the cards that apply to the hand type
                     {
@@ -2203,7 +2203,7 @@ static bool check_and_score_joker_for_event(ListItr* starting_joker_itr, CardObj
     return false;
 }
 
-static void played_cards_update_loop(bool* discarded_card, int* played_selections, bool* sound_played)
+static void played_cards_update_loop(bool* discarded_card, bool* sound_played)
 {
     // TODO: Break this function up into smaller ones.
 
@@ -2229,11 +2229,11 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
             {
                 case PLAY_PLAYING:
 
-                    if (i == 0 && (timer % FRAMES(10) == 0 || !card_object_is_selected(played[played_top - *played_selections])) && timer > FRAMES(40))
+                    if (i == 0 && (timer % FRAMES(10) == 0 || !card_object_is_selected(played[played_top - scored_card_index])) && timer > FRAMES(40))
                     {
-                        (*played_selections)--;
+                        scored_card_index--;
 
-                        if (*played_selections == 0)
+                        if (scored_card_index == 0)
                         {
                             _joker_scored_itr = list_itr_create(&_owned_jokers_list);
                             timer = TM_ZERO;
@@ -2241,7 +2241,7 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                         }
                     }
 
-                    if (card_object_is_selected(played[i]) && played_top - i >= *played_selections)
+                    if (card_object_is_selected(played[i]) && played_top - i >= scored_card_index)
                     {
                         played_y -= int2fx(10);
                     }
@@ -2317,7 +2317,7 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
 
                             if (card_object_is_selected(scored_card_object))
                             {
-                                tte_set_pos(fx2int(scored_card_object->sprite_object->x) + 8, SCORED_CARD_TEXT_Y); // Offset of 1 tile to keep the text on the card
+                                tte_set_pos(fx2int(scored_card_object->sprite_object->x) + TILE_SIZE, SCORED_CARD_TEXT_Y); // Offset of 1 tile to keep the text on the card
                                 tte_set_special(TTE_BLUE_PB * TTE_SPECIAL_PB_MULT_OFFSET); // Set text color to blue from background memory
 
                                 // Write the score to a character buffer variable
@@ -2413,7 +2413,7 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
 
                         play_state = PLAY_ENDING;
                         timer = TM_ZERO;
-                        scored_card_index = played_top + 1; // Reset the played selections to the top of the played stack
+                        scored_card_index = played_top + 1; // Reset the scored card index to the top of the played stack
                         break;
                     }
                 
@@ -2478,7 +2478,6 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                                 play_state = PLAY_PLAYING;
                                 cards_drawn = 0;
                                 hand_selections = 0;
-                                *played_selections = 0;
                                 played_top = -1; // Reset the played stack
                                 scored_card_index = 0;
                                 _joker_scored_itr = list_itr_create(&_owned_jokers_list);
@@ -2568,12 +2567,11 @@ static void game_playing_on_update()
 
     game_playing_discarded_cards_loop();
 
-    static int played_selections = 0;
     static bool sound_played = false;
     bool discarded_card = false;
 
-    cards_in_hand_update_loop(&discarded_card, &played_selections, &sound_played);
-	played_cards_update_loop(&discarded_card, &played_selections, &sound_played);
+    cards_in_hand_update_loop(&discarded_card, &sound_played);
+	played_cards_update_loop(&discarded_card, &sound_played);
     
     game_playing_ui_text_update();
 
