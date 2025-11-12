@@ -20,6 +20,11 @@ if (checked_event != restricted_event) \
 
 // Joker Effect functions
 
+static JokerEffect joker_effect_noop(Joker *joker, Card *scored_card, enum JokerEvent joker_event)
+{
+    return (JokerEffect){0};
+}
+
 static JokerEffect default_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event)
 {
     JokerEffect effect = {0};
@@ -595,7 +600,7 @@ static JokerEffect hanging_chad_joker_effect(Joker *joker, Card *scored_card, en
 
     switch (joker_event)
     {
-        case JOKER_EVENT_ON_HAND_SCORED_END:
+        case JOKER_EVENT_ON_HAND_PLAYED:
             *p_remaining_retriggers = 2;
             break;
     
@@ -755,7 +760,7 @@ static JokerEffect photograph_joker_effect(Joker *joker, Card *scored_card, enum
 
     switch (joker_event)
     {
-        case JOKER_EVENT_ON_HAND_SCORED_END:
+        case JOKER_EVENT_ON_HAND_PLAYED:
             *p_first_face_index = UNDEFINED;
             break;
         
@@ -807,7 +812,7 @@ static JokerEffect dusk_joker_effect(Joker *joker, Card *scored_card, enum Joker
 
     switch (joker_event)
     {
-        case JOKER_EVENT_ON_HAND_SCORED_END:
+        case JOKER_EVENT_ON_HAND_PLAYED:
             *p_last_retriggered_index = UNDEFINED;
             break;
         
@@ -886,7 +891,7 @@ static JokerEffect hack_joker_effect(Joker *joker, Card *scored_card, enum Joker
 
     switch (joker_event)
     {
-        case JOKER_EVENT_ON_HAND_SCORED_END:
+        case JOKER_EVENT_ON_HAND_PLAYED:
             *p_last_retriggered_index = UNDEFINED;
             break;
         
@@ -926,8 +931,15 @@ static JokerEffect seltzer_joker_effect(Joker *joker, Card *scored_card, enum Jo
 
     switch (joker_event)
     {
-        case JOKER_EVENT_ON_HAND_SCORED_END:
+        case JOKER_EVENT_ON_JOKER_CREATED:
+            *p_hands_left_until_exp = 10; // remaining retriggered hands
+            break;
+
+        case JOKER_EVENT_ON_HAND_PLAYED:
             *p_last_retriggered_idx = UNDEFINED;
+            break;
+
+        case JOKER_EVENT_ON_HAND_SCORED_END:
             *p_hands_left_until_exp -= 1;
             if (*p_hands_left_until_exp <= 0)
             {
@@ -968,7 +980,7 @@ static JokerEffect sock_and_buskin_joker_effect(Joker *joker, Card *scored_card,
 
     switch (joker_event)
     {
-        case JOKER_EVENT_ON_HAND_SCORED_END:
+        case JOKER_EVENT_ON_HAND_PLAYED:
             *p_last_retriggered_face_index = UNDEFINED;
             break;
         
@@ -989,42 +1001,6 @@ static JokerEffect sock_and_buskin_joker_effect(Joker *joker, Card *scored_card,
     return effect;
 }
 
-// ON JOKER CREATED Callbacks
-
-// For Jokers that don't need to do anything when created
-void on_joker_created_noop(Joker *joker) {}
-
-void hanging_chad_on_joker_created(Joker *joker)
-{
-    joker->data = 2; // retriggers left, reset to 2 at round end
-}
-
-void dusk_on_joker_created(Joker *joker)
-{
-    joker->data = UNDEFINED; // previously retriggered card index
-}
-
-void hack_on_joker_created(Joker *joker)
-{
-    joker->data = UNDEFINED; // previously retriggered card index
-}
-
-void photograph_on_joker_created(Joker *joker)
-{
-    joker->data = UNDEFINED; // First scoring face card index
-}
-
-void sock_and_buskin_on_joker_created(Joker *joker)
-{
-    joker->data = UNDEFINED; // previously retriggered face card index
-}
-
-void seltzer_on_joker_created(Joker *joker)
-{
-    joker->halves.data0 = UNDEFINED; // previously retriggered card index
-    joker->halves.data1 = 10; // remaining retriggered hands
-}
-
 
 /* The index of a joker in the registry matches its ID.
  * The joker sprites are matched by ID so the position in the registry
@@ -1036,57 +1012,57 @@ void seltzer_on_joker_created(Joker *joker)
  * Otherwise the order is similar to the wiki.
  */
 const JokerInfo joker_registry[] = {
-    { COMMON_JOKER,    2, default_joker_effect,          on_joker_created_noop            }, // DEFAULT_JOKER_ID = 0
-    { COMMON_JOKER,    5, greedy_joker_effect,           on_joker_created_noop            }, // GREEDY_JOKER_ID  = 1
-    { COMMON_JOKER,    5, lusty_joker_effect,            on_joker_created_noop            }, // etc...  2
-    { COMMON_JOKER,    5, wrathful_joker_effect,         on_joker_created_noop            }, // 3
-    { COMMON_JOKER,    5, gluttonous_joker_effect,       on_joker_created_noop            }, // 4
-    { COMMON_JOKER,    3, jolly_joker_effect,            on_joker_created_noop            }, // 5
-    { COMMON_JOKER,    4, zany_joker_effect,             on_joker_created_noop            }, // 6
-    { COMMON_JOKER,    4, mad_joker_effect,              on_joker_created_noop            }, // 7
-    { COMMON_JOKER,    4, crazy_joker_effect,            on_joker_created_noop            }, // 8
-    { COMMON_JOKER,    4, droll_joker_effect,            on_joker_created_noop            }, // 9
-    { COMMON_JOKER,    3, sly_joker_effect,              on_joker_created_noop            }, // 10
-    { COMMON_JOKER,    4, wily_joker_effect,             on_joker_created_noop            }, // 11
-    { COMMON_JOKER,    4, clever_joker_effect,           on_joker_created_noop            }, // 12
-    { COMMON_JOKER,    4, devious_joker_effect,          on_joker_created_noop            }, // 13 
-    { COMMON_JOKER,    4, crafty_joker_effect,           on_joker_created_noop            }, // 14
-    { COMMON_JOKER,    5, half_joker_effect,             on_joker_created_noop            }, // 15
-    { UNCOMMON_JOKER,  8, joker_stencil_effect,          on_joker_created_noop            }, // 16
-    { COMMON_JOKER,    5, banner_joker_effect,           on_joker_created_noop            }, // 17
-    { COMMON_JOKER,    4, walkie_talkie_joker_effect,    on_joker_created_noop            }, // 18
-    { UNCOMMON_JOKER,  8, fibonnaci_joker_effect,        on_joker_created_noop            }, // 19
-    { UNCOMMON_JOKER,  6, blackboard_joker_effect,       on_joker_created_noop            }, // 20
-    { COMMON_JOKER,    5, mystic_summit_joker_effect,    on_joker_created_noop            }, // 21
-    { COMMON_JOKER,    4, misprint_joker_effect,         on_joker_created_noop            }, // 22
-    { COMMON_JOKER,    4, even_steven_joker_effect,      on_joker_created_noop            }, // 23
-    { COMMON_JOKER,    5, blue_joker_effect,             on_joker_created_noop            }, // 24
-    { COMMON_JOKER,    4, odd_todd_joker_effect,         on_joker_created_noop            }, // 25
-    { UNCOMMON_JOKER,  7, NULL, /* Shortcut */           on_joker_created_noop            }, // 26
-    { COMMON_JOKER,    4, business_card_joker_effect,    on_joker_created_noop            }, // 27
+    { COMMON_JOKER,    2, default_joker_effect          }, // DEFAULT_JOKER_ID = 0
+    { COMMON_JOKER,    5, greedy_joker_effect           }, // GREEDY_JOKER_ID  = 1
+    { COMMON_JOKER,    5, lusty_joker_effect            }, // etc...  2
+    { COMMON_JOKER,    5, wrathful_joker_effect         }, // 3
+    { COMMON_JOKER,    5, gluttonous_joker_effect       }, // 4
+    { COMMON_JOKER,    3, jolly_joker_effect            }, // 5
+    { COMMON_JOKER,    4, zany_joker_effect             }, // 6
+    { COMMON_JOKER,    4, mad_joker_effect              }, // 7
+    { COMMON_JOKER,    4, crazy_joker_effect            }, // 8
+    { COMMON_JOKER,    4, droll_joker_effect            }, // 9
+    { COMMON_JOKER,    3, sly_joker_effect              }, // 10
+    { COMMON_JOKER,    4, wily_joker_effect             }, // 11
+    { COMMON_JOKER,    4, clever_joker_effect           }, // 12
+    { COMMON_JOKER,    4, devious_joker_effect          }, // 13 
+    { COMMON_JOKER,    4, crafty_joker_effect           }, // 14
+    { COMMON_JOKER,    5, half_joker_effect             }, // 15
+    { UNCOMMON_JOKER,  8, joker_stencil_effect          }, // 16
+    { COMMON_JOKER,    5, banner_joker_effect           }, // 17
+    { COMMON_JOKER,    4, walkie_talkie_joker_effect    }, // 18
+    { UNCOMMON_JOKER,  8, fibonnaci_joker_effect        }, // 19
+    { UNCOMMON_JOKER,  6, blackboard_joker_effect       }, // 20
+    { COMMON_JOKER,    5, mystic_summit_joker_effect    }, // 21
+    { COMMON_JOKER,    4, misprint_joker_effect         }, // 22
+    { COMMON_JOKER,    4, even_steven_joker_effect      }, // 23
+    { COMMON_JOKER,    5, blue_joker_effect             }, // 24
+    { COMMON_JOKER,    4, odd_todd_joker_effect         }, // 25
+    { UNCOMMON_JOKER,  7, joker_effect_noop,            }, // 26 Shortcut
+    { COMMON_JOKER,    4, business_card_joker_effect    }, // 27
     // Business card should be paired with Shortcut for palette optimization when it's added
-    { COMMON_JOKER,    4, scary_face_joker_effect,       on_joker_created_noop            }, // 28
-    { UNCOMMON_JOKER,  7, bootstraps_joker_effect,       on_joker_created_noop            }, // 29
-    { UNCOMMON_JOKER,  5, NULL,                          on_joker_created_noop            }, // 30 Pareidolia
-    { COMMON_JOKER,    6, reserved_parking_joker_effect, on_joker_created_noop            }, // 31
-    { COMMON_JOKER,    4, abstract_joker_effect,         on_joker_created_noop            }, // 32
-    { UNCOMMON_JOKER,  6, bull_joker_effect,             on_joker_created_noop            }, // 33
-    { RARE_JOKER,      8, the_duo_joker_effect,          on_joker_created_noop            }, // 34
-    { RARE_JOKER,      8, the_trio_joker_effect,         on_joker_created_noop            }, // 35
-    { RARE_JOKER,      8, the_family_joker_effect,       on_joker_created_noop            }, // 36
-    { RARE_JOKER,      8, the_order_joker_effect,        on_joker_created_noop            }, // 37
-    { RARE_JOKER,      8, the_tribe_joker_effect,        on_joker_created_noop            }, // 38
-    { RARE_JOKER,     10, blueprint_joker_effect,        on_joker_created_noop            }, // 39
-    { RARE_JOKER,     10, brainstorm_joker_effect,       on_joker_created_noop            }, // 40
-    { COMMON_JOKER,    5, raised_fist_joker_effect,      on_joker_created_noop            }, // 41
-    { COMMON_JOKER,    4, smiley_face_joker_effect,      on_joker_created_noop            }, // 42
-    { UNCOMMON_JOKER,  6, acrobat_joker_effect,          on_joker_created_noop            }, // 43
-    { UNCOMMON_JOKER,  5, dusk_joker_effect,             dusk_on_joker_created            }, // 44
-    { UNCOMMON_JOKER,  6, sock_and_buskin_joker_effect,  sock_and_buskin_on_joker_created }, // 45
-    { UNCOMMON_JOKER,  6, hack_joker_effect,             hack_on_joker_created            }, // 46
-    { COMMON_JOKER,    4, hanging_chad_joker_effect,     hanging_chad_on_joker_created    }, // 47
-    { UNCOMMON_JOKER,  7, NULL,/* Four Fingers */        on_joker_created_noop            }, // 48
-    { COMMON_JOKER,    4, scholar_joker_effect,          on_joker_created_noop            }, // 49
+    { COMMON_JOKER,    4, scary_face_joker_effect       }, // 28
+    { UNCOMMON_JOKER,  7, bootstraps_joker_effect       }, // 29
+    { UNCOMMON_JOKER,  5, joker_effect_noop             }, // 30 Pareidolia
+    { COMMON_JOKER,    6, reserved_parking_joker_effect }, // 31
+    { COMMON_JOKER,    4, abstract_joker_effect         }, // 32
+    { UNCOMMON_JOKER,  6, bull_joker_effect             }, // 33
+    { RARE_JOKER,      8, the_duo_joker_effect          }, // 34
+    { RARE_JOKER,      8, the_trio_joker_effect         }, // 35
+    { RARE_JOKER,      8, the_family_joker_effect       }, // 36
+    { RARE_JOKER,      8, the_order_joker_effect        }, // 37
+    { RARE_JOKER,      8, the_tribe_joker_effect        }, // 38
+    { RARE_JOKER,     10, blueprint_joker_effect        }, // 39
+    { RARE_JOKER,     10, brainstorm_joker_effect       }, // 40
+    { COMMON_JOKER,    5, raised_fist_joker_effect      }, // 41
+    { COMMON_JOKER,    4, smiley_face_joker_effect      }, // 42
+    { UNCOMMON_JOKER,  6, acrobat_joker_effect          }, // 43
+    { UNCOMMON_JOKER,  5, dusk_joker_effect             }, // 44
+    { UNCOMMON_JOKER,  6, sock_and_buskin_joker_effect  }, // 45
+    { UNCOMMON_JOKER,  6, hack_joker_effect             }, // 46
+    { COMMON_JOKER,    4, hanging_chad_joker_effect     }, // 47
+    { UNCOMMON_JOKER,  7, joker_effect_noop,            }, // 48 Four Fingers
+    { COMMON_JOKER,    4, scholar_joker_effect          }, // 49
 
     // The following jokers don't have sprites yet,
     // uncomment them when their sprites are added.

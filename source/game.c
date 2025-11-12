@@ -2232,8 +2232,9 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
 
                         if (*played_selections == 0)
                         {
-                            play_state = PLAY_BEFORE_SCORING;
+                            _joker_scored_itr = list_itr_create(&_owned_jokers_list);
                             timer = TM_ZERO;
+                            play_state = PLAY_BEFORE_SCORING;
                         }
                     }
 
@@ -2250,14 +2251,13 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                     {
                         return;
                     }
-
-                    _joker_scored_itr = list_itr_create(&_owned_jokers_list);
-                    play_state = PLAY_SCORING_CARDS;
                     
                     if (card_object_is_selected(played[i]) && played_top - i >= *played_selections)
                     {
                         played_y -= int2fx(10);
                     }
+
+                    play_state = PLAY_SCORING_CARDS;
                     break;
 
                 case PLAY_SCORING_CARDS:
@@ -2327,8 +2327,7 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                             }
                         }
 
-                        // advance state after going past the last card (exited the loop without returning)
-                        play_state = PLAY_SCORING_JOKERS;
+                        play_state = PLAY_SCORING_HELD;
                         // reuse these variables for held cards
                         _joker_scored_itr = list_itr_create(&_owned_jokers_list);
                         scored_card_index = hand_top;
