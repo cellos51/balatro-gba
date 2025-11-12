@@ -2255,7 +2255,7 @@ static void played_cards_update_loop(bool* discarded_card, bool* sound_played)
                         return;
                     }
                     
-                    if (card_object_is_selected(played[i]) && played_top - i >= *played_selections)
+                    if (card_object_is_selected(played[i]) && played_top - i >= scored_card_index)
                     {
                         played_y -= int2fx(10);
                     }
@@ -2283,25 +2283,14 @@ static void played_cards_update_loop(bool* discarded_card, bool* sound_played)
 
                         if (scored_card_index > 0 && card_object_is_selected(played[previous_scored_card_index]))
                         {
-                            if (check_and_score_joker_for_event(&_joker_scored_itr, played[previous_scored_card_index]->card, JOKER_EVENT_ON_CARD_SCORED))
+                            if (check_and_score_joker_for_event(&_joker_scored_itr, played[previous_scored_card_index], JOKER_EVENT_ON_CARD_SCORED))
                             {
-                                if (check_and_score_joker_for_event(&_joker_scored_itr, played[*played_selections - 1], JOKER_EVENT_ON_CARD_SCORED))
-                                {
-                                    return;
-                                }
-                            
-                                // Trigger all Jokers that have an effect when a card finishes scoring
-                                // (e.g. retriggers) after activating all the other scored_card Jokers normally
-                                _joker_scored_itr = list_itr_create(&_owned_jokers_list);
-                                if (check_and_score_joker_for_event(&_joker_scored_itr, played[*played_selections - 1], JOKER_EVENT_ON_CARD_SCORED_END))
-                                {
-                                    return;
-                                }
+                                return;
                             }
 
                             // Trigger all Jokers that have an effect when a card finishes scoring
                             // (e.g. retriggers) after activating all the other scored_card Jokers normally
-                            if (check_and_score_joker_for_event(&_joker_card_scored_end_itr, played[previous_scored_card_index]->card, JOKER_EVENT_ON_CARD_SCORED_END))
+                            if (check_and_score_joker_for_event(&_joker_card_scored_end_itr, played[previous_scored_card_index], JOKER_EVENT_ON_CARD_SCORED_END))
                             {
                                 return;
                             }
