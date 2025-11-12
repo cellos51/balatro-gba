@@ -49,9 +49,11 @@
 // Joker per Joker basis (see if it's there, then do something, e.g. Pareidolia, Baseball Card)
 enum JokerEvent
 {
-    JOKER_EVENT_ON_HAND_PLAYED,     // Triggers only once when the hand is played
+    JOKER_EVENT_ON_JOKER_CREATED,   // Triggers only once when the Joker is created, mainly used for data initialization
+    JOKER_EVENT_ON_HAND_PLAYED,     // Triggers only once when the hand is played and before the cards are scored
     JOKER_EVENT_ON_CARD_SCORED,     // Triggers when a played card scores (e.g. Walkie Talkie, Fibonnacci...)
     JOKER_EVENT_ON_CARD_SCORED_END, // Triggers after the card has finishd scoring (e.g. retrigger Jokers)
+    JOKER_EVENT_ON_CARD_HELD,       // Triggers when going through held cards
     JOKER_EVENT_INDEPENDENT,        // Joker will trigger normally, when Jokers are scored (e.g. base Joker)
     JOKER_EVENT_ON_HAND_SCORED_END, // Triggers when entire hand has finished scoring (e.g. food Jokers)
     JOKER_EVENT_ON_HAND_DISCARDED,  // Triggers when discarding a hand
@@ -105,12 +107,10 @@ typedef struct  // These jokers are triggered after the played hand has finished
 } JokerEffect;
 
 typedef JokerEffect (*JokerEffectFunc)(Joker *joker, Card *scored_card, enum JokerEvent joker_event);
-typedef void (*JokerCallbackOnCreated)(Joker *joker);
 typedef struct {
     u8 rarity;
     u8 base_value;
     JokerEffectFunc joker_effect;
-    JokerCallbackOnCreated on_joker_created;
 } JokerInfo;
 const JokerInfo* get_joker_registry_entry(int joker_id);
 size_t get_joker_registry_size(void);
@@ -129,7 +129,7 @@ JokerObject *joker_object_new(Joker *joker);
 void joker_object_destroy(JokerObject **joker_object);
 void joker_object_update(JokerObject *joker_object);
 void joker_object_shake(JokerObject *joker_object, mm_word sound_id); // This doesn't actually score anything, it just performs an animation and plays a sound effect
-bool joker_object_score(JokerObject *joker_object, Card* scored_card, enum JokerEvent joker_event, int *chips, int *mult, int *money, bool *retrigger); // This scores the joker and returns true if it was scored successfully (Card = NULL means the joker is independent and not scored by a card)
+bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum JokerEvent joker_event, int *chips, int *mult, int *money, bool *retrigger); // This scores the joker and returns true if it was scored successfully (Card = NULL means the joker is independent and not scored by a card)
 
 void joker_object_set_selected(JokerObject* joker_object, bool selected);
 bool joker_object_is_selected(JokerObject* joker_object);

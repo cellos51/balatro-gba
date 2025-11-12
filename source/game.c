@@ -541,6 +541,7 @@ static const Rect TEMP_SCORE_RECT           = {8,       64,     64,     72  };
 static const Rect SCORE_RECT                = {32,      48,     64,     56  };
 
 static const Rect PLAYED_CARDS_SCORES_RECT  = {72,      48,     240,    56  };
+static const Rect HELD_CARDS_SCORES_RECT    = {72,      108,    240,    116 };
 static const Rect BLIND_TOKEN_TEXT_RECT     = {80,      72,     200,    160 };
 static const Rect MONEY_TEXT_RECT           = {8,       120,    64,     128 };
 static const Rect CHIPS_TEXT_RECT           = {8,       80,     32,     88  };
@@ -2181,13 +2182,13 @@ static void cards_in_hand_update_loop(bool* discarded_card, int* played_selectio
 }
 
 // returns true if a joker was scored, false otherwise
-static bool check_and_score_joker_for_event(ListItr* starting_joker_itr, Card* played_card, enum JokerEvent joker_event)
+static bool check_and_score_joker_for_event(ListItr* starting_joker_itr, CardObject* card_object, enum JokerEvent joker_event)
 {
     JokerObject* joker;
 
     while((joker = list_itr_next(starting_joker_itr)))
     {
-        if (joker_object_score(joker, played_card, joker_event, &chips, &mult, &money, &retrigger))
+        if (joker_object_score(joker, card_object, joker_event, &chips, &mult, &money, &retrigger))
         {
             display_chips();
             display_mult();
@@ -2231,8 +2232,9 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
 
                         if (*played_selections == 0)
                         {
-                            play_state = PLAY_SCORING_CARDS;
+                            _joker_scored_itr = list_itr_create(&_owned_jokers_list);
                             timer = TM_ZERO;
+                            play_state = PLAY_BEFORE_SCORING;
                         }
                     }
 
@@ -2242,11 +2244,26 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                     }
                     break;
                 
+                case PLAY_BEFORE_SCORING:
+
+                    // Activate Jokers with an effect just before the hand is scored
+                    if (check_and_score_joker_for_event(&_joker_scored_itr, NULL, JOKER_EVENT_ON_HAND_PLAYED))
+                    {
+                        return;
+                    }
+                    
+                    if (card_object_is_selected(played[i]) && played_top - i >= *played_selections)
+                    {
+                        played_y -= int2fx(10);
+                    }
+
+                    play_state = PLAY_SCORING_CARDS;
+                    break;
+
                 case PLAY_SCORING_CARDS:
 
                     if (i == 0 && (timer % FRAMES(30) == 0) && timer > FRAMES(40))
                     {
-
                         // We are about to score played Cards, then Jokers.
                         // If we need to retrigger, then we have scored a card previously
                         // and thus have incremented scored_card_index by 1.
@@ -2268,7 +2285,7 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                             // Trigger all Jokers after each card scored
                             if (*played_selections > 0)
                             {
-                                if (check_and_score_joker_for_event(&_joker_scored_itr, played[*played_selections - 1]->card, JOKER_EVENT_ON_CARD_SCORED))
+                                if (check_and_score_joker_for_event(&_joker_scored_itr, played[*played_selections - 1], JOKER_EVENT_ON_CARD_SCORED))
                                 {
                                     return;
                                 }
@@ -2276,7 +2293,7 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                                 // Trigger all Jokers that have an effect when a card finishes scoring
                                 // (e.g. retriggers) after activating all the other scored_card Jokers normally
                                 _joker_scored_itr = list_itr_create(&_owned_jokers_list);
-                                if (check_and_score_joker_for_event(&_joker_scored_itr, played[*played_selections - 1]->card, JOKER_EVENT_ON_CARD_SCORED_END))
+                                if (check_and_score_joker_for_event(&_joker_scored_itr, played[*played_selections - 1], JOKER_EVENT_ON_CARD_SCORED_END))
                                 {
                                     return;
                                 }
@@ -2310,11 +2327,10 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                             }
                         }
 
-                        // advance state after going past the last card (exited the loop without returning)
-                        play_state = PLAY_SCORING_JOKERS;
+                        play_state = PLAY_SCORING_HELD;
+                        // reuse these variables for held cards
                         _joker_scored_itr = list_itr_create(&_owned_jokers_list);
-                        scored_card_index = 0; // reuse this variable for held cards
-                        return;
+                        scored_card_index = hand_top;
                     }
 
                     if (card_object_is_selected(played[i]))
@@ -2322,7 +2338,35 @@ static void played_cards_update_loop(bool* discarded_card, int* played_selection
                         played_y -= int2fx(10);
                     }
                     break;
-                            
+                
+                case PLAY_SCORING_HELD:
+
+                    if (i == 0 && (timer % FRAMES(30) == 0) && timer > FRAMES(40))
+                    {
+                        tte_erase_rect_wrapper(HELD_CARDS_SCORES_RECT);
+
+                        // Go through all held cards and see if they activate Jokers
+                        for ( ; scored_card_index >= 0; scored_card_index--)
+                        {
+
+                            if (check_and_score_joker_for_event(&_joker_scored_itr, hand[scored_card_index], JOKER_EVENT_ON_CARD_HELD))
+                            {
+                                card_object_shake(hand[scored_card_index], SFX_CARD_SELECT);
+                                return;
+                            }
+                            _joker_scored_itr = list_itr_create(&_owned_jokers_list);
+                        }
+                        scored_card_index = 0;
+
+                        play_state = PLAY_SCORING_JOKERS;
+                    }
+
+                    if (card_object_is_selected(played[i]))
+                    {
+                        played_y -= int2fx(10);
+                    }
+                    break;
+
                 // Score Jokers normally
                 case PLAY_SCORING_JOKERS:
 
