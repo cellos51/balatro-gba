@@ -2223,6 +2223,7 @@ static void play_playing_update(int i, FIXED* played_y)
     }
 }
 
+// returns true if the scoring loop has returned early
 static bool play_before_scoring_update(int i, FIXED* played_y)
 {
     // Activate Jokers with an effect just before the hand is scored
@@ -2240,6 +2241,7 @@ static bool play_before_scoring_update(int i, FIXED* played_y)
     return false;
 }
 
+// returns true if the scoring loop has returned early
 static bool play_scoring_cards_update(int i, FIXED* played_y)
 {
     if (i == 0 && (timer % FRAMES(30) == 0) && timer > FRAMES(40))
@@ -2329,6 +2331,7 @@ static bool play_scoring_cards_update(int i, FIXED* played_y)
     return false;
 }
 
+// returns true if the scoring loop has returned early
 static bool play_scoring_held_update(int i, FIXED* played_y)
 {
     if (i == 0 && (timer % FRAMES(30) == 0) && timer > FRAMES(40))
@@ -2338,7 +2341,6 @@ static bool play_scoring_held_update(int i, FIXED* played_y)
         // Go through all held cards and see if they activate Jokers
         for ( ; scored_card_index >= 0; scored_card_index--)
         {
-
             if (check_and_score_joker_for_event(&_joker_scored_itr, hand[scored_card_index], JOKER_EVENT_ON_CARD_HELD))
             {
                 card_object_shake(hand[scored_card_index], SFX_CARD_SELECT);
@@ -2358,6 +2360,7 @@ static bool play_scoring_held_update(int i, FIXED* played_y)
     return false;
 }
 
+// returns true if the scoring loop has returned early
 static bool play_scoring_jokers_update(int i, FIXED* played_y)
 {
     if (i == 0 && (timer % FRAMES(30) == 0) && timer > FRAMES(40))
@@ -2459,8 +2462,6 @@ static void play_ended_update(bool* discarded_card, bool* sound_played, int i, F
 
 static void played_cards_update_loop(bool* discarded_card, bool* sound_played)
 {
-    // TODO: Break this function up into smaller ones.
-
     // So this one is a bit fucking weird because I have to work kinda backwards for everything because of the order of the pushed cards from the hand to the play stack
     // (also crazy that the company that published Balatro is called "Playstack" and this is a play stack, but I digress)
     for (int i = 0; i <= played_top; i++)
