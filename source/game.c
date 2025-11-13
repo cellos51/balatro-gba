@@ -171,7 +171,7 @@ static enum HandState hand_state = HAND_DRAW;
 static enum PlayState play_state = PLAY_STARTING;
 
 static enum HandType hand_type = NONE;
-static ContainedHandTypes contained_hands = {0};
+static ContainedHandTypes _contained_hands = {0};
 
 static CardObject *main_menu_ace = NULL;
 
@@ -486,7 +486,7 @@ int get_money(void)
 
 ContainedHandTypes* get_contained_hands(void)
 {
-    return &contained_hands;
+    return &_contained_hands;
 }
 
 
@@ -756,7 +756,7 @@ void hand_get_type()
 {
     // resetting all hand info
     hand_type = NONE;
-    memcpy16(&contained_hands, 0, sizeof(contained_hands));
+    memcpy16(&_contained_hands, 0, sizeof(_contained_hands));
 
     // Idk if this is how Balatro does it but this is how I'm doing it
     if (hand_selections == 0 || hand_state == HAND_DISCARD)
@@ -766,7 +766,7 @@ void hand_get_type()
     }
 
     hand_type = HIGH_CARD;
-    contained_hands.HIGH_CARD = 1;
+    _contained_hands.HIGH_CARD = 1;
 
     u8 suits[NUM_SUITS];
     u8 ranks[NUM_RANKS];
@@ -779,12 +779,12 @@ void hand_get_type()
     if (n_of_a_kind >= 2)
     {
         hand_type = PAIR;
-        contained_hands.PAIR = 1;
+        _contained_hands.PAIR = 1;
 
         if (hand_contains_two_pair(ranks))
         {
             hand_type = TWO_PAIR;
-            contained_hands.TWO_PAIR = 1;
+            _contained_hands.TWO_PAIR = 1;
         }
     }
 
@@ -792,51 +792,51 @@ void hand_get_type()
     if (n_of_a_kind >= 3)
     {
         hand_type = THREE_OF_A_KIND;
-        contained_hands.THREE_OF_A_KIND = 1;
+        _contained_hands.THREE_OF_A_KIND = 1;
     }
 
     // Straight
     if (hand_contains_straight(ranks))
     {
         hand_type = STRAIGHT;
-        contained_hands.STRAIGHT = 1;
+        _contained_hands.STRAIGHT = 1;
     }
 
     // Flush
     if (hand_contains_flush(suits))
     {
         hand_type = FLUSH;
-        contained_hands.FLUSH = 1;
+        _contained_hands.FLUSH = 1;
     }
 
     // Full House
     if (n_of_a_kind >= 3 && hand_contains_full_house(ranks))
     {
         hand_type = FULL_HOUSE;
-        contained_hands.FULL_HOUSE = 1;
+        _contained_hands.FULL_HOUSE = 1;
     }
 
     // 4 OAK
     if (n_of_a_kind >= 4)
     {
         hand_type = FOUR_OF_A_KIND;
-        contained_hands.FOUR_OF_A_KIND = 1;
+        _contained_hands.FOUR_OF_A_KIND = 1;
     }
 
     // Straight Flush
-    if (contained_hands.STRAIGHT && contained_hands.FLUSH)
+    if (_contained_hands.STRAIGHT && _contained_hands.FLUSH)
     {
         hand_type = STRAIGHT_FLUSH;
-        contained_hands.STRAIGHT_FLUSH = 1;
+        _contained_hands.STRAIGHT_FLUSH = 1;
     }
 
     // Royal Flush
-    if (contained_hands.STRAIGHT_FLUSH)
+    if (_contained_hands.STRAIGHT_FLUSH)
     {
         if (ranks[TEN] && ranks[JACK] && ranks[QUEEN] && ranks[KING] && ranks[ACE])
         {
             hand_type = ROYAL_FLUSH;
-            contained_hands.ROYAL_FLUSH = 1;
+            _contained_hands.ROYAL_FLUSH = 1;
         }
     }
 
@@ -844,22 +844,22 @@ void hand_get_type()
     if (n_of_a_kind >= 5)
     {
         hand_type = FIVE_OF_A_KIND;
-        contained_hands.FIVE_OF_A_KIND = 1;
+        _contained_hands.FIVE_OF_A_KIND = 1;
     }
 
     // Flush House and Five
-    if (contained_hands.FLUSH)
+    if (_contained_hands.FLUSH)
     {
-        if (contained_hands.FULL_HOUSE)
+        if (_contained_hands.FULL_HOUSE)
         {
             hand_type = FLUSH_HOUSE;
-            contained_hands.FLUSH_HOUSE = 1;
+            _contained_hands.FLUSH_HOUSE = 1;
         }
 
-        if (contained_hands.FIVE_OF_A_KIND)
+        if (_contained_hands.FIVE_OF_A_KIND)
         {
             hand_type = FLUSH_FIVE;
-            contained_hands.FLUSH_FIVE = 1;
+            _contained_hands.FLUSH_FIVE = 1;
         }
     }
 }
