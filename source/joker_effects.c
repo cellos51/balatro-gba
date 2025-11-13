@@ -1011,7 +1011,8 @@ static JokerEffect sock_and_buskin_joker_effect(Joker *joker, Card *scored_card,
  * (and put together in the matching spritesheet) to share a color palette.
  * Otherwise the order is similar to the wiki.
  */
-const JokerInfo joker_registry[] = {
+const JokerInfo joker_registry[] = 
+{
     { COMMON_JOKER,    2, default_joker_effect          }, // DEFAULT_JOKER_ID = 0
     { COMMON_JOKER,    5, greedy_joker_effect           }, // GREEDY_JOKER_ID  = 1
     { COMMON_JOKER,    5, lusty_joker_effect            }, // etc...  2
@@ -1029,9 +1030,9 @@ const JokerInfo joker_registry[] = {
     { COMMON_JOKER,    4, crafty_joker_effect           }, // 14
     { COMMON_JOKER,    5, half_joker_effect             }, // 15
     { UNCOMMON_JOKER,  8, joker_stencil_effect          }, // 16
-    { COMMON_JOKER,    5, banner_joker_effect           }, // 17
+    { COMMON_JOKER,    5, photograph_joker_effect,      }, // 17
     { COMMON_JOKER,    4, walkie_talkie_joker_effect    }, // 18
-    { UNCOMMON_JOKER,  8, fibonnaci_joker_effect        }, // 19
+    { COMMON_JOKER,    5, banner_joker_effect           }, // 19
     { UNCOMMON_JOKER,  6, blackboard_joker_effect       }, // 20
     { COMMON_JOKER,    5, mystic_summit_joker_effect    }, // 21
     { COMMON_JOKER,    4, misprint_joker_effect         }, // 22
@@ -1040,7 +1041,6 @@ const JokerInfo joker_registry[] = {
     { COMMON_JOKER,    4, odd_todd_joker_effect         }, // 25
     { UNCOMMON_JOKER,  7, joker_effect_noop,            }, // 26 Shortcut
     { COMMON_JOKER,    4, business_card_joker_effect    }, // 27
-    // Business card should be paired with Shortcut for palette optimization when it's added
     { COMMON_JOKER,    4, scary_face_joker_effect       }, // 28
     { UNCOMMON_JOKER,  7, bootstraps_joker_effect       }, // 29
     { UNCOMMON_JOKER,  5, joker_effect_noop             }, // 30 Pareidolia
@@ -1063,13 +1063,14 @@ const JokerInfo joker_registry[] = {
     { COMMON_JOKER,    4, hanging_chad_joker_effect     }, // 47
     { UNCOMMON_JOKER,  7, joker_effect_noop,            }, // 48 Four Fingers
     { COMMON_JOKER,    4, scholar_joker_effect          }, // 49
-
+    { UNCOMMON_JOKER,  8, fibonnaci_joker_effect        }, // 50
+    
     // The following jokers don't have sprites yet,
     // uncomment them when their sprites are added.
 #if 0
-    { COMMON_JOKER,   5, photograph_joker_effect,       photograph_on_joker_created },
-    { UNCOMMON_JOKER, 6, seltzer_joker_effect,          seltzer_on_joker_created },
-    { COMMON_JOKER,   5, shoot_the_moon_joker_effect,   on_joker_created_noop},
+
+    { UNCOMMON_JOKER, 6, seltzer_joker_effect,          },
+    { COMMON_JOKER,   5, shoot_the_moon_joker_effect,   },
 #endif
 };
 
