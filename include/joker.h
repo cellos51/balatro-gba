@@ -97,9 +97,9 @@ typedef struct JokerObject
 
 typedef struct  // These jokers are triggered after the played hand has finished scoring.
 {
-    int chips;
-    int mult;
-    int xmult;
+    u32 chips;
+    u32 mult;
+    u32 xmult;
     int money;
     bool retrigger; // Retrigger played hand (e.g. "Dusk" joker, even though on the wiki it says "On Scored" it makes more sense to have it here)
     bool expire; // Joker is destroyed (food jokers)
@@ -129,7 +129,7 @@ JokerObject *joker_object_new(Joker *joker);
 void joker_object_destroy(JokerObject **joker_object);
 void joker_object_update(JokerObject *joker_object);
 void joker_object_shake(JokerObject *joker_object, mm_word sound_id); // This doesn't actually score anything, it just performs an animation and plays a sound effect
-bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum JokerEvent joker_event, int *chips, int *mult, int *money, bool *retrigger); // This scores the joker and returns true if it was scored successfully (Card = NULL means the joker is independent and not scored by a card)
+bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum JokerEvent joker_event, u32 *chips, u32 *mult, int *money, bool *retrigger); // This scores the joker and returns true if it was scored successfully (Card = NULL means the joker is independent and not scored by a card)
 
 void joker_object_set_selected(JokerObject* joker_object, bool selected);
 bool joker_object_is_selected(JokerObject* joker_object);
