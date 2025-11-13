@@ -2457,7 +2457,6 @@ static void play_ended_update(bool* discarded_card, bool* sound_played, int i, F
 
         *discarded_card = true;
     }
-    return;
 }
 
 static void played_cards_update_loop(bool* discarded_card, bool* sound_played)
