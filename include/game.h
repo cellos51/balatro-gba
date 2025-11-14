@@ -50,7 +50,7 @@ enum HandState
 
 enum PlayState
 {
-    PLAY_PLAYING,
+    PLAY_STARTING,
     PLAY_BEFORE_SCORING,
     PLAY_SCORING_CARDS,
     PLAY_SCORING_HELD,

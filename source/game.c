@@ -168,7 +168,7 @@ static const SubStateActionFn round_end_state_actions[] =
 
 static enum GameState game_state = GAME_STATE_UNDEFINED; // The current game state, this is used to determine what the game is doing at any given time
 static enum HandState hand_state = HAND_DRAW;
-static enum PlayState play_state = PLAY_PLAYING;
+static enum PlayState play_state = PLAY_STARTING;
 
 static enum HandType hand_type = NONE;
 
@@ -2204,7 +2204,7 @@ static bool check_and_score_joker_for_event(ListItr* starting_joker_itr, CardObj
 }
 
 
-static void play_playing_update(int played_idx)
+static void play_starting_update(int played_idx)
 {
     if (played_idx == played_top && (timer % FRAMES(10) == 0 || !card_object_is_selected(played[played_top - scored_card_index])) && timer > FRAMES(40))
     {
@@ -2379,7 +2379,7 @@ static bool play_scoring_jokers_update(int played_idx)
     return false;
 }
 
-// This is the reverse of PLAY_PLAYING. The cards get reset back to their neutral position sequentially
+// This is the reverse of PLAY_STARTING. The cards get reset back to their neutral position sequentially
 static void play_ending_update(int played_idx)
 {
     if (played_idx == 0 && (timer % FRAMES(10) == 0 || !card_object_is_selected(played[played_top - scored_card_index])) && timer > FRAMES(40))
@@ -2434,7 +2434,7 @@ static bool play_ended_update(int played_idx, bool* discarded_card, bool* sound_
                     hand_state = HAND_DRAW;
                 }
 
-                play_state = PLAY_PLAYING;
+                play_state = PLAY_STARTING;
                 cards_drawn = 0;
                 hand_selections = 0;
                 played_top = -1; // Reset the played stack
@@ -2472,9 +2472,9 @@ static void played_cards_update_loop(bool* discarded_card, bool* sound_played)
 
         switch (play_state)
         {
-            case PLAY_PLAYING:
+            case PLAY_STARTING:
 
-                play_playing_update(played_idx);
+                play_starting_update(played_idx);
                 break;
             
             case PLAY_BEFORE_SCORING:
