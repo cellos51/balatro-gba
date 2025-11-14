@@ -2203,9 +2203,10 @@ static bool check_and_score_joker_for_event(ListItr* starting_joker_itr, CardObj
     return false;
 }
 
-static void play_playing_update(int i, FIXED* played_y)
+
+static void play_playing_update(int played_idx)
 {
-    if (i == 0 && (timer % FRAMES(10) == 0 || !card_object_is_selected(played[played_top - scored_card_index])) && timer > FRAMES(40))
+    if (played_idx == played_top && (timer % FRAMES(10) == 0 || !card_object_is_selected(played[played_top - scored_card_index])) && timer > FRAMES(40))
     {
         scored_card_index--;
 
@@ -2217,24 +2218,22 @@ static void play_playing_update(int i, FIXED* played_y)
         }
     }
 
-    if (card_object_is_selected(played[i]) && played_top - i >= scored_card_index)
+    played[played_idx]->sprite_object->tx = int2fx(120) + (int2fx(played_top - played_idx) - int2fx(played_top) / 2) * -27;
+    played[played_idx]->sprite_object->ty = int2fx(70);
+
+    if (card_object_is_selected(played[played_idx]) && played_top - played_idx >= scored_card_index)
     {
-        (*played_y) -= int2fx(10);
+        played[played_idx]->sprite_object->ty -= int2fx(10);
     }
 }
 
 // returns true if the scoring loop has returned early
-static bool play_before_scoring_update(int i, FIXED* played_y)
+static bool play_before_scoring_update(int played_idx)
 {
     // Activate Jokers with an effect just before the hand is scored
     if (check_and_score_joker_for_event(&_joker_scored_itr, NULL, JOKER_EVENT_ON_HAND_PLAYED))
     {
         return true;
-    }
-    
-    if (card_object_is_selected(played[i]) && played_top - i >= scored_card_index)
-    {
-        (*played_y) -= int2fx(10);
     }
 
     play_state = PLAY_SCORING_CARDS;
@@ -2242,9 +2241,9 @@ static bool play_before_scoring_update(int i, FIXED* played_y)
 }
 
 // returns true if the scoring loop has returned early
-static bool play_scoring_cards_update(int i, FIXED* played_y)
+static bool play_scoring_cards_update(int played_idx)
 {
-    if (i == 0 && (timer % FRAMES(30) == 0) && timer > FRAMES(40))
+    if (played_idx == 0 && (timer % FRAMES(30) == 0) && timer > FRAMES(40))
     {
         // We are about to score played Cards, then Jokers. If we
         // need to retrigger, then we have scored a card previously
@@ -2324,17 +2323,13 @@ static bool play_scoring_cards_update(int i, FIXED* played_y)
         scored_card_index = hand_top;
     }
 
-    if (card_object_is_selected(played[i]))
-    {
-        (*played_y) -= int2fx(10);
-    }
     return false;
 }
 
 // returns true if the scoring loop has returned early
-static bool play_scoring_held_update(int i, FIXED* played_y)
+static bool play_scoring_held_update(int played_idx)
 {
-    if (i == 0 && (timer % FRAMES(30) == 0) && timer > FRAMES(40))
+    if (played_idx == 0 && (timer % FRAMES(30) == 0) && timer > FRAMES(40))
     {
         tte_erase_rect_wrapper(HELD_CARDS_SCORES_RECT);
 
@@ -2353,17 +2348,14 @@ static bool play_scoring_held_update(int i, FIXED* played_y)
         play_state = PLAY_SCORING_JOKERS;
     }
 
-    if (card_object_is_selected(played[i]))
-    {
-        (*played_y) -= int2fx(10);
-    }
     return false;
 }
 
+// Score Jokers normally
 // returns true if the scoring loop has returned early
-static bool play_scoring_jokers_update(int i, FIXED* played_y)
+static bool play_scoring_jokers_update(int played_idx)
 {
-    if (i == 0 && (timer % FRAMES(30) == 0) && timer > FRAMES(40))
+    if (played_idx == 0 && (timer % FRAMES(30) == 0) && timer > FRAMES(40))
     {
 
         tte_erase_rect_wrapper(PLAYED_CARDS_SCORES_RECT);
@@ -2382,19 +2374,15 @@ static bool play_scoring_jokers_update(int i, FIXED* played_y)
         play_state = PLAY_ENDING;
         timer = TM_ZERO;
         scored_card_index = played_top + 1; // Reset the scored card index to the top of the played stack
-        return false;
     }
 
-    if (card_object_is_selected(played[i]))
-    {
-        (*played_y) -= int2fx(10);
-    }
     return false;
 }
 
-static void play_ending_update(int i, FIXED* played_y)
+// This is the reverse of PLAY_PLAYING. The cards get reset back to their neutral position sequentially
+static void play_ending_update(int played_idx)
 {
-    if (i == 0 && (timer % FRAMES(10) == 0 || !card_object_is_selected(played[played_top - scored_card_index])) && timer > FRAMES(40))
+    if (played_idx == 0 && (timer % FRAMES(10) == 0 || !card_object_is_selected(played[played_top - scored_card_index])) && timer > FRAMES(40))
     {
         scored_card_index--;
 
@@ -2405,35 +2393,37 @@ static void play_ending_update(int i, FIXED* played_y)
         }
     }
 
-    if (card_object_is_selected(played[i]) && played_top - i <= scored_card_index - 1)
+    if (card_object_is_selected(played[played_idx]))
     {
-        (*played_y) -= int2fx(10);
+        played[played_idx]->sprite_object->ty = int2fx(70);
     }
 }
 
-static void play_ended_update(bool* discarded_card, bool* sound_played, int i, FIXED* played_x, FIXED* played_y)
+// Basically a copy of HAND_DISCARD
+// returns true if played[played_idx] has been invalidated
+static bool play_ended_update(int played_idx, bool* discarded_card, bool* sound_played)
 {
-    if (!*discarded_card && played[i] != NULL && timer > FRAMES(40))
+    if (!*discarded_card && timer > FRAMES(40))
     {
-        (*played_x) = int2fx(240);
-        (*played_y) = int2fx(70);
-
+        // play the sound only once per card, when it is pushed off-screen to the right
         if (!*sound_played)
         {
             play_sfx(SFX_CARD_DRAW, MM_BASE_PITCH_RATE + cards_drawn*PITCH_STEP_DISCARD_SFX);
             *sound_played = true;
         }
 
-        if (played[i]->sprite_object->x >= (*played_x))
+        // card has exited the screen, now discard it and set it to NULL
+        if (played[played_idx]->sprite_object->x >= int2fx(CARD_DISCARD_PNT.x))
         {
-            discard_push(played[i]->card); // Push the card to the discard pile
-            card_object_destroy(&played[i]);
+            discard_push(played[played_idx]->card); // Push the card to the discard pile
+            card_object_destroy(&played[played_idx]);
 
             //played_top--; 
             cards_drawn++; // This technically isn't drawing cards, I'm just reusing the variable
-            *sound_played = false;
+            *sound_played = false; // Allow for the sound for the next card to be played
 
-            if (i == played_top)
+            // we reached hand_top, all cards have been discarded
+            if (played_idx == played_top)
             {
                 if (game_round_is_over())
                 {
@@ -2451,91 +2441,90 @@ static void play_ended_update(bool* discarded_card, bool* sound_played, int i, F
                 scored_card_index = 0;
                 _joker_scored_itr = list_itr_create(&_owned_jokers_list);
                 timer = TM_ZERO;
-                return; // return early to avoid accessing an invalid index
             }
+
+            return true; // return early to avoid accessing played[played_idx] == NULL
         }
 
+        // put target X position off screen to the right
+        played[played_idx]->sprite_object->tx = int2fx(CARD_DISCARD_PNT.x);
         *discarded_card = true;
     }
-    return;
+
+    return false;
 }
 
 static void played_cards_update_loop(bool* discarded_card, bool* sound_played)
 {
     // So this one is a bit fucking weird because I have to work kinda backwards for everything because of the order of the pushed cards from the hand to the play stack
     // (also crazy that the company that published Balatro is called "Playstack" and this is a play stack, but I digress)
-    for (int i = 0; i <= played_top; i++)
+    for (int played_idx = 0; played_idx <= played_top; played_idx++)
     {
-        if (played[i] != NULL)
+        if (played[played_idx] == NULL)
         {
-            if (card_object_get_sprite(played[i]) == NULL)
-            {
-                //played[i]->sprite = sprite_new(ATTR0_SQUARE | ATTR0_4BPP | ATTR0_AFF, ATTR1_SIZE_32, card_sprite_lut[played[i]->card->suit][played[i]->card->rank], 0, i + MAX_HAND_SIZE);
-                card_object_set_sprite(played[i], i + MAX_HAND_SIZE); // Set the sprite for the played card object
-            }
-
-            FIXED played_x = int2fx(120);
-            FIXED played_y = int2fx(70);
-            FIXED played_scale = FIX_ONE;
-
-            played_x = played_x + (int2fx(played_top - i) - int2fx(played_top) / 2) * -27;
-
-            switch (play_state)
-            {
-                case PLAY_PLAYING:
-
-                    play_playing_update(i, &played_y);
-                    break;
-                
-                case PLAY_BEFORE_SCORING:
-
-                    if (play_before_scoring_update(i, &played_y))
-                    {
-                        return;
-                    }
-                    break;
-
-                case PLAY_SCORING_CARDS:
-
-                    if (play_scoring_cards_update(i, &played_y))
-                    {
-                        return;
-                    }
-                    break;
-                
-                case PLAY_SCORING_HELD:
-
-                    if (play_scoring_held_update(i, &played_y))
-                    {
-                        return;
-                    }
-                    break;
-
-                // Score Jokers normally
-                case PLAY_SCORING_JOKERS:
-
-                    if (play_scoring_jokers_update(i, &played_y))
-                    {
-                        return;
-                    }
-                    break;
-
-                case PLAY_ENDING: // This is the reverse of PLAY_PLAYING. The cards get reset back to their neutral position sequentially
-
-                    play_ending_update(i, &played_y);
-                    break;
-
-                case PLAY_ENDED: // Basically a copy of HAND_DISCARD
-
-                    play_ended_update(discarded_card, sound_played, i, &played_x, &played_y);
-                    break;
-            }
-
-            played[i]->sprite_object->tx = played_x;
-            played[i]->sprite_object->ty = played_y;
-            played[i]->sprite_object->tscale = played_scale;
-            card_object_update(played[i]);
+            continue;
         }
+
+        if (card_object_get_sprite(played[played_idx]) == NULL)
+        {
+            card_object_set_sprite(played[played_idx], played_idx + MAX_HAND_SIZE); // Set the sprite for the played card object
+        }
+
+        switch (play_state)
+        {
+            case PLAY_PLAYING:
+
+                play_playing_update(played_idx);
+                break;
+            
+            case PLAY_BEFORE_SCORING:
+
+                if (play_before_scoring_update(played_idx))
+                {
+                    return;
+                }
+                break;
+
+            case PLAY_SCORING_CARDS:
+
+                if (play_scoring_cards_update(played_idx))
+                {
+                    return;
+                }
+                break;
+            
+            case PLAY_SCORING_HELD:
+
+                if (play_scoring_held_update(played_idx))
+                {
+                    return;
+                }
+                break;
+
+            case PLAY_SCORING_JOKERS:
+
+                if (play_scoring_jokers_update(played_idx))
+                {
+                    return;
+                }
+                break;
+
+            case PLAY_ENDING:
+
+                play_ending_update(played_idx);
+                break;
+
+            case PLAY_ENDED:
+
+                if (play_ended_update(played_idx, discarded_card, sound_played))
+                {
+                    continue;
+                }
+                break;
+        }
+
+        played[played_idx]->sprite_object->tscale = FIX_ONE;
+        card_object_update(played[played_idx]);
     }
 }
 
