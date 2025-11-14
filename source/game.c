@@ -574,6 +574,7 @@ static const BG_POINT CARD_DRAW_POS         = {208,     110};
 static const BG_POINT CUR_BLIND_TOKEN_POS   = {8,       18};
 static const BG_POINT CARD_DISCARD_PNT      = {240,     70};
 static const BG_POINT HAND_START_POS        = {120,     90};
+static const BG_POINT HAND_PLAY_POS         = {120,     70};
 static const BG_POINT MAIN_MENU_ACE_T       = {88,      26};
 
 // Pixel sizes
@@ -2218,8 +2219,8 @@ static void play_starting_update(int played_idx)
         }
     }
 
-    played[played_idx]->sprite_object->tx = int2fx(120) + (int2fx(played_top - played_idx) - int2fx(played_top) / 2) * -27;
-    played[played_idx]->sprite_object->ty = int2fx(70);
+    played[played_idx]->sprite_object->tx = int2fx(HAND_PLAY_POS.x) + (int2fx(played_top - played_idx) - int2fx(played_top) / 2) * -27;
+    played[played_idx]->sprite_object->ty = int2fx(HAND_PLAY_POS.y);
 
     if (card_object_is_selected(played[played_idx]) && played_top - played_idx >= scored_card_index)
     {
