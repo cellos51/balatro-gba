@@ -2208,7 +2208,7 @@ static bool check_and_score_joker_for_event(ListItr* starting_joker_itr, CardObj
 }
 
 
-static void play_starting_update(int played_idx)
+static void play_starting_played_cards_update(int played_idx)
 {
     if (played_idx == played_top && (timer % FRAMES(10) == 0 || !card_object_is_selected(played[played_top - scored_card_index])) && timer > FRAMES(40))
     {
@@ -2232,7 +2232,7 @@ static void play_starting_update(int played_idx)
 }
 
 // returns true if the scoring loop has returned early
-static bool play_before_scoring_update(int played_idx)
+static bool play_before_scoring_cards_update(int played_idx)
 {
     // Activate Jokers with an effect just before the hand is scored
     if (check_and_score_joker_for_event(&_joker_scored_itr, NULL, JOKER_EVENT_ON_HAND_PLAYED))
@@ -2302,7 +2302,7 @@ static bool play_scoring_cards_update(int played_idx)
 
 // Activate "on scored" Jokers for the previous scored card if any
 // returns true if the scoring loop has returned early
-static bool play_scoring_jokers_update(int played_idx)
+static bool play_scoring_card_jokers_update(int played_idx)
 {
     if (timer % FRAMES(30) == 0 && timer > FRAMES(40))
     {
@@ -2340,7 +2340,7 @@ static bool play_scoring_jokers_update(int played_idx)
 }
 
 // returns true if the scoring loop has returned early
-static bool play_scoring_held_update(int played_idx)
+static bool play_scoring_held_cards_update(int played_idx)
 {
     if (played_idx == 0 && (timer % FRAMES(30) == 0) && timer > FRAMES(40))
     {
@@ -2367,7 +2367,7 @@ static bool play_scoring_held_update(int played_idx)
 
 // Score Jokers normally (independent)
 // returns true if the scoring loop has returned early
-static bool play_scoring_independent_update(int played_idx)
+static bool play_scoring_independent_jokers_update(int played_idx)
 {
     if (played_idx == 0 && (timer % FRAMES(30) == 0) && timer > FRAMES(40))
     {
@@ -2394,7 +2394,7 @@ static bool play_scoring_independent_update(int played_idx)
 }
 
 // This is the reverse of PLAY_STARTING. The cards get reset back to their neutral position sequentially
-static void play_ending_update(int played_idx)
+static void play_ending_played_cards_update(int played_idx)
 {
     if (played_idx == 0 && (timer % FRAMES(10) == 0 || !card_object_is_selected(played[played_top - scored_card_index])) && timer > FRAMES(40))
     {
@@ -2415,7 +2415,7 @@ static void play_ending_update(int played_idx)
 
 // Basically a copy of HAND_DISCARD
 // returns true if played[played_idx] has been invalidated
-static bool play_ended_update(int played_idx)
+static bool play_ended_played_cards_update(int played_idx)
 {
     if (!discarded_card && timer > FRAMES(40))
     {
@@ -2488,12 +2488,12 @@ static void played_cards_update_loop()
         {
             case PLAY_STARTING:
 
-                play_starting_update(played_idx);
+                play_starting_played_cards_update(played_idx);
                 break;
             
             case PLAY_BEFORE_SCORING:
 
-                if (play_before_scoring_update(played_idx))
+                if (play_before_scoring_cards_update(played_idx))
                 {
                     return;
                 }
@@ -2509,7 +2509,7 @@ static void played_cards_update_loop()
             
             case PLAY_SCORING_JOKERS:
 
-                if (play_scoring_jokers_update(played_idx))
+                if (play_scoring_card_jokers_update(played_idx))
                 {
                     return;
                 }
@@ -2517,7 +2517,7 @@ static void played_cards_update_loop()
             
             case PLAY_SCORING_HELD:
 
-                if (play_scoring_held_update(played_idx))
+                if (play_scoring_held_cards_update(played_idx))
                 {
                     return;
                 }
@@ -2525,7 +2525,7 @@ static void played_cards_update_loop()
 
             case PLAY_SCORING_INDEPENDENT:
 
-                if (play_scoring_independent_update(played_idx))
+                if (play_scoring_independent_jokers_update(played_idx))
                 {
                     return;
                 }
@@ -2533,12 +2533,12 @@ static void played_cards_update_loop()
 
             case PLAY_ENDING:
 
-                play_ending_update(played_idx);
+                play_ending_played_cards_update(played_idx);
                 break;
 
             case PLAY_ENDED:
 
-                if (play_ended_update(played_idx))
+                if (play_ended_played_cards_update(played_idx))
                 {
                     continue;
                 }
