@@ -2396,18 +2396,18 @@ static bool play_scoring_independent_jokers_update(int played_idx)
 // This is the reverse of PLAY_STARTING. The cards get reset back to their neutral position sequentially
 static void play_ending_played_cards_update(int played_idx)
 {
-    if (played_idx == 0 && (timer % FRAMES(10) == 0 || !card_object_is_selected(played[played_top - scored_card_index])) && timer > FRAMES(40))
+    if (played_idx == played_top && (timer % FRAMES(10) == 0 || !card_object_is_selected(played[played_top - scored_card_index])) && timer > FRAMES(40))
     {
         scored_card_index--;
 
         if (scored_card_index == 0)
         {
-            play_state = PLAY_ENDED;
             timer = TM_ZERO;
+            play_state = PLAY_ENDED;
         }
     }
 
-    if (card_object_is_selected(played[played_idx]))
+    if (card_object_is_selected(played[played_idx]) && played_top - played_idx >= scored_card_index)
     {
         played[played_idx]->sprite_object->ty = int2fx(HAND_PLAY_POS.y);
     }
