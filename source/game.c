@@ -223,6 +223,10 @@ static int hand_selections = 0;
 static int scored_card_index = 0;
 static int previous_scored_card_index = 0;
 
+// discarded cards specific
+static bool sound_played = false;
+static bool discarded_card = false;
+
 // Keeping track of what Jokers are scored at each step
 static ListItr _joker_scored_itr;
 static ListItr _joker_card_scored_end_itr;
@@ -1798,7 +1802,7 @@ static void game_playing_discarded_cards_loop()
 
 static const int HAND_SPACING_LUT[MAX_HAND_SIZE] = { 28, 28, 28, 28, 27, 21, 18, 15, 13, 12, 10, 9, 9, 8, 8, 7 }; // This is a stupid way to do this but I don't care
 
-void card_in_hand_loop_handle_discard_and_shuffling(int card_idx, bool* discarded_card, FIXED* hand_x, FIXED* hand_y, bool* sound_played, bool* break_loop)
+void card_in_hand_loop_handle_discard_and_shuffling(int card_idx, FIXED* hand_x, FIXED* hand_y, bool* break_loop)
 {
     if (hand_state != HAND_DISCARD && hand_state != HAND_SHUFFLING)
     {
@@ -1809,15 +1813,15 @@ void card_in_hand_loop_handle_discard_and_shuffling(int card_idx, bool* discarde
     *break_loop = false;
     if (card_object_is_selected(hand[card_idx]) || hand_state == HAND_SHUFFLING)
     {
-        if (!*discarded_card)
+        if (!discarded_card)
         {
             *hand_x = int2fx(CARD_DISCARD_PNT.x);
             *hand_y = int2fx(CARD_DISCARD_PNT.y);
 
-            if (!*sound_played)
+            if (!sound_played)
             {
                 play_sfx(SFX_CARD_DRAW, MM_BASE_PITCH_RATE + cards_drawn * PITCH_STEP_DISCARD_SFX);
-                *sound_played = true;
+                sound_played = true;
             }
 
             if (hand[card_idx]->sprite_object->x >= *hand_x)
@@ -1828,14 +1832,14 @@ void card_in_hand_loop_handle_discard_and_shuffling(int card_idx, bool* discarde
 
                 hand_top--;
                 cards_drawn++; // This technically isn't drawing cards, I'm just reusing the variable
-                *sound_played = false;
+                sound_played = false;
                 timer = TM_ZERO;
 
                 *hand_y = hand[card_idx]->sprite_object->y;
                 *hand_x = hand[card_idx]->sprite_object->x;
             }
 
-            *discarded_card = true;
+            discarded_card = true;
         }
         else
         {
@@ -1855,11 +1859,11 @@ void card_in_hand_loop_handle_discard_and_shuffling(int card_idx, bool* discarde
         *hand_x = *hand_x + (int2fx(card_idx) - int2fx(hand_top) / 2) * -HAND_SPACING_LUT[hand_top];
     }
 
-    if (card_idx == 0 && *discarded_card == false && timer % FRAMES(10) == 0)
+    if (card_idx == 0 && discarded_card == false && timer % FRAMES(10) == 0)
     {
         // This is never reached in the case of HAND_SHUFFLING.        // Not sure why but that's how it's supposed to be.
         hand_state = HAND_DRAW;
-        *sound_played = false;
+        sound_played = false;
         cards_drawn = 0;
         hand_selections = 0;
         timer = TM_ZERO;
@@ -2054,7 +2058,7 @@ static void select_highcard_cards_in_played_hand()
     card_object_set_selected(played[highest_rank_index], true);
 }
 
-static void cards_in_hand_update_loop(bool* discarded_card, bool* sound_played)
+static void cards_in_hand_update_loop()
 {
     // TODO: Break this function up into smaller ones, Gods be good
     for (int i = hand_top + 1; i >= 0; i--) // Start from the end of the hand and work backwards because that's how Balatro does it
@@ -2097,7 +2101,7 @@ static void cards_in_hand_update_loop(bool* discarded_card, bool* sound_played)
                 /* FALL THROUGH */
             case HAND_DISCARD: // TODO: Add sound
                 bool break_loop;
-                card_in_hand_loop_handle_discard_and_shuffling(i, discarded_card, &hand_x, &hand_y, sound_played, &break_loop);
+                card_in_hand_loop_handle_discard_and_shuffling(i, &hand_x, &hand_y, &break_loop);
                 if (break_loop) break;
 
                 break;
@@ -2105,7 +2109,7 @@ static void cards_in_hand_update_loop(bool* discarded_card, bool* sound_played)
                 hand_x = hand_x + (int2fx(i) - int2fx(hand_top) / 2) * -HAND_SPACING_LUT[hand_top];
                 hand_y += int2fx(24);
 
-                if (card_object_is_selected(hand[i]) && *discarded_card == false && timer % FRAMES(10) == 0)
+                if (card_object_is_selected(hand[i]) && discarded_card == false && timer % FRAMES(10) == 0)
                 {
                     card_object_set_selected(hand[i], false);
                     played_push(hand[i]);
@@ -2119,10 +2123,10 @@ static void cards_in_hand_update_loop(bool* discarded_card, bool* sound_played)
                     hand_selections--;
                     cards_drawn++;
 
-                    *discarded_card = true;
+                    discarded_card = true;
                 }
 
-                if (i == 0 && *discarded_card == false && timer % FRAMES(10) == 0)
+                if (i == 0 && discarded_card == false && timer % FRAMES(10) == 0)
                 {
                     hand_state = HAND_PLAYING;
                     cards_drawn = 0;
@@ -2402,15 +2406,15 @@ static void play_ending_update(int played_idx)
 
 // Basically a copy of HAND_DISCARD
 // returns true if played[played_idx] has been invalidated
-static bool play_ended_update(int played_idx, bool* discarded_card, bool* sound_played)
+static bool play_ended_update(int played_idx)
 {
-    if (!*discarded_card && timer > FRAMES(40))
+    if (!discarded_card && timer > FRAMES(40))
     {
         // play the sound only once per card, when it is pushed off-screen to the right
-        if (!*sound_played)
+        if (!sound_played)
         {
             play_sfx(SFX_CARD_DRAW, MM_BASE_PITCH_RATE + cards_drawn*PITCH_STEP_DISCARD_SFX);
-            *sound_played = true;
+            sound_played = true;
         }
 
         // card has exited the screen, now discard it and set it to NULL
@@ -2421,7 +2425,7 @@ static bool play_ended_update(int played_idx, bool* discarded_card, bool* sound_
 
             //played_top--; 
             cards_drawn++; // This technically isn't drawing cards, I'm just reusing the variable
-            *sound_played = false; // Allow for the sound for the next card to be played
+            sound_played = false; // Allow for the sound for the next card to be played
 
             // we reached hand_top, all cards have been discarded
             if (played_idx == played_top)
@@ -2449,13 +2453,13 @@ static bool play_ended_update(int played_idx, bool* discarded_card, bool* sound_
 
         // put target X position off screen to the right
         played[played_idx]->sprite_object->tx = int2fx(CARD_DISCARD_PNT.x);
-        *discarded_card = true;
+        discarded_card = true;
     }
 
     return false;
 }
 
-static void played_cards_update_loop(bool* discarded_card, bool* sound_played)
+static void played_cards_update_loop()
 {
     // So this one is a bit fucking weird because I have to work kinda backwards for everything because of the order of the pushed cards from the hand to the play stack
     // (also crazy that the company that published Balatro is called "Playstack" and this is a play stack, but I digress)
@@ -2517,7 +2521,7 @@ static void played_cards_update_loop(bool* discarded_card, bool* sound_played)
 
             case PLAY_ENDED:
 
-                if (play_ended_update(played_idx, discarded_card, sound_played))
+                if (play_ended_update(played_idx))
                 {
                     continue;
                 }
@@ -2596,11 +2600,10 @@ static void game_playing_on_update()
 
     game_playing_discarded_cards_loop();
 
-    static bool sound_played = false;
-    bool discarded_card = false;
+    discarded_card = false;
 
-    cards_in_hand_update_loop(&discarded_card, &sound_played);
-	played_cards_update_loop(&discarded_card, &sound_played);
+    cards_in_hand_update_loop();
+	played_cards_update_loop();
     
     game_playing_ui_text_update();
 
