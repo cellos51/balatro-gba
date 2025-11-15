@@ -2312,7 +2312,7 @@ static void played_cards_update_loop(bool* discarded_card, bool* sound_played)
                                 snprintf(score_buffer, sizeof(score_buffer), "+%d", card_get_value(scored_card_object->card));
                                 tte_write(score_buffer);
 
-                                card_object_shake(scored_card_object, SFX_CARD_SELECT);
+                                card_object_shake(scored_card_object, SFX_CHIPS_CARD);
 
                                 // Relocated card scoring logic here
                                 chips += card_get_value(scored_card_object->card);
