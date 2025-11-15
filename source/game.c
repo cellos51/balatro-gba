@@ -2250,34 +2250,22 @@ static bool play_scoring_cards_update(int played_idx)
     if (timer % FRAMES(30) == 0 && timer > FRAMES(40))
     {
         // We are about to score played Cards.
-        
-        // If we need to retrigger, then we have previously scored a card's
-        // Jokers, and thus have incremented scored_card_index by 1.
-        // Take out this increment to score the lasted scored card again.
-        if (retrigger)
-        {
-            retrigger = false;
-            scored_card_index--;
-        }
-        // If not, then start from the current card index
+        // Start from the current card index
         // and seek the next scoring card
-        else
+        while (scored_card_index <= played_top && !card_object_is_selected(played[scored_card_index]))
         {
-            while (scored_card_index <= played_top && !card_object_is_selected(played[scored_card_index]))
-            {
-                scored_card_index++;
-            }
+            scored_card_index++;
+        }
 
-            // go to the next state if there are no cards left to score
-            if (scored_card_index > played_top)
-            {
-                // reuse these variables for held cards
-                _joker_scored_itr = list_itr_create(&_owned_jokers_list);
-                scored_card_index = hand_top;
-                
-                play_state = PLAY_SCORING_HELD;
-                return false;
-            }
+        // go to the next state if there are no cards left to score
+        if (scored_card_index > played_top)
+        {
+            // reuse these variables for held cards
+            _joker_scored_itr = list_itr_create(&_owned_jokers_list);
+            scored_card_index = hand_top;
+            
+            play_state = PLAY_SCORING_HELD;
+            return false;
         }
 
         tte_erase_rect_wrapper(PLAYED_CARDS_SCORES_RECT);
@@ -2331,6 +2319,14 @@ static bool play_scoring_jokers_update(int played_idx)
         // (e.g. retriggers) after activating all the other scored_card Jokers normally
         if (check_and_score_joker_for_event(&_joker_card_scored_end_itr, played[scored_card_index], JOKER_EVENT_ON_CARD_SCORED_END))
         {
+            // If we just scored a retrigger, return early and go back to the
+            // previous state score the same card again without incrementing
+            // scored_card_index to score the current card again
+            if (retrigger)
+            {
+                retrigger = false;
+                play_state = PLAY_SCORING_CARDS;
+            }
             return true;
         }
         
