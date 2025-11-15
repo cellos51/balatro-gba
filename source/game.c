@@ -2245,7 +2245,7 @@ static bool play_before_scoring_cards_update(int played_idx)
 }
 
 // returns true if the scoring loop has returned early
-static bool play_scoring_cards_update(int played_idx)
+static bool play_scoring_cards_update()
 {
     if (timer % FRAMES(30) == 0 && timer > FRAMES(40))
     {
@@ -2293,7 +2293,7 @@ static bool play_scoring_cards_update(int played_idx)
             _joker_card_scored_end_itr = list_itr_create(&_owned_jokers_list);
         }
 
-        play_state = PLAY_SCORING_JOKERS;
+        play_state = PLAY_SCORING_CARD_JOKERS;
         return true;
     }
 
@@ -2302,7 +2302,7 @@ static bool play_scoring_cards_update(int played_idx)
 
 // Activate "on scored" Jokers for the previous scored card if any
 // returns true if the scoring loop has returned early
-static bool play_scoring_card_jokers_update(int played_idx)
+static bool play_scoring_card_jokers_update()
 {
     if (timer % FRAMES(30) == 0 && timer > FRAMES(40))
     {
@@ -2359,7 +2359,7 @@ static bool play_scoring_held_cards_update(int played_idx)
 
         scored_card_index = 0;
 
-        play_state = PLAY_SCORING_INDEPENDENT;
+        play_state = PLAY_SCORING_INDEPENDENT_JOKERS;
     }
 
     return false;
@@ -2501,15 +2501,15 @@ static void played_cards_update_loop()
 
             case PLAY_SCORING_CARDS:
 
-                if (play_scoring_cards_update(played_idx))
+                if (play_scoring_cards_update())
                 {
                     return;
                 }
                 break;
             
-            case PLAY_SCORING_JOKERS:
+            case PLAY_SCORING_CARD_JOKERS:
 
-                if (play_scoring_card_jokers_update(played_idx))
+                if (play_scoring_card_jokers_update())
                 {
                     return;
                 }
@@ -2523,7 +2523,7 @@ static void played_cards_update_loop()
                 }
                 break;
 
-            case PLAY_SCORING_INDEPENDENT:
+            case PLAY_SCORING_INDEPENDENT_JOKERS:
 
                 if (play_scoring_independent_jokers_update(played_idx))
                 {
