@@ -299,29 +299,35 @@ bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum
         cursorPosY = JOKER_SCORE_TEXT_Y;
     }
 
+    mm_word sfx_id;
+
     if (joker_effect.chips > 0)
     {
         char score_buffer[INT_MAX_DIGITS + 2]; // For '+' and null terminator
         snprintf(score_buffer, sizeof(score_buffer), "+%d", joker_effect.chips);
         set_and_shift_text(score_buffer, &cursorPosX, &cursorPosY, TTE_BLUE_PB);
+        sfx_id = SFX_CHIPS_GENERIC; // The joker chips effect is "generic"
     }
     if (joker_effect.mult > 0)
     {
         char score_buffer[INT_MAX_DIGITS + 2];
         snprintf(score_buffer, sizeof(score_buffer), "+%d", joker_effect.mult);
         set_and_shift_text(score_buffer, &cursorPosX, &cursorPosY, TTE_RED_PB);
+        sfx_id = SFX_MULT;
     }
     if (joker_effect.xmult > 0)
     {
         char score_buffer[INT_MAX_DIGITS + 2];
         snprintf(score_buffer, sizeof(score_buffer), "X%d", joker_effect.xmult);
         set_and_shift_text(score_buffer, &cursorPosX, &cursorPosY, TTE_RED_PB);
+        sfx_id = SFX_XMULT;
     }
     if (joker_effect.money > 0)
     {
         char score_buffer[INT_MAX_DIGITS + 2];
         snprintf(score_buffer, sizeof(score_buffer), "%d$", joker_effect.money);
         set_and_shift_text(score_buffer, &cursorPosX, &cursorPosY, TTE_YELLOW_PB);
+        // TODO: Money sound effect
     }
     // custom message for Jokers (including retriggers where Jokers will say "Again!")
     if (joker_effect.message != NULL && joker_effect.message[0] != '\0') // Message is not empty
@@ -333,7 +339,7 @@ bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum
         // TODO make Jokers expire
     }
 
-    joker_object_shake(joker_object, SFX_CARD_SELECT); // TODO: Add a sound effect for scoring the joker
+    joker_object_shake(joker_object, sfx_id);
 
     return true;
 }
