@@ -2409,12 +2409,12 @@ static void play_ending_played_cards_update(int played_idx)
 
     if (card_object_is_selected(played[played_idx]))
     {
-        played[played_idx]->sprite_object->ty = int2fx(70);
+        played[played_idx]->sprite_object->ty = int2fx(HAND_PLAY_POS.y);
     }
 }
 
 // Basically a copy of HAND_DISCARD
-// returns true if played[played_idx] has been invalidated
+// returns true if the current card has been discarded
 static bool play_ended_played_cards_update(int played_idx)
 {
     if (!discarded_card && timer > FRAMES(40))
@@ -2540,6 +2540,9 @@ static void played_cards_update_loop()
 
                 if (play_ended_played_cards_update(played_idx))
                 {
+                    // we continue here instead of returning to instantly go to
+                    // the next card to discard, instead of starting over
+                    // from index 0 and going up to that card again
                     continue;
                 }
                 break;
