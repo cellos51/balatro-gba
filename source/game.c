@@ -2264,7 +2264,7 @@ static bool play_scoring_cards_update()
             _joker_scored_itr = list_itr_create(&_owned_jokers_list);
             scored_card_index = hand_top;
             
-            play_state = PLAY_SCORING_HELD;
+            play_state = PLAY_SCORING_HELD_CARDS;
             return false;
         }
 
@@ -2515,7 +2515,7 @@ static void played_cards_update_loop()
                 }
                 break;
             
-            case PLAY_SCORING_HELD:
+            case PLAY_SCORING_HELD_CARDS:
 
                 if (play_scoring_held_cards_update(played_idx))
                 {
