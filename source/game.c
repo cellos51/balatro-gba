@@ -2250,8 +2250,8 @@ static bool play_scoring_cards_update(int played_idx)
 {
     if (played_idx == 0 && (timer % FRAMES(30) == 0) && timer > FRAMES(40))
     {
-        // We are about to score played Cards, then Jokers. If we
-        // need to retrigger, then we have scored a card previously
+        // We are about to score played Cards.
+        // If we need to retrigger, then we have scored a card previously
         // and thus have incremented scored_card_index until we found a scoring card.
         // Go back to the last scored card to score it again
         if (retrigger)
@@ -2261,25 +2261,6 @@ static bool play_scoring_cards_update(int played_idx)
         }
 
         tte_erase_rect_wrapper(PLAYED_CARDS_SCORES_RECT);
-
-        // Activate Jokers for the previous scored card if any
-
-        if (scored_card_index > 0 && card_object_is_selected(played[previous_scored_card_index]))
-        {
-            if (check_and_score_joker_for_event(&_joker_scored_itr, played[previous_scored_card_index], JOKER_EVENT_ON_CARD_SCORED))
-            {
-                return true;
-            }
-
-            // Trigger all Jokers that have an effect when a card finishes scoring
-            // (e.g. retriggers) after activating all the other scored_card Jokers normally
-            if (check_and_score_joker_for_event(&_joker_card_scored_end_itr, played[previous_scored_card_index], JOKER_EVENT_ON_CARD_SCORED_END))
-            {
-                return true;
-            }
-        }
-
-        // Score card
 
         if (scored_card_index <= played_top)
         {
@@ -2306,26 +2287,56 @@ static bool play_scoring_cards_update(int played_idx)
                 _joker_card_scored_end_itr = list_itr_create(&_owned_jokers_list);
             }
 
-            // store last played card for next Jokers and possible retriggers
-            // and search the next scoring card
+            // Store last played card for any possible retriggers and search the next scoring card
             previous_scored_card_index = scored_card_index;
             do
             {
                 scored_card_index++;
-                if (scored_card_index > played_top)
-                {
-                    return true;
-                }
             }
-            while (!card_object_is_selected(played[scored_card_index]));
+            while (scored_card_index <= played_top && !card_object_is_selected(played[scored_card_index]));
 
+            play_state = PLAY_SCORING_JOKERS;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+// Activate "on scored" Jokers for the previous scored card if any
+// returns true if the scoring loop has returned early
+static bool play_scoring_jokers_update(int played_idx)
+{
+    if (played_idx == 0 && (timer % FRAMES(30) == 0) && timer > FRAMES(40))
+    {
+        tte_erase_rect_wrapper(PLAYED_CARDS_SCORES_RECT);
+
+        if (check_and_score_joker_for_event(&_joker_scored_itr, played[previous_scored_card_index], JOKER_EVENT_ON_CARD_SCORED))
+        {
             return true;
         }
 
-        play_state = PLAY_SCORING_HELD;
-        // reuse these variables for held cards
-        _joker_scored_itr = list_itr_create(&_owned_jokers_list);
-        scored_card_index = hand_top;
+        // Trigger all Jokers that have an effect when a card finishes scoring
+        // (e.g. retriggers) after activating all the other scored_card Jokers normally
+        if (check_and_score_joker_for_event(&_joker_card_scored_end_itr, played[previous_scored_card_index], JOKER_EVENT_ON_CARD_SCORED_END))
+        {
+            return true;
+        }
+
+        // go to the next state if all cards have been scored
+        if (scored_card_index > played_top)
+        {
+            // reuse these variables for held cards
+            _joker_scored_itr = list_itr_create(&_owned_jokers_list);
+            scored_card_index = hand_top;
+            
+            play_state = PLAY_SCORING_HELD;
+            return false;
+        }
+
+        // else, go back to the previous state
+        play_state = PLAY_SCORING_CARDS;
+        return false;
     }
 
     return false;
@@ -2334,7 +2345,7 @@ static bool play_scoring_cards_update(int played_idx)
 // returns true if the scoring loop has returned early
 static bool play_scoring_held_update(int played_idx)
 {
-    if (played_idx == 0 && (timer % FRAMES(30) == 0) && timer > FRAMES(40))
+    if ((timer % FRAMES(30) == 0) && timer > FRAMES(40))
     {
         tte_erase_rect_wrapper(HELD_CARDS_SCORES_RECT);
 
@@ -2350,17 +2361,17 @@ static bool play_scoring_held_update(int played_idx)
         }
         scored_card_index = 0;
 
-        play_state = PLAY_SCORING_JOKERS;
+        play_state = PLAY_SCORING_INDEPENDENT;
     }
 
     return false;
 }
 
-// Score Jokers normally
+// Score Jokers normally (independent)
 // returns true if the scoring loop has returned early
-static bool play_scoring_jokers_update(int played_idx)
+static bool play_scoring_independent_update(int played_idx)
 {
-    if (played_idx == 0 && (timer % FRAMES(30) == 0) && timer > FRAMES(40))
+    if ((timer % FRAMES(30) == 0) && timer > FRAMES(40))
     {
 
         tte_erase_rect_wrapper(PLAYED_CARDS_SCORES_RECT);
@@ -2498,6 +2509,14 @@ static void played_cards_update_loop()
                 }
                 break;
             
+            case PLAY_SCORING_JOKERS:
+
+                if (play_scoring_jokers_update(played_idx))
+                {
+                    return;
+                }
+                break;
+            
             case PLAY_SCORING_HELD:
 
                 if (play_scoring_held_update(played_idx))
@@ -2506,9 +2525,9 @@ static void played_cards_update_loop()
                 }
                 break;
 
-            case PLAY_SCORING_JOKERS:
+            case PLAY_SCORING_INDEPENDENT:
 
-                if (play_scoring_jokers_update(played_idx))
+                if (play_scoring_independent_update(played_idx))
                 {
                     return;
                 }
