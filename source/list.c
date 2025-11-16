@@ -249,6 +249,20 @@ ListItr list_itr_create(List* list)
         .list = list,
         .next_node = !list_is_empty(list) ? list->head : NULL,
         .current_node = NULL,
+        .direction = LIST_ITR_FORWARD,
+    };
+
+    return itr;
+}
+
+ListItr rev_list_itr_create(List* list)
+{
+    ListItr itr =
+    {
+        .list = list,
+        .next_node = !list_is_empty(list) ? list->tail : NULL,
+        .current_node = NULL,
+        .direction = LIST_ITR_REVERSE,
     };
 
     return itr;
@@ -267,10 +281,19 @@ static ListNode* _list_itr_node_next(ListItr* itr)
     itr->current_node = itr->next_node;
 
     ListNode* ln = itr->next_node;
-
-    if(ln->next)
+    ListNode* next_itr_node = NULL;
+    if(itr->direction == LIST_ITR_FORWARD)
     {
-        itr->next_node = ln->next;
+        next_itr_node = ln->next;
+    }
+    else
+    {
+        next_itr_node = ln->prev;
+    }
+
+    if(next_itr_node)
+    {
+        itr->next_node = next_itr_node;
         return ln;
     }
 

@@ -60,6 +60,15 @@ typedef struct List
 } List;
 
 /**
+ * @brief @ref ListItr direction
+ */
+enum ListItrDirection
+{
+    LIST_ITR_FORWARD,  
+    LIST_ITR_REVERSE,  
+};
+
+/**
  * @brief An iterator into a list
  */
 typedef struct
@@ -80,6 +89,11 @@ typedef struct
      * The node of the most recently returned data from  @ref list_itr_next() .
      */
     ListNode* current_node;
+
+    /**
+     * @brief The direction of the iterator
+     */
+    enum ListItrDirection direction;
 } ListItr;
 
 /**
@@ -215,6 +229,15 @@ int list_get_len(const List* list);
  * @return A new @ref ListItr
  */
 ListItr list_itr_create(List* list);
+
+/**
+ * Declare a reverse @ref ListItr
+ *
+ * @param list pointer to a @ref List
+ *
+ * @return A new reverse @ref ListItr
+ */
+ListItr rev_list_itr_create(List* list);
 
 /**
  * Get the next data entry in a @ref ListItr

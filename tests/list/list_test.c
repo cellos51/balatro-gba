@@ -293,6 +293,7 @@ void push_back_three_remove_push_front_three_entries(void)
 // - list_is_empty
 // - list_get_len
 // - list_itr_create
+// - rev_list_itr_create
 // - list_itr_next
 // - list_clear
 void test_list_insertion(void)
@@ -399,6 +400,32 @@ void test_list_insertion(void)
             assert(*(int*)data == test_data[test_data_itr++]);
         }
         index++;
+    }
+
+    printf("\n");
+
+    ListItr rev_itr = rev_list_itr_create(&my_cool_list);
+    index = initial_list_size + 2;
+    test_data_itr = initial_list_size - 1;
+    while((data = list_itr_next(&rev_itr)))
+    {
+        if(index == 0)
+        {
+            assert(*(int*)data == head_val);
+        }
+        else if(index == insert_loc)
+        {
+            assert(*(int*)data == middle_val);
+        }
+        else if(index == initial_list_size + 2) // for head+middle+tail
+        {
+            assert(*(int*)data == tail_val);
+        }
+        else
+        {
+            assert(*(int*)data == test_data[test_data_itr--]);
+        }
+        index--;
     }
 
     assert(list_get_len(&my_cool_list) == initial_list_size + 3);
