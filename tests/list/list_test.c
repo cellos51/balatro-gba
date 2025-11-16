@@ -319,6 +319,7 @@ void test_list_insertion(void)
     int head_val = 0xDEADBEEF;
     int middle_val = 1337;
     int tail_val = 1010101010;
+    int last_tail_val = 0x12345678;
 
     // insert at head of list
     list_insert(&my_cool_list, &head_val, 0);
@@ -386,6 +387,40 @@ void test_list_insertion(void)
             assert(*(int*)data == middle_val);
         }
         else if(index == initial_list_size + 2) // for head+middle+tail
+        {
+            assert(*(int*)data == tail_val);
+        }
+        else
+        {
+            assert(*(int*)data == test_data[test_data_itr++]);
+        }
+        index++;
+    }
+
+    // insert at the real end of the list, to make sure
+    // it works in conjunction with the previous "out of range" insertion for the tail
+    int tail_idx = initial_list_size + 2;
+    test_data_itr = 0;
+    list_insert(&my_cool_list, &last_tail_val, tail_idx);
+
+    itr = list_itr_create(&my_cool_list);
+    index = 0;
+
+    while((data = list_itr_next(&itr)))
+    {
+        if(index == 0)
+        {
+            assert(*(int*)data == head_val);
+        }
+        else if(index == insert_loc)
+        {
+            assert(*(int*)data == middle_val);
+        }
+        else if(index == initial_list_size + 2) // for head+middle+tail
+        {
+            assert(*(int*)data == last_tail_val);
+        }
+        else if(index == initial_list_size + 3) // for head+middle+tail+last_tail
         {
             assert(*(int*)data == tail_val);
         }

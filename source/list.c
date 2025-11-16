@@ -102,7 +102,7 @@ void list_push_back(List *list, void* data)
 
 void list_insert(List* list, void* data, unsigned int idx)
 {
-    if(idx >= list->len)
+    if(idx > list->len)
     {
         list_push_back(list, data);
         return;
