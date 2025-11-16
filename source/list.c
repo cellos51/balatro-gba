@@ -1,5 +1,4 @@
 #include <stdbool.h>
-#include <stdint.h>
 #include "list.h"
 #include "pool.h"
 
@@ -127,10 +126,10 @@ void list_insert(List* list, void* data, unsigned int idx)
         if(idx == curr_idx++)
         {
             ListNode *node = POOL_GET(ListNode);
-            ln->prev->next = node;
-            ln->prev = node;
             node->prev = ln->prev;
             node->next = ln;
+            ln->prev->next = node;
+            ln->prev = node;
             node->data = data;
             list->len++;
             return;
@@ -210,7 +209,7 @@ int list_get_len(const List* list)
 
 void* list_get_at_idx(List* list, unsigned int idx)
 {
-    if(idx >= list_get_len(list) || idx < 0) return NULL;
+    if(idx >= list_get_len(list)) return NULL;
 
     int curr_idx = 0;
     ListItr itr = list_itr_create(list);
@@ -226,7 +225,7 @@ void* list_get_at_idx(List* list, unsigned int idx)
 
 bool list_remove_at_idx(List* list, unsigned int idx)
 {
-    if(idx >= list_get_len(list) || idx < 0) return false;
+    if(idx >= list_get_len(list)) return false;
 
     int len = 0;
     ListItr itr = list_itr_create(list);
