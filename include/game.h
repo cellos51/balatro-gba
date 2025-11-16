@@ -111,7 +111,7 @@ typedef struct ContainedHandTypes
     unsigned short int FIVE_OF_A_KIND  : 1;
     unsigned short int FLUSH_HOUSE     : 1;
     unsigned short int FLUSH_FIVE      : 1;
-    unsigned short int PADDING : 3;
+    unsigned short int                 : 3;
 } ContainedHandTypes;
 
 typedef struct 
