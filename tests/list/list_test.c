@@ -286,6 +286,255 @@ void push_back_three_remove_push_front_three_entries(void)
     assert(list_is_empty(&my_cool_list));
 }
 
+// Test inserting at head, middle, and tail of list
+// - list_create
+// - list_push_back
+// - list_insert
+// - list_is_empty
+// - list_get_len
+// - list_itr_create
+// - list_itr_next
+// - list_clear
+void test_list_insertion(void)
+{
+    List my_cool_list = list_create();
+
+    // verify no data 
+    assert(my_cool_list.head == NULL);
+    assert(my_cool_list.tail == NULL);
+    assert(list_get_len(&my_cool_list) == 0);
+    assert(list_is_empty(&my_cool_list));
+
+    const int initial_list_size = 5;
+    int test_data[initial_list_size];
+
+    for(int i = 0; i < initial_list_size; i++)
+    {
+        test_data[i] = i;
+        list_push_back(&my_cool_list, &test_data[i]);
+    }
+
+    assert(list_get_len(&my_cool_list) == initial_list_size);
+
+    int head_val = 0xDEADBEEF;
+    int middle_val = 1337;
+    int tail_val = 1010101010;
+
+    // insert at head of list
+    list_insert(&my_cool_list, &head_val, 0);
+
+    ListItr itr = list_itr_create(&my_cool_list);
+    void* data;
+    int test_data_itr = 0;
+
+    int index = 0;
+
+    while((data = list_itr_next(&itr)))
+    {
+        if(index == 0)
+        {
+            assert(*(int*)data == head_val);
+        }
+        else
+        {
+            assert(*(int*)data == test_data[test_data_itr++]);
+        }
+        index++;
+    }
+    
+    // insert at tail of list, use large value of 100 to force it to append it
+    // to the end of the list
+    list_insert(&my_cool_list, &tail_val, 100);
+
+    itr = list_itr_create(&my_cool_list);
+    index = 0;
+    test_data_itr = 0;
+
+    while((data = list_itr_next(&itr)))
+    {
+        if(index == 0)
+        {
+            assert(*(int*)data == head_val);
+        }
+        else if(index == initial_list_size + 1) // for head and tail insertion
+        {
+            assert(*(int*)data == tail_val);
+        }
+        else
+        {
+            assert(*(int*)data == test_data[test_data_itr++]);
+        }
+        index++;
+    }
+    
+    // insert at "middle" of list
+    int insert_loc = 2;
+    test_data_itr = 0;
+    list_insert(&my_cool_list, &middle_val, insert_loc);
+
+    itr = list_itr_create(&my_cool_list);
+    index = 0;
+
+    while((data = list_itr_next(&itr)))
+    {
+        if(index == 0)
+        {
+            assert(*(int*)data == head_val);
+        }
+        else if(index == insert_loc)
+        {
+            assert(*(int*)data == middle_val);
+        }
+        else if(index == initial_list_size + 2) // for head+middle+tail
+        {
+            assert(*(int*)data == tail_val);
+        }
+        else
+        {
+            assert(*(int*)data == test_data[test_data_itr++]);
+        }
+        index++;
+    }
+    
+    
+
+    // clear the list
+    list_clear(&my_cool_list);
+
+    // verify no data 
+    assert(my_cool_list.head == NULL);
+    assert(my_cool_list.tail == NULL);
+    assert(list_is_empty(&my_cool_list));
+}
+
+// Test inserting at head, middle, and tail of list
+// - list_create
+// - list_push_back
+// - list_swap
+// - list_is_empty
+// - list_get_len
+// - list_itr_create
+// - list_itr_next
+// - list_clear
+void test_list_swap(void)
+{
+    List my_cool_list = list_create();
+
+    // verify no data 
+    assert(my_cool_list.head == NULL);
+    assert(my_cool_list.tail == NULL);
+    assert(list_get_len(&my_cool_list) == 0);
+    assert(list_is_empty(&my_cool_list));
+
+    const int initial_list_size = 5;
+    int test_data[initial_list_size];
+
+    for(int i = 0; i < initial_list_size; i++)
+    {
+        // 0 -> 1 -> 2 -> 3 -> 4
+        test_data[i] = i;
+        list_push_back(&my_cool_list, &test_data[i]);
+    }
+
+    assert(list_get_len(&my_cool_list) == initial_list_size);
+
+
+    ListItr itr = list_itr_create(&my_cool_list);
+    void* data;
+
+    int index = 0;
+
+    while((data = list_itr_next(&itr)))
+    {
+        // 0 -> 1 -> 2 -> 3 -> 4
+        assert(*(int*)data == test_data[index++]);
+    }
+
+    // swap nothing, out of range
+    assert(!list_swap(&my_cool_list, 100, 100));
+
+    itr = list_itr_create(&my_cool_list);
+    index = 0;
+    while((data = list_itr_next(&itr)))
+    {
+        // 0 -> 1 -> 2 -> 3 -> 4
+        assert(*(int*)data == test_data[index++]);
+    }
+
+    // swap nothing, in range
+    assert(list_swap(&my_cool_list, 0, 0));
+
+    itr = list_itr_create(&my_cool_list);
+    index = 0;
+    while((data = list_itr_next(&itr)))
+    {
+        // 0 -> 1 -> 2 -> 3 -> 4
+        assert(*(int*)data == test_data[index++]);
+    }
+
+    // swap head and "middle"
+    int mid_idx = initial_list_size / 2;
+    assert(list_swap(&my_cool_list, 0, mid_idx));
+
+    itr = list_itr_create(&my_cool_list);
+    index = 0;
+
+    while((data = list_itr_next(&itr)))
+    {
+        // 2 -> 1 -> 0 -> 3 -> 4
+        if(index == 0)
+        {
+            assert(*(int*)data == test_data[mid_idx]);
+        }
+        else if(index == mid_idx)
+        {
+            assert(*(int*)data == test_data[0]);
+        }
+        else
+        {
+            assert(*(int*)data == test_data[index]);
+        }
+        index++;
+    }
+
+    // swap tail and "middle"
+    assert(list_swap(&my_cool_list, initial_list_size - 1, mid_idx));
+
+    itr = list_itr_create(&my_cool_list);
+    index = 0;
+
+    while((data = list_itr_next(&itr)))
+    {
+        // 2 -> 1 -> 4 -> 3 -> 0
+        if(index == 0)
+        {
+            assert(*(int*)data == test_data[mid_idx]);
+        }
+        else if(index == mid_idx)
+        {
+            assert(*(int*)data == test_data[initial_list_size - 1]);
+        }
+        else if(index == initial_list_size - 1)
+        {
+            assert(*(int*)data == test_data[0]);
+        }
+        else
+        {
+            assert(*(int*)data == test_data[index]);
+        }
+        index++;
+    }
+
+    // clear the list
+    list_clear(&my_cool_list);
+
+    // verify no data 
+    assert(my_cool_list.head == NULL);
+    assert(my_cool_list.tail == NULL);
+    assert(list_is_empty(&my_cool_list));
+}
+
+
 int main(void)
 {
     printf("Testing List Create and Clear.\n");
@@ -296,8 +545,15 @@ int main(void)
 
     printf("Testing List Push Front.\n");
     push_front_one_entry();
+
     printf("Testing List Complete Exercise.\n");
     push_back_three_remove_push_front_three_entries();
+
+    printf("Testing List Insertion.\n");
+    test_list_insertion();
+
+    printf("Testing List Swap.\n");
+    test_list_swap();
 
     printf("-------------------------------------------------------------------------------\n");
     printf("List Tests Passed :)\n");
