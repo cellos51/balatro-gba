@@ -952,7 +952,7 @@ static JokerEffect spare_trousers_joker_effect(Joker *joker, Card *scored_card, 
             if (get_contained_hands()->TWO_PAIR)
             {
                 (*p_nb_played_two_pairs)++;
-                effect.message = "+2 Mult!";
+                effect.message = "Upgrade!";
             }
             break;
         
