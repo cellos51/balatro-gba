@@ -838,47 +838,73 @@ static JokerEffect dusk_joker_effect(Joker *joker, Card *scored_card, enum Joker
 }
 
 
-static JokerEffect blueprint_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event)
+static JokerEffect blueprint_brainstorm_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event)
 {
     JokerEffect effect = {0};
-    List* jokers = get_jokers_list();
 
-    ListItr itr = list_itr_create(jokers);
-    JokerObject* curr_joker_object;
-
-    while((curr_joker_object = list_itr_next(&itr)))
-    {
-        if (curr_joker_object->joker == joker)
-        {
-            JokerObject* next_joker_object = list_itr_next(&itr);
-            effect = joker_get_score_effect(next_joker_object->joker, scored_card, joker_event);
-            break;
-        }
-    }
-
-    return effect;
-}
-
-
-static JokerEffect brainstorm_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event)
-{
-    JokerEffect effect = {0};
-    static bool in_brainstorm = false;
-    if (in_brainstorm)
+    // No need for this kind of init since these Jokers
+    // will have their data copied when needed
+    if (joker_event == JOKER_EVENT_ON_JOKER_CREATED)
     {
         return effect;
     }
 
+    // find ourselves in the Jokers list
     List* jokers = get_jokers_list();
-    JokerObject* first_joker = list_get_at_idx(jokers, 0);
-
-    if (first_joker != NULL && first_joker->joker->id != JOKER_BRAINSTORM_ID)
+    ListItr itr = list_itr_create(jokers);
+    JokerObject* starting_joker_object;
+    while((starting_joker_object = list_itr_next(&itr)))
     {
-        // Static var to avoid infinite blueprint + brainstorm loops
-        in_brainstorm = true;
-        effect = joker_get_score_effect(first_joker->joker, scored_card, joker_event);
-        in_brainstorm = false;
+        if (starting_joker_object->joker == joker)
+        {
+            break;
+        }
     }
+
+    // find the copied Joker, may need to bounce around Blueprints and a Brainstorm
+    // If we encounter NULL, we have a Blueprint at the end of the list that can't copy anything.
+    // If we go through the starting Joker again, we are in a loop and need to exit
+    JokerObject* copied_joker_object = starting_joker_object;
+    do
+    {
+        switch (copied_joker_object->joker->id)
+        {
+            // get the next Joker for Blueprint
+            case BLUEPRINT_JOKER_ID:
+                copied_joker_object = list_itr_next(&itr);
+                break;
+
+            // Get the first (leftmost) Joker for Brainstorm
+            case BRAINSTORM_JOKER_ID:
+                itr = list_itr_create(jokers);
+                copied_joker_object = list_itr_next(&itr);
+                break;
+
+            // We encountered a Joker that isn't a Copying Joker and copy it now
+            // but how we copy it depends on this Joker's ID because they don't
+            // all handle data the same way.
+            default:
+                u8 copied_joker_id = copied_joker_object->joker->id;
+                const JokerInfo* copied_joker_info = get_joker_registry_entry(copied_joker_id);
+
+                // For Jokers that retain data accross rounds,
+                // copy this data to the copying JokerObject
+                // if (copied_joker_id == SELTZER_JOKER_ID) {...}
+
+                // Then regardless of if we copied the data above, apply the
+                // copied JokerEffect function to the local data
+                effect = copied_joker_info->joker_effect(joker, scored_card, joker_event);
+
+                // make also sure we don't expire
+                effect.expire = false;
+
+                // exit the loop
+                copied_joker_object = NULL;
+
+                break;
+        }
+    }
+    while(copied_joker_object != NULL && copied_joker_object != starting_joker_object);
 
     return effect;
 }
@@ -1013,57 +1039,57 @@ static JokerEffect sock_and_buskin_joker_effect(Joker *joker, Card *scored_card,
  */
 const JokerInfo joker_registry[] = 
 {
-    { COMMON_JOKER,    2, default_joker_effect          }, // DEFAULT_JOKER_ID = 0
-    { COMMON_JOKER,    5, greedy_joker_effect           }, // GREEDY_JOKER_ID  = 1
-    { COMMON_JOKER,    5, lusty_joker_effect            }, // etc...  2
-    { COMMON_JOKER,    5, wrathful_joker_effect         }, // 3
-    { COMMON_JOKER,    5, gluttonous_joker_effect       }, // 4
-    { COMMON_JOKER,    3, jolly_joker_effect            }, // 5
-    { COMMON_JOKER,    4, zany_joker_effect             }, // 6
-    { COMMON_JOKER,    4, mad_joker_effect              }, // 7
-    { COMMON_JOKER,    4, crazy_joker_effect            }, // 8
-    { COMMON_JOKER,    4, droll_joker_effect            }, // 9
-    { COMMON_JOKER,    3, sly_joker_effect              }, // 10
-    { COMMON_JOKER,    4, wily_joker_effect             }, // 11
-    { COMMON_JOKER,    4, clever_joker_effect           }, // 12
-    { COMMON_JOKER,    4, devious_joker_effect          }, // 13 
-    { COMMON_JOKER,    4, crafty_joker_effect           }, // 14
-    { COMMON_JOKER,    5, half_joker_effect             }, // 15
-    { UNCOMMON_JOKER,  8, joker_stencil_effect          }, // 16
-    { COMMON_JOKER,    5, photograph_joker_effect,      }, // 17
-    { COMMON_JOKER,    4, walkie_talkie_joker_effect    }, // 18
-    { COMMON_JOKER,    5, banner_joker_effect           }, // 19
-    { UNCOMMON_JOKER,  6, blackboard_joker_effect       }, // 20
-    { COMMON_JOKER,    5, mystic_summit_joker_effect    }, // 21
-    { COMMON_JOKER,    4, misprint_joker_effect         }, // 22
-    { COMMON_JOKER,    4, even_steven_joker_effect      }, // 23
-    { COMMON_JOKER,    5, blue_joker_effect             }, // 24
-    { COMMON_JOKER,    4, odd_todd_joker_effect         }, // 25
-    { UNCOMMON_JOKER,  7, joker_effect_noop,            }, // 26 Shortcut
-    { COMMON_JOKER,    4, business_card_joker_effect    }, // 27
-    { COMMON_JOKER,    4, scary_face_joker_effect       }, // 28
-    { UNCOMMON_JOKER,  7, bootstraps_joker_effect       }, // 29
-    { UNCOMMON_JOKER,  5, joker_effect_noop             }, // 30 Pareidolia
-    { COMMON_JOKER,    6, reserved_parking_joker_effect }, // 31
-    { COMMON_JOKER,    4, abstract_joker_effect         }, // 32
-    { UNCOMMON_JOKER,  6, bull_joker_effect             }, // 33
-    { RARE_JOKER,      8, the_duo_joker_effect          }, // 34
-    { RARE_JOKER,      8, the_trio_joker_effect         }, // 35
-    { RARE_JOKER,      8, the_family_joker_effect       }, // 36
-    { RARE_JOKER,      8, the_order_joker_effect        }, // 37
-    { RARE_JOKER,      8, the_tribe_joker_effect        }, // 38
-    { RARE_JOKER,     10, blueprint_joker_effect        }, // 39
-    { RARE_JOKER,     10, brainstorm_joker_effect       }, // 40
-    { COMMON_JOKER,    5, raised_fist_joker_effect      }, // 41
-    { COMMON_JOKER,    4, smiley_face_joker_effect      }, // 42
-    { UNCOMMON_JOKER,  6, acrobat_joker_effect          }, // 43
-    { UNCOMMON_JOKER,  5, dusk_joker_effect             }, // 44
-    { UNCOMMON_JOKER,  6, sock_and_buskin_joker_effect  }, // 45
-    { UNCOMMON_JOKER,  6, hack_joker_effect             }, // 46
-    { COMMON_JOKER,    4, hanging_chad_joker_effect     }, // 47
-    { UNCOMMON_JOKER,  7, joker_effect_noop,            }, // 48 Four Fingers
-    { COMMON_JOKER,    4, scholar_joker_effect          }, // 49
-    { UNCOMMON_JOKER,  8, fibonnaci_joker_effect        }, // 50
+    { COMMON_JOKER,    2, default_joker_effect              }, // DEFAULT_JOKER_ID = 0
+    { COMMON_JOKER,    5, greedy_joker_effect               }, // GREEDY_JOKER_ID  = 1
+    { COMMON_JOKER,    5, lusty_joker_effect                }, // etc...  2
+    { COMMON_JOKER,    5, wrathful_joker_effect             }, // 3
+    { COMMON_JOKER,    5, gluttonous_joker_effect           }, // 4
+    { COMMON_JOKER,    3, jolly_joker_effect                }, // 5
+    { COMMON_JOKER,    4, zany_joker_effect                 }, // 6
+    { COMMON_JOKER,    4, mad_joker_effect                  }, // 7
+    { COMMON_JOKER,    4, crazy_joker_effect                }, // 8
+    { COMMON_JOKER,    4, droll_joker_effect                }, // 9
+    { COMMON_JOKER,    3, sly_joker_effect                  }, // 10
+    { COMMON_JOKER,    4, wily_joker_effect                 }, // 11
+    { COMMON_JOKER,    4, clever_joker_effect               }, // 12
+    { COMMON_JOKER,    4, devious_joker_effect              }, // 13 
+    { COMMON_JOKER,    4, crafty_joker_effect               }, // 14
+    { COMMON_JOKER,    5, half_joker_effect                 }, // 15
+    { UNCOMMON_JOKER,  8, joker_stencil_effect              }, // 16
+    { COMMON_JOKER,    5, photograph_joker_effect,          }, // 17
+    { COMMON_JOKER,    4, walkie_talkie_joker_effect        }, // 18
+    { COMMON_JOKER,    5, banner_joker_effect               }, // 19
+    { UNCOMMON_JOKER,  6, blackboard_joker_effect           }, // 20
+    { COMMON_JOKER,    5, mystic_summit_joker_effect        }, // 21
+    { COMMON_JOKER,    4, misprint_joker_effect             }, // 22
+    { COMMON_JOKER,    4, even_steven_joker_effect          }, // 23
+    { COMMON_JOKER,    5, blue_joker_effect                 }, // 24
+    { COMMON_JOKER,    4, odd_todd_joker_effect             }, // 25
+    { UNCOMMON_JOKER,  7, joker_effect_noop,                }, // 26 Shortcut
+    { COMMON_JOKER,    4, business_card_joker_effect        }, // 27
+    { COMMON_JOKER,    4, scary_face_joker_effect           }, // 28
+    { UNCOMMON_JOKER,  7, bootstraps_joker_effect           }, // 29
+    { UNCOMMON_JOKER,  5, joker_effect_noop                 }, // 30 Pareidolia
+    { COMMON_JOKER,    6, reserved_parking_joker_effect     }, // 31
+    { COMMON_JOKER,    4, abstract_joker_effect             }, // 32
+    { UNCOMMON_JOKER,  6, bull_joker_effect                 }, // 33
+    { RARE_JOKER,      8, the_duo_joker_effect              }, // 34
+    { RARE_JOKER,      8, the_trio_joker_effect             }, // 35
+    { RARE_JOKER,      8, the_family_joker_effect           }, // 36
+    { RARE_JOKER,      8, the_order_joker_effect            }, // 37
+    { RARE_JOKER,      8, the_tribe_joker_effect            }, // 38
+    { RARE_JOKER,     10, blueprint_brainstorm_joker_effect }, // 39 Blueprint
+    { RARE_JOKER,     10, blueprint_brainstorm_joker_effect }, // 40 Brainstorm
+    { COMMON_JOKER,    5, raised_fist_joker_effect          }, // 41
+    { COMMON_JOKER,    4, smiley_face_joker_effect          }, // 42
+    { UNCOMMON_JOKER,  6, acrobat_joker_effect              }, // 43
+    { UNCOMMON_JOKER,  5, dusk_joker_effect                 }, // 44
+    { UNCOMMON_JOKER,  6, sock_and_buskin_joker_effect      }, // 45
+    { UNCOMMON_JOKER,  6, hack_joker_effect                 }, // 46
+    { COMMON_JOKER,    4, hanging_chad_joker_effect         }, // 47
+    { UNCOMMON_JOKER,  7, joker_effect_noop,                }, // 48 Four Fingers
+    { COMMON_JOKER,    4, scholar_joker_effect              }, // 49
+    { UNCOMMON_JOKER,  8, fibonnaci_joker_effect            }, // 50
     
     // The following jokers don't have sprites yet,
     // uncomment them when their sprites are added.
