@@ -191,7 +191,7 @@ int bitset_itr_next(BitsetItr* itr);
  * @param capacity the capacity of the bitset
  */
 #define BITSET_DEFINE(name, capacity)                                                                                  \
-    static uint32_t name##_w[BITSET_ARRAY_SIZE] = { 0 };                                                               \
+    static uint32_t name##_w[BITSET_ARRAY_SIZE] = {0};                                                                 \
     static Bitset name = {                                                                                             \
         .w = name##_w,                                                                                                 \
         .nbits = BITSET_BITS_PER_WORD,                                                                                 \

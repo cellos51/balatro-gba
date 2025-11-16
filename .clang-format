@@ -7,7 +7,7 @@ BreakBeforeBraces: Allman
 AllowShortBlocksOnASingleLine: false
 AllowShortIfStatementsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: None
-AllowShortLoopsOnASingleLine: true
+AllowShortLoopsOnASingleLine: false
 
 # Pointer alignment
 PointerAlignment: Left
@@ -26,17 +26,20 @@ ContinuationIndentWidth: 4
 AlignArrayOfStructures: Left
 PackConstructorInitializers: Never
 
-SpaceBeforeParens: Never
+SpaceBeforeParens: Custom
+SpaceBeforeParensOptions:
+  AfterControlStatements: true
+  AfterFunctionDefinitionName: false
+
 AlignOperands: AlignAfterOperator
 BreakBeforeBinaryOperators: None
 
 IndentPPDirectives: AfterHash
 AlignConsecutiveMacros: Consecutive
 
-Cpp11BracedListStyle: false
-
 BinPackArguments: false
 BinPackParameters: false
+
 AllowAllArgumentsOnNextLine: false
 AllowAllParametersOfDeclarationOnNextLine: false
 AlignAfterOpenBracket: Align
