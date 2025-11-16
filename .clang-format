@@ -1,0 +1,42 @@
+BasedOnStyle: LLVM
+IndentWidth: 4
+UseTab: Never
+
+# Allman brace style
+BreakBeforeBraces: Allman
+AllowShortBlocksOnASingleLine: false
+AllowShortIfStatementsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+AllowShortLoopsOnASingleLine: true
+
+# Pointer alignment
+PointerAlignment: Left
+
+# Column limit
+ColumnLimit: 120
+
+# Case labels
+IndentCaseLabels: true
+
+# Include sorting
+SortIncludes: CaseSensitive
+IncludeBlocks: Regroup
+
+ContinuationIndentWidth: 4
+AlignArrayOfStructures: Left
+PackConstructorInitializers: Never
+
+SpaceBeforeParens: Never
+AlignOperands: AlignAfterOperator
+BreakBeforeBinaryOperators: None
+
+IndentPPDirectives: AfterHash
+AlignConsecutiveMacros: Consecutive
+
+Cpp11BracedListStyle: false
+
+BinPackArguments: false
+BinPackParameters: false
+AllowAllArgumentsOnNextLine: false
+AllowAllParametersOfDeclarationOnNextLine: false
+AlignAfterOpenBracket: Align
