@@ -2493,7 +2493,7 @@ static void played_cards_update_loop()
             
             case PLAY_BEFORE_SCORING:
 
-                if (play_before_scoring_cards_update(played_idx))
+                if (play_before_scoring_cards_update())
                 {
                     return;
                 }
