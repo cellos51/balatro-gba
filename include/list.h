@@ -173,6 +173,8 @@ void list_insert(List* list, void* data, unsigned int idx);
  * @param list pointer to a @ref List
  * @param idx_a desired index to swap with idx_b
  * @param idx_b desired index to swap with idx_a
+ *
+ * @return true if successful, false otherwise
  */
 bool list_swap(List* list, unsigned int idx_a, unsigned int idx_b);
 
