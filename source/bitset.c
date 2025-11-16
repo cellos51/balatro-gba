@@ -1,7 +1,8 @@
 #include "bitset.h"
+
 #include "util.h"
 
-void bitset_set_idx(Bitset *bitset, int idx, bool on)
+void bitset_set_idx(Bitset* bitset, int idx, bool on)
 {
     uint32_t i = idx / BITSET_BITS_PER_WORD;
     uint32_t b = idx % BITSET_BITS_PER_WORD;
@@ -10,9 +11,9 @@ void bitset_set_idx(Bitset *bitset, int idx, bool on)
     // These are more efficient, but removed for readability
     // See: https://github.com/cellos51/balatro-gba/pull/132#discussion_r2365966071
     // Divide by 32 to get the word index
-    //uint32_t i = idx >> 5;
+    // uint32_t i = idx >> 5;
     // Get last 5-bits, same as a modulo (% 32) operation on positive numbers
-    //uint32_t b = idx & 0x1F;
+    // uint32_t b = idx & 0x1F;
     if(on)
     {
         bitset->w[i] |= (uint32_t)1 << b;
@@ -23,9 +24,9 @@ void bitset_set_idx(Bitset *bitset, int idx, bool on)
     }
 }
 
-int bitset_allocate_idx(Bitset *bitset)
+int bitset_allocate_idx(Bitset* bitset)
 {
-    for (uint32_t i = 0; i < bitset->nwords; i++)
+    for(uint32_t i = 0; i < bitset->nwords; i++)
     {
         uint32_t inv = ~bitset->w[i];
 
@@ -37,7 +38,7 @@ int bitset_allocate_idx(Bitset *bitset)
         // than 0 indicates there is a free slot. Then, when counting the trailing 0's, you can test very quickly
         // where the first free slot is. This operation prevents looping through every bit of filled flags, and
         // will instead operate only on the first word with free slots.
-        if (inv)
+        if(inv)
         {
             int bit = __builtin_ctz(inv);
             bitset->w[i] |= ((uint32_t)1 << bit);
@@ -49,7 +50,7 @@ int bitset_allocate_idx(Bitset *bitset)
     return UNDEFINED;
 }
 
-void bitset_clear(Bitset *bitset)
+void bitset_clear(Bitset* bitset)
 {
     for(int i = 0; i < bitset->nwords; i++)
     {
@@ -57,16 +58,17 @@ void bitset_clear(Bitset *bitset)
     }
 }
 
-bool bitset_is_empty(Bitset *bitset)
+bool bitset_is_empty(Bitset* bitset)
 {
     for(int i = 0; i < bitset->nwords; i++)
     {
-        if(bitset->w[i]) return false;
+        if(bitset->w[i])
+            return false;
     }
     return true;
 }
 
-bool bitset_get_idx(Bitset *bitset, int idx)
+bool bitset_get_idx(Bitset* bitset, int idx)
 {
     uint32_t i = idx / BITSET_BITS_PER_WORD;
     uint32_t b = idx % BITSET_BITS_PER_WORD;
@@ -74,7 +76,7 @@ bool bitset_get_idx(Bitset *bitset, int idx)
     return bitset->w[i] & (uint32_t)1 << b;
 }
 
-int bitset_num_set_bits(Bitset *bitset)
+int bitset_num_set_bits(Bitset* bitset)
 {
     int sum = 0;
 
@@ -86,7 +88,7 @@ int bitset_num_set_bits(Bitset *bitset)
     return sum;
 }
 
-int bitset_find_idx_of_nth_set(const Bitset *bitset, int n)
+int bitset_find_idx_of_nth_set(const Bitset* bitset, int n)
 {
     int tracker = 0;
     int prev_tracker = 0;
@@ -98,9 +100,11 @@ int bitset_find_idx_of_nth_set(const Bitset *bitset, int n)
         if(tracker > n)
         {
             // The index is here somewhere
-            int base = prev_tracker - 1; // this one is to count the 1's not the offset, underflow to -1 is good for finding the 0 index
-            int offset = bitset->nbits * i; // this one is for the actual offset we want to map the id to
-            for (int j = 0; j < bitset->nbits; j++)
+            // this one is to count the 1's not the offset, underflow to -1 is good for finding the 0 index
+            int base = prev_tracker - 1;
+            // this one is for the actual offset we want to map the id to
+            int offset = bitset->nbits * i;
+            for(int j = 0; j < bitset->nbits; j++)
             {
                 if(base == n)
                 {
@@ -121,8 +125,7 @@ int bitset_find_idx_of_nth_set(const Bitset *bitset, int n)
 
 BitsetItr bitset_itr_create(const Bitset* bitset)
 {
-    BitsetItr itr =
-    {
+    BitsetItr itr = {
         .bitset = bitset,
         .word = 0,
         .bit = 0,
@@ -142,10 +145,10 @@ int bitset_itr_next(BitsetItr* itr)
     // So one last thing you could do is something like `bitset_allocate_idx` does with the
     // __builtin_ctz function as well.
     //
-    // The point being, this can be very slow, but it's simple and can be much faster. 
-    for (; itr->word < itr->bitset->nwords; itr->word++)
+    // The point being, this can be very slow, but it's simple and can be much faster.
+    for(; itr->word < itr->bitset->nwords; itr->word++)
     {
-        for (; itr->bit < itr->bitset->nbits; itr->bit++)
+        for(; itr->bit < itr->bitset->nbits; itr->bit++)
         {
             itr->itr++;
             if(itr->bitset->w[itr->word] & (1 << itr->bit))

@@ -1,12 +1,12 @@
 /** @file bitset.h
  *
- *  @brief A bitset for operating on flags 
- */ 
+ *  @brief A bitset for operating on flags
+ */
 #ifndef BITSET_H
 #define BITSET_H
 
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 /**
  * @def BITSET_BITS_PER_WORD
@@ -24,13 +24,13 @@
  * bitset will always use this number of words, though it's capacity can be any length
  * from `1` to `BITSET_BITS_PER_WORD * BITSET_ARRAY_SIZE`
  */
-#define BITSET_ARRAY_SIZE     8
+#define BITSET_ARRAY_SIZE 8
 
 /**
  * @def BITSET_MAX_BITS
  * @brief Maximum number of bits in a bitset
  */
-#define BITSET_MAX_BITS BITSET_BITS_PER_WORD * BITSET_ARRAY_SIZE
+#define BITSET_MAX_BITS (BITSET_BITS_PER_WORD * BITSET_ARRAY_SIZE)
 
 /**
  * @brief A bitset spread across multiple `uint32_t` words
@@ -40,7 +40,7 @@ typedef struct Bitset
     /**
      * @brief Word array of `uint32_t` to hold the bitset data
      */
-    uint32_t *w;
+    uint32_t* w;
 
     /**
      * @brief Number of bits in a word, will be 32
@@ -73,7 +73,7 @@ typedef struct
     /**
      * @brief @ref Bitset this is iterating through
      */
-    const Bitset *bitset;
+    const Bitset* bitset;
 
     /**
      * @brief Current word the iterator is on
@@ -88,7 +88,7 @@ typedef struct
     /**
      * @brief Number of bits that have been iterated through in total
      */
-    int itr; 
+    int itr;
 } BitsetItr;
 
 /**
@@ -98,7 +98,7 @@ typedef struct
  * @param idx the index of the flag to set
  * @param on the value to set the flag to
  */
-void bitset_set_idx(Bitset *bitset, int idx, bool on);
+void bitset_set_idx(Bitset* bitset, int idx, bool on);
 
 /**
  * @brief Get the value of a flag
@@ -108,19 +108,19 @@ void bitset_set_idx(Bitset *bitset, int idx, bool on);
  *
  * @return the value of the flag as `true` or `false`
  */
-bool bitset_get_idx(Bitset *bitset, int idx);
+bool bitset_get_idx(Bitset* bitset, int idx);
 
 // Get the next free (set to 0) index in the bitset.
 // It also sets the bit which it maybe should do... It really shouldn't do two things
 // But it's such a fast operation idk. // TODO: decide what you wanna do
-int bitset_allocate_idx(Bitset *bitset);
+int bitset_allocate_idx(Bitset* bitset);
 
 /**
  * @brief Clear the bitset, all to 0
  *
  * @param bitset A @ref Bitset to operate on
  */
-void bitset_clear(Bitset *bitset);
+void bitset_clear(Bitset* bitset);
 
 /**
  * @brief Check if a bitset is empty (all 0's)
@@ -129,7 +129,7 @@ void bitset_clear(Bitset *bitset);
  *
  * @return `true` if empty, `false` otherwise
  */
-bool bitset_is_empty(Bitset *bitset);
+bool bitset_is_empty(Bitset* bitset);
 
 /**
  * @brief Count how many bits are set to `1` in a bitset
@@ -138,7 +138,7 @@ bool bitset_is_empty(Bitset *bitset);
  *
  * @return The number of flags set to `1` in a bitset
  */
-int bitset_num_set_bits(Bitset *bitset);
+int bitset_num_set_bits(Bitset* bitset);
 
 /**
  * @brief Find the index of the nth set bit
@@ -150,7 +150,7 @@ int bitset_num_set_bits(Bitset *bitset);
  *
  * @return The index of the nth flag set to `1` in the bitset
  */
-int bitset_find_idx_of_nth_set(const Bitset *bitset, int n);
+int bitset_find_idx_of_nth_set(const Bitset* bitset, int n);
 
 /**
  * @brief Declare a @ref BitsetItr
@@ -190,15 +190,13 @@ int bitset_itr_next(BitsetItr* itr);
  * @param name the name of the bitset
  * @param capacity the capacity of the bitset
  */
-#define BITSET_DEFINE(name, capacity)                         \
-    static uint32_t name##_w[BITSET_ARRAY_SIZE] = {0};        \
-    static Bitset name =                                      \
-    {                                                         \
-        .w = name##_w,                                        \
-        .nbits = BITSET_BITS_PER_WORD,                        \
-        .nwords = BITSET_ARRAY_SIZE,                          \
-        .cap = capacity,                                      \
+#define BITSET_DEFINE(name, capacity)                                                                                  \
+    static uint32_t name##_w[BITSET_ARRAY_SIZE] = { 0 };                                                               \
+    static Bitset name = {                                                                                             \
+        .w = name##_w,                                                                                                 \
+        .nbits = BITSET_BITS_PER_WORD,                                                                                 \
+        .nwords = BITSET_ARRAY_SIZE,                                                                                   \
+        .cap = capacity,                                                                                               \
     };
-
 
 #endif // BITSET_H
