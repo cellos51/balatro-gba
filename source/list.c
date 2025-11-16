@@ -102,7 +102,7 @@ void list_push_back(List *list, void* data)
 
 void list_insert(List* list, void* data, unsigned int idx)
 {
-    if(idx > list->len)
+    if(idx >= list->len)
     {
         list_push_back(list, data);
         return;
@@ -116,7 +116,7 @@ void list_insert(List* list, void* data, unsigned int idx)
 
     // After the above two checks the index is guaranteed to be inbetween the
     // `head` and `tail` of the `list`. This means the actual list doesn't need
-    // to be modified. Simplifying the code below:
+    // to modify it's head and tail, only it's length. Simplifying the code below:
 
     unsigned int curr_idx = 0;
     ListItr itr = list_itr_create(list);
@@ -132,6 +132,7 @@ void list_insert(List* list, void* data, unsigned int idx)
             node->prev = ln->prev;
             node->next = ln;
             node->data = data;
+            list->len++;
             return;
         }
     }

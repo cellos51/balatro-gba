@@ -317,8 +317,8 @@ void test_list_insertion(void)
     assert(list_get_len(&my_cool_list) == initial_list_size);
 
     int head_val = 0xDEADBEEF;
-    int middle_val = 1337;
-    int tail_val = 1010101010;
+    int middle_val = 0x1337;
+    int tail_val = 0x10101010;
     int last_tail_val = 0x12345678;
 
     // insert at head of list
@@ -342,6 +342,8 @@ void test_list_insertion(void)
         }
         index++;
     }
+
+    assert(list_get_len(&my_cool_list) == initial_list_size + 1);
     
     // insert at tail of list, use large value of 100 to force it to append it
     // to the end of the list
@@ -367,6 +369,8 @@ void test_list_insertion(void)
         }
         index++;
     }
+
+    assert(list_get_len(&my_cool_list) == initial_list_size + 2);
     
     // insert at "middle" of list
     int insert_loc = 2;
@@ -397,9 +401,11 @@ void test_list_insertion(void)
         index++;
     }
 
+    assert(list_get_len(&my_cool_list) == initial_list_size + 3);
+
     // insert at the real end of the list, to make sure
     // it works in conjunction with the previous "out of range" insertion for the tail
-    int tail_idx = initial_list_size + 2;
+    int tail_idx = list_get_len(&my_cool_list) - 1;
     test_data_itr = 0;
     list_insert(&my_cool_list, &last_tail_val, tail_idx);
 
@@ -430,8 +436,8 @@ void test_list_insertion(void)
         }
         index++;
     }
-    
-    
+
+    assert(list_get_len(&my_cool_list) == initial_list_size + 4);
 
     // clear the list
     list_clear(&my_cool_list);
