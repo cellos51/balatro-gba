@@ -937,6 +937,37 @@ static JokerEffect sock_and_buskin_joker_effect(Joker *joker, Card *scored_card,
 }
 
 
+static JokerEffect spare_trousers_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event)
+{
+    JokerEffect effect = {0};
+    s32* p_nb_played_two_pairs = &(joker->data);
+
+    switch (joker_event)
+    {
+        case JOKER_EVENT_ON_JOKER_CREATED:
+            *p_nb_played_two_pairs = 0;
+            break;
+
+        case JOKER_EVENT_ON_HAND_PLAYED:
+            if (get_contained_hands()->TWO_PAIR)
+            {
+                (*p_nb_played_two_pairs)++;
+                effect.message = "+2 Mult!";
+            }
+            break;
+        
+        case JOKER_EVENT_INDEPENDENT:
+            effect.mult = (*p_nb_played_two_pairs) * 2;
+            break;
+
+        default:
+            break;
+    }
+
+    return effect;
+}
+
+
 /* The index of a joker in the registry matches its ID.
  * The joker sprites are matched by ID so the position in the registry
  * determines the joker's sprite.
@@ -999,6 +1030,7 @@ const JokerInfo joker_registry[] =
     { UNCOMMON_JOKER,  7, joker_effect_noop,            }, // 48 Four Fingers
     { COMMON_JOKER,    4, scholar_joker_effect          }, // 49
     { UNCOMMON_JOKER,  8, fibonnaci_joker_effect        }, // 50
+    { UNCOMMON_JOKER,  6, spare_trousers_joker_effect   }, // 51
     
     // The following jokers don't have sprites yet,
     // uncomment them when their sprites are added.

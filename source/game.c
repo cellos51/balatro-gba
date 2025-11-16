@@ -2268,13 +2268,20 @@ static void play_starting_played_cards_update(int played_idx)
 // returns true if the scoring loop has returned early
 static bool play_before_scoring_cards_update()
 {
-    // Activate Jokers with an effect just before the hand is scored
-    if (check_and_score_joker_for_event(&_joker_scored_itr, NULL, JOKER_EVENT_ON_HAND_PLAYED))
+    if (timer % FRAMES(30) == 0 && timer > FRAMES(40))
     {
-        return true;
-    }
+        tte_erase_rect_wrapper(PLAYED_CARDS_SCORES_RECT);
 
-    play_state = PLAY_SCORING_CARDS;
+        // Activate Jokers with an effect just before the hand is scored
+        if (check_and_score_joker_for_event(&_joker_scored_itr, NULL, JOKER_EVENT_ON_HAND_PLAYED))
+        {
+            return true;
+        }
+
+        timer = TM_ZERO;
+        play_state = PLAY_SCORING_CARDS;
+    }
+    
     return false;
 }
 
