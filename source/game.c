@@ -2232,7 +2232,7 @@ static void play_starting_played_cards_update(int played_idx)
 }
 
 // returns true if the scoring loop has returned early
-static bool play_before_scoring_cards_update(int played_idx)
+static bool play_before_scoring_cards_update()
 {
     // Activate Jokers with an effect just before the hand is scored
     if (check_and_score_joker_for_event(&_joker_scored_itr, NULL, JOKER_EVENT_ON_HAND_PLAYED))
