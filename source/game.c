@@ -2540,9 +2540,10 @@ static void played_cards_update_loop()
 
                 if (play_ended_played_cards_update(played_idx))
                 {
-                    // we continue here instead of returning to instantly go to
-                    // the next card to discard, instead of starting over
-                    // from index 0 and going up to that card again
+                    // we continue here instead of returning for performance 
+                    // to instantly go to the next card to discard at played_idx+1, 
+                    // instead of  starting over from index 0 and going up
+                    // to that card again 
                     continue;
                 }
                 break;
