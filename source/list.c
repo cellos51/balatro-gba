@@ -100,6 +100,80 @@ void list_push_back(List *list, void* data)
     list->len++;
 }
 
+void list_insert(List* list, void* data, unsigned int idx)
+{
+    if(idx >= list->len)
+    {
+        list_push_back(list, data);
+        return;
+    }
+
+    if(idx == 0)
+    {
+        list_push_front(list, data);
+        return;
+    }
+
+    // After the above two checks the index is guaranteed to be inbetween the
+    // `head` and `tail` of the `list`. This means the actual list doesn't need
+    // to be modified. Simplifying the code below:
+
+    unsigned int curr_idx = 0;
+    ListItr itr = list_itr_create(list);
+    ListNode* ln;
+
+    while((ln = _list_itr_node_next(&itr)))
+    {
+        if(idx == curr_idx++)
+        {
+            ListNode *node = POOL_GET(ListNode);
+            ln->prev->next = node;
+            ln->prev = node;
+            node->prev = ln->prev;
+            node->next = ln;
+            node->data = data;
+            return;
+        }
+    }
+}
+
+bool list_swap(List* list, unsigned int idx_a, unsigned int idx_b)
+{
+    if(idx_a >= list->len || idx_b >= list->len) return false;
+    if(idx_a == idx_b) return true; // swapping with yourself isn't technically an error
+
+    unsigned int curr_idx = 0;
+    unsigned int max_idx = idx_a > idx_b ? idx_a : idx_b;
+    ListNode* node_a = NULL;
+    ListNode* node_b = NULL;
+
+    ListItr itr = list_itr_create(list);
+    ListNode* ln;
+
+    do
+    {
+        ln = _list_itr_node_next(&itr);
+        if(idx_a == curr_idx)
+        {
+            node_a = ln;
+            continue;
+        }
+        if(idx_b == curr_idx)
+        {
+            node_b = ln;
+            continue;
+        }
+    }
+    while(max_idx != curr_idx++);
+
+    // Just swap the data pointers
+    void* tmp = node_a->data;
+    node_a->data = node_b->data;
+    node_b->data = tmp;
+
+    return true;
+}
+
 static void _list_remove_node(List *list, ListNode *node)
 {
     if(node->prev && !node->next) // end of list
@@ -133,9 +207,9 @@ int list_get_len(const List* list)
     return list->len;
 }
 
-void* list_get_at_idx(List* list, int n)
+void* list_get_at_idx(List* list, unsigned int idx)
 {
-    if(n >= list_get_len(list) || n < 0) return NULL;
+    if(idx >= list_get_len(list) || idx < 0) return NULL;
 
     int curr_idx = 0;
     ListItr itr = list_itr_create(list);
@@ -143,15 +217,15 @@ void* list_get_at_idx(List* list, int n)
 
     while((data = list_itr_next(&itr)))
     {
-        if (n == curr_idx++) return data;
+        if (idx == curr_idx++) return data;
     }
 
     return NULL;
 }
 
-bool list_remove_at_idx(List* list, int n)
+bool list_remove_at_idx(List* list, unsigned int idx)
 {
-    if(n >= list_get_len(list) || n < 0) return false;
+    if(idx >= list_get_len(list) || idx < 0) return false;
 
     int len = 0;
     ListItr itr = list_itr_create(list);
@@ -159,7 +233,7 @@ bool list_remove_at_idx(List* list, int n)
 
     while((ln = _list_itr_node_next(&itr)))
     {
-        if(n == len++)
+        if(idx == len++)
         {
             _list_remove_node(list, ln);
             return true;
