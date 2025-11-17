@@ -281,15 +281,7 @@ static ListNode* _list_itr_node_next(ListItr* itr)
     itr->current_node = itr->next_node;
 
     ListNode* ln = itr->next_node;
-    ListNode* next_itr_node = NULL;
-    if(itr->direction == LIST_ITR_FORWARD)
-    {
-        next_itr_node = ln->next;
-    }
-    else
-    {
-        next_itr_node = ln->prev;
-    }
+    ListNode* next_itr_node = (itr->direction == LIST_ITR_FORWARD) ? ln->next : ln->prev;
 
     if(next_itr_node)
     {
