@@ -1,6 +1,7 @@
-/** @file bitset.h
+/**
+ * @file bitset.h
  *
- *  @brief A bitset for operating on flags
+ * @brief A bitset for operating on flags
  */
 #ifndef BITSET_H
 #define BITSET_H

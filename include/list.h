@@ -1,18 +1,26 @@
-/** @file list.h
+/**
+ * @file list.h
  *
- *  @brief A doubly-linked list
+ * @brief A doubly-linked list
  *
- *  List Implementation
- *  ===================
+ * List Implementation
+ * ===================
  *
- *  - This @ref List operates as a linked list @ref ListNodes. It operates as a regular doubly-linked list
- *  but doesn't allocate memory and rather gets @ref ListNodes from a pool.
+ * - This @ref List operates as a linked list @ref ListNodes. It operates as a regular doubly-linked list
+ * but doesn't allocate memory and rather gets @ref ListNodes from a pool.
  */ 
 #ifndef LIST_H
 #define LIST_H
 
 #include <stdbool.h>
 
+/**
+ * @def MAX_LIST_NODES
+ * @brief Number of reserved list nodes.
+ *
+ * Number of list nodes available from the pool of @ref ListNode . This should
+ * be set to to the maximum number of list nodes needed at once.
+ */
 #define MAX_LIST_NODES 128
 
 typedef struct ListNode ListNode;

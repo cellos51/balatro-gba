@@ -17,7 +17,13 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Clang Format
-        run: clang-format --dry-run -Werror include/bitset.h source/bitset.c
+        run: >
+          clang-format --dry-run -Werror 
+          include/bitset.h source/bitset.c 
+          include/affine_background.h source/affine_background.c 
+          include/audio_utils.h source/audio_utils.c 
+          include/graphic_utils.h source/graphic_utils.c 
+          include/util.h
         # Currently contains only the code that has been formatted to conform
         # When all existing code conforms, change to this:
         # run: clang-format --dry-run -Werror include/*.h source/*.c

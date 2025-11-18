@@ -1,11 +1,12 @@
-#include <tonc_core.h>
-#include <tonc_tte.h>
-#include <tonc_math.h>
-
-#include "util.h"
 #include "graphic_utils.h"
 
-const Rect FULL_SCREENBLOCK_RECT = { 0, 0, SE_ROW_LEN - 1, SE_COL_LEN - 1};
+#include "util.h"
+
+#include <tonc_core.h>
+#include <tonc_math.h>
+#include <tonc_tte.h>
+
+const Rect FULL_SCREENBLOCK_RECT = {0, 0, SE_ROW_LEN - 1, SE_COL_LEN - 1};
 
 // Clips a rect of screenblock entries to a specified rect
 // The bounding rect is not required to be within screenblock boundaries
@@ -29,7 +30,7 @@ SE main_bg_se_get_se(BG_POINT pos)
     return se_mat[MAIN_BG_SBB][pos.y][pos.x];
 }
 
-// Clips a rect of screenblock entries to be within one step of 
+// Clips a rect of screenblock entries to be within one step of
 // screenblock boundaries vertically depending on direction.
 static void clip_se_rect_within_step_of_full_screen_vert(Rect* se_rect, int direction)
 {
@@ -42,7 +43,7 @@ static void clip_se_rect_within_step_of_full_screen_vert(Rect* se_rect, int dire
     {
         bounding_rect.bottom -= 1;
     }
-    
+
     clip_se_rect_to_bounding_rect(se_rect, &bounding_rect);
 }
 
@@ -62,8 +63,7 @@ void main_bg_se_clear_rect(Rect se_rect)
 // Internal static function to merge implementation of move/copy functions.
 static void bg_se_copy_or_move_rect_1_tile_vert(u16 bg_sbb, Rect se_rect, int direction, bool move)
 {
-     if (se_rect.left > se_rect.right
-        || (direction != SE_UP && direction != SE_DOWN))
+    if (se_rect.left > se_rect.right || (direction != SE_UP && direction != SE_DOWN))
     {
         return;
     }
@@ -89,7 +89,7 @@ static void bg_se_copy_or_move_rect_1_tile_vert(u16 bg_sbb, Rect se_rect, int di
 
 static void main_bg_se_copy_or_move_rect_1_tile_vert(Rect se_rect, int direction, bool move)
 {
-   bg_se_copy_or_move_rect_1_tile_vert(MAIN_BG_SBB, se_rect, direction, move);
+    bg_se_copy_or_move_rect_1_tile_vert(MAIN_BG_SBB, se_rect, direction, move);
 }
 
 void bg_se_copy_rect_1_tile_vert(u16 bg_sbb, Rect se_rect, int direction)
@@ -127,18 +127,14 @@ void main_bg_se_copy_rect(Rect se_rect, BG_POINT dest_pos)
     // Copy the rect to the tile map
     for (int sy = 0; sy < height; sy++)
     {
-        memcpy16(&tile_map[sy][0],
-                 &se_mat[MAIN_BG_SBB][se_rect.top + sy][se_rect.left], 
-                 width);
+        memcpy16(&tile_map[sy][0], &se_mat[MAIN_BG_SBB][se_rect.top + sy][se_rect.left], width);
     }
-    
+
     // TODO: Avoid overflow
     // Copy the tilemap to the new rect position
     for (int sy = 0; sy < height; sy++)
     {
-        memcpy16(&se_mat[MAIN_BG_SBB][dest_pos.y + sy][dest_pos.x],
-                 &tile_map[sy][0],
-                 width);
+        memcpy16(&se_mat[MAIN_BG_SBB][dest_pos.y + sy][dest_pos.x], &tile_map[sy][0], width);
     }
 }
 
@@ -160,7 +156,10 @@ void main_bg_se_fill_rect_with_se(SE se, Rect se_rect)
 }
 
 // Helper: Copy the corners of a 3x3 tile block
-static void main_bg_se_expand_3x3_copy_corners(const Rect* se_dest_rect, const BG_POINT* src_top_left_pnt, int dest_rect_width, int dest_rect_height)
+static void main_bg_se_expand_3x3_copy_corners(const Rect* se_dest_rect,
+                                               const BG_POINT* src_top_left_pnt,
+                                               int dest_rect_width,
+                                               int dest_rect_height)
 {
     SE top_left_se = se_mat[MAIN_BG_SBB][src_top_left_pnt->y][src_top_left_pnt->x];
     se_mat[MAIN_BG_SBB][se_dest_rect->top][se_dest_rect->left] = top_left_se;
@@ -172,27 +171,35 @@ static void main_bg_se_expand_3x3_copy_corners(const Rect* se_dest_rect, const B
     se_mat[MAIN_BG_SBB][se_dest_rect->top + dest_rect_height - 1][se_dest_rect->left] = bottom_left_se;
 
     SE bottom_right_se = se_mat[MAIN_BG_SBB][src_top_left_pnt->y + 2][src_top_left_pnt->x + 2];
-    se_mat[MAIN_BG_SBB][se_dest_rect->top + dest_rect_height - 1][se_dest_rect->left + dest_rect_width - 1] = bottom_right_se;
+    se_mat[MAIN_BG_SBB][se_dest_rect->top + dest_rect_height - 1][se_dest_rect->left + dest_rect_width - 1] =
+        bottom_right_se;
 }
 
 // Helper: Copy the top and bottom sides of a 3x3 tile block
-static void main_bg_se_expand_3x3_copy_top_bottom(const Rect* se_dest_rect, const BG_POINT* src_top_left_pnt, int dest_rect_width)
+static void main_bg_se_expand_3x3_copy_top_bottom(const Rect* se_dest_rect,
+                                                  const BG_POINT* src_top_left_pnt,
+                                                  int dest_rect_width)
 {
     if (dest_rect_width > 2)
     {
         SE top_middle_se = se_mat[MAIN_BG_SBB][src_top_left_pnt->y][src_top_left_pnt->x + 1];
         SE bottom_middle_se = se_mat[MAIN_BG_SBB][src_top_left_pnt->y + 2][src_top_left_pnt->x + 1];
         memset16(&se_mat[MAIN_BG_SBB][se_dest_rect->top][se_dest_rect->left + 1], top_middle_se, dest_rect_width - 2);
-        memset16(&se_mat[MAIN_BG_SBB][se_dest_rect->bottom][se_dest_rect->left + 1], bottom_middle_se, dest_rect_width - 2);
+        memset16(&se_mat[MAIN_BG_SBB][se_dest_rect->bottom][se_dest_rect->left + 1],
+                 bottom_middle_se,
+                 dest_rect_width - 2);
     }
 }
 
 // Helper: Copy the left and right sides of a 3x3 tile block
-static void main_bg_se_expand_3x3_copy_left_right(const Rect* se_dest_rect, const BG_POINT* src_top_left_pnt, int dest_rect_width, int dest_rect_height)
+static void main_bg_se_expand_3x3_copy_left_right(const Rect* se_dest_rect,
+                                                  const BG_POINT* src_top_left_pnt,
+                                                  int dest_rect_width,
+                                                  int dest_rect_height)
 {
     SE middle_left_se = se_mat[MAIN_BG_SBB][src_top_left_pnt->y + 1][src_top_left_pnt->x];
     SE middle_right_se = se_mat[MAIN_BG_SBB][src_top_left_pnt->y + 1][src_top_left_pnt->x + 2];
-    for (int y = 1;  y < dest_rect_height - 1; y++)
+    for (int y = 1; y < dest_rect_height - 1; y++)
     {
         se_mat[MAIN_BG_SBB][se_dest_rect->top + y][se_dest_rect->left] = middle_left_se;
         se_mat[MAIN_BG_SBB][se_dest_rect->top + y][se_dest_rect->left + dest_rect_width - 1] = middle_right_se;
@@ -225,7 +232,10 @@ void main_bg_se_copy_expand_3x3_rect(Rect se_dest_rect, BG_POINT src_top_left_pn
     if (dest_rect_width > 2 && dest_rect_height > 2)
     {
         SE middle_fill_se = se_mat[MAIN_BG_SBB][src_top_left_pnt.y + 1][src_top_left_pnt.x + 1];
-        Rect dest_inner_fill_rect = {se_dest_rect.left + 1, se_dest_rect.top + 1, se_dest_rect.right - 1, se_dest_rect.bottom - 1};
+        Rect dest_inner_fill_rect = {se_dest_rect.left + 1,
+                                     se_dest_rect.top + 1,
+                                     se_dest_rect.right - 1,
+                                     se_dest_rect.bottom - 1};
         main_bg_se_fill_rect_with_se(middle_fill_se, dest_inner_fill_rect);
     }
 }
@@ -247,7 +257,7 @@ void update_text_rect_to_right_align_num(Rect* rect, int num, int overflow_direc
         int num_fitting_digits = rect_width(rect) / TILE_SIZE;
         if (num_digits < num_fitting_digits)
             rect->left += (num_fitting_digits - num_digits) * TILE_SIZE;
-        //else nothing is to be updated, entire rect is filled and may overflow
+        // else nothing is to be updated, entire rect is filled and may overflow
     }
 }
 
