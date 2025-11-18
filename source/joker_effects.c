@@ -285,7 +285,7 @@ static JokerEffect joker_stencil_effect(Joker *joker, Card *scored_card, enum Jo
 
     while((joker_object = list_itr_next(&itr)))
     {
-        if (joker_object->joker->id == JOKER_STENCIL_ID) effect.xmult++;
+        if (joker_object->joker->id == STENCIL_JOKER_ID) effect.xmult++;
     }
 
     return effect;
@@ -861,6 +861,13 @@ static JokerEffect blueprint_brainstorm_joker_effect(Joker *joker, Card *scored_
         }
     }
 
+    // This shouldn't happen since if we are a scoring Joker, we should always
+    // be part of the Jokers list, but being extra careful doesn't cost much
+    if (starting_joker_object == NULL)
+    {
+        return effect;
+    }
+
     // find the copied Joker, may need to bounce around Blueprints and a Brainstorm
     // If we encounter NULL, we have a Blueprint at the end of the list that can't copy anything.
     // If we go through the starting Joker again, we are in a loop and need to exit
@@ -887,7 +894,7 @@ static JokerEffect blueprint_brainstorm_joker_effect(Joker *joker, Card *scored_
                 u8 copied_joker_id = copied_joker_object->joker->id;
                 const JokerInfo* copied_joker_info = get_joker_registry_entry(copied_joker_id);
 
-                // For Jokers that retain data accross rounds,
+                // For Jokers that retain data across rounds,
                 // copy this data to the copying JokerObject
                 // if (copied_joker_id == SELTZER_JOKER_ID) {...}
 
