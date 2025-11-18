@@ -17,8 +17,9 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Clang Format
-        run: clang-format --dry-run include/*.h source/*.c > /dev/null 2>&1
-        # When existing code conforms, re-add this:
+        run: clang-format --dry-run -Werror include/bitset.h source/bitset.c
+        # Currently contains only the code that has been formatted to conform
+        # When all existing code conforms, change to this:
         # run: clang-format --dry-run -Werror include/*.h source/*.c
 
       - name: Run Tests
