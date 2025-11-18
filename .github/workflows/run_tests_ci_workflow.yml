@@ -9,8 +9,17 @@ jobs:
     name: Run Tests
     runs-on: ubuntu-latest
     steps:
+      - name: Install clang-format
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-format
       - name: Checkout repository
         uses: actions/checkout@v5
+
+      - name: Clang Format
+        run: clang-format --dry-run include/*.h source/*.c > /dev/null 2>&1
+        # When existing code conforms, re-add this:
+        # run: clang-format --dry-run -Werror include/*.h source/*.c
 
       - name: Run Tests
         run: cd tests && ./run_tests.sh
