@@ -1,0 +1,50 @@
+BasedOnStyle: LLVM
+IndentWidth: 4
+UseTab: Never
+
+# Allman brace style
+BreakBeforeBraces: Allman
+AllowShortBlocksOnASingleLine: false
+AllowShortIfStatementsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+AllowShortLoopsOnASingleLine: false
+
+# Pointer alignment
+PointerAlignment: Left
+
+# Column limit
+ColumnLimit: 120
+
+# Case labels
+IndentCaseLabels: true
+
+# Include sorting
+SortIncludes: CaseSensitive
+IncludeBlocks: Regroup
+
+ContinuationIndentWidth: 4
+AlignArrayOfStructures: Left
+PackConstructorInitializers: Never
+
+SpaceBeforeParens: Custom
+SpaceBeforeParensOptions:
+  AfterControlStatements: true
+  AfterFunctionDefinitionName: false
+
+AlignOperands: AlignAfterOperator
+BreakBeforeBinaryOperators: None
+
+IndentPPDirectives: AfterHash
+AlignConsecutiveMacros: Consecutive
+
+BinPackArguments: false
+BinPackParameters: false
+
+AllowAllArgumentsOnNextLine: false
+AllowAllParametersOfDeclarationOnNextLine: false
+AlignAfterOpenBracket: Align
+
+ReflowComments: true
+SpacesInLineCommentPrefix:
+  Minimum: 1
+  Maximum: 1
