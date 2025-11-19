@@ -1659,7 +1659,7 @@ static void game_playing_process_input_and_state()
         if (mult > 0)
         {
             // protect against score overflow
-            temp_score = U32_PROTECTED_MULT(chips, mult);
+            temp_score = u32_protected_mult(chips, mult);
             lerped_temp_score = int2fx(temp_score);
             lerped_score = int2fx(score);
 
@@ -1683,19 +1683,14 @@ static void game_playing_process_input_and_state()
 
         if (lerped_temp_score > 0)
         {
-            display_temp_score(fx2int(lerped_temp_score));
+            display_temp_score(fx2uint(lerped_temp_score));
 
             // We actually don't need to erase this because the score only increases
-            display_score(fx2int(lerped_score)); // Set the score display
-
-            if (temp_score <= 0)
-            {
-                tte_erase_rect_wrapper(TEMP_SCORE_RECT);
-            }
+            display_score(fx2uint(lerped_score)); // Set the score display
         }
         else
         {
-            score = U32_PROTECTED_ADD(score, temp_score);
+            score = u32_protected_add(score, temp_score);
             temp_score = 0;
             lerped_temp_score = 0;
             lerped_score = 0;
@@ -2288,7 +2283,7 @@ static bool play_scoring_cards_update()
             card_object_shake(scored_card_object, SFX_CARD_SELECT);
 
             // Relocated card scoring logic here
-            chips = U32_PROTECTED_ADD(chips, card_value);
+            chips = u32_protected_add(chips, card_value);
             display_chips();
 
             // Allow Joker scoring

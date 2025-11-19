@@ -745,7 +745,7 @@ static JokerEffect shoot_the_moon_joker_effect(Joker *joker, Card *scored_card, 
 
     if (scored_card->rank == QUEEN)
     {
-        effect.mult = U32_PROTECTED_ADD(effect.mult, 13);
+        effect.mult = u32_protected_add(effect.mult, 13);
     }
 
     return effect;
