@@ -144,10 +144,12 @@ Disregard Steps 3-4 and instead click the green code button on the main reposito
 
 # **Credits:**
 ## **Game**
-This implementation is based on Balatro designed and created by LocalThunk and published by Playstack.
+This implementation is based on Balatro which is designed and created by LocalThunk and published by Playstack.
+See repository list of contributors for code contributions to this implementation.
 ## **Music**
-The music is based on original soundtrack by LouisF.
+Music arrangement made by @cellos51 is based on original Balatro soundtrack by [LouisF](https://louisfmusic.com/) and [transcription by MrCrimit](https://musescore.com/user/8237321/scores/14590660).
 ## **Imagery**
 Sprites and backgrounds are based on original Balatro imagery created by LocalThunk.
+See [Joker Art Discussion](https://github.com/cellos51/balatro-gba/discussions/69) for full credits for each joker sprite.
 ## **Sounds**
 All sound effects were created by LocalThunk and are used under Creative Commons - CC0 license. 
