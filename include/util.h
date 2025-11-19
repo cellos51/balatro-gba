@@ -1,8 +1,6 @@
 #ifndef UTIL_H
 #define UTIL_H
 
-#include <tonc.h>
-
 static inline int get_digits(int n) // https://stackoverflow.com/questions/1068849/how-do-i-determine-the-number-of-digits-of-an-integer-in-c
 {
     if (n < 10) return 1;
@@ -45,9 +43,9 @@ static inline int get_digits_even(int n)
 
 int int_arr_max(int int_arr[], int size);
 
-u32 u32_protected_add(u32 a, u32 b);
-u16 u16_protected_add(u16 a, u16 b);
-u32 u32_protected_mult(u32 a, u32 b);
-u16 u16_protected_mult(u16 a, u16 b);
+unsigned long u32_protected_add (unsigned long a, unsigned long b);
+unsigned int  u16_protected_add (unsigned int  a, unsigned int  b);
+unsigned long u32_protected_mult(unsigned long a, unsigned long b);
+unsigned int  u16_protected_mult(unsigned int  a, unsigned int  b);
 
 #endif // UTIL_H

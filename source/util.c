@@ -16,22 +16,26 @@ int int_arr_max(int int_arr[], int size)
 }
 
 // Avoid uint overflow when add/multiplying score
-u32 u32_protected_add(u32 a, u32 b)
+
+#define UINT32_MAX 4294967295
+#define UINT16_MAX 65535
+
+unsigned long u32_protected_add(unsigned long a, unsigned long b)
 {
     return (a > (UINT32_MAX - b)) ? UINT32_MAX : (a + b);
 }
     
-u16 u16_protected_add(u16 a, u16 b)
+unsigned int u16_protected_add(unsigned int a, unsigned int b)
 {
     return (a > (UINT16_MAX - b)) ? UINT16_MAX : (a + b);
 }
 
-u32 u32_protected_mult(u32 a, u32 b)
+unsigned long u32_protected_mult(unsigned long a, unsigned long b)
 {
     return (a == 0 || b == 0) ? 0 : (a > (UINT32_MAX / b) ? UINT32_MAX : a * b);
 }
 
-u16 u16_protected_mult(u16 a, u16 b)
+unsigned int u16_protected_mult(unsigned int a, unsigned int b)
 {
     return (a == 0 || b == 0) ? 0 : (a > (UINT16_MAX / b) ? UINT16_MAX : a * b);
 }
