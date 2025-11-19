@@ -405,7 +405,7 @@ static JokerEffect raised_fist_joker_effect(Joker *joker, Card *scored_card, enu
 {
     JokerEffect effect = {0};
 
-    s32* p_lowest_value_index = &(joker->data);
+    u32* p_lowest_value_index = &(joker->scoring_state);
 
     switch (joker_event)
     {
@@ -596,7 +596,7 @@ static JokerEffect acrobat_joker_effect(Joker *joker, Card *scored_card, enum Jo
 static JokerEffect hanging_chad_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event)
 {
     JokerEffect effect = {0};
-    s32* p_remaining_retriggers = &(joker->data);
+    u32* p_remaining_retriggers = &(joker->scoring_state);
 
     switch (joker_event)
     {
@@ -609,9 +609,9 @@ static JokerEffect hanging_chad_joker_effect(Joker *joker, Card *scored_card, en
         // will be false and scoring will go onto the next card
         case JOKER_EVENT_ON_CARD_SCORED_END:
             effect.retrigger = (*p_remaining_retriggers > 0);
-            *p_remaining_retriggers -= 1;
             if (effect.retrigger)
             {
+                (*p_remaining_retriggers)--;
                 effect.message = "Again!";
             }
             break;
@@ -756,7 +756,7 @@ __attribute__((unused))
 static JokerEffect photograph_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event)
 {
     JokerEffect effect = {0};
-    s32* p_first_face_index = &(joker->data);
+    u32* p_first_face_index = &(joker->scoring_state);
 
     switch (joker_event)
     {
@@ -808,7 +808,7 @@ static JokerEffect triboulet_joker_effect(Joker *joker, Card *scored_card, enum 
 static JokerEffect dusk_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event)
 {
     JokerEffect effect = {0};
-    s32* p_last_retriggered_index = &(joker->data);
+    u32* p_last_retriggered_index = &(joker->scoring_state);
 
     switch (joker_event)
     {
@@ -820,7 +820,10 @@ static JokerEffect dusk_joker_effect(Joker *joker, Card *scored_card, enum Joker
             // Only retrigger current card if it's strictly after the last one we retriggered
             if (get_num_hands_remaining() == 0)
             {
-                effect.retrigger = (*p_last_retriggered_index < get_scored_card_index());
+                // need the second check because scoring_state is unsigned, so
+                // it starts as UINT32_MAX which is bigger than the scored index,
+                // but we do need to retrigger the card in that case
+                effect.retrigger = (*p_last_retriggered_index < get_scored_card_index() || *p_last_retriggered_index == UNDEFINED);
                 if (effect.retrigger)
                 {
                     *p_last_retriggered_index = get_scored_card_index();
@@ -844,7 +847,7 @@ static JokerEffect blueprint_brainstorm_joker_effect(Joker *joker, Card *scored_
 
     // No need for this kind of init since these Jokers
     // will have their data copied when needed
-    if (joker_event == JOKER_EVENT_ON_JOKER_CREATED)
+    if (joker_event == JOKER_EVENT_ON_JOKER_CREATED || joker_event == JOKER_EVENT_ON_ROUND_END)
     {
         return effect;
     }
@@ -895,9 +898,8 @@ static JokerEffect blueprint_brainstorm_joker_effect(Joker *joker, Card *scored_
                 u8 copied_joker_id = copied_joker_object->joker->id;
                 const JokerInfo* copied_joker_info = get_joker_registry_entry(copied_joker_id);
 
-                // For Jokers that retain data across rounds,
-                // copy this data to the copying JokerObject
-                // if (copied_joker_id == SELTZER_JOKER_ID) {...}
+                // Copy the persistent data
+                joker->persistent_state = copied_joker_object->joker->persistent_state;
 
                 // Then regardless of if we copied the data above, apply the
                 // copied JokerEffect function to the local data
@@ -921,7 +923,7 @@ static JokerEffect blueprint_brainstorm_joker_effect(Joker *joker, Card *scored_
 static JokerEffect hack_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event)
 {
     JokerEffect effect = {0};
-    s32* p_last_retriggered_index = &(joker->data);
+    u32* p_last_retriggered_index = &(joker->scoring_state);
 
     switch (joker_event)
     {
@@ -937,7 +939,7 @@ static JokerEffect hack_joker_effect(Joker *joker, Card *scored_card, enum Joker
                 case THREE:
                 case FOUR:
                 case FIVE:
-                    effect.retrigger = (*p_last_retriggered_index < get_scored_card_index());
+                    effect.retrigger = (*p_last_retriggered_index < get_scored_card_index() || *p_last_retriggered_index == UNDEFINED);
                     if (effect.retrigger)
                     {
                         *p_last_retriggered_index = get_scored_card_index();
@@ -960,8 +962,8 @@ __attribute__((unused))
 static JokerEffect seltzer_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event)
 {
     JokerEffect effect = {0};
-    s16* p_last_retriggered_idx = &(joker->halves.data0);
-    s16* p_hands_left_until_exp = &(joker->halves.data1);
+    u32* p_last_retriggered_idx = &(joker->scoring_state);
+    u32* p_hands_left_until_exp = &(joker->persistent_state);
 
     switch (joker_event)
     {
@@ -972,31 +974,31 @@ static JokerEffect seltzer_joker_effect(Joker *joker, Card *scored_card, enum Jo
         case JOKER_EVENT_ON_HAND_PLAYED:
             *p_last_retriggered_idx = UNDEFINED;
             break;
-
-        case JOKER_EVENT_ON_HAND_SCORED_END:
-            *p_hands_left_until_exp -= 1;
-            if (*p_hands_left_until_exp <= 0)
-            {
-                effect.expire = true;
-                effect.message = "Drank!";
-            }
-            else
-            {
-                effect.message = "-1";
-            }
-            break;
         
         case JOKER_EVENT_ON_CARD_SCORED_END:
             // Works the same way as Dusk, but if it can still trigger
             if (*p_hands_left_until_exp > 0)
             {
-                effect.retrigger = (*p_last_retriggered_idx < get_scored_card_index());
+                effect.retrigger = (*p_last_retriggered_idx < get_scored_card_index() || *p_last_retriggered_idx == UNDEFINED);
                 if (effect.retrigger)
                 {
                     *p_last_retriggered_idx = get_scored_card_index();
                     effect.message = "Again!";
                 }
             } 
+            break;
+
+        case JOKER_EVENT_ON_HAND_SCORED_END:
+            if (*p_hands_left_until_exp > 0)
+            {
+                (*p_hands_left_until_exp)--;
+                effect.message = "-1";
+            }
+            else
+            {
+                effect.expire = true;
+                effect.message = "Drank!";
+            }
             break;
 
         default:
@@ -1010,7 +1012,7 @@ static JokerEffect seltzer_joker_effect(Joker *joker, Card *scored_card, enum Jo
 static JokerEffect sock_and_buskin_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event)
 {
     JokerEffect effect = {0};
-    s32* p_last_retriggered_face_index = &(joker->data);
+    u32* p_last_retriggered_face_index = &(joker->scoring_state);
 
     switch (joker_event)
     {
@@ -1020,7 +1022,7 @@ static JokerEffect sock_and_buskin_joker_effect(Joker *joker, Card *scored_card,
         
         case JOKER_EVENT_ON_CARD_SCORED_END:
             // Works the same way as Dusk, but for face cards
-            effect.retrigger = (*p_last_retriggered_face_index < get_scored_card_index() && card_is_face(scored_card));
+            effect.retrigger = ((*p_last_retriggered_face_index < get_scored_card_index() || *p_last_retriggered_face_index == UNDEFINED) && card_is_face(scored_card));
             if (effect.retrigger)
             {
                 *p_last_retriggered_face_index = get_scored_card_index();

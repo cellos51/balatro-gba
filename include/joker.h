@@ -79,15 +79,10 @@ typedef struct
     u8 modifier; // base, foil, holo, poly, negative
     u8 value;
     u8 rarity;
+
     // General purpose values that are interpreted differently for each Joker (scaling, last retriggered card, etc...)
-    union
-    {
-        s32 data;
-        struct {
-            s16 data0;
-            s16 data1;
-        } halves;
-    };
+    u32 scoring_state;
+    u32 persistent_state;
 } Joker;
 
 typedef struct JokerObject
