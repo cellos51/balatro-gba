@@ -296,6 +296,7 @@ void push_back_three_remove_push_front_three_entries(void)
 // - rev_list_itr_create
 // - list_itr_next
 // - list_clear
+// - list_get_at_idx
 void test_list_insertion(void)
 {
     List my_cool_list = list_create();
@@ -333,13 +334,19 @@ void test_list_insertion(void)
 
     while((data = list_itr_next(&itr)))
     {
+        int data_itr = *(int*)data;
+        int data_from_get_at_idx = *(int*)list_get_at_idx(&my_cool_list, index);
+
         if(index == 0)
         {
-            assert(*(int*)data == head_val);
+            assert(data_itr == head_val);
+            assert(data_from_get_at_idx == head_val);
         }
         else
         {
-            assert(*(int*)data == test_data[test_data_itr++]);
+            assert(data_itr == test_data[test_data_itr]);
+            assert(data_from_get_at_idx == test_data[test_data_itr]);
+            test_data_itr++;
         }
         index++;
     }
@@ -356,17 +363,24 @@ void test_list_insertion(void)
 
     while((data = list_itr_next(&itr)))
     {
+        int data_itr = *(int*)data;
+        int data_from_get_at_idx = *(int*)list_get_at_idx(&my_cool_list, index);
+
         if(index == 0)
         {
-            assert(*(int*)data == head_val);
+            assert(data_itr == head_val);
+            assert(data_from_get_at_idx == head_val);
         }
         else if(index == initial_list_size + 1) // for head and tail insertion
         {
-            assert(*(int*)data == tail_val);
+            assert(data_itr == tail_val);
+            assert(data_from_get_at_idx == tail_val);
         }
         else
         {
-            assert(*(int*)data == test_data[test_data_itr++]);
+            assert(data_itr == test_data[test_data_itr]);
+            assert(data_from_get_at_idx == test_data[test_data_itr]);
+            test_data_itr++;
         }
         index++;
     }
@@ -383,21 +397,29 @@ void test_list_insertion(void)
 
     while((data = list_itr_next(&itr)))
     {
+        int data_itr = *(int*)data;
+        int data_from_get_at_idx = *(int*)list_get_at_idx(&my_cool_list, index);
+
         if(index == 0)
         {
-            assert(*(int*)data == head_val);
+            assert(data_itr == head_val);
+            assert(data_from_get_at_idx == head_val);
         }
         else if(index == insert_loc)
         {
-            assert(*(int*)data == middle_val);
+            assert(data_itr == middle_val);
+            assert(data_from_get_at_idx == middle_val);
         }
         else if(index == initial_list_size + 2) // for head+middle+tail
         {
-            assert(*(int*)data == tail_val);
+            assert(data_itr == tail_val);
+            assert(data_from_get_at_idx == tail_val);
         }
         else
         {
-            assert(*(int*)data == test_data[test_data_itr++]);
+            assert(data_itr == test_data[test_data_itr]);
+            assert(data_from_get_at_idx == test_data[test_data_itr]);
+            test_data_itr++;
         }
         index++;
     }
@@ -409,21 +431,29 @@ void test_list_insertion(void)
     test_data_itr = initial_list_size - 1;
     while((data = list_itr_next(&rev_itr)))
     {
+        int data_itr = *(int*)data;
+        int data_from_get_at_idx = *(int*)list_get_at_idx(&my_cool_list, index);
+
         if(index == 0)
         {
-            assert(*(int*)data == head_val);
+            assert(data_itr == head_val);
+            assert(data_from_get_at_idx == head_val);
         }
         else if(index == insert_loc)
         {
-            assert(*(int*)data == middle_val);
+            assert(data_itr == middle_val);
+            assert(data_from_get_at_idx == middle_val);
         }
         else if(index == initial_list_size + 2) // for head+middle+tail
         {
-            assert(*(int*)data == tail_val);
+            assert(data_itr == tail_val);
+            assert(data_from_get_at_idx == tail_val);
         }
         else
         {
-            assert(*(int*)data == test_data[test_data_itr--]);
+            assert(data_itr == test_data[test_data_itr]);
+            assert(data_from_get_at_idx == test_data[test_data_itr]);
+            test_data_itr--;
         }
         index--;
     }
@@ -441,25 +471,34 @@ void test_list_insertion(void)
 
     while((data = list_itr_next(&itr)))
     {
+        int data_itr = *(int*)data;
+        int data_from_get_at_idx = *(int*)list_get_at_idx(&my_cool_list, index);
+
         if(index == 0)
         {
-            assert(*(int*)data == head_val);
+            assert(data_itr == head_val);
+            assert(data_from_get_at_idx == head_val);
         }
         else if(index == insert_loc)
         {
-            assert(*(int*)data == middle_val);
+            assert(data_itr == middle_val);
+            assert(data_from_get_at_idx == middle_val);
         }
         else if(index == initial_list_size + 2) // for head+middle+tail
         {
-            assert(*(int*)data == last_tail_val);
+            assert(data_itr == last_tail_val);
+            assert(data_from_get_at_idx == last_tail_val);
         }
         else if(index == initial_list_size + 3) // for head+middle+tail+last_tail
         {
-            assert(*(int*)data == tail_val);
+            assert(data_itr == tail_val);
+            assert(data_from_get_at_idx == tail_val);
         }
         else
         {
-            assert(*(int*)data == test_data[test_data_itr++]);
+            assert(data_itr == test_data[test_data_itr]);
+            assert(data_from_get_at_idx == test_data[test_data_itr]);
+            test_data_itr++;
         }
         index++;
     }
@@ -484,6 +523,7 @@ void test_list_insertion(void)
 // - list_itr_create
 // - list_itr_next
 // - list_clear
+// - list_get_at_idx
 void test_list_swap(void)
 {
     List my_cool_list = list_create();
@@ -515,7 +555,9 @@ void test_list_swap(void)
     while((data = list_itr_next(&itr)))
     {
         // 0 -> 1 -> 2 -> 3 -> 4
-        assert(*(int*)data == test_data[index++]);
+        assert(*(int*)list_get_at_idx(&my_cool_list, index) == test_data[index]);
+        assert(*(int*)data == test_data[index]);
+        index++;
     }
 
     // swap nothing, out of range
@@ -526,7 +568,9 @@ void test_list_swap(void)
     while((data = list_itr_next(&itr)))
     {
         // 0 -> 1 -> 2 -> 3 -> 4
-        assert(*(int*)data == test_data[index++]);
+        assert(*(int*)list_get_at_idx(&my_cool_list, index) == test_data[index]);
+        assert(*(int*)data == test_data[index]);
+        index++;
     }
 
     // swap nothing, in range
@@ -537,7 +581,9 @@ void test_list_swap(void)
     while((data = list_itr_next(&itr)))
     {
         // 0 -> 1 -> 2 -> 3 -> 4
-        assert(*(int*)data == test_data[index++]);
+        assert(*(int*)list_get_at_idx(&my_cool_list, index) == test_data[index]);
+        assert(*(int*)data == test_data[index]);
+        index++;
     }
 
     // swap head and "middle"
@@ -549,18 +595,24 @@ void test_list_swap(void)
 
     while((data = list_itr_next(&itr)))
     {
+        int data_itr = *(int*)data;
+        int data_from_get_at_idx = *(int*)list_get_at_idx(&my_cool_list, index);
+
         // 2 -> 1 -> 0 -> 3 -> 4
         if(index == 0)
         {
-            assert(*(int*)data == test_data[mid_idx]);
+            assert(data_itr == test_data[mid_idx]);
+            assert(data_from_get_at_idx == test_data[mid_idx]);
         }
         else if(index == mid_idx)
         {
-            assert(*(int*)data == test_data[0]);
+            assert(data_itr == test_data[0]);
+            assert(data_from_get_at_idx == test_data[0]);
         }
         else
         {
-            assert(*(int*)data == test_data[index]);
+            assert(data_itr == test_data[index]);
+            assert(data_from_get_at_idx == test_data[index]);
         }
         index++;
     }
@@ -573,22 +625,29 @@ void test_list_swap(void)
 
     while((data = list_itr_next(&itr)))
     {
+        int data_itr = *(int*)data;
+        int data_from_get_at_idx = *(int*)list_get_at_idx(&my_cool_list, index);
+
         // 2 -> 1 -> 4 -> 3 -> 0
         if(index == 0)
         {
-            assert(*(int*)data == test_data[mid_idx]);
+            assert(data_itr == test_data[mid_idx]);
+            assert(data_from_get_at_idx == test_data[mid_idx]);
         }
         else if(index == mid_idx)
         {
-            assert(*(int*)data == test_data[initial_list_size - 1]);
+            assert(data_itr == test_data[initial_list_size - 1]);
+            assert(data_from_get_at_idx == test_data[initial_list_size - 1]);
         }
         else if(index == initial_list_size - 1)
         {
-            assert(*(int*)data == test_data[0]);
+            assert(data_itr == test_data[0]);
+            assert(data_from_get_at_idx == test_data[0]);
         }
         else
         {
-            assert(*(int*)data == test_data[index]);
+            assert(data_itr == test_data[index]);
+            assert(data_from_get_at_idx == test_data[index]);
         }
         index++;
     }
