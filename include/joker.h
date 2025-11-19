@@ -61,6 +61,20 @@ enum JokerEvent
     JOKER_EVENT_ON_BLIND_SELECTED,  // Triggers when selecting a blind (e.g. Dagger, Riff Raff, Madness..)
 };
 
+// These are flags that can be combined into a single u8 and returned by
+// JokerEffect functions to indicate what effects they had
+enum JokerEffectFlag
+{
+    JOKER_EFFECT_NONE      = 0,
+    JOKER_EFFECT_CHIPS     = 1,  // 1 << 0
+    JOKER_EFFECT_MULT      = 2,  // 1 << 1
+    JOKER_EFFECT_XMULT     = 4,  // 1 << 2
+    JOKER_EFFECT_MONEY     = 8,  // 1 << 3
+    JOKER_EFFECT_RETRIGGER = 16, // 1 << 4
+    JOKER_EFFECT_EXPIRE    = 32, // 1 << 5
+    JOKER_EFFECT_MESSAGE   = 64  // 1 << 6
+};
+
 #define MAX_JOKER_OBJECTS 32 // The maximum number of joker objects that can be created at once
 
 // Jokers in the game
@@ -102,7 +116,7 @@ typedef struct  // These jokers are triggered after the played hand has finished
     char* message; // Used to send custom messages e.g. "Extinct" or "-1" (Bananas and food Jokers)
 } JokerEffect;
 
-typedef JokerEffect (*JokerEffectFunc)(Joker *joker, Card *scored_card, enum JokerEvent joker_event);
+typedef u8 (*JokerEffectFunc)(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
 typedef struct {
     u8 rarity;
     u8 base_value;
@@ -118,7 +132,7 @@ void joker_destroy(Joker **joker);
 
 // Unique effects like "Four Fingers" or "Credit Card" will be hard coded into game.c with a conditional check for the joker ID from the players owned jokers
 // game.c should probably be restructured so most of the variables in it are moved to some sort of global variable header file so they can be easily accessed and modified for the jokers
-JokerEffect joker_get_score_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event);
+u8 joker_get_score_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
 int joker_get_sell_value(const Joker* joker);
 
 JokerObject *joker_object_new(Joker *joker);
