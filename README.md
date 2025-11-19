@@ -141,3 +141,13 @@ Disregard Steps 3-4 and instead click the green code button on the main reposito
 
 #### 4. **It says I don't have `Git` or `Make` installed!**
 - Use `pacman -S git` (not required) or `pacman -S make` although make should already be installed if you followed the instructions correctly.
+
+# **Credits:**
+## **Game**
+This implementation is based on Balatro designed and created by LocalThunk and published by Playstack.
+## **Music**
+The music is based on original soundtrack by LouisF.
+## **Imagery**
+Sprites and backgrounds are based on original Balatro imagery created by LocalThunk.
+## **Sounds**
+All sound effects were created by LocalThunk and are used under Creative Commons - CC0 license. 
