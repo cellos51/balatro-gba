@@ -852,10 +852,10 @@ static JokerEffect blueprint_brainstorm_joker_effect(Joker *joker, Card *scored_
     // find ourselves in the Jokers list
     List* jokers = get_jokers_list();
     ListItr itr = list_itr_create(jokers);
-    JokerObject* starting_joker_object;
-    while((starting_joker_object = list_itr_next(&itr)))
+    JokerObject* copied_joker_object;
+    while((copied_joker_object = list_itr_next(&itr)))
     {
-        if (starting_joker_object->joker == joker)
+        if (copied_joker_object->joker == joker)
         {
             break;
         }
@@ -863,15 +863,15 @@ static JokerEffect blueprint_brainstorm_joker_effect(Joker *joker, Card *scored_
 
     // This shouldn't happen since if we are a scoring Joker, we should always
     // be part of the Jokers list, but being extra careful doesn't cost much
-    if (starting_joker_object == NULL)
+    if (copied_joker_object == NULL)
     {
         return effect;
     }
 
     // find the copied Joker, may need to bounce around Blueprints and a Brainstorm
     // If we encounter NULL, we have a Blueprint at the end of the list that can't copy anything.
-    // If we go through the starting Joker again, we are in a loop and need to exit
-    JokerObject* copied_joker_object = starting_joker_object;
+    // If we go through a Brainstorms twice, we will be in a loop and need to exit
+    u8 brainstorm_counter = 0;
     do
     {
         switch (copied_joker_object->joker->id)
@@ -883,6 +883,7 @@ static JokerEffect blueprint_brainstorm_joker_effect(Joker *joker, Card *scored_
 
             // Get the first (leftmost) Joker for Brainstorm
             case BRAINSTORM_JOKER_ID:
+                brainstorm_counter++;
                 itr = list_itr_create(jokers);
                 copied_joker_object = list_itr_next(&itr);
                 break;
@@ -911,7 +912,7 @@ static JokerEffect blueprint_brainstorm_joker_effect(Joker *joker, Card *scored_
                 break;
         }
     }
-    while(copied_joker_object != NULL && copied_joker_object != starting_joker_object);
+    while(copied_joker_object != NULL && brainstorm_counter < 2);
 
     return effect;
 }
