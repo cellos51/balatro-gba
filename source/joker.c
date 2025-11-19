@@ -150,7 +150,7 @@ Joker *joker_new(u8 id)
 
     // initialize persistent Joker data if needed
     JokerEffect *joker_effect = NULL;
-    jinfo->joker_effect(joker, NULL, JOKER_EVENT_ON_JOKER_CREATED, &joker_effect);
+    jinfo->joker_effect_func(joker, NULL, JOKER_EVENT_ON_JOKER_CREATED, &joker_effect);
 
     return joker;
 }
@@ -166,7 +166,7 @@ u8 joker_get_score_effect(Joker *joker, Card *scored_card, enum JokerEvent joker
     const JokerInfo *jinfo = get_joker_registry_entry(joker->id);
     if (!jinfo) return JOKER_EFFECT_NONE;
 
-    return jinfo->joker_effect(joker, scored_card, joker_event, joker_effect);
+    return jinfo->joker_effect_func(joker, scored_card, joker_event, joker_effect);
 }
 
 int joker_get_sell_value(const Joker* joker)
@@ -278,6 +278,11 @@ bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum
     if (joker_ret == JOKER_EFFECT_NONE)
     {
         return false;
+    }
+
+    if (joker_ret & JOKER_EFFECT_RETRIGGER)
+    {
+        *retrigger = joker_effect->retrigger;
     }
 
     int cursorPosX = TILE_SIZE; // Offset of one tile to better center the text on the card

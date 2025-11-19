@@ -120,7 +120,7 @@ typedef u8 (*JokerEffectFunc)(Joker *joker, Card *scored_card, enum JokerEvent j
 typedef struct {
     u8 rarity;
     u8 base_value;
-    JokerEffectFunc joker_effect;
+    JokerEffectFunc joker_effect_func;
 } JokerInfo;
 const JokerInfo* get_joker_registry_entry(int joker_id);
 size_t get_joker_registry_size(void);
