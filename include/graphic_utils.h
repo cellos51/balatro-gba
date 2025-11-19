@@ -286,7 +286,7 @@ void main_bg_se_fill_rect_with_se(SE tile, Rect se_rect);
 void main_bg_se_copy_expand_3x3_rect(Rect se_rect_dest, BG_POINT se_rect_src_3x3_top_left);
 
 /**
- * @briefMoves a rect in the main background vertically in direction by a single tile.
+ * @brief Moves a rect in the main background vertically in direction by a single tile.
  *
  * Note that tiles in the previous location will be transparent (0x000)
  * so maybe copy would be a better choice if you don't want to delete things
@@ -343,7 +343,7 @@ void memcpy16_tile8_with_palette_offset(u16* dst, const u16* src, uint wcount, u
  *
  * This is intended solely for use with tile8/8bpp data for dst and src.
  * The palette offset allows the tiles to use a different location in the palette memory
- * This is useful because  grit always loads the palette to the beginning of pal_bg_mem[]
+ * This is useful because grit always loads the palette to the beginning of pal_bg_mem[]
  *
  * @param dst destination charblock
  *
