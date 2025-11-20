@@ -62,8 +62,8 @@ typedef enum
 
 typedef struct 
 {
-    int chips;
-    int mult;
+    u32 chips;
+    u32 mult;
     char *display_name;
 } HandValues;
 
@@ -205,14 +205,14 @@ static int discards = 0;
 static int round = 0;
 static int ante = 0;
 static int money = 0;
-static int score = 0;
-static int temp_score = 0; // This is the score that shows in the same spot as the hand type.
+static u32 score = 0;
+static u32 temp_score = 0; // This is the score that shows in the same spot as the hand type.
 static bool score_flames_active = false;
 static FIXED lerped_score = 0;
 static FIXED lerped_temp_score = 0;
 
-static int chips = 0;
-static int mult = 0;
+static u32 chips = 0;
+static u32 mult = 0;
 static bool retrigger = false;
 
 static int hand_size = 8; // Default hand size is 8
@@ -1091,20 +1091,20 @@ void change_background(int id)
     background = id;
 }
 
-void display_temp_score(int value)
+void display_temp_score(u32 value)
 {
     int x_offset = 40 - get_digits_even(value) * TILE_SIZE;
     tte_erase_rect_wrapper(TEMP_SCORE_RECT);
-    tte_printf("#{P:%d,%d; cx:0x%X000}%d", x_offset, TEMP_SCORE_RECT.top, TTE_WHITE_PB, value);
+    tte_printf("#{P:%d,%d; cx:0x%X000}%lu", x_offset, TEMP_SCORE_RECT.top, TTE_WHITE_PB, value);
 }
 
-void display_score(int value)
+void display_score(u32 value)
 {
     // Clear the existing text before redrawing
     tte_erase_rect_wrapper(SCORE_RECT);
     
     char score_suffix = ' ';
-    int display_value = value;
+    u32 display_value = value;
     
     if(value >= TEN_K)
     {
@@ -1124,7 +1124,7 @@ void display_score(int value)
     int rect_width = SCORE_RECT.right - SCORE_RECT.left;
     int x_offset = SCORE_RECT.left + (rect_width - text_width) / 2;
     
-    tte_printf("#{P:%d,48; cx:0x%X000}%d%c", x_offset, TTE_WHITE_PB, display_value, score_suffix);
+    tte_printf("#{P:%d,48; cx:0x%X000}%lu%c", x_offset, TTE_WHITE_PB, display_value, score_suffix);
 }
 
 void display_money(int value)
@@ -1164,14 +1164,14 @@ void display_chips()
     Rect chips_text_rect = CHIPS_TEXT_RECT;
     tte_erase_rect_wrapper(CHIPS_TEXT_RECT);
     update_text_rect_to_right_align_num(&chips_text_rect, chips, OVERFLOW_LEFT);
-    tte_printf("#{P:%d,%d; cx:0x%X000;}%d", chips_text_rect.left, chips_text_rect.top, TTE_WHITE_PB, chips);
+    tte_printf("#{P:%d,%d; cx:0x%X000;}%lu", chips_text_rect.left, chips_text_rect.top, TTE_WHITE_PB, chips);
     check_flaming_score();
 }
 
 void display_mult()
 {
     tte_erase_rect_wrapper(MULT_TEXT_RECT);
-    tte_printf("#{P:%d,%d; cx:0x%X000;}%d", MULT_TEXT_RECT.left, MULT_TEXT_RECT.top, TTE_WHITE_PB, mult);
+    tte_printf("#{P:%d,%d; cx:0x%X000;}%lu", MULT_TEXT_RECT.left, MULT_TEXT_RECT.top, TTE_WHITE_PB, mult);
     check_flaming_score();
 }
 
@@ -1658,7 +1658,8 @@ static void game_playing_process_input_and_state()
     {
         if (mult > 0)
         {
-            temp_score = chips * mult;
+            // protect against score overflow
+            temp_score = u32_protected_mult(chips, mult);
             lerped_temp_score = int2fx(temp_score);
             lerped_score = int2fx(score);
 
@@ -1682,19 +1683,14 @@ static void game_playing_process_input_and_state()
 
         if (lerped_temp_score > 0)
         {
-            display_temp_score(fx2int(lerped_temp_score));
+            display_temp_score(fx2uint(lerped_temp_score));
 
             // We actually don't need to erase this because the score only increases
-            display_score(fx2int(lerped_score)); // Set the score display
-
-            if (temp_score <= 0)
-            {
-                tte_erase_rect_wrapper(TEMP_SCORE_RECT);
-            }
+            display_score(fx2uint(lerped_score)); // Set the score display
         }
         else
         {
-            score += temp_score;
+            score = u32_protected_add(score, temp_score);
             temp_score = 0;
             lerped_temp_score = 0;
             lerped_score = 0;
@@ -2277,15 +2273,17 @@ static bool play_scoring_cards_update()
             tte_set_pos(fx2int(scored_card_object->sprite_object->x) + TILE_SIZE, SCORED_CARD_TEXT_Y); // Offset of 1 tile to keep the text on the card
             tte_set_special(TTE_BLUE_PB * TTE_SPECIAL_PB_MULT_OFFSET); // Set text color to blue from background memory
 
+            u8 card_value = card_get_value(scored_card_object->card);
+
             // Write the score to a character buffer variable
             char score_buffer[INT_MAX_DIGITS + 2]; // for '+' and null terminator
-            snprintf(score_buffer, sizeof(score_buffer), "+%d", card_get_value(scored_card_object->card));
+            snprintf(score_buffer, sizeof(score_buffer), "+%hhu", card_value);
             tte_write(score_buffer);
 
             card_object_shake(scored_card_object, SFX_CARD_SELECT);
 
             // Relocated card scoring logic here
-            chips += card_get_value(scored_card_object->card);
+            chips = u32_protected_add(chips, card_value);
             display_chips();
 
             // Allow Joker scoring

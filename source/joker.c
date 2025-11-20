@@ -263,7 +263,7 @@ void set_and_shift_text(char* str, int* cursor_pos_x, int* cursor_pos_y, int col
     *cursor_pos_x += joker_score_display_offset_px;
 }
 
-bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum JokerEvent joker_event, int *chips, int *mult, int *money, bool *retrigger)
+bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum JokerEvent joker_event, u32 *chips, u32 *mult, int *money, bool *retrigger)
 {
     if (joker_object == NULL)
     {
@@ -277,9 +277,15 @@ bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum
         return false;
     }
 
-    *chips    += joker_effect.chips;
-    *mult     += joker_effect.mult;
-    *mult     *= joker_effect.xmult > 0 ? joker_effect.xmult : 1; // if xmult is zero, DO NOT multiply by it
+    // protect chips and mult against overflow
+    *chips = u32_protected_add(*chips, joker_effect.chips);
+    *mult  = u32_protected_add(*mult,  joker_effect.mult);
+    // If xMult is 0 DON'T multiply by it!
+    if (joker_effect.xmult > 0)
+    {
+        *mult = u32_protected_mult(*mult, joker_effect.xmult);
+    }
+    
     *money    += joker_effect.money;
     *retrigger = joker_effect.retrigger;
     // joker_effect.message will have been set if the Joker had anything custom to say
@@ -302,19 +308,19 @@ bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum
     if (joker_effect.chips > 0)
     {
         char score_buffer[INT_MAX_DIGITS + 2]; // For '+' and null terminator
-        snprintf(score_buffer, sizeof(score_buffer), "+%d", joker_effect.chips);
+        snprintf(score_buffer, sizeof(score_buffer), "+%lu", joker_effect.chips);
         set_and_shift_text(score_buffer, &cursorPosX, &cursorPosY, TTE_BLUE_PB);
     }
     if (joker_effect.mult > 0)
     {
         char score_buffer[INT_MAX_DIGITS + 2];
-        snprintf(score_buffer, sizeof(score_buffer), "+%d", joker_effect.mult);
+        snprintf(score_buffer, sizeof(score_buffer), "+%lu", joker_effect.mult);
         set_and_shift_text(score_buffer, &cursorPosX, &cursorPosY, TTE_RED_PB);
     }
     if (joker_effect.xmult > 0)
     {
         char score_buffer[INT_MAX_DIGITS + 2];
-        snprintf(score_buffer, sizeof(score_buffer), "X%d", joker_effect.xmult);
+        snprintf(score_buffer, sizeof(score_buffer), "X%lu", joker_effect.xmult);
         set_and_shift_text(score_buffer, &cursorPosX, &cursorPosY, TTE_RED_PB);
     }
     if (joker_effect.money > 0)
