@@ -81,8 +81,8 @@ typedef struct
     u8 rarity;
 
     // General purpose values that are interpreted differently for each Joker (scaling, last retriggered card, etc...)
-    u32 scoring_state;
-    u32 persistent_state;
+    s32 scoring_state;
+    s32 persistent_state;
 } Joker;
 
 typedef struct JokerObject
