@@ -144,8 +144,8 @@ Disregard Steps 3-4 and instead click the green code button on the main reposito
 
 # **Credits:**
 ## **Game**
-This implementation is based on Balatro which is designed and created by LocalThunk and published by Playstack.
-See repository list of contributors for code contributions to this implementation.
+This GBA implementation is based on Balatro which is designed and created by LocalThunk and published by Playstack.
+See repository list of contributors for code contributions to this GBA implementation.
 ## **Music**
 Music arrangement made by @cellos51 is based on original Balatro soundtrack by [LouisF](https://louisfmusic.com/) and [transcription by MrCrimit](https://musescore.com/user/8237321/scores/14590660).
 ## **Imagery**
