@@ -141,3 +141,15 @@ Disregard Steps 3-4 and instead click the green code button on the main reposito
 
 #### 4. **It says I don't have `Git` or `Make` installed!**
 - Use `pacman -S git` (not required) or `pacman -S make` although make should already be installed if you followed the instructions correctly.
+
+# **Credits:**
+## **Game**
+This GBA implementation is based on Balatro which is designed and created by LocalThunk and published by Playstack.
+See repository contributors list for code contribution credits to this GBA implementation.
+## **Music**
+Music arrangement is made by @cellos51 based on original Balatro soundtrack by [LouisF](https://louisfmusic.com/) and [transcription by MrCrimit](https://musescore.com/user/8237321/scores/14590660).
+## **Imagery**
+Sprites and backgrounds are based on original Balatro imagery created by LocalThunk.
+See [Joker Art Discussion](https://github.com/cellos51/balatro-gba/discussions/69) for full credits for each joker sprite.
+## **Sounds**
+All sound effects were created by LocalThunk and are used under Creative Commons - CC0 license. 
