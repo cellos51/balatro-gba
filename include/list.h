@@ -60,6 +60,15 @@ typedef struct List
 } List;
 
 /**
+ * @brief @ref ListItr direction
+ */
+enum ListItrDirection
+{
+    LIST_ITR_FORWARD,  
+    LIST_ITR_REVERSE,  
+};
+
+/**
  * @brief An iterator into a list
  */
 typedef struct
@@ -80,6 +89,11 @@ typedef struct
      * The node of the most recently returned data from  @ref list_itr_next() .
      */
     ListNode* current_node;
+
+    /**
+     * @brief The direction of the iterator
+     */
+    enum ListItrDirection direction;
 } ListItr;
 
 /**
@@ -128,24 +142,75 @@ void list_push_front(List* list, void* data);
 void list_push_back(List* list, void* data);
 
 /**
- * Get a List's node at it's nth index
+ * Insert data into a @ref List a specific index
+ *
+ * If the index specified is larger than the length of the list
+ * it will @ref list_push_back() the data instead;
+ *
+ * Performs the following operation:
+ *
+ *                    ┌─────┐                      
+ *                    │ node│                      
+ *                    └─────┘                      
+ *          ┌─────┐   ┌─────┐   ┌─────┐            
+ *          │idx-1│◄─►│ idx │◄─►│idx+1│            
+ *          └─────┘   └─────┘   └─────┘            
+ *                                                 
+ *  1. Set new `node` `prev` to the node at idx - 1
+ *  2. Set new `node` `next` to the node at idx    
+ *  3. Set node at idx - 1 `next` to new `node`    
+ *  4. Set node at idx `prev` to the new `node`    
+ *
+ * Result:
+ *                                                 
+ *     ┌─────┐   ┌─────┐   ┌─────┐   ┌─────┐       
+ *     │idx-1│◄─►│ node│◄─►│ idx │◄─►│idx+1│       
+ *     └─────┘   └─────┘   └─────┘   └─────┘
+ *
+ * Finally, the list is now updated with new `node` now at the labeled idx:
+ *     
+ *     ┌─────┐   ┌─────┐   ┌─────┐   ┌─────┐       
+ *     │idx-1│◄─►│ idx │◄─►│idx+1│◄─►│idx+2│       
+ *     └─────┘   └─────┘   └─────┘   └─────┘       
  *
  * @param list pointer to a @ref List
- * @param n index of the desired @ref ListNode in the list
- *
- * @return a pointer to the data at the nth @ref ListNode, or NULL if out-of-bounds
+ * @param data pointer to data to put into the @ref List
+ * @param idx desired index to insert
  */
-void* list_get_at_idx(List *list, int n);
+void list_insert(List* list, void* data, unsigned int idx);
 
 /**
- * Remove a List's node at it's nth index
+ * Swap the data pointers at the specified indices of a @ref List
+ *
+ * If either indices are larger than the length of the list, return false. 
  *
  * @param list pointer to a @ref List
- * @param n index of the desired @ref ListNode in the list
+ * @param idx_a desired index to swap with idx_b
+ * @param idx_b desired index to swap with idx_a
+ *
+ * @return true if successful, false otherwise
+ */
+bool list_swap(List* list, unsigned int idx_a, unsigned int idx_b);
+
+/**
+ * Get a List's node at the specified index
+ *
+ * @param list pointer to a @ref List
+ * @param idx index of the desired @ref ListNode in the list
+ *
+ * @return a pointer to the data at the index of the list, or NULL if out-of-bounds
+ */
+void* list_get_at_idx(List *list, unsigned int idx);
+
+/**
+ * Remove a List's node at the specified index
+ *
+ * @param list pointer to a @ref List
+ * @param idx index of the desired @ref ListNode in the list
  *
  * @return `true` if successfully removed, `false` if out-of-bounds
  */
-bool list_remove_at_idx(List *list, int n);
+bool list_remove_at_idx(List *list, unsigned int idx);
 
 /**
  * Get the number of elements in a @ref List
@@ -164,6 +229,15 @@ int list_get_len(const List* list);
  * @return A new @ref ListItr
  */
 ListItr list_itr_create(List* list);
+
+/**
+ * Declare a reverse @ref ListItr
+ *
+ * @param list pointer to a @ref List
+ *
+ * @return A new reverse @ref ListItr
+ */
+ListItr rev_list_itr_create(List* list);
 
 /**
  * Get the next data entry in a @ref ListItr
