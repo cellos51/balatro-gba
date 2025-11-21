@@ -145,7 +145,8 @@ Joker *joker_new(u8 id)
     joker->modifier = BASE_EDITION; // TODO: Make this a parameter
     joker->value = jinfo->base_value + edition_price_lut[joker->modifier];
     joker->rarity = jinfo->rarity;
-    joker->data = 0;
+    joker->scoring_state = 0;
+    joker->persistent_state = 0;
 
     // initialize persistent Joker data if needed
     jinfo->joker_effect(joker, NULL, JOKER_EVENT_ON_JOKER_CREATED);

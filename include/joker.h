@@ -66,10 +66,11 @@ enum JokerEvent
 // Jokers in the game
 #define DEFAULT_JOKER_ID 0
 #define GREEDY_JOKER_ID 1
-#define JOKER_STENCIL_ID 16
+#define STENCIL_JOKER_ID 16
+#define SHORTCUT_JOKER_ID 26
 #define PAREIDOLIA_JOKER_ID 30
-#define JOKER_BRAINSTORM_ID 40
-#define SHORTCUT_JOKER_ID 26 
+#define BLUEPRINT_JOKER_ID 39
+#define BRAINSTORM_JOKER_ID 40
 #define FOUR_FINGERS_JOKER_ID 48
 
 typedef struct 
@@ -78,15 +79,10 @@ typedef struct
     u8 modifier; // base, foil, holo, poly, negative
     u8 value;
     u8 rarity;
+
     // General purpose values that are interpreted differently for each Joker (scaling, last retriggered card, etc...)
-    union
-    {
-        s32 data;
-        struct {
-            s16 data0;
-            s16 data1;
-        } halves;
-    };
+    s32 scoring_state;
+    s32 persistent_state;
 } Joker;
 
 typedef struct JokerObject
