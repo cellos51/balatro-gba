@@ -1091,7 +1091,6 @@ static u32 hack_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent jo
 
 
 // Note: Joker expiration is not yet implemented so Seltzer cannot be made active before it does.
-GBLA_UNUSED
 static u32 seltzer_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
     u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
@@ -1244,12 +1243,12 @@ const JokerInfo joker_registry[] =
     { UNCOMMON_JOKER,  7, joker_effect_noop,                }, // 48 Four Fingers
     { COMMON_JOKER,    4, scholar_joker_effect              }, // 49
     { UNCOMMON_JOKER,  8, fibonnaci_joker_effect            }, // 50
+    { UNCOMMON_JOKER,  6, seltzer_joker_effect,             }, // 51
     
     // The following jokers don't have sprites yet,
     // uncomment them when their sprites are added.
 #if 0
 
-    { UNCOMMON_JOKER, 6, seltzer_joker_effect,          },
     { COMMON_JOKER,   5, shoot_the_moon_joker_effect,   },
 #endif
 };
