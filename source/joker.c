@@ -265,7 +265,7 @@ void set_and_shift_text(char* str, int* cursor_pos_x, int* cursor_pos_y, int col
     *cursor_pos_x += joker_score_display_offset_px;
 }
 
-bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum JokerEvent joker_event, u32 *chips, u32 *mult, int *money, bool *retrigger)
+bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum JokerEvent joker_event, u32 *chips, u32 *mult, int *money, bool *retrigger, bool *expire)
 {
     if (joker_object == NULL)
     {

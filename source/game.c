@@ -214,6 +214,7 @@ static FIXED lerped_temp_score = 0;
 static u32 chips = 0;
 static u32 mult = 0;
 static bool retrigger = false;
+static bool expire = false;
 
 static int hand_size = 8; // Default hand size is 8
 static int cards_drawn = 0;
@@ -2191,11 +2192,20 @@ static bool check_and_score_joker_for_event(ListItr* starting_joker_itr, CardObj
 
     while((joker = list_itr_next(starting_joker_itr)))
     {
-        if (joker_object_score(joker, card_object, joker_event, &chips, &mult, &money, &retrigger))
+        if (joker_object_score(joker, card_object, joker_event, &chips, &mult, &money, &retrigger, &expire))
         {
             display_chips();
             display_mult();
             display_money(money);
+
+            if (expire)
+            {
+                // remove the joker directly, no need for the protections of
+                // the remove_owned_joker function because they don't concern Jokers
+                // that can expire
+                list_itr_remove_current_node(starting_joker_itr);
+                joker_object_destroy(&joker);
+            }
 
             return true;
         }
@@ -2356,6 +2366,7 @@ static bool play_scoring_held_cards_update(int played_idx)
         }
 
         scored_card_index = 0;
+        _joker_round_end_itr = list_itr_create(&_owned_jokers_list);
 
         play_state = PLAY_SCORING_INDEPENDENT_JOKERS;
     }
