@@ -152,4 +152,6 @@ Music arrangement is made by @cellos51 based on original Balatro soundtrack by [
 Sprites and backgrounds are based on original Balatro imagery created by LocalThunk.
 See [Joker Art Discussion](https://github.com/cellos51/balatro-gba/discussions/69) for full credits for each joker sprite.
 ## **Sounds**
-All sound effects were created by LocalThunk and are used under Creative Commons - CC0 license. 
+For the mult and xmult sound effects: [Toy records#06-E3-02.wav by poissonmort](https://freesound.org/s/253249/) used under License: Attribution 4.0
+
+All other sound effects were created by LocalThunk and are used under Creative Commons - CC0 license. 

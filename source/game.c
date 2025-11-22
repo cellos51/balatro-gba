@@ -2280,7 +2280,7 @@ static bool play_scoring_cards_update()
             snprintf(score_buffer, sizeof(score_buffer), "+%hhu", card_value);
             tte_write(score_buffer);
 
-            card_object_shake(scored_card_object, SFX_CARD_SELECT);
+            card_object_shake(scored_card_object, SFX_CHIPS_CARD);
 
             // Relocated card scoring logic here
             chips = u32_protected_add(chips, card_value);
