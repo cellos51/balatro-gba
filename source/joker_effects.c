@@ -976,7 +976,9 @@ static u32 blueprint_brainstorm_joker_effect(Joker *joker, Card *scored_card, en
 
     // No need for this kind of init since these Jokers
     // will have their data copied when needed
-    if (joker_event == JOKER_EVENT_ON_JOKER_CREATED || joker_event == JOKER_EVENT_ON_ROUND_END)
+    if (joker_event == JOKER_EVENT_ON_JOKER_CREATED ||
+        joker_event == JOKER_EVENT_ON_HAND_SCORED_END ||
+        joker_event == JOKER_EVENT_ON_ROUND_END)
     {
         return effect_flags_ret;
     }
@@ -1090,7 +1092,6 @@ static u32 hack_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent jo
 }
 
 
-// Note: Joker expiration is not yet implemented so Seltzer cannot be made active before it does.
 static u32 seltzer_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
     u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
@@ -1101,7 +1102,7 @@ static u32 seltzer_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent
     switch (joker_event)
     {
         case JOKER_EVENT_ON_JOKER_CREATED:
-            (*p_hands_left_until_exp) = 1; // remaining retriggered hands
+            (*p_hands_left_until_exp) = 10; // remaining retriggered hands
             break;
 
         case JOKER_EVENT_ON_HAND_PLAYED:
@@ -1130,10 +1131,16 @@ static u32 seltzer_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent
         case JOKER_EVENT_ON_HAND_SCORED_END:
             *joker_effect = &shared_joker_effect;
             effect_flags_ret = JOKER_EFFECT_FLAG_MESSAGE;
+
             if (*p_hands_left_until_exp > 0)
             {
-                *p_hands_left_until_exp -= 1;
-                (*joker_effect)->message = "-1";
+                (*p_hands_left_until_exp)--;
+                // Need to do this for now because the message's memory can't really be allocated
+                // So we can't use snprintf to craft a message depending on the number of hands left
+                static char* seltzer_messages[9] = {
+                    "1", "2", "3", "4", "5", "6", "7", "8", "9"
+                };
+                (*joker_effect)->message = seltzer_messages[(*p_hands_left_until_exp) - 1];
             }
             else
             {
