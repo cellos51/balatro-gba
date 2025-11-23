@@ -110,10 +110,14 @@ void bitset_set_idx(Bitset* bitset, int idx, bool on);
  */
 bool bitset_get_idx(Bitset* bitset, int idx);
 
-// Get the next free (set to 0) index in the bitset.
-// It also sets the bit which it maybe should do... It really shouldn't do two things
-// But it's such a fast operation idk. // TODO: decide what you wanna do
-int bitset_allocate_idx(Bitset* bitset);
+/**
+ * @brief Set the next free index in the bitset and return the index value
+ *
+ * @param bitset A @ref Bitset to operate on
+ *
+ * @return The index of the bit that was set
+ */
+int bitset_set_next_free_idx(Bitset* bitset);
 
 /**
  * @brief Clear the bitset, all to 0
