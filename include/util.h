@@ -1,7 +1,7 @@
 /**
  * @file util.h
  *
- * @brief Helper utilities sizes of numbers
+ * @brief Utilities relating around number string representation and protected arithmatic helper functions
  */
 #ifndef UTIL_H
 #define UTIL_H
@@ -10,12 +10,13 @@
 
 /**
  * @def UNDEFINED
- * @brief Universal representation of an undefined value for ints
+ * @brief Universal representation of an undefined value
  */
 #define UNDEFINED -1
 
 /**
  * @def NUM_ELEM_IN_ARR
+ * @brief Get the number of elements in an array
  *
  * @param arr input array
  */
@@ -25,7 +26,7 @@
  * @def INT_MAX_DIGITS
  * @brief Number of characters in the maximum representation of an integer
  *
- * For example: strlen(str(INT_MAX)) = strlen("-2147483647")
+ * **For example: strlen(str(INT_MAX)) = strlen("-2147483647")**
  */
 #define INT_MAX_DIGITS 11
 
@@ -33,7 +34,7 @@
  * @def UINT_MAX_DIGITS
  * @brief Number of characters in the maximum representation of an unsigned integer
  *
- * For example: strlen(str(UINT32_MAX)) = strlen("4294967295")
+ * **For example: strlen(str(UINT32_MAX)) = strlen("4294967295")**
  */
 #define UINT_MAX_DIGITS 10
 
@@ -41,47 +42,47 @@
  * @def UINT8_MAX_DIGITS
  * @brief Number of characters in the maximum representation of an unsigned char
  *
- * For example: strlen(str(UINT8_MAX)) = strlen("255")
+ * **For example: strlen(str(UINT8_MAX)) = strlen("255")**
  */
-#define UINT8_MAX_DIGITS 3 // strlen(str(UINT8_MAX)) = strlen("255")
+#define UINT8_MAX_DIGITS 3
 
 /**
- * @brief Avoid uint 32 overflow when adding
+ * @brief Avoid overflow when adding two u32 integers
  *
- * @param a left operator a + b
- * @param b left operator a + b
+ * @param a left operator **a + b**
+ * @param b left operator **a + b**
  *
- * @return the result of a + b or UINT32_MAX
+ * @return the result of **a + b** or **UINT32_MAX**
  */
 uint32_t u32_protected_add(uint32_t a, uint32_t b);
 
 /**
- * @brief Avoid uint 16 overflow when adding
+ * @brief Avoid overflow when adding two u16 integers
  *
- * @param a left operator a + b
- * @param b left operator a + b
+ * @param a left operator **a + b**
+ * @param b left operator **a + b**
  *
- * @return the result of a + b or UINT16_MAX
+ * @return the result of **a + b** or **UINT16_MAX**
  */
 uint16_t u16_protected_add(uint16_t a, uint16_t b);
 
 /**
- * @brief Avoid uint 32 overflow when multiplying score
+ * @brief Avoid overflow when multiplying two u32 integers
  *
- * @param a left operator a x b
- * @param b left operator a x b
+ * @param a left operator **a * b**
+ * @param b left operator **a * b**
  *
- * @return the result of a x b or UINT32_MAX
+ * @return the result of **a * b** or **UINT32_MAX**
  */
 uint32_t u32_protected_mult(uint32_t a, uint32_t b);
 
 /**
- * @brief Avoid uint 16 overflow when multiplying score
+ * @brief Avoid overflow when multiplying two u16 integers
  *
- * @param a left operator a x b
- * @param b left operator a x b
+ * @param a left operator **a * b**
+ * @param b left operator **a * b**
  *
- * @return the result of a x b or UINT16_MAX
+ * @return the result of **a * b** or **UINT16_MAX**
  */
 uint16_t u16_protected_mult(uint16_t a, uint16_t b);
 
