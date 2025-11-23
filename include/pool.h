@@ -7,9 +7,9 @@
 #include <stdint.h>
 
 #ifdef POOLS_TEST_ENV
-#    define POOLS_DEF_FILE "def_test_mempool.h"
+#define POOLS_DEF_FILE "def_test_mempool.h"
 #else
-#    define POOLS_DEF_FILE "def_balatro_mempool.h"
+#define POOLS_DEF_FILE "def_balatro_mempool.h"
 #endif
 
 #define POOL_DECLARE_TYPE(type)                                                                                        \
