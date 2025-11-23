@@ -1,19 +1,18 @@
 #include "card.h"
 
-#include <maxmod.h>
-#include <stdlib.h>
-
 #include "deck_gfx.h"
 #include "graphic_utils.h"
 
+#include <maxmod.h>
+#include <stdlib.h>
+
 // Audio
+#include "pool.h"
 #include "soundbank.h"
 
-#include "pool.h"
-
 // Card sprites lookup table. First index is the suit, second index is the rank. The value is the tile index.
-const static u16 card_sprite_lut[NUM_SUITS][NUM_RANKS] = {
-    {0, 16, 32, 48, 64, 80, 96, 112, 128, 144, 160, 176, 192},
+const static u16 _card_sprite_lut[NUM_SUITS][NUM_RANKS] = {
+    {0,   16,  32,  48,  64,  80,  96,  112, 128, 144, 160, 176, 192},
     {208, 224, 240, 256, 272, 288, 304, 320, 336, 352, 368, 384, 400},
     {416, 432, 448, 464, 480, 496, 512, 528, 544, 560, 576, 592, 608},
     {624, 640, 656, 672, 688, 704, 720, 736, 752, 768, 784, 800, 816}
@@ -25,9 +24,9 @@ void card_init()
 }
 
 // Card methods
-Card *card_new(u8 suit, u8 rank)
+Card* card_new(u8 suit, u8 rank)
 {
-    Card *card = POOL_GET(Card);
+    Card* card = POOL_GET(Card);
 
     card->suit = suit;
     card->rank = rank;
@@ -35,13 +34,13 @@ Card *card_new(u8 suit, u8 rank)
     return card;
 }
 
-void card_destroy(Card **card)
+void card_destroy(Card** card)
 {
     POOL_FREE(Card, *card);
     *card = NULL;
 }
 
-u8 card_get_value(Card *card)
+u8 card_get_value(Card* card)
 {
     if (card->rank == JACK || card->rank == QUEEN || card->rank == KING)
     {
@@ -60,9 +59,9 @@ u8 card_get_value(Card *card)
 }
 
 // CardObject methods
-CardObject *card_object_new(Card *card)
+CardObject* card_object_new(Card* card)
 {
-    CardObject *card_object = POOL_GET(CardObject);
+    CardObject* card_object = POOL_GET(CardObject);
 
     card_object->card = card;
     card_object->sprite_object = sprite_object_new();
@@ -70,9 +69,10 @@ CardObject *card_object_new(Card *card)
     return card_object;
 }
 
-void card_object_destroy(CardObject **card_object)
+void card_object_destroy(CardObject** card_object)
 {
-    if (*card_object == NULL) return;
+    if (*card_object == NULL)
+        return;
     sprite_object_destroy(&((*card_object)->sprite_object));
     POOL_FREE(CardObject, *card_object);
     *card_object = NULL;
@@ -80,15 +80,20 @@ void card_object_destroy(CardObject **card_object)
 
 void card_object_update(CardObject* card_object)
 {
-    if (card_object == NULL) return;
+    if (card_object == NULL)
+        return;
     sprite_object_update(card_object->sprite_object);
 }
 
-void card_object_set_sprite(CardObject *card_object, int layer)
+void card_object_set_sprite(CardObject* card_object, int layer)
 {
     int tile_index = CARD_TID + (layer * CARD_SPRITE_OFFSET);
-    memcpy32(&tile_mem[4][tile_index], &deck_gfxTiles[card_sprite_lut[card_object->card->suit][card_object->card->rank] * TILE_SIZE], TILE_SIZE * CARD_SPRITE_OFFSET);
-    sprite_object_set_sprite(card_object->sprite_object, sprite_new(ATTR0_SQUARE | ATTR0_4BPP | ATTR0_AFF, ATTR1_SIZE_32, tile_index, 0, layer + CARD_STARTING_LAYER));
+    memcpy32(&tile_mem[4][tile_index],
+             &deck_gfxTiles[_card_sprite_lut[card_object->card->suit][card_object->card->rank] * TILE_SIZE],
+             TILE_SIZE * CARD_SPRITE_OFFSET);
+    Sprite* sprite =
+        sprite_new(ATTR0_SQUARE | ATTR0_4BPP | ATTR0_AFF, ATTR1_SIZE_32, tile_index, 0, layer + CARD_STARTING_LAYER);
+    sprite_object_set_sprite(card_object->sprite_object, sprite);
 }
 
 void card_object_shake(CardObject* card_object, mm_word sound_id)
