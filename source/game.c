@@ -647,9 +647,6 @@ static const BG_POINT MAIN_MENU_ACE_T       = {88,      26};
 #define STARTING_MONEY 4
 #define STARTING_SCORE 0
 
-#define TEN_K 10000
-#define ONE_K 1000
-
 #define CARD_FOCUSED_UNSEL_Y 10
 #define CARD_UNFOCUSED_SEL_Y 15
 #define CARD_FOCUSED_SEL_Y 20
@@ -1198,16 +1195,32 @@ void check_flaming_score()
 void display_chips()
 {
     Rect chips_text_rect = CHIPS_TEXT_RECT;
-    tte_erase_rect_wrapper(CHIPS_TEXT_RECT);
-    update_text_rect_to_right_align_num(&chips_text_rect, chips, OVERFLOW_LEFT);
-    tte_printf("#{P:%d,%d; cx:0x%X000;}%lu", chips_text_rect.left, chips_text_rect.top, TTE_WHITE_PB, chips);
+
+    // In case of overflow, the rect overflow left by 1 char
+    Rect chips_text_overflow_rect = chips_text_rect;
+    chips_text_overflow_rect.left -= TTE_CHAR_SIZE;
+    tte_erase_rect_wrapper(chips_text_overflow_rect);
+
+    char chips_str_buff[UINT_MAX_DIGITS + 2];
+    truncate_uint_to_suffixed_str(chips, rect_width(&chips_text_rect)/TTE_CHAR_SIZE, chips_str_buff);
+
+    update_text_rect_to_right_align_str(&chips_text_rect, chips_str_buff, OVERFLOW_LEFT);
+
+    tte_printf("#{P:%d,%d; cx:0x%X000;}%s", chips_text_rect.left, chips_text_rect.top, TTE_WHITE_PB, chips_str_buff);
     check_flaming_score();
 }
 
 void display_mult()
 {
-    tte_erase_rect_wrapper(MULT_TEXT_RECT);
-    tte_printf("#{P:%d,%d; cx:0x%X000;}%lu", MULT_TEXT_RECT.left, MULT_TEXT_RECT.top, TTE_WHITE_PB, mult);
+    Rect mult_text_overflow_rect = MULT_TEXT_RECT;
+    // In case of overflow the rect will overflow right by 1 char
+    mult_text_overflow_rect.right += TTE_CHAR_SIZE;
+    tte_erase_rect_wrapper(mult_text_overflow_rect);
+
+    char mult_str_buff[UINT_MAX_DIGITS + 2];
+    truncate_uint_to_suffixed_str(mult, rect_width(&MULT_TEXT_RECT)/TTE_CHAR_SIZE, mult_str_buff);
+
+    tte_printf("#{P:%d,%d; cx:0x%X000;}%s", MULT_TEXT_RECT.left, MULT_TEXT_RECT.top, TTE_WHITE_PB, mult_str_buff);
     check_flaming_score();
 }
 
@@ -1415,30 +1428,16 @@ static void game_round_on_init()
     }
 
     Rect blind_req_text_rect = BLIND_REQ_TEXT_RECT;
-    int blind_requirement = blind_get_requirement(current_blind, ante);
+    u32 blind_requirement = blind_get_requirement(current_blind, ante);
     
-    // TODO: Address Copilot review at
-    // https://github.com/cellos51/balatro-gba/pull/46#pullrequestreview-3045772903
-    char score_suffix = ' ';
-    if(blind_requirement >= TEN_K)
-    {
-        // clear existing text
-        tte_erase_rect_wrapper(blind_req_text_rect);
-        
-        score_suffix = 'k';
-        blind_requirement /= ONE_K; // 11,000 = 11k
-    }
+    char blind_req_str_buff[UINT_MAX_DIGITS + 2];
+
+    truncate_uint_to_suffixed_str(blind_requirement, rect_width(&BLIND_REQ_TEXT_RECT)/TTE_CHAR_SIZE, blind_req_str_buff);
     
     // Update text rect for right alignment AFTER shortening the number
-    update_text_rect_to_right_align_num(&blind_req_text_rect, blind_requirement, OVERFLOW_RIGHT);
-    
-    // If we added a suffix, adjust position to account for the extra character
-    if(score_suffix == 'k')
-    {
-        blind_req_text_rect.left -= TILE_SIZE; // Move left by one character width to make room for 'k'
-    }
+    update_text_rect_to_right_align_str(&blind_req_text_rect, blind_req_str_buff, OVERFLOW_RIGHT);
 
-    tte_printf("#{P:%d,%d; cx:0x%X000}%d%c", blind_req_text_rect.left, blind_req_text_rect.top, TTE_RED_PB, blind_requirement, score_suffix); // Blind requirement
+    tte_printf("#{P:%d,%d; cx:0x%X000}%s", blind_req_text_rect.left, blind_req_text_rect.top, TTE_RED_PB, blind_req_str_buff);
     tte_printf("#{P:%d,%d; cx:0x%X000}$%d", BLIND_REWARD_RECT.left, BLIND_REWARD_RECT.top, TTE_YELLOW_PB, blind_get_reward(current_blind)); // Blind reward
 
     deck_shuffle(); // Shuffle the deck at the start of the round
@@ -2773,10 +2772,18 @@ static void game_round_end_display_finished_blind()
     if (current_blind == BLIND_TYPE_BOSS) current_ante--; // Beating the boss blind increases the ante, so we need to display the previous ante value
     
     Rect blind_req_rect = ROUND_END_BLIND_REQ_RECT;
-    int blind_req = blind_get_requirement(current_blind, current_ante);
-    update_text_rect_to_right_align_num(&blind_req_rect, blind_req, OVERFLOW_RIGHT);
+    u32 blind_req = blind_get_requirement(current_blind, current_ante);
+
+    /* Not bothering to truncate here because there are 8 tiles
+     * and the blind requirement will not increase past ante 8
+     * so there's enough room for sure.
+     */
+    char blind_req_str_buff[UINT_MAX_DIGITS + 2];
+    snprintf(blind_req_str_buff, sizeof(blind_req_str_buff), "%lu", blind_req);
+
+    update_text_rect_to_right_align_str(&blind_req_rect, blind_req_str_buff, OVERFLOW_RIGHT);
     
-    tte_printf("#{P:%d,%d; cx:0x%X000}%d", blind_req_rect.left, blind_req_rect.top, TTE_RED_PB, blind_req);
+    tte_printf("#{P:%d,%d; cx:0x%X000}%s", blind_req_rect.left, blind_req_rect.top, TTE_RED_PB, blind_req_str_buff);
     
     if (timer == TM_START_ROUND_END_REWARDS_ANIM)
     {

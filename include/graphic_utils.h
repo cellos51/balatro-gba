@@ -142,6 +142,7 @@ void main_bg_se_move_rect_1_tile_vert(Rect se_rect, int direction);
 // A wrapper for tte_erase_rect that would use the rect struct
 void tte_erase_rect_wrapper(Rect rect);
 
+// TODO: Update documentation
 /* Changes rect->left so it fits the digits of num exactly when right aligned to rect->right.
  * Assumes num is not negative.
  * 
@@ -154,7 +155,7 @@ void tte_erase_rect_wrapper(Rect rect);
  * 
  * Note that both rect->left and rect-right need to be defined, top and bottom don't matter
  */
-void update_text_rect_to_right_align_num(Rect* rect, int num, int overflow_direction);
+void update_text_rect_to_right_align_str(Rect* rect, char* str, int overflow_direction);
 
 /*Copies 16 bit data from src to dst, applying a palette offset to the data.
  * This is intended solely for use with tile8/8bpp data for dst and src.

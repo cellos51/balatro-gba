@@ -4,6 +4,7 @@
 
 #include "util.h"
 #include "graphic_utils.h"
+#include "string.h"
 
 const Rect FULL_SCREENBLOCK_RECT = { 0, 0, SE_ROW_LEN - 1, SE_COL_LEN - 1};
 
@@ -235,18 +236,18 @@ void tte_erase_rect_wrapper(Rect rect)
     tte_erase_rect(rect.left, rect.top, rect.right, rect.bottom);
 }
 
-void update_text_rect_to_right_align_num(Rect* rect, int num, int overflow_direction)
+void update_text_rect_to_right_align_str(Rect* rect, char* str, int overflow_direction)
 {
-    int num_digits = get_digits(num);
+    int str_len = strlen(str);
     if (overflow_direction == OVERFLOW_LEFT)
     {
-        rect->left = max(0, rect->right - num_digits * TILE_SIZE);
+        rect->left = max(0, rect->right - str_len * TILE_SIZE);
     }
     else if (overflow_direction == OVERFLOW_RIGHT)
     {
         int num_fitting_digits = rect_width(rect) / TILE_SIZE;
-        if (num_digits < num_fitting_digits)
-            rect->left += (num_fitting_digits - num_digits) * TILE_SIZE;
+        if (str_len < num_fitting_digits)
+            rect->left += (num_fitting_digits - str_len) * TILE_SIZE;
         //else nothing is to be updated, entire rect is filled and may overflow
     }
 }
