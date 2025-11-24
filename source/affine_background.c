@@ -9,7 +9,7 @@
 // Prepare screen during VBLANK
 // Pre-computes the affine matrices values for each scanline and stores in bgaff_arr. This is to be done in VBLANK so
 // the HBLANK code can just fetch the values quickly.
-static IWRAM_CODE void _affine_background_prep_bgaff_arr();
+static IWRAM_CODE void s_affine_background_prep_bgaff_arr();
 
 static BG_AFFINE _bgaff_arr[SCREEN_HEIGHT + 1];
 static AFF_SRC_EX _asx = {0};
@@ -40,7 +40,7 @@ void affine_background_update()
 {
     if (REG_IE & IRQ_HBLANK) // High quality mode with HBLANK interrupt
     {
-        _affine_background_prep_bgaff_arr();
+        s_affine_background_prep_bgaff_arr();
     }
     else // Low quality mode without HBLANK interrupt
     {
@@ -106,7 +106,7 @@ void affine_background_change_background(enum AffineBackgroundID new_bg)
     }
 }
 
-static IWRAM_CODE void _affine_background_prep_bgaff_arr()
+static IWRAM_CODE void s_affine_background_prep_bgaff_arr()
 {
     for (u16 vcount = 0; vcount < SCREEN_HEIGHT; vcount++)
     {
