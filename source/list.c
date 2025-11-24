@@ -14,7 +14,7 @@
  * @param list pointer to a @ref List
  * @param node pointer to a @ref ListNode
  */
-static void _list_remove_node(List* list, ListNode* node);
+static void s_list_remove_node(List* list, ListNode* node);
 
 /**
  * Get the next @ref ListNode in a @ref ListItr
@@ -27,7 +27,7 @@ static void _list_remove_node(List* list, ListNode* node);
  *
  * @return A pointer to the @ref ListNode in the itr, otherwise return NULL.
  */
-static ListNode* _list_itr_node_next(ListItr* itr);
+static ListNode* s_list_itr_node_next(ListItr* itr);
 
 List list_create(void)
 {
@@ -43,7 +43,7 @@ void list_clear(List* list)
     ListItr itr = list_itr_create(list);
     ListNode* ln;
 
-    while ((ln = _list_itr_node_next(&itr)))
+    while ((ln = s_list_itr_node_next(&itr)))
     {
         POOL_FREE(ListNode, ln);
     }
@@ -123,7 +123,7 @@ void list_insert(List* list, void* data, unsigned int idx)
     ListItr itr = list_itr_create(list);
     ListNode* ln;
 
-    while ((ln = _list_itr_node_next(&itr)))
+    while ((ln = s_list_itr_node_next(&itr)))
     {
         if (idx == curr_idx++)
         {
@@ -156,7 +156,7 @@ bool list_swap(List* list, unsigned int idx_a, unsigned int idx_b)
 
     do
     {
-        ln = _list_itr_node_next(&itr);
+        ln = s_list_itr_node_next(&itr);
         if (idx_a == curr_idx)
         {
             node_a = ln;
@@ -177,7 +177,7 @@ bool list_swap(List* list, unsigned int idx_a, unsigned int idx_b)
     return true;
 }
 
-static void _list_remove_node(List* list, ListNode* node)
+static void s_list_remove_node(List* list, ListNode* node)
 {
     if (node->prev && !node->next) // end of list
     {
@@ -237,11 +237,11 @@ bool list_remove_at_idx(List* list, unsigned int idx)
     ListItr itr = list_itr_create(list);
     ListNode* ln;
 
-    while ((ln = _list_itr_node_next(&itr)))
+    while ((ln = s_list_itr_node_next(&itr)))
     {
         if (idx == len++)
         {
-            _list_remove_node(list, ln);
+            s_list_remove_node(list, ln);
             return true;
         }
     }
@@ -274,11 +274,11 @@ ListItr rev_list_itr_create(List* list)
 
 void* list_itr_next(ListItr* itr)
 {
-    ListNode* ln = _list_itr_node_next(itr);
+    ListNode* ln = s_list_itr_node_next(itr);
     return ln ? ln->data : NULL;
 }
 
-static ListNode* _list_itr_node_next(ListItr* itr)
+static ListNode* s_list_itr_node_next(ListItr* itr)
 {
     if (!itr->next_node)
         return NULL;
@@ -303,6 +303,6 @@ void list_itr_remove_current_node(ListItr* itr)
     if (!itr || !itr->current_node)
         return;
     ListNode* tmp_prev = itr->current_node->prev;
-    _list_remove_node(itr->list, itr->current_node);
+    s_list_remove_node(itr->list, itr->current_node);
     itr->current_node = tmp_prev;
 }
