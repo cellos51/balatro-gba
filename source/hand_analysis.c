@@ -1,49 +1,64 @@
 #include "hand_analysis.h"
+
 #include "card.h"
 #include "game.h"
 
+void get_hand_distribution(u8* ranks_out, u8* suits_out)
+{
+    for (int i = 0; i < NUM_RANKS; i++)
+        ranks_out[i] = 0;
+    for (int i = 0; i < NUM_SUITS; i++)
+        suits_out[i] = 0;
 
-void get_hand_distribution(u8 *ranks_out, u8 *suits_out) {
-    for (int i = 0; i < NUM_RANKS; i++) ranks_out[i] = 0;
-    for (int i = 0; i < NUM_SUITS; i++) suits_out[i] = 0;
-
-    CardObject **cards = get_hand_array();
+    CardObject** cards = get_hand_array();
     int top = get_hand_top();
-    for (int i = 0; i <= top; i++) {
-        if (cards[i] && card_object_is_selected(cards[i])) {
+    for (int i = 0; i <= top; i++)
+    {
+        if (cards[i] && card_object_is_selected(cards[i]))
+        {
             ranks_out[cards[i]->card->rank]++;
             suits_out[cards[i]->card->suit]++;
         }
     }
 }
 
-void get_played_distribution(u8 *ranks_out, u8 *suits_out) {
-    for (int i = 0; i < NUM_RANKS; i++) ranks_out[i] = 0;
-    for (int i = 0; i < NUM_SUITS; i++) suits_out[i] = 0;
+void get_played_distribution(u8* ranks_out, u8* suits_out)
+{
+    for (int i = 0; i < NUM_RANKS; i++)
+        ranks_out[i] = 0;
+    for (int i = 0; i < NUM_SUITS; i++)
+        suits_out[i] = 0;
 
-    CardObject **played = get_played_array();
+    CardObject** played = get_played_array();
     int top = get_played_top();
-    for (int i = 0; i <= top; i++) {
-        if (!played[i]) continue;
+    for (int i = 0; i <= top; i++)
+    {
+        if (!played[i])
+            continue;
         ranks_out[played[i]->card->rank]++;
         suits_out[played[i]->card->suit]++;
     }
 }
 
 // Returns the highest N of a kind. So a full-house would return 3.
-u8 hand_contains_n_of_a_kind(u8 *ranks) {
+u8 hand_contains_n_of_a_kind(u8* ranks)
+{
     u8 highest_n = 0;
-    for (int i = 0; i < NUM_RANKS; i++) {
+    for (int i = 0; i < NUM_RANKS; i++)
+    {
         if (ranks[i] > highest_n)
             highest_n = ranks[i];
     }
     return highest_n;
 }
 
-bool hand_contains_two_pair(u8 *ranks) {
+bool hand_contains_two_pair(u8* ranks)
+{
     bool contains_other_pair = false;
-    for (int i = 0; i < NUM_RANKS; i++) {
-        if (ranks[i] >= 2) {
+    for (int i = 0; i < NUM_RANKS; i++)
+    {
+        if (ranks[i] >= 2)
+        {
             if (contains_other_pair)
                 return true;
             contains_other_pair = true;
@@ -52,14 +67,18 @@ bool hand_contains_two_pair(u8 *ranks) {
     return false;
 }
 
-bool hand_contains_full_house(u8* ranks) {
+bool hand_contains_full_house(u8* ranks)
+{
     int count_three = 0;
     int count_pair = 0;
-    for (int i = 0; i < NUM_RANKS; i++) {
-        if (ranks[i] >= 3) {
+    for (int i = 0; i < NUM_RANKS; i++)
+    {
+        if (ranks[i] >= 3)
+        {
             count_three++;
         }
-        else if (ranks[i] >= 2) {
+        else if (ranks[i] >= 2)
+        {
             count_pair++;
         }
     }
@@ -72,7 +91,8 @@ bool hand_contains_full_house(u8* ranks) {
 }
 
 // This is mostly from Google Gemini
-bool hand_contains_straight(u8 *ranks) {
+bool hand_contains_straight(u8* ranks)
+{
     if (!is_shortcut_joker_active())
     {
         int straight_size = get_straight_and_flush_size();
@@ -80,23 +100,30 @@ bool hand_contains_straight(u8 *ranks) {
         int run = 0;
         for (int i = 0; i < NUM_RANKS; ++i)
         {
-            if (ranks[i]) {
+            if (ranks[i])
+            {
                 if (++run >= straight_size)
                     return true;
-            } else {
+            }
+            else
+            {
                 run = 0;
             }
         }
 
         // Check for ace low straight
-        if (straight_size >= 2 && ranks[ACE]) {
+        if (straight_size >= 2 && ranks[ACE])
+        {
             // With A as low, the highest rank you can use is FIVE.
-            int last_needed = TWO + (straight_size - 2);   // -1 for inclusive integer distance and another -1 for the Ace e.g. need=5 -> need 2..5
-            if (last_needed <= FIVE) {
+            // -1 for inclusive integer distance and another -1 for the Ace e.g. need=5 -> need 2..5
+            int last_needed = TWO + (straight_size - 2);
+            if (last_needed <= FIVE)
+            {
                 bool ok = true;
                 for (int r = TWO; r <= last_needed; ++r)
                 {
-                    if (!ranks[r]) {
+                    if (!ranks[r])
+                    {
                         ok = false;
                         break;
                     }
@@ -107,10 +134,11 @@ bool hand_contains_straight(u8 *ranks) {
         }
 
         return false;
-    } else
+    }
+    else
     {
         // Shortcut Joker is active, we have to detect straights where any card may "skip" 1 rank
-        // We do this with a dynamic programming algorithm that calculates 
+        // We do this with a dynamic programming algorithm that calculates
         // the longest possible straight that can end on each rank
         // and stopping when we find one that is {straight-size} cards long
         u8 longest_short_cut_at[NUM_RANKS] = {0};
@@ -172,7 +200,8 @@ bool hand_contains_straight(u8 *ranks) {
     return false;
 }
 
-bool hand_contains_flush(u8 *suits) {
+bool hand_contains_flush(u8* suits)
+{
     for (int i = 0; i < NUM_SUITS; i++)
     {
         if (suits[i] >= get_straight_and_flush_size())
@@ -183,7 +212,8 @@ bool hand_contains_flush(u8 *suits) {
     return false;
 }
 
-// Returns the number of cards in the best flush found or 0 if no flush of min_len is found, and marks them in out_selection.
+// Returns the number of cards in the best flush found or 0 if no flush of min_len is found, and marks them in
+// out_selection.
 /**
  * Finds the largest flush (set of cards with the same suit) in the given array of played cards.
  * Marks the cards belonging to the best flush in the out_selection array.
@@ -194,29 +224,39 @@ bool hand_contains_flush(u8 *suits) {
  * @param out_selection Output array of bools; set to true for cards in the best flush, false otherwise.
  * @return              The number of cards in the best flush found, or 0 if no flush meets min_len.
  */
-int find_flush_in_played_cards(CardObject** played, int top, int min_len, bool* out_selection) {
-    if (top < 0) return 0;
-    for (int i = 0; i <= top; i++) out_selection[i] = false;
+int find_flush_in_played_cards(CardObject** played, int top, int min_len, bool* out_selection)
+{
+    if (top < 0)
+        return 0;
+    for (int i = 0; i <= top; i++)
+        out_selection[i] = false;
 
     int suit_counts[NUM_SUITS] = {0};
-    for (int i = 0; i <= top; i++) {
-        if (played[i] && played[i]->card) {
+    for (int i = 0; i <= top; i++)
+    {
+        if (played[i] && played[i]->card)
+        {
             suit_counts[played[i]->card->suit]++;
         }
     }
 
     int best_suit = -1;
     int best_count = 0;
-    for (int i = 0; i < NUM_SUITS; i++) {
-        if (suit_counts[i] > best_count) {
+    for (int i = 0; i < NUM_SUITS; i++)
+    {
+        if (suit_counts[i] > best_count)
+        {
             best_count = suit_counts[i];
             best_suit = i;
         }
     }
 
-    if (best_count >= min_len) {
-        for (int i = 0; i <= top; i++) {
-            if (played[i] && played[i]->card && played[i]->card->suit == best_suit) {
+    if (best_count >= min_len)
+    {
+        for (int i = 0; i <= top; i++)
+        {
+            if (played[i] && played[i]->card && played[i]->card->suit == best_suit)
+            {
                 out_selection[i] = true;
             }
         }
@@ -225,81 +265,145 @@ int find_flush_in_played_cards(CardObject** played, int top, int min_len, bool* 
     return 0;
 }
 
-// Returns the number of cards in the best straight or 0 if no straight of min_len is found, marks as true them in out_selection[].
-// This is mostly from Google Gemini
-int find_straight_in_played_cards(CardObject** played, int top, bool shortcut_active, int min_len, bool* out_selection) {
-    if (top < 0) return 0;
-    for (int i = 0; i <= top; i++) out_selection[i] = false;
+// Returns the number of cards in the best straight or 0 if no straight of min_len is found, marks as true them in
+// out_selection[]. This is mostly from Google Gemini
+int find_straight_in_played_cards(CardObject** played, int top, bool shortcut_active, int min_len, bool* out_selection)
+{
+    if (top < 0)
+        return 0;
+    for (int i = 0; i <= top; i++)
+        out_selection[i] = false;
 
     // --- Setup for Backtracking DP ---
     u8 longest_straight_at[NUM_RANKS] = {0};
     int parent[NUM_RANKS];
-    for(int i=0; i<NUM_RANKS; i++) parent[i] = -1;
+    for (int i = 0; i < NUM_RANKS; i++)
+        parent[i] = -1;
 
     u8 ranks[NUM_RANKS] = {0};
-    for (int i = 0; i <= top; i++) {
-        if (played[i] && played[i]->card) {
+    for (int i = 0; i <= top; i++)
+    {
+        if (played[i] && played[i]->card)
+        {
             ranks[played[i]->card->rank]++;
         }
     }
 
     // --- Run DP to find longest straight ---
     // This is nearly identical to hand_contains_straight() logic
-    // TODO: Consolidate functions to avoid code duplication? 
+    // TODO: Consolidate functions to avoid code duplication?
     // Might cost performance because this does a little more
     int ace_low_len = ranks[ACE] ? 1 : 0;
-    for (int i = 0; i < NUM_RANKS; i++) {
-        if (ranks[i] > 0) {
+    for (int i = 0; i < NUM_RANKS; i++)
+    {
+        if (ranks[i] > 0)
+        {
             int prev1 = 0, prev2 = 0;
             int parent1 = -1, parent2 = -1;
 
-            if (shortcut_active) {
-                if (i == TWO) { prev1 = ace_low_len; parent1 = ACE; }
-                else if (i == THREE) { prev1 = longest_straight_at[TWO]; parent1 = TWO; prev2 = ace_low_len; parent2 = ACE; }
-                else if (i == ACE) { prev1 = longest_straight_at[KING]; parent1 = KING; prev2 = longest_straight_at[QUEEN]; parent2 = QUEEN; }
-                else { prev1 = longest_straight_at[i-1]; parent1 = i-1; if (i > 1) { prev2 = longest_straight_at[i-2]; parent2 = i-2; }}
-            } else {
-                if (i == TWO) { prev1 = ace_low_len; parent1 = ACE; }
-                else if (i == ACE) { prev1 = longest_straight_at[KING]; parent1 = KING; }
-                else { prev1 = longest_straight_at[i-1]; parent1 = i-1; }
+            if (shortcut_active)
+            {
+                if (i == TWO)
+                {
+                    prev1 = ace_low_len;
+                    parent1 = ACE;
+                }
+                else if (i == THREE)
+                {
+                    prev1 = longest_straight_at[TWO];
+                    parent1 = TWO;
+                    prev2 = ace_low_len;
+                    parent2 = ACE;
+                }
+                else if (i == ACE)
+                {
+                    prev1 = longest_straight_at[KING];
+                    parent1 = KING;
+                    prev2 = longest_straight_at[QUEEN];
+                    parent2 = QUEEN;
+                }
+                else
+                {
+                    prev1 = longest_straight_at[i - 1];
+                    parent1 = i - 1;
+                    if (i > 1)
+                    {
+                        prev2 = longest_straight_at[i - 2];
+                        parent2 = i - 2;
+                    }
+                }
+            }
+            else
+            {
+                if (i == TWO)
+                {
+                    prev1 = ace_low_len;
+                    parent1 = ACE;
+                }
+                else if (i == ACE)
+                {
+                    prev1 = longest_straight_at[KING];
+                    parent1 = KING;
+                }
+                else
+                {
+                    prev1 = longest_straight_at[i - 1];
+                    parent1 = i - 1;
+                }
             }
 
             // Parallels longest_short_cut_at[i] = 1 + max(prev_len1, prev_len2);
             // in hand_contains_straight()
-            if(prev1 >= prev2) { longest_straight_at[i] = 1 + prev1; parent[i] = parent1; }
-            else { longest_straight_at[i] = 1 + prev2; parent[i] = parent2; }
+            if (prev1 >= prev2)
+            {
+                longest_straight_at[i] = 1 + prev1;
+                parent[i] = parent1;
+            }
+            else
+            {
+                longest_straight_at[i] = 1 + prev2;
+                parent[i] = parent2;
+            }
         }
     }
 
     // --- Find best straight and backtrack ---
     int best_len = 0;
     int end_rank = -1;
-    for (int i = 0; i < NUM_RANKS; i++) {
-        if (longest_straight_at[i] >= best_len) {
+    for (int i = 0; i < NUM_RANKS; i++)
+    {
+        if (longest_straight_at[i] >= best_len)
+        {
             best_len = longest_straight_at[i];
             end_rank = i;
         }
     }
 
-    if (best_len >= min_len) {
+    if (best_len >= min_len)
+    {
         u8 needed_ranks[NUM_RANKS] = {0};
         int current_rank = end_rank;
-        while (current_rank != -1 && best_len > 0) {
+        while (current_rank != -1 && best_len > 0)
+        {
             needed_ranks[current_rank]++;
             current_rank = parent[current_rank];
             best_len--;
         }
 
-        for (int i = 0; i <= top; i++) {
-            if (played[i] && played[i]->card && needed_ranks[played[i]->card->rank] > 0) {
+        for (int i = 0; i <= top; i++)
+        {
+            if (played[i] && played[i]->card && needed_ranks[played[i]->card->rank] > 0)
+            {
                 out_selection[i] = true;
                 needed_ranks[played[i]->card->rank]--;
             }
         }
 
         int final_card_count = 0;
-        for(int i=0; i<=top; i++) {
-            if(out_selection[i]) final_card_count++;
+        for (int i = 0; i <= top; i++)
+        {
+            if (out_selection[i])
+                final_card_count++;
         }
         return final_card_count;
     }
@@ -308,25 +412,32 @@ int find_straight_in_played_cards(CardObject** played, int top, bool shortcut_ac
 
 // This is used for the special case in "Four Fingers" where you can add a pair into a straight
 // (e.g. AA234 should score all 5 cards)
-void select_paired_cards_in_hand(CardObject** played, int played_top, bool* selection) {
+void select_paired_cards_in_hand(CardObject** played, int played_top, bool* selection)
+{
     // Build a set of ranks that are already selected
     bool rank_selected[NUM_RANKS] = {0};
     bool any_selected_rank = false;
 
-    for (int i = 0; i <= played_top; i++) {
-        if (selection[i] && played[i] && played[i]->card) {
+    for (int i = 0; i <= played_top; i++)
+    {
+        if (selection[i] && played[i] && played[i]->card)
+        {
             rank_selected[played[i]->card->rank] = true;
             any_selected_rank = true;
         }
     }
 
     // If no ranks were selected initially, nothing to do
-    if (!any_selected_rank) return;
+    if (!any_selected_rank)
+        return;
 
     // Add any unselected card to the selection if if shares a rank with the selected ranks
-    for (int i = 0; i <= played_top; i++) {
-        if (played[i] && played[i]->card && !selection[i]) {
-            if (rank_selected[played[i]->card->rank]) {
+    for (int i = 0; i <= played_top; i++)
+    {
+        if (played[i] && played[i]->card && !selection[i])
+        {
+            if (rank_selected[played[i]->card->rank])
+            {
                 selection[i] = true;
             }
         }

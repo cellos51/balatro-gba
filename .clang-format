@@ -34,7 +34,7 @@ SpaceBeforeParensOptions:
 AlignOperands: AlignAfterOperator
 BreakBeforeBinaryOperators: None
 
-IndentPPDirectives: AfterHash
+IndentPPDirectives: None
 AlignConsecutiveMacros: Consecutive
 
 BinPackArguments: false
@@ -48,3 +48,5 @@ ReflowComments: true
 SpacesInLineCommentPrefix:
   Minimum: 1
   Maximum: 1
+
+PenaltyReturnTypeOnItsOwnLine: 99999999
