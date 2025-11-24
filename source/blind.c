@@ -41,7 +41,7 @@ static Blind _blind_type_map[BLIND_TYPE_MAX] = {
 };
 // clang-format on
 
-static void _blind_gfx_init(enum BlindType type);
+static void s_blind_gfx_init(enum BlindType type);
 
 __attribute__((unused)) void blind_set_boss_graphics(const unsigned int* tiles, const u16* palette)
 {
@@ -55,14 +55,14 @@ __attribute__((unused)) void blind_set_boss_graphics(const unsigned int* tiles, 
 
     _blind_type_map[BLIND_TYPE_BOSS].gfx_info.tiles = tiles;
     _blind_type_map[BLIND_TYPE_BOSS].gfx_info.palette = palette;
-    _blind_gfx_init(BLIND_TYPE_BOSS);
+    s_blind_gfx_init(BLIND_TYPE_BOSS);
 }
 
 void blind_init()
 {
     for (int i = 0; i < BLIND_TYPE_MAX; i++)
     {
-        _blind_gfx_init(i);
+        s_blind_gfx_init(i);
     }
 
     return;
@@ -100,7 +100,7 @@ Sprite* blind_token_new(enum BlindType type, int x, int y, int sprite_index)
     return sprite;
 }
 
-static void _blind_gfx_init(enum BlindType type)
+static void s_blind_gfx_init(enum BlindType type)
 {
     // TODO: Re-add grit copy. You need to decouple the blind graphics first.
     // This will allow this function to change the boss graphics info
