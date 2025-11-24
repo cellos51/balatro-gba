@@ -20,6 +20,7 @@ jobs:
         run: >
           clang-format --dry-run -Werror 
           include/bitset.h source/bitset.c 
+          include/sprite.h source/sprite.c 
           include/splash_screen.h source/splash_screen.c 
         # Currently contains only the code that has been formatted to conform
         # When all existing code conforms, change to this:
