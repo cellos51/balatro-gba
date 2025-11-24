@@ -3,9 +3,9 @@
 
 #include <tonc.h>
 
-#define SPLASH_FPS 60
+#define SPLASH_FPS              60
 #define SPLASH_DURATION_SECONDS 10
-#define SPLASH_DURATION_FRAMES (SPLASH_FPS * SPLASH_DURATION_SECONDS)
+#define SPLASH_DURATION_FRAMES  (SPLASH_FPS * SPLASH_DURATION_SECONDS)
 
 void splash_screen_on_init();
 void splash_screen_on_update();
