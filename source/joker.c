@@ -52,18 +52,18 @@ static bool _used_layers[MAX_JOKER_OBJECTS] = {false}; // Track used layers for 
 static int _joker_spritesheet_pb_map[(MAX_DEFINABLE_JOKERS + 1) / NUM_JOKERS_PER_SPRITESHEET];
 static int _joker_pb_num_sprite_users[JOKER_LAST_PB - JOKER_BASE_PB + 1] = {0};
 
-static int _get_num_spritesheets(void);
-static int _joker_get_spritesheet_idx(u8 joker_id);
-static void _joker_pb_add_sprite_user(int pb);
-static void _joker_pb_remove_sprite_user(int pb);
-static int _joker_pb_get_num_sprite_users(int joker_pb);
-static int _get_unused_joker_pb(void);
-static int _allocate_pb_if_needed(u8 joker_id);
+static int s_get_num_spritesheets(void);
+static int s_joker_get_spritesheet_idx(u8 joker_id);
+static void s_joker_pb_add_sprite_user(int pb);
+static void s_joker_pb_remove_sprite_user(int pb);
+static int s_joker_pb_get_num_sprite_users(int joker_pb);
+static int s_get_unused_joker_pb(void);
+static int s_allocate_pb_if_needed(u8 joker_id);
 
 void joker_init()
 {
     // This should init once only so no need to free
-    int num_spritesheets = _get_num_spritesheets();
+    int num_spritesheets = s_get_num_spritesheets();
 
     for (int i = 0; i < num_spritesheets; i++)
     {
@@ -138,10 +138,10 @@ JokerObject* joker_object_new(Joker* joker)
 
     int tile_index = JOKER_TID + (layer * JOKER_SPRITE_OFFSET);
 
-    int joker_spritesheet_idx = _joker_get_spritesheet_idx(joker->id);
+    int joker_spritesheet_idx = s_joker_get_spritesheet_idx(joker->id);
     int joker_idx = joker->id % NUM_JOKERS_PER_SPRITESHEET;
-    int joker_pb = _allocate_pb_if_needed(joker->id);
-    _joker_pb_add_sprite_user(joker_pb);
+    int joker_pb = s_allocate_pb_if_needed(joker->id);
+    s_joker_pb_add_sprite_user(joker_pb);
 
     memcpy32(&tile_mem[4][tile_index],
              &joker_gfxTiles[joker_spritesheet_idx][joker_idx * TILE_SIZE * JOKER_SPRITE_OFFSET],
@@ -164,10 +164,10 @@ void joker_object_destroy(JokerObject** joker_object)
 
     int layer = sprite_get_layer(joker_object_get_sprite(*joker_object)) - JOKER_STARTING_LAYER;
     _used_layers[layer] = false;
-    _joker_pb_remove_sprite_user(sprite_get_pb(joker_object_get_sprite(*joker_object)));
-    if (_joker_pb_get_num_sprite_users((sprite_get_pb(joker_object_get_sprite(*joker_object)))) == 0)
+    s_joker_pb_remove_sprite_user(sprite_get_pb(joker_object_get_sprite(*joker_object)));
+    if (s_joker_pb_get_num_sprite_users((sprite_get_pb(joker_object_get_sprite(*joker_object)))) == 0)
     {
-        _joker_spritesheet_pb_map[_joker_get_spritesheet_idx((*joker_object)->joker->id)] = UNDEFINED;
+        _joker_spritesheet_pb_map[s_joker_get_spritesheet_idx((*joker_object)->joker->id)] = UNDEFINED;
     }
 
     sprite_object_destroy(&(*joker_object)->sprite_object); // Destroy the sprite
@@ -336,34 +336,34 @@ int joker_get_random_rarity()
     return joker_rarity;
 }
 
-static int _get_num_spritesheets()
+static int s_get_num_spritesheets()
 {
     return (get_joker_registry_size() + NUM_JOKERS_PER_SPRITESHEET - 1) / NUM_JOKERS_PER_SPRITESHEET;
 }
 
-static int _joker_get_spritesheet_idx(u8 joker_id)
+static int s_joker_get_spritesheet_idx(u8 joker_id)
 {
     return joker_id / NUM_JOKERS_PER_SPRITESHEET;
 }
 
 // TODO: This should be generalized so any sprite can have dynamic swapping
-static void _joker_pb_add_sprite_user(int pb)
+static void s_joker_pb_add_sprite_user(int pb)
 {
     _joker_pb_num_sprite_users[pb - JOKER_BASE_PB]++;
 }
 
-static void _joker_pb_remove_sprite_user(int pb)
+static void s_joker_pb_remove_sprite_user(int pb)
 {
     int num_sprite_users = _joker_pb_num_sprite_users[pb - JOKER_BASE_PB];
     _joker_pb_num_sprite_users[pb - JOKER_BASE_PB] = max(0, num_sprite_users - 1);
 }
 
-static int _joker_pb_get_num_sprite_users(int joker_pb)
+static int s_joker_pb_get_num_sprite_users(int joker_pb)
 {
     return _joker_pb_num_sprite_users[joker_pb - JOKER_BASE_PB];
 }
 
-static int _get_unused_joker_pb()
+static int s_get_unused_joker_pb()
 {
     for (int i = 0; i < NUM_ELEM_IN_ARR(_joker_pb_num_sprite_users); i++)
     {
@@ -376,9 +376,9 @@ static int _get_unused_joker_pb()
     return UNDEFINED;
 }
 
-static int _allocate_pb_if_needed(u8 joker_id)
+static int s_allocate_pb_if_needed(u8 joker_id)
 {
-    int joker_spritesheet_idx = _joker_get_spritesheet_idx(joker_id);
+    int joker_spritesheet_idx = s_joker_get_spritesheet_idx(joker_id);
     int joker_pb = _joker_spritesheet_pb_map[joker_spritesheet_idx];
     if (joker_pb != UNDEFINED)
     {
@@ -387,7 +387,7 @@ static int _allocate_pb_if_needed(u8 joker_id)
     }
 
     // Allocate a new palette
-    joker_pb = _get_unused_joker_pb();
+    joker_pb = s_get_unused_joker_pb();
 
     if (joker_pb == UNDEFINED)
     {
