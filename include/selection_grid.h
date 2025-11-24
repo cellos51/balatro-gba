@@ -27,7 +27,7 @@ struct SelectionGridRow
 
 struct SelectionGrid
 {
-    SelectionGridRow* rows;
+    const SelectionGridRow* rows;
     const int num_rows;
     Selection selection;
  };
