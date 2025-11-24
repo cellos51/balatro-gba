@@ -175,58 +175,58 @@ typedef struct
 
 typedef void (*SubStateActionFn)();
 
-static inline void _set_shop_joker_avail(int joker_id, bool avail);
-static inline bool _get_shop_joker_avail(int joker_id);
-static inline int _get_num_shop_jokers_avail(void);
-static inline void _reset_shop_jokers(void);
-static inline bool _no_avail_jokers(void);
-static inline void _played_push(CardObject* card_object);
+static inline void set_shop_joker_avail(int joker_id, bool avail);
+static inline bool get_shop_joker_avail(int joker_id);
+static inline int get_num_shop_jokers_avail(void);
+static inline void reset_shop_jokers(void);
+static inline bool no_avail_jokers(void);
+static inline void played_push(CardObject* card_object);
 static inline CardObject* played_pop(void);
-static inline void _deck_push(Card* card);
-static inline Card* _deck_pop(void);
-static inline void _discard_push(Card* card);
-static inline Card* _discard_pop(void);
-static inline void _reset_top_left_panel_bottom_row(void);
+static inline void deck_push(Card* card);
+static inline Card* deck_pop(void);
+static inline void discard_push(Card* card);
+static inline Card* discard_pop(void);
+static inline void reset_top_left_panel_bottom_row(void);
 
-static void _add_joker(JokerObject* joker_object);
-static void _remove_owned_joker(int owned_joker_idx);
-static void _set_seed(int seed);
-static void _sort_hand_by_suit(void);
-static void _sort_hand_by_rank(void);
-static void _sort_cards(void);
-static enum HandType _hand_get_type(void);
-static void _bg_copy_current_item_to_top_left_panel(void);
-static void _change_background(int id);
-static void _display_temp_score(u32 value);
-static void _display_score(u32 value);
-static void _display_money(int value);
-static void _check_flaming_score(void);
-static void _display_chips(void);
-static void _display_mult(void);
-static void _display_round(int value);
-static void _display_ante(int value);
-static void _display_hands(int value);
-static void _display_discards(int value);
-static void _set_hand(void);
-static void _card_draw(void);
-static void _hand_set_focus(int index);
-static void _hand_toggle_card_selection(void);
-static void _hand_deselect_all_cards(void);
-static void _hand_change_sort(void);
-static int _hand_get_max_size(void);
-static bool _hand_discard(void);
-static bool _hand_play(void);
-static int _deck_get_size(void);
-static int _deck_get_max_size(void);
-static void _deck_shuffle(void);
-static void _increment_blind(enum BlindState increment_reason);
+static void add_joker(JokerObject* joker_object);
+static void remove_owned_joker(int owned_joker_idx);
+static void set_seed(int seed);
+static void sort_hand_by_suit(void);
+static void sort_hand_by_rank(void);
+static void sort_cards(void);
+static enum HandType hand_get_type(void);
+static void bg_copy_current_item_to_top_left_panel(void);
+static void change_background(int id);
+static void display_temp_score(u32 value);
+static void display_score(u32 value);
+static void display_money(int value);
+static void check_flaming_score(void);
+static void display_chips(void);
+static void display_mult(void);
+static void display_round(int value);
+static void display_ante(int value);
+static void display_hands(int value);
+static void display_discards(int value);
+static void set_hand(void);
+static void card_draw(void);
+static void hand_set_focus(int index);
+static void hand_toggle_card_selection(void);
+static void hand_deselect_all_cards(void);
+static void hand_change_sort(void);
+static int hand_get_max_size(void);
+static bool hand_discard(void);
+static bool hand_play(void);
+static int deck_get_size(void);
+static int deck_get_max_size(void);
+static void deck_shuffle(void);
+static void increment_blind(enum BlindState increment_reason);
 
 // Used as a No Operation for game states that have no init and/or exit function.
 // ricfehr3 did the work of determining whether a noop or a NULL check was more
 // efficient. Well, this is the answer.
 // Thanks!
 // https://github.com/cellos51/balatro-gba/issues/137#issuecomment-3322485129
-static void _noop(void)
+static void noop(void)
 {
 }
 
@@ -236,121 +236,121 @@ static void _noop(void)
 // This could be done, and maybe should be done,
 // with an X macro, but I'll leave that to the
 // reviewer(s).
-static void _game_main_menu_on_init(void);
-static void _game_main_menu_on_update(void);
+static void game_main_menu_on_init(void);
+static void game_main_menu_on_update(void);
 
-static void _game_playing_on_update(void);
-static void _game_round_on_init(void);
+static void game_playing_on_update(void);
+static void game_round_on_init(void);
 
-static void _game_round_end_on_update(void);
-static void _game_round_end_on_exit(void);
+static void game_round_end_on_update(void);
+static void game_round_end_on_exit(void);
 
-static void _game_shop_on_update(void);
-static void _game_shop_on_exit(void);
+static void game_shop_on_update(void);
+static void game_shop_on_exit(void);
 
-static void _game_blind_select_on_update(void);
-static void _game_blind_select_on_exit(void);
+static void game_blind_select_on_update(void);
+static void game_blind_select_on_exit(void);
 
-static void _game_lose_on_init(void);
-static void _game_lose_on_update(void);
+static void game_lose_on_init(void);
+static void game_lose_on_update(void);
 
-static void _game_over_init(void);
-static void _game_over_on_exit(void);
+static void game_over_init(void);
+static void game_over_on_exit(void);
 
-static void _game_win_on_init(void);
-static void _game_win_on_update(void);
+static void game_win_on_init(void);
+static void game_win_on_update(void);
 
-static void _game_shop_intro(void);
-static void _game_shop_process_user_input(void);
-static void _game_shop_outro(void);
+static void game_shop_intro(void);
+static void game_shop_process_user_input(void);
+static void game_shop_outro(void);
 
-static void _game_blind_select_start_anim_seq(void);
-static void _game_blind_select_handle_input(void);
-static void _game_blind_select_selected_anim_seq(void);
-static void _game_blind_select_display_blind_panel(void);
+static void game_blind_select_start_anim_seq(void);
+static void game_blind_select_handle_input(void);
+static void game_blind_select_selected_anim_seq(void);
+static void game_blind_select_display_blind_panel(void);
 
-static void _game_round_end_start(void);
-static void _game_round_end_start_expand_popup(void);
-static void _game_round_end_display_finished_blind(void);
-static void _game_round_end_display_score_min(void);
-static void _game_round_end_update_blind_reward(void);
-static void _game_round_end_panel_exit(void);
-static void _game_round_end_display_rewards(void);
-static void _game_round_end_display_cashout(void);
-static void _game_round_end_dismiss_round_end_panel(void);
+static void game_round_end_start(void);
+static void game_round_end_start_expand_popup(void);
+static void game_round_end_display_finished_blind(void);
+static void game_round_end_display_score_min(void);
+static void game_round_end_update_blind_reward(void);
+static void game_round_end_panel_exit(void);
+static void game_round_end_display_rewards(void);
+static void game_round_end_display_cashout(void);
+static void game_round_end_dismiss_round_end_panel(void);
 
-static void _jokers_available_to_shop_init(void);
-static void _game_start(void);
-static void _game_playing_process_hand_select_input(void);
-static void _game_playing_process_input_and_state(void);
-static void _game_playing_process_card_draw(void);
-static bool _game_round_is_over(void);
-static void _game_playing_handle_round_over(void);
-static void _game_playing_discarded_cards_loop(void);
-static void _card_in_hand_loop_handle_discard_and_shuffling(int card_idx,
-                                                            FIXED* hand_x,
-                                                            FIXED* hand_y,
-                                                            bool* break_loop);
-static void _select_flush_and_straight_cards_in_played_hand(void);
-static void _select_all_five_cards_in_played_hand(void);
-static void _select_four_of_a_kind_cards_in_played_hand(void);
-static void _select_three_of_a_kind_cards_in_played_hand(void);
-static void _select_two_pair_cards_in_played_hand(void);
-static void _select_pair_cards_in_played_hand(void);
-static void _select_highcard_cards_in_played_hand(void);
-static void _cards_in_hand_update_loop(void);
-static bool _check_and_score_joker_for_event(ListItr* starting_joker_itr,
-                                             CardObject* card_object,
-                                             enum JokerEvent joker_event);
-static void _play_starting_played_cards_update(int played_idx);
-static bool _play_before_scoring_cards_update(void);
-static bool _play_scoring_cards_update(void);
-static bool _play_scoring_card_jokers_update(void);
-static bool _play_scoring_held_cards_update(int played_idx);
-static bool _play_scoring_independent_jokers_update(int played_idx);
-static void _play_ending_played_cards_update(int played_idx);
-static bool _play_ended_played_cards_update(int played_idx);
-static void _played_cards_update_loop(void);
-static void _game_playing_ui_text_update(void);
-static void _game_playing_process_flaming_score(void);
-static int _calculate_interest_reward(void);
-static void _game_round_end_cashout(void);
-static void _game_round_end_extend_black_panel_down(int black_panel_bottom);
-static void _game_round_end_print_separator_ellipsis(void);
-static void _game_round_end_print_hand_reward(int hand_y_offset);
-static void _game_round_end_print_interest_reward(int interest_y_offset);
-static void _print_price_under_sprite_object(SpriteObject* sprite_object, int price);
-static void _erase_price_under_sprite_object(SpriteObject* sprite_object);
-static int _game_shop_get_rand_available_joker_id(void);
-static void _game_shop_create_items(void);
-static void _game_shop_reroll(int* reroll_cost);
-static int _jokers_sel_row_get_size(void);
-static void _jokers_sel_row_on_selection_changed(SelectionGrid* selection_grid,
+static void jokers_available_to_shop_init(void);
+static void game_start(void);
+static void game_playing_process_hand_select_input(void);
+static void game_playing_process_input_and_state(void);
+static void game_playing_process_card_draw(void);
+static bool game_round_is_over(void);
+static void game_playing_handle_round_over(void);
+static void game_playing_discarded_cards_loop(void);
+static void card_in_hand_loop_handle_discard_and_shuffling(int card_idx,
+                                                           FIXED* hand_x,
+                                                           FIXED* hand_y,
+                                                           bool* break_loop);
+static void select_flush_and_straight_cards_in_played_hand(void);
+static void select_all_five_cards_in_played_hand(void);
+static void select_four_of_a_kind_cards_in_played_hand(void);
+static void select_three_of_a_kind_cards_in_played_hand(void);
+static void select_two_pair_cards_in_played_hand(void);
+static void select_pair_cards_in_played_hand(void);
+static void select_highcard_cards_in_played_hand(void);
+static void cards_in_hand_update_loop(void);
+static bool check_and_score_joker_for_event(ListItr* starting_joker_itr,
+                                            CardObject* card_object,
+                                            enum JokerEvent joker_event);
+static void play_starting_played_cards_update(int played_idx);
+static bool play_before_scoring_cards_update(void);
+static bool play_scoring_cards_update(void);
+static bool play_scoring_card_jokers_update(void);
+static bool play_scoring_held_cards_update(int played_idx);
+static bool play_scoring_independent_jokers_update(int played_idx);
+static void play_ending_played_cards_update(int played_idx);
+static bool play_ended_played_cards_update(int played_idx);
+static void played_cards_update_loop(void);
+static void game_playing_ui_text_update(void);
+static void game_playing_process_flaming_score(void);
+static int calculate_interest_reward(void);
+static void game_round_end_cashout(void);
+static void game_round_end_extend_black_panel_down(int black_panel_bottom);
+static void game_round_end_print_separator_ellipsis(void);
+static void game_round_end_print_hand_reward(int hand_y_offset);
+static void game_round_end_print_interest_reward(int interest_y_offset);
+static void print_price_under_sprite_object(SpriteObject* sprite_object, int price);
+static void erase_price_under_sprite_object(SpriteObject* sprite_object);
+static int game_shop_get_rand_available_joker_id(void);
+static void game_shop_create_items(void);
+static void game_shop_reroll(int* reroll_cost);
+static int jokers_sel_row_get_size(void);
+static void jokers_sel_row_on_selection_changed(SelectionGrid* selection_grid,
+                                                int row_idx,
+                                                const Selection* prev_selection,
+                                                const Selection* new_selection);
+static void joker_start_discard_animation(JokerObject* joker_object);
+static void game_sell_joker(int joker_idx);
+static void jokers_sel_row_on_key_hit(SelectionGrid* selection_grid, Selection* selection);
+static int shop_top_row_get_size(void);
+static void add_to_held_jokers(JokerObject* joker_object);
+static void game_shop_buy_joker(int shop_joker_idx);
+static void shop_top_row_on_key_hit(SelectionGrid* selection_grid, Selection* selection);
+static void shop_top_row_on_selection_changed(SelectionGrid* selection_grid,
+                                              int row_idx,
+                                              const Selection* prev_selection,
+                                              const Selection* new_selection);
+static int shop_reroll_row_get_size(void);
+static void shop_reroll_row_on_selection_changed(SelectionGrid* selection_grid,
                                                  int row_idx,
                                                  const Selection* prev_selection,
                                                  const Selection* new_selection);
-static void _joker_start_discard_animation(JokerObject* joker_object);
-static void _game_sell_joker(int joker_idx);
-static void _jokers_sel_row_on_key_hit(SelectionGrid* selection_grid, Selection* selection);
-static int _shop_top_row_get_size(void);
-static void _add_to_held_jokers(JokerObject* joker_object);
-static void _game_shop_buy_joker(int shop_joker_idx);
-static void _shop_top_row_on_key_hit(SelectionGrid* selection_grid, Selection* selection);
-static void _shop_top_row_on_selection_changed(SelectionGrid* selection_grid,
-                                               int row_idx,
-                                               const Selection* prev_selection,
-                                               const Selection* new_selection);
-static int _shop_reroll_row_get_size(void);
-static void _shop_reroll_row_on_selection_changed(SelectionGrid* selection_grid,
-                                                  int row_idx,
-                                                  const Selection* prev_selection,
-                                                  const Selection* new_selection);
-static void _shop_reroll_row_on_key_hit(SelectionGrid* selection_grid, Selection* selection);
-static void _game_shop_lights_anim_frame(void);
-static void _discarded_jokers_update_loop(void);
-static void _held_jokers_update_loop(void);
-static void _jokers_update_loop(void);
-static void _game_over_anim_frame(void);
+static void shop_reroll_row_on_key_hit(SelectionGrid* selection_grid, Selection* selection);
+static void game_shop_lights_anim_frame(void);
+static void discarded_jokers_update_loop(void);
+static void held_jokers_update_loop(void);
+static void jokers_update_loop(void);
+static void game_over_anim_frame(void);
 
 // Rects                                       left     top     right   bottom
 // Screenblock rects
@@ -451,9 +451,9 @@ static StateInfo _state_info[] = {
 };
 
 static const SelectionGridRow _shop_selection_rows[] = {
-    {0, _jokers_sel_row_get_size,  _jokers_sel_row_on_selection_changed,  _jokers_sel_row_on_key_hit },
-    {1, _shop_top_row_get_size,    _shop_top_row_on_selection_changed,    _shop_top_row_on_key_hit   },
-    {2, _shop_reroll_row_get_size, _shop_reroll_row_on_selection_changed, _shop_reroll_row_on_key_hit}
+    {0, jokers_sel_row_get_size,  jokers_sel_row_on_selection_changed,  jokers_sel_row_on_key_hit },
+    {1, shop_top_row_get_size,    shop_top_row_on_selection_changed,    shop_top_row_on_key_hit   },
+    {2, shop_reroll_row_get_size, shop_reroll_row_on_selection_changed, shop_reroll_row_on_key_hit}
 };
 
 static const Selection _SHOP_INIT_SEL = {-1, 1};
@@ -479,24 +479,22 @@ static const HandValues _HAND_BASE_VALUES[] = {
     {.chips = 160, .mult = 16, .display_name = "FLUSH 5"}  // FLUSH_FIVE
 };
 
-static const SubStateActionFn _shop_state_actions[] = {_game_shop_intro,
-                                                       _game_shop_process_user_input,
-                                                       _game_shop_outro};
+static const SubStateActionFn _shop_state_actions[] = {game_shop_intro, game_shop_process_user_input, game_shop_outro};
 
-static const SubStateActionFn _blind_select_state_actions[] = {_game_blind_select_start_anim_seq,
-                                                               _game_blind_select_handle_input,
-                                                               _game_blind_select_selected_anim_seq,
-                                                               _game_blind_select_display_blind_panel};
+static const SubStateActionFn _blind_select_state_actions[] = {game_blind_select_start_anim_seq,
+                                                               game_blind_select_handle_input,
+                                                               game_blind_select_selected_anim_seq,
+                                                               game_blind_select_display_blind_panel};
 
-static const SubStateActionFn _round_end_state_actions[] = {_game_round_end_start,
-                                                            _game_round_end_start_expand_popup,
-                                                            _game_round_end_display_finished_blind,
-                                                            _game_round_end_display_score_min,
-                                                            _game_round_end_update_blind_reward,
-                                                            _game_round_end_panel_exit,
-                                                            _game_round_end_display_rewards,
-                                                            _game_round_end_display_cashout,
-                                                            _game_round_end_dismiss_round_end_panel};
+static const SubStateActionFn _round_end_state_actions[] = {game_round_end_start,
+                                                            game_round_end_start_expand_popup,
+                                                            game_round_end_display_finished_blind,
+                                                            game_round_end_display_score_min,
+                                                            game_round_end_update_blind_reward,
+                                                            game_round_end_panel_exit,
+                                                            game_round_end_display_rewards,
+                                                            game_round_end_display_cashout,
+                                                            game_round_end_dismiss_round_end_panel};
 
 static uint _rng_seed = 0;
 
@@ -616,7 +614,7 @@ void game_init()
     // TODO: Move this to an initialization of the play scoring states
     _joker_scored_itr = list_itr_create(&_owned_jokers_list);
 
-    _jokers_available_to_shop_init();
+    jokers_available_to_shop_init();
 
     _hands = _max_hands;
     _discards = _max_discards;
@@ -652,7 +650,7 @@ void game_update()
 {
     _timer++;
 
-    _jokers_update_loop();
+    jokers_update_loop();
 
     _state_info[_game_state].on_update();
 }
@@ -774,22 +772,22 @@ int get_straight_and_flush_size(void)
     return straight_and_flush_size;
 }
 
-static inline void _set_shop_joker_avail(int joker_id, bool avail)
+static inline void set_shop_joker_avail(int joker_id, bool avail)
 {
     bitset_set_idx(&_avail_jokers_bitset, joker_id, avail);
 }
 
-__attribute__((unused)) static inline bool _get_shop_joker_avail(int joker_id)
+__attribute__((unused)) static inline bool get_shop_joker_avail(int joker_id)
 {
     return bitset_get_idx(&_avail_jokers_bitset, joker_id);
 }
 
-static inline int _get_num_shop_jokers_avail()
+static inline int get_num_shop_jokers_avail()
 {
     return bitset_num_set_bits(&_avail_jokers_bitset);
 }
 
-static inline void _reset_shop_jokers()
+static inline void reset_shop_jokers()
 {
     int num_jokers = get_joker_registry_size();
     bitset_clear(&_avail_jokers_bitset);
@@ -799,13 +797,13 @@ static inline void _reset_shop_jokers()
     }
 }
 
-static inline bool _no_avail_jokers()
+static inline bool no_avail_jokers()
 {
     return bitset_is_empty(&_avail_jokers_bitset);
 }
 
 // Played stack
-static inline void _played_push(CardObject* card_object)
+static inline void played_push(CardObject* card_object)
 {
     if (_played_top >= MAX_SELECTION_SIZE - 1)
         return;
@@ -820,14 +818,14 @@ static inline CardObject* played_pop()
 }
 
 // Deck stack
-static inline void _deck_push(Card* card)
+static inline void deck_push(Card* card)
 {
     if (_deck_top >= MAX_DECK_SIZE - 1)
         return;
     _deck[++_deck_top] = card;
 }
 
-static inline Card* _deck_pop()
+static inline Card* deck_pop()
 {
     if (_deck_top < 0)
         return NULL;
@@ -835,14 +833,14 @@ static inline Card* _deck_pop()
 }
 
 // Discard stack
-static inline void _discard_push(Card* card)
+static inline void discard_push(Card* card)
 {
     if (_discard_top >= MAX_DECK_SIZE - 1)
         return;
     _discard_pile[++_discard_top] = card;
 }
 
-static inline Card* _discard_pop()
+static inline Card* discard_pop()
 {
     if (_discard_top < 0)
         return NULL;
@@ -851,7 +849,7 @@ static inline Card* _discard_pop()
 
 // Resets bottom row bg tiles of the top left panel (shop/blind) after
 // it is dismissed to match the rest of the game panel background.
-static inline void _reset_top_left_panel_bottom_row()
+static inline void reset_top_left_panel_bottom_row()
 {
     int y = 6;
 
@@ -863,7 +861,7 @@ static inline void _reset_top_left_panel_bottom_row()
     memset16(&se_mem[MAIN_BG_SBB][8 + 32 * (y - 1)], 0x0406, 1);
 }
 
-static void _add_joker(JokerObject* joker_object)
+static void add_joker(JokerObject* joker_object)
 {
     list_push_back(&_owned_jokers_list, joker_object);
 
@@ -885,7 +883,7 @@ static void _add_joker(JokerObject* joker_object)
     }
 }
 
-static void _remove_owned_joker(int owned_joker_idx)
+static void remove_owned_joker(int owned_joker_idx)
 {
     // TODO: Extract to on_joker_removed() callback
     JokerObject* joker_object = list_get_at_idx(&_owned_jokers_list, owned_joker_idx);
@@ -905,18 +903,18 @@ static void _remove_owned_joker(int owned_joker_idx)
         _shortcut_joker_count--;
     }
 
-    _set_shop_joker_avail(joker_object->joker->id, true);
+    set_shop_joker_avail(joker_object->joker->id, true);
     list_remove_at_idx(&_owned_jokers_list, owned_joker_idx);
 }
 
 // General functions
-static void _set_seed(int seed)
+static void set_seed(int seed)
 {
     _rng_seed = seed;
     srand(_rng_seed);
 }
 
-static void _sort_hand_by_suit()
+static void sort_hand_by_suit()
 {
     for (int a = 0; a < _hand_top; a++)
     {
@@ -934,7 +932,7 @@ static void _sort_hand_by_suit()
     }
 }
 
-static void _sort_hand_by_rank()
+static void sort_hand_by_rank()
 {
     for (int a = 0; a < _hand_top; a++)
     {
@@ -950,15 +948,15 @@ static void _sort_hand_by_rank()
     }
 }
 
-static void _sort_cards()
+static void sort_cards()
 {
     if (sort_by_suit)
     {
-        _sort_hand_by_suit();
+        sort_hand_by_suit();
     }
     else
     {
-        _sort_hand_by_rank();
+        sort_hand_by_rank();
     }
 
     // Update the sprites in the hand by destroying them and creating new ones in the correct order
@@ -986,7 +984,7 @@ static void _sort_cards()
     }
 }
 
-static enum HandType _hand_get_type()
+static enum HandType hand_get_type()
 {
     enum HandType res_hand_type = NONE;
 
@@ -1080,12 +1078,12 @@ static enum HandType _hand_get_type()
 /* Copies the appropriate item into the top left panel (blind/shop icon)
  * from where it was put outside the screenview
  */
-static void _bg_copy_current_item_to_top_left_panel()
+static void bg_copy_current_item_to_top_left_panel()
 {
     main_bg_se_copy_rect(TOP_LEFT_ITEM_SRC_RECT, TOP_LEFT_PANEL_POINT);
 }
 
-static void _change_background(int id)
+static void change_background(int id)
 {
     if (_background == id)
     {
@@ -1124,7 +1122,7 @@ static void _change_background(int id)
                 affine_background_set_color(blind_get_color(BLIND_TYPE_BOSS, BLIND_SHADOW_COLOR_INDEX));
             }
 
-            _bg_copy_current_item_to_top_left_panel();
+            bg_copy_current_item_to_top_left_panel();
 
             // This would change the palette of the background to match the blind, but the backgroun doesn't use the
             // blind token's exact colors so a different approach is required
@@ -1147,7 +1145,7 @@ static void _change_background(int id)
     {
         if (_background != BG_ID_CARD_SELECTING)
         {
-            _change_background(BG_ID_CARD_SELECTING);
+            change_background(BG_ID_CARD_SELECTING);
             _background = BG_ID_CARD_PLAYING;
         }
 
@@ -1165,7 +1163,7 @@ static void _change_background(int id)
     {
         if (_background != BG_ID_CARD_SELECTING && _background != BG_ID_CARD_PLAYING)
         {
-            _change_background(BG_ID_CARD_SELECTING);
+            change_background(BG_ID_CARD_SELECTING);
             _background = BG_ID_ROUND_END;
         }
 
@@ -1341,14 +1339,14 @@ static void _change_background(int id)
     _background = id;
 }
 
-static void _display_temp_score(u32 value)
+static void display_temp_score(u32 value)
 {
     int x_offset = 40 - get_digits_even(value) * TILE_SIZE;
     tte_erase_rect_wrapper(TEMP_SCORE_RECT);
     tte_printf("#{P:%d,%d; cx:0x%X000}%lu", x_offset, TEMP_SCORE_RECT.top, TTE_WHITE_PB, value);
 }
 
-static void _display_score(u32 value)
+static void display_score(u32 value)
 {
     // Clear the existing text before redrawing
     tte_erase_rect_wrapper(SCORE_RECT);
@@ -1377,7 +1375,7 @@ static void _display_score(u32 value)
     tte_printf("#{P:%d,48; cx:0x%X000}%lu%c", x_offset, TTE_WHITE_PB, display_value, score_suffix);
 }
 
-static void _display_money(int value)
+static void display_money(int value)
 {
     int x_offset = 32 - get_digits_odd(value) * TILE_SIZE;
     tte_erase_rect_wrapper(MONEY_TEXT_RECT);
@@ -1386,7 +1384,7 @@ static void _display_money(int value)
 
 // Show/Hide flaming score effect if we will score
 // more than the required amount or not
-static void _check_flaming_score()
+static void check_flaming_score()
 {
     int curr_score = _chips * _mult;
     int required_score = blind_get_requirement(_current_blind, _ante);
@@ -1409,40 +1407,40 @@ static void _check_flaming_score()
     }
 }
 
-static void _display_chips()
+static void display_chips()
 {
     Rect chips_text_rect = CHIPS_TEXT_RECT;
     tte_erase_rect_wrapper(CHIPS_TEXT_RECT);
     update_text_rect_to_right_align_num(&chips_text_rect, _chips, OVERFLOW_LEFT);
     tte_printf("#{P:%d,%d; cx:0x%X000;}%lu", chips_text_rect.left, chips_text_rect.top, TTE_WHITE_PB, _chips);
-    _check_flaming_score();
+    check_flaming_score();
 }
 
-static void _display_mult()
+static void display_mult()
 {
     tte_erase_rect_wrapper(MULT_TEXT_RECT);
     tte_printf("#{P:%d,%d; cx:0x%X000;}%lu", MULT_TEXT_RECT.left, MULT_TEXT_RECT.top, TTE_WHITE_PB, _mult);
-    _check_flaming_score();
+    check_flaming_score();
 }
 
-static void _display_round(int value)
+static void display_round(int value)
 {
     // tte_erase_rect_wrapper(ROUND_TEXT_RECT);
     tte_printf("#{P:%d,%d; cx:0x%X000}%d", ROUND_TEXT_RECT.left, ROUND_TEXT_RECT.top, TTE_YELLOW_PB, _round);
 }
 
-static void _display_ante(int value)
+static void display_ante(int value)
 {
     tte_printf("#{P:%d,%d; cx:0xC000}%d#{cx:0xF000}/%d", ANTE_TEXT_RECT.left, ANTE_TEXT_RECT.top, value, MAX_ANTE);
 }
 
-static void _display_hands(int value)
+static void display_hands(int value)
 {
     // tte_erase_rect_wrapper(HANDS_TEXT_RECT);
     tte_printf("#{P:%d,%d; cx:0xD000}%d", HANDS_TEXT_RECT.left, HANDS_TEXT_RECT.top, _hands); // Hand
 }
 
-static void _display_discards(int value)
+static void display_discards(int value)
 {
     // tte_erase_rect_wrapper(DISCARDS_TEXT_RECT);
     tte_printf("#{P:%d,%d; cx:0xE000}%d", DISCARDS_TEXT_RECT.left, DISCARDS_TEXT_RECT.top, _discards); // Discard
@@ -1455,10 +1453,10 @@ static void print_hand_type(const char* hand_type_str)
     tte_printf("#{P:%d,%d; cx:0x%X000}%s", HAND_TYPE_RECT.left, HAND_TYPE_RECT.top, TTE_WHITE_PB, hand_type_str);
 }
 
-static void _set_hand()
+static void set_hand()
 {
     tte_erase_rect_wrapper(HAND_TYPE_RECT);
-    _hand_type = _hand_get_type();
+    _hand_type = hand_get_type();
 
     HandValues hand = _HAND_BASE_VALUES[_hand_type];
 
@@ -1466,16 +1464,16 @@ static void _set_hand()
     _mult = hand.mult;
 
     print_hand_type(hand.display_name);
-    _display_chips();
-    _display_mult();
+    display_chips();
+    display_mult();
 }
 
-static void _card_draw()
+static void card_draw()
 {
     if (_deck_top < 0 || _hand_top >= _hand_size - 1 || _hand_top >= MAX_HAND_SIZE - 1)
         return;
 
-    CardObject* card_object = card_object_new(_deck_pop());
+    CardObject* card_object = card_object_new(deck_pop());
 
     const FIXED deck_x = int2fx(CARD_DRAW_POS.x);
     const FIXED deck_y = int2fx(CARD_DRAW_POS.y);
@@ -1486,12 +1484,12 @@ static void _card_draw()
     _hand[++_hand_top] = card_object;
 
     // Sort the hand after drawing a card
-    _sort_cards();
+    sort_cards();
 
     play_sfx(SFX_CARD_DRAW, MM_BASE_PITCH_RATE + _cards_drawn * PITCH_STEP_DRAW_SFX);
 }
 
-static void _hand_set_focus(int index)
+static void hand_set_focus(int index)
 {
     if (_hand_state != HAND_SELECT)
         return;
@@ -1513,7 +1511,7 @@ static void _hand_set_focus(int index)
     play_sfx(SFX_CARD_FOCUS, MM_BASE_PITCH_RATE + rand() % 512);
 }
 
-static void _hand_toggle_card_selection()
+static void hand_toggle_card_selection()
 {
     if (_hand_state != HAND_SELECT || _hand[_selection_x] == NULL)
         return;
@@ -1532,7 +1530,7 @@ static void _hand_toggle_card_selection()
     }
 }
 
-static void _hand_deselect_all_cards()
+static void hand_deselect_all_cards()
 {
     bool any_cards_deselected = false;
     for (int i = 0; i <= get_hand_top(); i++)
@@ -1551,43 +1549,43 @@ static void _hand_deselect_all_cards()
     }
 }
 
-static void _hand_change_sort()
+static void hand_change_sort()
 {
     sort_by_suit = !sort_by_suit;
-    _sort_cards();
+    sort_cards();
 }
 
-static int _hand_get_max_size()
+static int hand_get_max_size()
 {
     return _hand_size;
 }
 
-static bool _hand_discard()
+static bool hand_discard()
 {
     if (_hand_state != HAND_SELECT || _hand_selections == 0)
         return false;
     return true;
 }
 
-static bool _hand_play()
+static bool hand_play()
 {
     if (_hand_state != HAND_SELECT || _hand_selections == 0)
         return false;
     return true;
 }
 
-static int _deck_get_size()
+static int deck_get_size()
 {
     return _deck_top + 1;
 }
 
-static int _deck_get_max_size()
+static int deck_get_max_size()
 {
     // This is the max amount of cards that the player currently has in their possession
     return _hand_top + _played_top + _deck_top + _discard_top + 4;
 }
 
-static void _deck_shuffle()
+static void deck_shuffle()
 {
     for (int i = _deck_top; i > 0; i--)
     {
@@ -1598,7 +1596,7 @@ static void _deck_shuffle()
     }
 }
 
-static void _increment_blind(enum BlindState increment_reason)
+static void increment_blind(enum BlindState increment_reason)
 {
     _current_blind++;
     if (_current_blind >= BLIND_TYPE_MAX)
@@ -1615,10 +1613,10 @@ static void _increment_blind(enum BlindState increment_reason)
     }
 }
 
-static void _game_main_menu_on_init()
+static void game_main_menu_on_init()
 {
     affine_background_change_background(AFFINE_BG_MAIN_MENU);
-    _change_background(BG_ID_MAIN_MENU);
+    change_background(BG_ID_MAIN_MENU);
     _main_menu_ace = card_object_new(card_new(SPADES, ACE));
     card_object_set_sprite(_main_menu_ace, 0);                          // Set the sprite for the ace of spades
     _main_menu_ace->sprite_object->sprite->obj->attr0 |= ATTR0_AFF_DBL; // Make the sprite double sized
@@ -1629,9 +1627,9 @@ static void _game_main_menu_on_init()
     _main_menu_ace->sprite_object->tscale = float2fx(0.8f);
 }
 
-static void _game_main_menu_on_update()
+static void game_main_menu_on_update()
 {
-    _change_background(BG_ID_MAIN_MENU);
+    change_background(BG_ID_MAIN_MENU);
 
     card_object_update(_main_menu_ace);
     _main_menu_ace->sprite_object->trotation = lu_sin((_timer << 8) / 2) / 3;
@@ -1667,7 +1665,7 @@ static void _game_main_menu_on_update()
         if (key_hit(KEY_A))
         {
             // Start the game
-            _game_start();
+            game_start();
         }
     }
     else
@@ -1677,38 +1675,38 @@ static void _game_main_menu_on_update()
     }
 }
 
-static void _game_playing_on_update()
+static void game_playing_on_update()
 {
     // Background logic (thissss might be moved to the card'ssss logic later. I'm a sssssnake)
     if (_hand_state == HAND_DRAW || _hand_state == HAND_DISCARD || _hand_state == HAND_SELECT)
     {
-        _change_background(BG_ID_CARD_SELECTING);
+        change_background(BG_ID_CARD_SELECTING);
     }
     else if (_hand_state != HAND_SHUFFLING)
     {
-        _change_background(BG_ID_CARD_PLAYING);
+        change_background(BG_ID_CARD_PLAYING);
     }
 
-    _game_playing_process_input_and_state();
+    game_playing_process_input_and_state();
 
     // Card logic
 
-    _game_playing_process_card_draw();
+    game_playing_process_card_draw();
 
-    _game_playing_discarded_cards_loop();
+    game_playing_discarded_cards_loop();
 
     _discarded_card = false;
 
-    _cards_in_hand_update_loop();
-    _played_cards_update_loop();
+    cards_in_hand_update_loop();
+    played_cards_update_loop();
 
-    _game_playing_ui_text_update();
+    game_playing_ui_text_update();
 
     // animate score flames if we exceed the score requirement
-    _game_playing_process_flaming_score();
+    game_playing_process_flaming_score();
 }
 
-static void _game_round_on_init()
+static void game_round_on_init()
 {
     _hand_state = HAND_DRAW;
     _cards_drawn = 0;
@@ -1768,10 +1766,10 @@ static void _game_round_on_init()
                TTE_YELLOW_PB,
                blind_get_reward(_current_blind)); // Blind reward
 
-    _deck_shuffle(); // Shuffle the deck at the start of the round
+    deck_shuffle(); // Shuffle the deck at the start of the round
 }
 
-static void _game_round_end_on_update()
+static void game_round_end_on_update()
 {
     if (_state_info[_game_state].substate == ROUND_END_EXIT)
     {
@@ -1783,7 +1781,7 @@ static void _game_round_end_on_update()
     _round_end_state_actions[substate]();
 }
 
-static void _game_round_end_on_exit()
+static void game_round_end_on_exit()
 {
     // Cleanup blind tokens from this round to avoid accumulating
     // allocated blind sprites each round
@@ -1795,9 +1793,9 @@ static void _game_round_end_on_exit()
     // TODO: Reuse sprites for blind selection?
 }
 
-static void _game_shop_on_update()
+static void game_shop_on_update()
 {
-    _change_background(BG_ID_SHOP);
+    change_background(BG_ID_SHOP);
 
     if (!list_is_empty(&_shop_jokers_list))
     {
@@ -1814,7 +1812,7 @@ static void _game_shop_on_update()
 
     if (_timer % 20 == 0)
     {
-        _game_shop_lights_anim_frame();
+        game_shop_lights_anim_frame();
     }
 
     if (_state_info[_game_state].substate == GAME_SHOP_MAX)
@@ -1828,7 +1826,7 @@ static void _game_shop_on_update()
     _shop_state_actions[substate]();
 }
 
-static void _game_shop_on_exit()
+static void game_shop_on_exit()
 {
     ListItr itr = list_itr_create(&_shop_jokers_list);
     JokerObject* joker_object;
@@ -1838,17 +1836,17 @@ static void _game_shop_on_exit()
         if (joker_object != NULL)
         {
             // Make the joker available back to shop
-            _set_shop_joker_avail(joker_object->joker->id, true);
+            set_shop_joker_avail(joker_object->joker->id, true);
         }
         joker_object_destroy(&joker_object); // Destroy the joker objects
     }
 
     list_clear(&_shop_jokers_list);
 
-    _increment_blind(BLIND_STATE_DEFEATED); // TODO: Move to game_round_end()?
+    increment_blind(BLIND_STATE_DEFEATED); // TODO: Move to game_round_end()?
 }
 
-static void _game_blind_select_on_update()
+static void game_blind_select_on_update()
 {
     if (_state_info[_game_state].substate == BLIND_SELECT_MAX)
     {
@@ -1860,24 +1858,24 @@ static void _game_blind_select_on_update()
     _blind_select_state_actions[substate]();
 }
 
-static void _game_blind_select_on_exit()
+static void game_blind_select_on_exit()
 {
     _selection_y = 0;
     _background = UNDEFINED;
 }
 
-static void _game_lose_on_init()
+static void game_lose_on_init()
 {
-    _game_over_init();
+    game_over_init();
     // Using the text color to match the "Game Over" text
     affine_background_set_color(TEXT_CLR_RED);
 }
 
-static void _game_lose_on_update()
+static void game_lose_on_update()
 {
     if (_timer < GAME_OVER_ANIM_FRAMES)
     {
-        _game_over_anim_frame();
+        game_over_anim_frame();
     }
     else if (_timer == GAME_OVER_ANIM_FRAMES)
     {
@@ -1891,7 +1889,7 @@ static void _game_lose_on_update()
         game_change_state(GAME_STATE_BLIND_SELECT);
 }
 
-static void _game_over_init()
+static void game_over_init()
 {
     // Clears the round end menu
     main_bg_se_clear_rect(POP_MENU_ANIM_RECT);
@@ -1902,7 +1900,7 @@ static void _game_over_init()
 // This function isn't set in stone. This is just a placeholder
 // allowing the player to restart the game. Thought it would be nice to have
 // util we decide what we want to do after a game over.
-static void _game_over_on_exit()
+static void game_over_on_exit()
 {
     ListItr itr = list_itr_create(&_owned_jokers_list);
     JokerObject* joker_object;
@@ -1929,13 +1927,13 @@ static void _game_over_on_exit()
 
     game_init();
 
-    _display_round(_round);
-    _display_score(_score);
-    _display_chips();
-    _display_mult();
-    _display_hands(_hands);
-    _display_discards(_discards);
-    _display_money(_money);
+    display_round(_round);
+    display_score(_score);
+    display_chips();
+    display_mult();
+    display_hands(_hands);
+    display_discards(_discards);
+    display_money(_money);
     tte_printf("#{P:%d,%d; cx:0x%X000}%d#{cx:0x%X000}/%d",
                ANTE_TEXT_RECT.left,
                ANTE_TEXT_RECT.top,
@@ -1947,18 +1945,18 @@ static void _game_over_on_exit()
     affine_background_load_palette(affine_background_gfxPal);
 }
 
-static void _game_win_on_init()
+static void game_win_on_init()
 {
-    _game_over_init();
+    game_over_init();
     // Using the text color to match the "You Win" text
     affine_background_set_color(TEXT_CLR_BLUE);
 }
 
-static void _game_win_on_update()
+static void game_win_on_update()
 {
     if (_timer < GAME_OVER_ANIM_FRAMES)
     {
-        _game_over_anim_frame();
+        game_over_anim_frame();
     }
     else if (_timer == GAME_OVER_ANIM_FRAMES)
     {
@@ -1973,13 +1971,13 @@ static void _game_win_on_update()
 }
 
 // Intro sequence (menu and shop icon coming into frame)
-static void _game_shop_intro()
+static void game_shop_intro()
 {
     main_bg_se_copy_rect_1_tile_vert(POP_MENU_ANIM_RECT, SE_UP);
 
     if (_timer == TM_CREATE_SHOP_ITEMS_WAIT)
     {
-        _game_shop_create_items();
+        game_shop_create_items();
     }
 
     if (_timer >= TM_SHIFT_SHOP_ICON_WAIT) // Shift the shop icon
@@ -2007,7 +2005,7 @@ static void _game_shop_intro()
 }
 
 // Shop menu input and selection
-static void _game_shop_process_user_input()
+static void game_shop_process_user_input()
 {
     if (_timer == TM_SHOP_PRC_INPUT_START)
     {
@@ -2022,7 +2020,7 @@ static void _game_shop_process_user_input()
     selection_grid_process_input(&_shop_selection_grid);
 }
 
-static void _game_shop_outro()
+static void game_shop_outro()
 {
     // Shift the shop panel
     main_bg_se_move_rect_1_tile_vert(POP_MENU_ANIM_RECT, SE_DOWN);
@@ -2045,7 +2043,7 @@ static void _game_shop_outro()
             }
         }
 
-        _reset_top_left_panel_bottom_row();
+        reset_top_left_panel_bottom_row();
     }
     else if (_timer == 2)
     {
@@ -2062,9 +2060,9 @@ static void _game_shop_outro()
     }
 }
 // Outro sequence (menu and shop icon going out of frame)
-static void _game_blind_select_start_anim_seq()
+static void game_blind_select_start_anim_seq()
 {
-    _change_background(BG_ID_BLIND_SELECT);
+    change_background(BG_ID_BLIND_SELECT);
     main_bg_se_copy_rect_1_tile_vert(POP_MENU_ANIM_RECT, SE_UP);
 
     for (int i = 0; i < BLIND_TYPE_MAX; i++)
@@ -2081,7 +2079,7 @@ static void _game_blind_select_start_anim_seq()
     }
 }
 
-static void _game_blind_select_handle_input()
+static void game_blind_select_handle_input()
 {
     if (_timer == TM_BLIND_SELECT_START && _current_blind == BLIND_TYPE_BOSS)
     {
@@ -2103,14 +2101,14 @@ static void _game_blind_select_handle_input()
         {
             _state_info[_game_state].substate = BLIND_SELECTED_ANIM_SEQ;
             _timer = TM_ZERO;
-            _display_round(++_round);
+            display_round(++_round);
         }
         else if (_current_blind != BLIND_TYPE_BOSS)
         {
-            _increment_blind(BLIND_STATE_SKIPPED);
+            increment_blind(BLIND_STATE_SKIPPED);
 
             _background = UNDEFINED; // Force refresh of the background
-            _change_background(BG_ID_BLIND_SELECT);
+            change_background(BG_ID_BLIND_SELECT);
 
             // TODO: Create a generic vertical move by any number of tiles to avoid for loops?
             for (int i = 0; i < 12; i++)
@@ -2143,7 +2141,7 @@ static void _game_blind_select_handle_input()
     }
 }
 
-static void _game_blind_select_selected_anim_seq()
+static void game_blind_select_selected_anim_seq()
 {
     if (_timer < 15)
     {
@@ -2170,7 +2168,7 @@ static void _game_blind_select_selected_anim_seq()
     }
 }
 
-static void _game_blind_select_display_blind_panel()
+static void game_blind_select_display_blind_panel()
 {
     if (_timer >= TM_DISP_BLIND_PANEL_FINISH)
     {
@@ -2180,7 +2178,7 @@ static void _game_blind_select_display_blind_panel()
 
     if (_timer == TM_DISP_BLIND_PANEL_START) // Switches to the selecting background and clears the blind panel area
     {
-        _change_background(BG_ID_CARD_SELECTING);
+        change_background(BG_ID_CARD_SELECTING);
 
         main_bg_se_clear_rect(ROUND_END_MENU_RECT);
 
@@ -2195,7 +2193,7 @@ static void _game_blind_select_display_blind_panel()
             main_bg_se_copy_rect(from, to);
         }
 
-        _reset_top_left_panel_bottom_row();
+        reset_top_left_panel_bottom_row();
     }
 
     for (int y = 0; y < _timer; y++) // Shift the blind panel down onto screen
@@ -2210,22 +2208,22 @@ static void _game_blind_select_display_blind_panel()
     }
 }
 
-static void _game_round_end_start()
+static void game_round_end_start()
 {
     if (_timer == TM_RESET_STATIC_VARS) // Reset static variables to default values upon re-entering the round end state
     {
-        _change_background(BG_ID_ROUND_END);                    // Change the background to the round end background
+        change_background(BG_ID_ROUND_END);                     // Change the background to the round end background
         _state_info[_game_state].substate = START_EXPAND_POPUP; // Change the state to the next one
         _timer = TM_ZERO;                                       // Reset the timer
         _blind_reward = blind_get_reward(_current_blind);
         _hand_reward = _hands;
-        _interest_reward = _calculate_interest_reward();
+        _interest_reward = calculate_interest_reward();
         _interest_to_count = _interest_reward;
         _interest_start_time = UNDEFINED;
     }
 }
 
-static void _game_round_end_start_expand_popup()
+static void game_round_end_start_expand_popup()
 {
     main_bg_se_copy_rect_1_tile_vert(POP_MENU_ANIM_RECT, SE_UP);
 
@@ -2236,7 +2234,7 @@ static void _game_round_end_start_expand_popup()
     }
 }
 
-static void _game_round_end_display_finished_blind()
+static void game_round_end_display_finished_blind()
 {
     obj_unhide(_round_end_blind_token->obj, 0);
 
@@ -2252,7 +2250,7 @@ static void _game_round_end_display_finished_blind()
 
     if (_timer == TM_START_ROUND_END_REWARDS_ANIM)
     {
-        _game_round_end_extend_black_panel_down(ROUND_END_BLACK_PANEL_INIT_BOTTOM_SE);
+        game_round_end_extend_black_panel_down(ROUND_END_BLACK_PANEL_INIT_BOTTOM_SE);
     }
 
     if (_timer >= TM_END_DISPLAY_FIN_BLIND)
@@ -2262,7 +2260,7 @@ static void _game_round_end_display_finished_blind()
     }
 }
 
-static void _game_round_end_display_score_min()
+static void game_round_end_display_score_min()
 {
     const int timer_offset = _timer - 1;
     const int x_from = 0;
@@ -2281,7 +2279,7 @@ static void _game_round_end_display_score_min()
     }
 }
 
-static void _game_round_end_update_blind_reward()
+static void game_round_end_update_blind_reward()
 {
     if (_timer % FRAMES(20) != 0)
         return;
@@ -2313,7 +2311,7 @@ static void _game_round_end_update_blind_reward()
     }
 }
 
-static void _game_round_end_panel_exit()
+static void game_round_end_panel_exit()
 {
     // TODO: make heads or tails of what's going on here and replace
     // magic numbers.
@@ -2323,7 +2321,7 @@ static void _game_round_end_panel_exit()
 
         if (_timer == 1) // Copied from shop. Feels slightly too niche of a function for me personally to make one.
         {
-            _reset_top_left_panel_bottom_row();
+            reset_top_left_panel_bottom_row();
         }
         else if (_timer == 2)
         {
@@ -2341,7 +2339,7 @@ static void _game_round_end_panel_exit()
     }
 }
 
-static void _game_round_end_display_rewards()
+static void game_round_end_display_rewards()
 {
     int hand_y_offset = 0;
     int interest_y_offset = 0;
@@ -2367,29 +2365,29 @@ static void _game_round_end_display_rewards()
     }
     else if (_timer == TM_START_ROUND_END_REWARDS_ANIM)
     {
-        _game_round_end_extend_black_panel_down(ROUND_END_REWARDS_ELLIPSIS_POS.y);
+        game_round_end_extend_black_panel_down(ROUND_END_REWARDS_ELLIPSIS_POS.y);
     }
     else if (_timer < TM_REWARDS_ELLIPSIS_PRINT_END)
     {
-        _game_round_end_print_separator_ellipsis();
+        game_round_end_print_separator_ellipsis();
     }
     else if (_timer >= TM_DISPLAY_REWARDS_CONT_WAIT && _hand_reward > 0)
     {
-        _game_round_end_print_hand_reward(hand_y_offset);
+        game_round_end_print_hand_reward(hand_y_offset);
     }
     else if (_interest_start_time != UNDEFINED && _timer >= _interest_start_time && _interest_to_count > 0)
     {
-        _game_round_end_print_interest_reward(interest_y_offset);
+        game_round_end_print_interest_reward(interest_y_offset);
     }
 }
 
-static void _game_round_end_display_cashout()
+static void game_round_end_display_cashout()
 {
     if (_timer == FRAMES(40)) // Put the "cash out" button onto the round end panel
     {
         main_bg_se_copy_expand_3x3_rect(CASHOUT_DEST_RECT, CASHOUT_SRC_3X3_RECT_POS);
 
-        int cashout_amount = _hands + blind_get_reward(_current_blind) + _calculate_interest_reward();
+        int cashout_amount = _hands + blind_get_reward(_current_blind) + calculate_interest_reward();
 
         bool omit_space = cashout_amount >= 10;
         tte_printf("#{P:%d, %d; cx:0x%X000}Cash Out:%s$%d",
@@ -2401,7 +2399,7 @@ static void _game_round_end_display_cashout()
     }
     else if (_timer > FRAMES(40) && key_hit(SELECT_CARD)) // Wait until the player presses A to cash out
     {
-        _game_round_end_cashout();
+        game_round_end_cashout();
 
         _state_info[_game_state].substate = DISMISS_ROUND_END_PANEL; // Go to the next state
         _timer = TM_ZERO;
@@ -2411,7 +2409,7 @@ static void _game_round_end_display_cashout()
     }
 }
 
-static void _game_round_end_dismiss_round_end_panel()
+static void game_round_end_dismiss_round_end_panel()
 {
     Rect round_end_down = ROUND_END_MENU_RECT;
     round_end_down.top--;
@@ -2424,14 +2422,14 @@ static void _game_round_end_dismiss_round_end_panel()
     }
 }
 
-static void _jokers_available_to_shop_init()
+static void jokers_available_to_shop_init()
 {
-    _reset_shop_jokers();
+    reset_shop_jokers();
 }
 
-static void _game_start()
+static void game_start()
 {
-    _set_seed(_rng_seed);
+    set_seed(_rng_seed);
     // set_seed(9); // 9 is a full house
 
     affine_background_change_background(AFFINE_BG_GAME);
@@ -2450,29 +2448,29 @@ static void _game_start()
         for (int rank = 0; rank < NUM_RANKS; rank++)
         {
             Card* card = card_new(suit, rank);
-            _deck_push(card);
+            deck_push(card);
         }
     }
 
-    _change_background(BG_ID_BLIND_SELECT);
+    change_background(BG_ID_BLIND_SELECT);
 
     tte_printf("#{P:%d,%d; cx:0x%X000}%d/%d",
                DECK_SIZE_RECT.left,
                DECK_SIZE_RECT.top,
                TTE_WHITE_PB,
-               _deck_get_size(),
-               _deck_get_max_size()); // Deck size/max size
+               deck_get_size(),
+               deck_get_max_size()); // Deck size/max size
 
-    _display_round(_round); // Set the round display
-    _display_score(_score); // Set the score display
+    display_round(_round); // Set the round display
+    display_score(_score); // Set the score display
 
-    _display_chips(); // Set the chips display
-    _display_mult();  // Set the multiplier display
+    display_chips(); // Set the chips display
+    display_mult();  // Set the multiplier display
 
-    _display_hands(_hands);       // Hand
-    _display_discards(_discards); // Discard
+    display_hands(_hands);       // Hand
+    display_discards(_discards); // Discard
 
-    _display_money(_money); // Set the money display
+    display_money(_money); // Set the money display
 
     tte_printf("#{P:%d,%d; cx:0x%X000}%d#{cx:0x%X000}/%d",
                ANTE_TEXT_RECT.left,
@@ -2485,7 +2483,7 @@ static void _game_start()
     game_change_state(GAME_STATE_BLIND_SELECT);
 }
 
-static void _game_playing_process_hand_select_input()
+static void game_playing_process_hand_select_input()
 {
     static bool discard_button_highlighted =
         false; // true = play button highlighted, false = discard button highlighted
@@ -2496,7 +2494,7 @@ static void _game_playing_process_hand_select_input()
         {
             // The reason why this adds 1 is because the hand is drawn from right to left. There is no particular reason
             // for this, it's just how I did it.
-            _hand_set_focus(_selection_x + 1);
+            hand_set_focus(_selection_x + 1);
         }
         else
         {
@@ -2507,7 +2505,7 @@ static void _game_playing_process_hand_select_input()
     {
         if (_selection_y == 0)
         {
-            _hand_set_focus(_selection_x - 1);
+            hand_set_focus(_selection_x - 1);
         }
         else
         {
@@ -2538,12 +2536,12 @@ static void _game_playing_process_hand_select_input()
             memset16(&pal_bg_mem[PLAY_HAND_BTN_BORDER_PID], HIGHLIGHT_COLOR, 1);
             memcpy16(&pal_bg_mem[DISCARD_BTN_BORDER_PID], &pal_bg_mem[DISCARD_BTN_PID], 1);
 
-            if (key_hit(SELECT_CARD) && _hands > 0 && _hand_play())
+            if (key_hit(SELECT_CARD) && _hands > 0 && hand_play())
             {
                 _hand_state = HAND_PLAY;
                 _selection_x = 0;
                 _selection_y = 0;
-                _display_hands(--_hands);
+                display_hands(--_hands);
             }
         }
         else // Discard button logic
@@ -2551,13 +2549,13 @@ static void _game_playing_process_hand_select_input()
             memcpy16(&pal_bg_mem[PLAY_HAND_BTN_BORDER_PID], &pal_bg_mem[PLAY_HAND_BTN_PID], 1);
             memset16(&pal_bg_mem[DISCARD_BTN_BORDER_PID], HIGHLIGHT_COLOR, 1);
 
-            if (key_hit(SELECT_CARD) && _discards > 0 && _hand_discard())
+            if (key_hit(SELECT_CARD) && _discards > 0 && hand_discard())
             {
                 _hand_state = HAND_DISCARD;
                 _selection_x = 0;
                 _selection_y = 0;
-                _display_hands(--_discards);
-                _set_hand();
+                display_hands(--_discards);
+                set_hand();
                 tte_printf("#{P:%d,%d; cx:0x%X000}%d",
                            DISCARDS_TEXT_RECT.left,
                            DISCARDS_TEXT_RECT.top,
@@ -2575,28 +2573,28 @@ static void _game_playing_process_hand_select_input()
 
         if (key_hit(SELECT_CARD))
         {
-            _hand_toggle_card_selection();
-            _set_hand();
+            hand_toggle_card_selection();
+            set_hand();
         }
 
         if (key_hit(DESELECT_CARDS))
         {
-            _hand_deselect_all_cards();
-            _set_hand();
+            hand_deselect_all_cards();
+            set_hand();
         }
     }
 
     if (key_hit(SORT_HAND))
     {
-        _hand_change_sort();
+        hand_change_sort();
     }
 }
 
-static void _game_playing_process_input_and_state()
+static void game_playing_process_input_and_state()
 {
     if (_hand_state == HAND_SELECT)
     {
-        _game_playing_process_hand_select_input();
+        game_playing_process_hand_select_input();
     }
     else if (_play_state == PLAY_ENDING)
     {
@@ -2607,12 +2605,12 @@ static void _game_playing_process_input_and_state()
             _lerped_temp_score = int2fx(_temp_score);
             _lerped_score = int2fx(_score);
 
-            _display_temp_score(_temp_score);
+            display_temp_score(_temp_score);
 
             _chips = 0;
             _mult = 0;
-            _display_mult();
-            _display_chips();
+            display_mult();
+            display_chips();
         }
     }
     else if (_play_state == PLAY_ENDED)
@@ -2627,10 +2625,10 @@ static void _game_playing_process_input_and_state()
 
         if (_lerped_temp_score > 0)
         {
-            _display_temp_score(fx2uint(_lerped_temp_score));
+            display_temp_score(fx2uint(_lerped_temp_score));
 
             // We actually don't need to erase this because the score only increases
-            _display_score(fx2uint(_lerped_score)); // Set the score display
+            display_score(fx2uint(_lerped_score)); // Set the score display
         }
         else
         {
@@ -2641,19 +2639,19 @@ static void _game_playing_process_input_and_state()
 
             tte_erase_rect_wrapper(TEMP_SCORE_RECT); // Just erase the temp score
 
-            _display_score(_score);
+            display_score(_score);
         }
     }
 }
 
-static void _game_playing_process_card_draw()
+static void game_playing_process_card_draw()
 {
     if (_hand_state == HAND_DRAW && _cards_drawn < _hand_size)
     {
         if (_timer % FRAMES(10) == 0) // Draw a card every 10 frames
         {
             _cards_drawn++;
-            _card_draw();
+            card_draw();
         }
     }
     else if (_hand_state == HAND_DRAW)
@@ -2664,12 +2662,12 @@ static void _game_playing_process_card_draw()
     }
 }
 
-static bool _game_round_is_over()
+static bool game_round_is_over()
 {
     return _hands == 0 || _score >= blind_get_requirement(_current_blind, _ante);
 }
 
-static void _game_playing_handle_round_over()
+static void game_playing_handle_round_over()
 {
     enum GameState next_state = GAME_STATE_ROUND_END;
 
@@ -2679,7 +2677,7 @@ static void _game_playing_handle_round_over()
         {
             if (_ante < MAX_ANTE)
             {
-                _display_ante(++_ante);
+                display_ante(++_ante);
             }
             else
             {
@@ -2695,20 +2693,20 @@ static void _game_playing_handle_round_over()
     game_change_state(next_state);
 }
 
-static void _game_playing_discarded_cards_loop()
+static void game_playing_discarded_cards_loop()
 {
     // Discarded cards loop (mainly for shuffling)
     if (hand_get_size() == 0 && _hand_state == HAND_SHUFFLING && _discard_top >= -1 && _timer > FRAMES(10))
     {
         // Change the background to the round end background. This is how it works in Balatro, so I'm doing it this way
         // too.
-        _change_background(BG_ID_ROUND_END);
+        change_background(BG_ID_ROUND_END);
 
         // We take each discarded card and put it back into the deck with a short animation
         static CardObject* discarded_card_object = NULL;
         if (discarded_card_object == NULL)
         {
-            discarded_card_object = card_object_new(_discard_pop());
+            discarded_card_object = card_object_new(discard_pop());
             // discarded_card_object->sprite = sprite_new(ATTR0_SQUARE | ATTR0_4BPP | ATTR0_AFF, ATTR1_SIZE_32,
             // card_sprite_lut[discarded_card_object->card->suit][discarded_card_object->card->rank], 0, 0);
             card_object_set_sprite(discarded_card_object, 0); // Set the sprite for the discarded card object
@@ -2727,7 +2725,7 @@ static void _game_playing_discarded_cards_loop()
 
             if (discarded_card_object->sprite_object->y >= discarded_card_object->sprite_object->ty)
             {
-                _deck_push(discarded_card_object->card); // Put the card back into the deck
+                deck_push(discarded_card_object->card); // Put the card back into the deck
                 card_object_destroy(&discarded_card_object);
 
                 play_sfx(SFX_CARD_DRAW, MM_BASE_PITCH_RATE + PITCH_STEP_UNDISCARD_SFX);
@@ -2737,15 +2735,12 @@ static void _game_playing_discarded_cards_loop()
         if (_discard_top == -1 && discarded_card_object == NULL) // If there are no more discarded cards, stop shuffling
         {
             // After HAND_SHUFFLING the round is over
-            _game_playing_handle_round_over();
+            game_playing_handle_round_over();
         }
     }
 }
 
-static void _card_in_hand_loop_handle_discard_and_shuffling(int card_idx,
-                                                            FIXED* hand_x,
-                                                            FIXED* hand_y,
-                                                            bool* break_loop)
+static void card_in_hand_loop_handle_discard_and_shuffling(int card_idx, FIXED* hand_x, FIXED* hand_y, bool* break_loop)
 {
     if (_hand_state != HAND_DISCARD && _hand_state != HAND_SHUFFLING)
     {
@@ -2769,9 +2764,9 @@ static void _card_in_hand_loop_handle_discard_and_shuffling(int card_idx,
 
             if (_hand[card_idx]->sprite_object->x >= *hand_x)
             {
-                _discard_push(_hand[card_idx]->card);
+                discard_push(_hand[card_idx]->card);
                 card_object_destroy(&_hand[card_idx]);
-                _sort_cards();
+                sort_cards();
 
                 _hand_top--;
                 _cards_drawn++; // This technically isn't drawing cards, I'm just reusing the variable
@@ -2815,7 +2810,7 @@ static void _card_in_hand_loop_handle_discard_and_shuffling(int card_idx,
     };
 }
 
-static void _select_flush_and_straight_cards_in_played_hand()
+static void select_flush_and_straight_cards_in_played_hand()
 {
     // Special handling because Four Fingers might be active
     bool final_selection[MAX_SELECTION_SIZE] = {false};
@@ -2858,7 +2853,7 @@ static void _select_flush_and_straight_cards_in_played_hand()
     }
 }
 
-static void _select_all_five_cards_in_played_hand()
+static void select_all_five_cards_in_played_hand()
 {
     for (int i = 0; i <= _played_top; i++)
     {
@@ -2866,7 +2861,7 @@ static void _select_all_five_cards_in_played_hand()
     }
 }
 
-static void _select_four_of_a_kind_cards_in_played_hand()
+static void select_four_of_a_kind_cards_in_played_hand()
 {
     // find four cards with the same rank
     // If there are 5 cards selected we just need to find the one card that doesn't match, and select the others
@@ -2901,7 +2896,7 @@ static void _select_four_of_a_kind_cards_in_played_hand()
     }
 }
 
-static void _select_three_of_a_kind_cards_in_played_hand()
+static void select_three_of_a_kind_cards_in_played_hand()
 {
     // find three cards with the same rank
     for (int i = 0; i <= _played_top - 1; i++)
@@ -2931,7 +2926,7 @@ static void _select_three_of_a_kind_cards_in_played_hand()
     }
 }
 
-static void _select_two_pair_cards_in_played_hand()
+static void select_two_pair_cards_in_played_hand()
 {
     // find two pairs of cards with the same rank
     int i;
@@ -2968,7 +2963,7 @@ static void _select_two_pair_cards_in_played_hand()
     }
 }
 
-static void _select_pair_cards_in_played_hand()
+static void select_pair_cards_in_played_hand()
 {
     // find two cards with the same rank
     for (int i = 0; i <= _played_top - 1; i++)
@@ -2988,7 +2983,7 @@ static void _select_pair_cards_in_played_hand()
     }
 }
 
-static void _select_highcard_cards_in_played_hand()
+static void select_highcard_cards_in_played_hand()
 {
     // find the card with the highest rank in the hand
     int highest_rank_index = 0;
@@ -3004,7 +2999,7 @@ static void _select_highcard_cards_in_played_hand()
     card_object_set_selected(_played[highest_rank_index], true);
 }
 
-static void _cards_in_hand_update_loop()
+static void cards_in_hand_update_loop()
 {
     // TODO: Break this function up into smaller ones, Gods be good
     // Start from the end of the hand and work backwards because that's how Balatro does it
@@ -3049,7 +3044,7 @@ static void _cards_in_hand_update_loop()
                     /* FALL THROUGH */
                 case HAND_DISCARD: // TODO: Add sound
                     bool break_loop;
-                    _card_in_hand_loop_handle_discard_and_shuffling(i, &hand_x, &hand_y, &break_loop);
+                    card_in_hand_loop_handle_discard_and_shuffling(i, &hand_x, &hand_y, &break_loop);
                     if (break_loop)
                         break;
 
@@ -3061,10 +3056,10 @@ static void _cards_in_hand_update_loop()
                     if (card_object_is_selected(_hand[i]) && _discarded_card == false && _timer % FRAMES(10) == 0)
                     {
                         card_object_set_selected(_hand[i], false);
-                        _played_push(_hand[i]);
+                        played_push(_hand[i]);
                         sprite_destroy(&_hand[i]->sprite_object->sprite);
                         _hand[i] = NULL;
-                        _sort_cards();
+                        sort_cards();
 
                         play_sfx(SFX_CARD_DRAW, MM_BASE_PITCH_RATE + _cards_drawn * PITCH_STEP_DISCARD_SFX);
 
@@ -3088,19 +3083,19 @@ static void _cards_in_hand_update_loop()
                             case NONE:
                                 break;
                             case HIGH_CARD:
-                                _select_highcard_cards_in_played_hand();
+                                select_highcard_cards_in_played_hand();
                                 break;
                             case PAIR:
-                                _select_pair_cards_in_played_hand();
+                                select_pair_cards_in_played_hand();
                                 break;
                             case TWO_PAIR:
-                                _select_two_pair_cards_in_played_hand();
+                                select_two_pair_cards_in_played_hand();
                                 break;
                             case THREE_OF_A_KIND:
-                                _select_three_of_a_kind_cards_in_played_hand();
+                                select_three_of_a_kind_cards_in_played_hand();
                                 break;
                             case FOUR_OF_A_KIND:
-                                _select_four_of_a_kind_cards_in_played_hand();
+                                select_four_of_a_kind_cards_in_played_hand();
                                 break;
                             case STRAIGHT:
                                 /* FALL THROUGH */
@@ -3109,7 +3104,7 @@ static void _cards_in_hand_update_loop()
                             case STRAIGHT_FLUSH:
                                 /* FALL THROUGH */
                             case ROYAL_FLUSH:
-                                _select_flush_and_straight_cards_in_played_hand();
+                                select_flush_and_straight_cards_in_played_hand();
                                 break;
                                 // ELSE FALL THROUGH
                             case FULL_HOUSE:
@@ -3119,7 +3114,7 @@ static void _cards_in_hand_update_loop()
                             case FLUSH_HOUSE:
                                 /* FALL THROUGH */
                             case FLUSH_FIVE: // Select all played cards in the hand
-                                _select_all_five_cards_in_played_hand();
+                                select_all_five_cards_in_played_hand();
                                 break;
                         }
                     }
@@ -3139,9 +3134,9 @@ static void _cards_in_hand_update_loop()
 }
 
 // returns true if a joker was scored, false otherwise
-static bool _check_and_score_joker_for_event(ListItr* starting_joker_itr,
-                                             CardObject* card_object,
-                                             enum JokerEvent joker_event)
+static bool check_and_score_joker_for_event(ListItr* starting_joker_itr,
+                                            CardObject* card_object,
+                                            enum JokerEvent joker_event)
 {
     JokerObject* joker;
 
@@ -3149,9 +3144,9 @@ static bool _check_and_score_joker_for_event(ListItr* starting_joker_itr,
     {
         if (joker_object_score(joker, card_object, joker_event, &_chips, &_mult, &_money, &_retrigger))
         {
-            _display_chips();
-            _display_mult();
-            _display_money(_money);
+            display_chips();
+            display_mult();
+            display_money(_money);
 
             return true;
         }
@@ -3159,7 +3154,7 @@ static bool _check_and_score_joker_for_event(ListItr* starting_joker_itr,
     return false;
 }
 
-static void _play_starting_played_cards_update(int played_idx)
+static void play_starting_played_cards_update(int played_idx)
 {
     if (played_idx == _played_top &&
         (_timer % FRAMES(10) == 0 || !card_object_is_selected(_played[_played_top - _scored_card_index])) &&
@@ -3186,10 +3181,10 @@ static void _play_starting_played_cards_update(int played_idx)
 }
 
 // returns true if the scoring loop has returned early
-static bool _play_before_scoring_cards_update()
+static bool play_before_scoring_cards_update()
 {
     // Activate Jokers with an effect just before the hand is scored
-    if (_check_and_score_joker_for_event(&_joker_scored_itr, NULL, JOKER_EVENT_ON_HAND_PLAYED))
+    if (check_and_score_joker_for_event(&_joker_scored_itr, NULL, JOKER_EVENT_ON_HAND_PLAYED))
     {
         return true;
     }
@@ -3199,7 +3194,7 @@ static bool _play_before_scoring_cards_update()
 }
 
 // returns true if the scoring loop has returned early
-static bool _play_scoring_cards_update()
+static bool play_scoring_cards_update()
 {
     if (_timer % FRAMES(30) == 0 && _timer > FRAMES(40))
     {
@@ -3243,7 +3238,7 @@ static bool _play_scoring_cards_update()
 
             // Relocated card scoring logic here
             _chips = u32_protected_add(_chips, card_value);
-            _display_chips();
+            display_chips();
 
             // Allow Joker scoring
             _joker_scored_itr = list_itr_create(&_owned_jokers_list);
@@ -3259,7 +3254,7 @@ static bool _play_scoring_cards_update()
 
 // Activate "on scored" Jokers for the previous scored card if any
 // returns true if the scoring loop has returned early
-static bool _play_scoring_card_jokers_update()
+static bool play_scoring_card_jokers_update()
 {
     if (_timer % FRAMES(30) == 0 && _timer > FRAMES(40))
     {
@@ -3267,18 +3262,18 @@ static bool _play_scoring_card_jokers_update()
 
         // since we sought the next scoring card index in the previous state,
         // scored_card_index is guaranteed to be a scoring card
-        if (_check_and_score_joker_for_event(&_joker_scored_itr,
-                                             _played[_scored_card_index],
-                                             JOKER_EVENT_ON_CARD_SCORED))
+        if (check_and_score_joker_for_event(&_joker_scored_itr,
+                                            _played[_scored_card_index],
+                                            JOKER_EVENT_ON_CARD_SCORED))
         {
             return true;
         }
 
         // Trigger all Jokers that have an effect when a card finishes scoring
         // (e.g. retriggers) after activating all the other scored_card Jokers normally
-        if (_check_and_score_joker_for_event(&_joker_card_scored_end_itr,
-                                             _played[_scored_card_index],
-                                             JOKER_EVENT_ON_CARD_SCORED_END))
+        if (check_and_score_joker_for_event(&_joker_card_scored_end_itr,
+                                            _played[_scored_card_index],
+                                            JOKER_EVENT_ON_CARD_SCORED_END))
         {
             // If we just scored a retrigger, return early and go back to the
             // previous state score the same card again without incrementing
@@ -3301,7 +3296,7 @@ static bool _play_scoring_card_jokers_update()
 }
 
 // returns true if the scoring loop has returned early
-static bool _play_scoring_held_cards_update(int played_idx)
+static bool play_scoring_held_cards_update(int played_idx)
 {
     if (played_idx == 0 && (_timer % FRAMES(30) == 0) && _timer > FRAMES(40))
     {
@@ -3310,9 +3305,9 @@ static bool _play_scoring_held_cards_update(int played_idx)
         // Go through all held cards and see if they activate Jokers
         for (; _scored_card_index >= 0; _scored_card_index--)
         {
-            if (_check_and_score_joker_for_event(&_joker_scored_itr,
-                                                 _hand[_scored_card_index],
-                                                 JOKER_EVENT_ON_CARD_HELD))
+            if (check_and_score_joker_for_event(&_joker_scored_itr,
+                                                _hand[_scored_card_index],
+                                                JOKER_EVENT_ON_CARD_HELD))
             {
                 card_object_shake(_hand[_scored_card_index], SFX_CARD_SELECT);
                 return true;
@@ -3330,20 +3325,20 @@ static bool _play_scoring_held_cards_update(int played_idx)
 
 // Score Jokers normally (independent)
 // returns true if the scoring loop has returned early
-static bool _play_scoring_independent_jokers_update(int played_idx)
+static bool play_scoring_independent_jokers_update(int played_idx)
 {
     if (played_idx == 0 && (_timer % FRAMES(30) == 0) && _timer > FRAMES(40))
     {
 
         tte_erase_rect_wrapper(PLAYED_CARDS_SCORES_RECT);
 
-        if (_check_and_score_joker_for_event(&_joker_scored_itr, NULL, JOKER_EVENT_INDEPENDENT))
+        if (check_and_score_joker_for_event(&_joker_scored_itr, NULL, JOKER_EVENT_INDEPENDENT))
         {
             return true;
         }
 
         // Trigger hand end effect for all jokers once they are done scoring
-        if (_check_and_score_joker_for_event(&_joker_round_end_itr, NULL, JOKER_EVENT_ON_HAND_SCORED_END))
+        if (check_and_score_joker_for_event(&_joker_round_end_itr, NULL, JOKER_EVENT_ON_HAND_SCORED_END))
         {
             return true;
         }
@@ -3357,7 +3352,7 @@ static bool _play_scoring_independent_jokers_update(int played_idx)
 }
 
 // This is the reverse of PLAY_STARTING. The cards get reset back to their neutral position sequentially
-static void _play_ending_played_cards_update(int played_idx)
+static void play_ending_played_cards_update(int played_idx)
 {
     if (played_idx == _played_top &&
         (_timer % FRAMES(10) == 0 || !card_object_is_selected(_played[_played_top - _scored_card_index])) &&
@@ -3380,7 +3375,7 @@ static void _play_ending_played_cards_update(int played_idx)
 
 // Basically a copy of HAND_DISCARD
 // returns true if the current card has been discarded
-static bool _play_ended_played_cards_update(int played_idx)
+static bool play_ended_played_cards_update(int played_idx)
 {
     if (!_discarded_card && _timer > FRAMES(40))
     {
@@ -3394,7 +3389,7 @@ static bool _play_ended_played_cards_update(int played_idx)
         // card has exited the screen, now discard it and set it to NULL
         if (_played[played_idx]->sprite_object->x >= int2fx(CARD_DISCARD_PNT.x))
         {
-            _discard_push(_played[played_idx]->card); // Push the card to the discard pile
+            discard_push(_played[played_idx]->card); // Push the card to the discard pile
             card_object_destroy(&_played[played_idx]);
 
             // played_top--;
@@ -3404,7 +3399,7 @@ static bool _play_ended_played_cards_update(int played_idx)
             // we reached hand_top, all cards have been discarded
             if (played_idx == _played_top)
             {
-                if (_game_round_is_over())
+                if (game_round_is_over())
                 {
                     _hand_state = HAND_SHUFFLING;
                 }
@@ -3433,7 +3428,7 @@ static bool _play_ended_played_cards_update(int played_idx)
     return false;
 }
 
-static void _played_cards_update_loop()
+static void played_cards_update_loop()
 {
     // So this one is a bit fucking weird because I have to work kinda backwards for everything because of the order of
     // the pushed cards from the hand to the play stack (also crazy that the company that published Balatro is called
@@ -3455,12 +3450,12 @@ static void _played_cards_update_loop()
         {
             case PLAY_STARTING:
 
-                _play_starting_played_cards_update(played_idx);
+                play_starting_played_cards_update(played_idx);
                 break;
 
             case PLAY_BEFORE_SCORING:
 
-                if (_play_before_scoring_cards_update())
+                if (play_before_scoring_cards_update())
                 {
                     return;
                 }
@@ -3468,7 +3463,7 @@ static void _played_cards_update_loop()
 
             case PLAY_SCORING_CARDS:
 
-                if (_play_scoring_cards_update())
+                if (play_scoring_cards_update())
                 {
                     return;
                 }
@@ -3476,7 +3471,7 @@ static void _played_cards_update_loop()
 
             case PLAY_SCORING_CARD_JOKERS:
 
-                if (_play_scoring_card_jokers_update())
+                if (play_scoring_card_jokers_update())
                 {
                     return;
                 }
@@ -3484,7 +3479,7 @@ static void _played_cards_update_loop()
 
             case PLAY_SCORING_HELD_CARDS:
 
-                if (_play_scoring_held_cards_update(played_idx))
+                if (play_scoring_held_cards_update(played_idx))
                 {
                     return;
                 }
@@ -3492,7 +3487,7 @@ static void _played_cards_update_loop()
 
             case PLAY_SCORING_INDEPENDENT_JOKERS:
 
-                if (_play_scoring_independent_jokers_update(played_idx))
+                if (play_scoring_independent_jokers_update(played_idx))
                 {
                     return;
                 }
@@ -3500,12 +3495,12 @@ static void _played_cards_update_loop()
 
             case PLAY_ENDING:
 
-                _play_ending_played_cards_update(played_idx);
+                play_ending_played_cards_update(played_idx);
                 break;
 
             case PLAY_ENDED:
 
-                if (_play_ended_played_cards_update(played_idx))
+                if (play_ended_played_cards_update(played_idx))
                 {
                     // we continue here instead of returning for performance
                     // to instantly go to the next card to discard at played_idx+1,
@@ -3521,12 +3516,12 @@ static void _played_cards_update_loop()
     }
 }
 
-static void _game_playing_ui_text_update()
+static void game_playing_ui_text_update()
 {
     static int last_hand_size = 0;
     static int last_deck_size = 0;
 
-    if (last_hand_size != hand_get_size() || last_deck_size != _deck_get_size())
+    if (last_hand_size != hand_get_size() || last_deck_size != deck_get_size())
     {
         if (_background == BG_ID_CARD_SELECTING)
         {
@@ -3535,7 +3530,7 @@ static void _game_playing_ui_text_update()
                        HAND_SIZE_RECT_SELECT.top,
                        TTE_WHITE_PB,
                        hand_get_size(),
-                       _hand_get_max_size()); // Hand size/max size
+                       hand_get_max_size()); // Hand size/max size
         }
         else if (_background == BG_ID_CARD_PLAYING)
         {
@@ -3544,22 +3539,22 @@ static void _game_playing_ui_text_update()
                        HAND_SIZE_RECT_PLAYING.top,
                        TTE_WHITE_PB,
                        hand_get_size(),
-                       _hand_get_max_size()); // Hand size/max size
+                       hand_get_max_size()); // Hand size/max size
         }
 
         tte_printf("#{P:%d,%d; cx:0x%X000}%d/%d",
                    DECK_SIZE_RECT.left,
                    DECK_SIZE_RECT.top,
                    TTE_WHITE_PB,
-                   _deck_get_size(),
-                   _deck_get_max_size()); // Deck size/max size
+                   deck_get_size(),
+                   deck_get_max_size()); // Deck size/max size
 
         last_hand_size = hand_get_size();
-        last_deck_size = _deck_get_size();
+        last_deck_size = deck_get_size();
     }
 }
 
-static void _game_playing_process_flaming_score()
+static void game_playing_process_flaming_score()
 {
     static u8 flame_score_frame = 0;
 
@@ -3583,7 +3578,7 @@ static void _game_playing_process_flaming_score()
     }
 }
 
-static int _calculate_interest_reward()
+static int calculate_interest_reward()
 {
     int reward = (_money / 5) * INTEREST_PER_5;
     if (reward > MAX_INTEREST)
@@ -3591,21 +3586,21 @@ static int _calculate_interest_reward()
     return reward;
 }
 
-static void _game_round_end_cashout()
+static void game_round_end_cashout()
 {
-    _money += _hands + blind_get_reward(_current_blind) + _calculate_interest_reward(); // Reward the player
-    _display_money(_money);
+    _money += _hands + blind_get_reward(_current_blind) + calculate_interest_reward(); // Reward the player
+    display_money(_money);
 
-    _hands = _max_hands;          // Reset the hands to the maximum
-    _discards = _max_discards;    // Reset the discards to the maximum
-    _display_hands(_hands);       // Set the hands display
-    _display_discards(_discards); // Set the discards display
+    _hands = _max_hands;         // Reset the hands to the maximum
+    _discards = _max_discards;   // Reset the discards to the maximum
+    display_hands(_hands);       // Set the hands display
+    display_discards(_discards); // Set the discards display
 
     _score = 0;
-    _display_score(_score); // Set the score display
+    display_score(_score); // Set the score display
 }
 
-static void _game_round_end_extend_black_panel_down(int black_panel_bottom)
+static void game_round_end_extend_black_panel_down(int black_panel_bottom)
 {
     Rect single_line_rect = ROUND_END_MENU_RECT;
     single_line_rect.bottom = black_panel_bottom;
@@ -3613,7 +3608,7 @@ static void _game_round_end_extend_black_panel_down(int black_panel_bottom)
     main_bg_se_copy_rect_1_tile_vert(single_line_rect, SE_DOWN);
 }
 
-static void _game_round_end_print_separator_ellipsis()
+static void game_round_end_print_separator_ellipsis()
 {
     int x = (ROUND_END_REWARDS_ELLIPSIS_POS.x + _timer - TM_REWARDS_ELLIPSIS_PRINT_START) * TILE_SIZE;
     int y = (ROUND_END_REWARDS_ELLIPSIS_POS.y) * TILE_SIZE;
@@ -3622,12 +3617,12 @@ static void _game_round_end_print_separator_ellipsis()
 }
 
 // TODO: Allow for more generic rewards and consolidate with game_round_end_print_interest_reward()
-static void _game_round_end_print_hand_reward(int hand_y_offset)
+static void game_round_end_print_hand_reward(int hand_y_offset)
 {
     int hand_y = ROUND_END_REWARDS_ELLIPSIS_POS.y + hand_y_offset;
     if (_timer == TM_DISPLAY_REWARDS_CONT_WAIT)
     {
-        _game_round_end_extend_black_panel_down(hand_y);
+        game_round_end_extend_black_panel_down(hand_y);
 
         tte_printf("#{P:%d,%d; cx:0x%X000}%d #{cx:0x%X000}Hands",
                    ROUND_END_REWARD_TEXT_X,
@@ -3652,13 +3647,13 @@ static void _game_round_end_print_hand_reward(int hand_y_offset)
     }
 }
 
-static void _game_round_end_print_interest_reward(int interest_y_offset)
+static void game_round_end_print_interest_reward(int interest_y_offset)
 {
     int interest_y = ROUND_END_REWARDS_ELLIPSIS_POS.y + interest_y_offset;
 
     if (_timer == _interest_start_time)
     {
-        _game_round_end_extend_black_panel_down(interest_y);
+        game_round_end_extend_black_panel_down(interest_y);
 
         tte_printf("#{P:%d,%d; cx:0x%X000}%d #{cx:0x%X000}Interest",
                    ROUND_END_REWARD_TEXT_X,
@@ -3680,14 +3675,14 @@ static void _game_round_end_print_interest_reward(int interest_y_offset)
     }
 }
 
-static void _print_price_under_sprite_object(SpriteObject* sprite_object, int price)
+static void print_price_under_sprite_object(SpriteObject* sprite_object, int price)
 {
     int x = fx2int(sprite_object->tx) + TILE_SIZE - (get_digits_even(price) - 1) * TILE_SIZE;
     int y = fx2int(sprite_object->ty) + CARD_SPRITE_SIZE + TILE_SIZE; // TODO: Should probably extract the sprite size
     tte_printf("#{P:%d,%d; cx:0x%X000}$%d", x, y, TTE_YELLOW_PB, price);
 }
 
-static void _erase_price_under_sprite_object(SpriteObject* sprite_object)
+static void erase_price_under_sprite_object(SpriteObject* sprite_object)
 {
     Rect price_rect;
     price_rect.left = fx2int(sprite_object->tx);
@@ -3699,13 +3694,13 @@ static void _erase_price_under_sprite_object(SpriteObject* sprite_object)
     tte_erase_rect_wrapper(price_rect);
 }
 
-static int _game_shop_get_rand_available_joker_id(void)
+static int game_shop_get_rand_available_joker_id(void)
 {
     // Roll for what rarity the joker will be
     int joker_rarity = joker_get_random_rarity();
 
     // Now determine how many jokers are available based on the rarity
-    int jokers_avail_size = _get_num_shop_jokers_avail();
+    int jokers_avail_size = get_num_shop_jokers_avail();
 
     if (jokers_avail_size == 0)
         return UNDEFINED;
@@ -3735,11 +3730,11 @@ static int _game_shop_get_rand_available_joker_id(void)
     return selected_joker_id;
 }
 
-static void _game_shop_create_items()
+static void game_shop_create_items()
 {
     tte_erase_rect_wrapper(SHOP_PRICES_TEXT_RECT);
 
-    if (_no_avail_jokers())
+    if (no_avail_jokers())
         return;
 
     list_clear(&_shop_jokers_list);
@@ -3763,14 +3758,14 @@ static void _game_shop_create_items()
         else
 #endif
         {
-            joker_id = _game_shop_get_rand_available_joker_id();
+            joker_id = game_shop_get_rand_available_joker_id();
         }
 
         // If for some reason only no joker is left, don't make another
         if (joker_id == UNDEFINED)
             break;
 
-        _set_shop_joker_avail(joker_id, false);
+        set_shop_joker_avail(joker_id, false);
 
         JokerObject* joker_object = joker_object_new(joker_new(joker_id));
 
@@ -3779,7 +3774,7 @@ static void _game_shop_create_items()
         joker_object->sprite_object->tx = joker_object->sprite_object->x;
         joker_object->sprite_object->ty = int2fx(ITEM_SHOP_Y);
 
-        _print_price_under_sprite_object(joker_object->sprite_object, joker_object->joker->value);
+        print_price_under_sprite_object(joker_object->sprite_object, joker_object->joker->value);
 
         sprite_position(joker_object_get_sprite(joker_object),
                         fx2int(joker_object->sprite_object->x),
@@ -3789,10 +3784,10 @@ static void _game_shop_create_items()
     }
 }
 
-static void _game_shop_reroll(int* reroll_cost)
+static void game_shop_reroll(int* reroll_cost)
 {
     _money -= *reroll_cost;
-    _display_money(_money); // Update the money display
+    display_money(_money); // Update the money display
 
     ListItr itr = list_itr_create(&_shop_jokers_list);
     JokerObject* joker_object;
@@ -3801,7 +3796,7 @@ static void _game_shop_reroll(int* reroll_cost)
     {
         if (joker_object != NULL)
         {
-            _set_shop_joker_avail(joker_object->joker->id, true);
+            set_shop_joker_avail(joker_object->joker->id, true);
             joker_object_destroy(&joker_object); // Destroy the joker object if it exists
         }
     }
@@ -3809,7 +3804,7 @@ static void _game_shop_reroll(int* reroll_cost)
     list_clear(&_shop_jokers_list);
     _shop_jokers_list = list_create();
 
-    _game_shop_create_items();
+    game_shop_create_items();
 
     itr = list_itr_create(&_shop_jokers_list);
 
@@ -3827,22 +3822,22 @@ static void _game_shop_reroll(int* reroll_cost)
     tte_printf("#{P:%d,%d; cx:0x%X000}$%d", SHOP_REROLL_RECT.left, SHOP_REROLL_RECT.top, TTE_WHITE_PB, *reroll_cost);
 }
 
-static int _jokers_sel_row_get_size()
+static int jokers_sel_row_get_size()
 {
     return list_get_len(&_owned_jokers_list);
 }
 
-static void _jokers_sel_row_on_selection_changed(SelectionGrid* selection_grid,
-                                                 int row_idx,
-                                                 const Selection* prev_selection,
-                                                 const Selection* new_selection)
+static void jokers_sel_row_on_selection_changed(SelectionGrid* selection_grid,
+                                                int row_idx,
+                                                const Selection* prev_selection,
+                                                const Selection* new_selection)
 {
     if (prev_selection->y == row_idx)
     {
         JokerObject* joker_object = (JokerObject*)list_get_at_idx(&_owned_jokers_list, prev_selection->x);
         if (joker_object != NULL)
         {
-            _erase_price_under_sprite_object(joker_object->sprite_object);
+            erase_price_under_sprite_object(joker_object->sprite_object);
             sprite_object_set_focus(joker_object->sprite_object, false);
         }
     }
@@ -3853,68 +3848,68 @@ static void _jokers_sel_row_on_selection_changed(SelectionGrid* selection_grid,
         if (joker_object != NULL)
         {
             sprite_object_set_focus(joker_object->sprite_object, true);
-            _print_price_under_sprite_object(joker_object->sprite_object, joker_get_sell_value(joker_object->joker));
+            print_price_under_sprite_object(joker_object->sprite_object, joker_get_sell_value(joker_object->joker));
         }
     }
 }
 
-static void _joker_start_discard_animation(JokerObject* joker_object)
+static void joker_start_discard_animation(JokerObject* joker_object)
 {
     joker_object->sprite_object->tx = int2fx(JOKER_DISCARD_TARGET.x);
     joker_object->sprite_object->ty = int2fx(JOKER_DISCARD_TARGET.y);
     list_push_back(&_discarded_jokers_list, joker_object);
 }
 
-static void _game_sell_joker(int joker_idx)
+static void game_sell_joker(int joker_idx)
 {
     if (joker_idx < 0 || joker_idx >= list_get_len(&_owned_jokers_list))
         return;
 
     JokerObject* joker_object = (JokerObject*)list_get_at_idx(&_owned_jokers_list, joker_idx);
     _money += joker_get_sell_value(joker_object->joker);
-    _display_money(_money);
-    _erase_price_under_sprite_object(joker_object->sprite_object);
+    display_money(_money);
+    erase_price_under_sprite_object(joker_object->sprite_object);
 
-    _remove_owned_joker(joker_idx);
+    remove_owned_joker(joker_idx);
 
-    _joker_start_discard_animation(joker_object);
+    joker_start_discard_animation(joker_object);
 }
 
-static void _jokers_sel_row_on_key_hit(SelectionGrid* selection_grid, Selection* selection)
+static void jokers_sel_row_on_key_hit(SelectionGrid* selection_grid, Selection* selection)
 {
     if (!key_hit(SELL_KEY))
         return;
 
-    _game_sell_joker(selection->x);
+    game_sell_joker(selection->x);
     // Move the selection away from the jokers so it doesn't point to an invalid place
     selection_grid_move_selection_vert(selection_grid, SCREEN_DOWN);
 }
 
 // Shop input
-static int _shop_top_row_get_size()
+static int shop_top_row_get_size()
 {
     return list_get_len(&_shop_jokers_list) + 1; // + 1 to account for next round button
 }
 
-static void _add_to_held_jokers(JokerObject* joker_object)
+static void add_to_held_jokers(JokerObject* joker_object)
 {
     joker_object->sprite_object->ty = int2fx(HELD_JOKERS_POS.y);
-    _add_joker(joker_object);
+    add_joker(joker_object);
 }
 
-static void _game_shop_buy_joker(int shop_joker_idx)
+static void game_shop_buy_joker(int shop_joker_idx)
 {
     JokerObject* joker_object = (JokerObject*)list_get_at_idx(&_shop_jokers_list, shop_joker_idx);
 
     _money -= joker_object->joker->value; // Deduct the money spent on the joker
-    _display_money(_money);               // Update the money display
-    _erase_price_under_sprite_object(joker_object->sprite_object);
+    display_money(_money);                // Update the money display
+    erase_price_under_sprite_object(joker_object->sprite_object);
     sprite_object_set_focus(joker_object->sprite_object, false);
-    _add_to_held_jokers(joker_object);
+    add_to_held_jokers(joker_object);
     list_remove_at_idx(&_shop_jokers_list, shop_joker_idx); // Remove the joker from the shop
 }
 
-static void _shop_top_row_on_key_hit(SelectionGrid* selection_grid, Selection* selection)
+static void shop_top_row_on_key_hit(SelectionGrid* selection_grid, Selection* selection)
 {
     if (!key_hit(SELECT_CARD))
         return;
@@ -3943,20 +3938,20 @@ static void _shop_top_row_on_key_hit(SelectionGrid* selection_grid, Selection* s
             return;
         }
 
-        _game_shop_buy_joker(shop_joker_idx);
+        game_shop_buy_joker(shop_joker_idx);
 
         // In Balatro the selection actually stays on the purchased joker it's easier to just move it left
         selection_grid_move_selection_horz(selection_grid, -1);
     }
 }
 
-static void _shop_top_row_on_selection_changed(SelectionGrid* selection_grid,
-                                               int row_idx,
-                                               const Selection* prev_selection,
-                                               const Selection* new_selection)
+static void shop_top_row_on_selection_changed(SelectionGrid* selection_grid,
+                                              int row_idx,
+                                              const Selection* prev_selection,
+                                              const Selection* new_selection)
 {
     // The selection grid system only guarantees that the new selection is within bounds
-    if (prev_selection->y == row_idx && prev_selection->x >= 0 && prev_selection->x < _shop_top_row_get_size())
+    if (prev_selection->y == row_idx && prev_selection->x >= 0 && prev_selection->x < shop_top_row_get_size())
     {
         if (prev_selection->x == NEXT_ROUND_BTN_SEL_X)
         {
@@ -3988,15 +3983,15 @@ static void _shop_top_row_on_selection_changed(SelectionGrid* selection_grid,
     }
 }
 
-static int _shop_reroll_row_get_size()
+static int shop_reroll_row_get_size()
 {
     return 1; // Only the reroll button
 }
 
-static void _shop_reroll_row_on_selection_changed(SelectionGrid* selection_grid,
-                                                  int row_idx,
-                                                  const Selection* prev_selection,
-                                                  const Selection* new_selection)
+static void shop_reroll_row_on_selection_changed(SelectionGrid* selection_grid,
+                                                 int row_idx,
+                                                 const Selection* prev_selection,
+                                                 const Selection* new_selection)
 {
     if (row_idx == prev_selection->y)
     {
@@ -4009,15 +4004,15 @@ static void _shop_reroll_row_on_selection_changed(SelectionGrid* selection_grid,
     }
 }
 
-static void _shop_reroll_row_on_key_hit(SelectionGrid* selection_grid, Selection* selection)
+static void shop_reroll_row_on_key_hit(SelectionGrid* selection_grid, Selection* selection)
 {
     if (_money >= reroll_cost)
     {
-        _game_shop_reroll(&reroll_cost);
+        game_shop_reroll(&reroll_cost);
     }
 }
 
-static void _game_shop_lights_anim_frame()
+static void game_shop_lights_anim_frame()
 {
     // Shift palette around the border of the shop icon
     COLOR shifted_palette[4];
@@ -4042,7 +4037,7 @@ static void _game_shop_lights_anim_frame()
     memcpy16(&pal_bg_mem[SHOP_LIGHTS_1_PID], &shifted_palette[3], 1);
 }
 
-static void _discarded_jokers_update_loop()
+static void discarded_jokers_update_loop()
 {
     if (list_is_empty(&_discarded_jokers_list))
     {
@@ -4064,7 +4059,7 @@ static void _discarded_jokers_update_loop()
     }
 }
 
-static void _held_jokers_update_loop()
+static void held_jokers_update_loop()
 {
     const int spacing_lut[MAX_JOKERS_HELD_SIZE][MAX_JOKERS_HELD_SIZE] = {
         {0,  0,   0,   0,   0  },
@@ -4088,13 +4083,13 @@ static void _held_jokers_update_loop()
     }
 }
 
-static void _jokers_update_loop()
+static void jokers_update_loop()
 {
-    _held_jokers_update_loop();
-    _discarded_jokers_update_loop();
+    held_jokers_update_loop();
+    discarded_jokers_update_loop();
 }
 
-static void _game_over_anim_frame()
+static void game_over_anim_frame()
 {
     main_bg_se_move_rect_1_tile_vert(GAME_OVER_ANIM_RECT, SE_UP);
 }
