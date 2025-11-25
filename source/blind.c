@@ -1,52 +1,49 @@
-#include <tonc.h>
-
 #include "blind.h"
-#include "small_blind_gfx.h"
+
 #include "big_blind_gfx.h"
 #include "boss_blind_gfx.h"
 #include "graphic_utils.h"
+#include "small_blind_gfx.h"
 
-// +1 is added because we'll actually be indexing at 1, but if something causes you to go to ante 0, there will still be a value there.
+#include <tonc.h>
+
+// +1 is added because we'll actually be indexing at 1, but if something causes you to go to ante 0, there will still be
+// a value there.
 static const int ante_lut[MAX_ANTE + 1] = {100, 300, 800, 2000, 5000, 11000, 20000, 35000, 50000};
 
-// Palettes for the blinds (Transparency, Text Color, Shadow, Highlight, Main Color) Use this: http://www.budmelvin.com/dev/15bitconverter.html
-static const u16 small_blind_token_palette[PAL_ROW_LEN] = {0x0000, 0x7FFF, 0x34A1, 0x5DCB, 0x5104, 0x55A0, 0x2D01, 0x34E0};
-static const u16 big_blind_token_palette[PAL_ROW_LEN] = {0x0000, 0x2527, 0x15F5, 0x36FC, 0x1E9C, 0x01B4, 0x0D0A, 0x010E};
-static const u16 boss_blind_token_palette[PAL_ROW_LEN] = {0x0000, 0x2CC9, 0x3D0D, 0x5E14, 0x5171, 0x4D0F, 0x2CC8, 0x3089}; // This variable is temporary, each boss blind will have its own unique palette
+// Palettes for the blinds (Transparency, Text Color, Shadow, Highlight, Main Color) Use this:
+// http://www.budmelvin.com/dev/15bitconverter.html
+static const u16 small_blind_token_palette[PAL_ROW_LEN] =
+    {0x0000, 0x7FFF, 0x34A1, 0x5DCB, 0x5104, 0x55A0, 0x2D01, 0x34E0};
+static const u16 big_blind_token_palette[PAL_ROW_LEN] =
+    {0x0000, 0x2527, 0x15F5, 0x36FC, 0x1E9C, 0x01B4, 0x0D0A, 0x010E};
+// This variable is temporary, each boss blind will have its own unique palette
+static const u16 boss_blind_token_palette[PAL_ROW_LEN] =
+    {0x0000, 0x2CC9, 0x3D0D, 0x5E14, 0x5171, 0x4D0F, 0x2CC8, 0x3089};
 
-
-static Blind _blind_type_map[BLIND_TYPE_MAX] =
-{
-#define BLIND_INFO(NAME, name, multi, _reward)           \
-    {                                                    \
-        .type = BLIND_TYPE_##NAME ,                      \
-        .gfx_info =                                      \
-        {                                                \
-            .tiles = name##_blind_gfxTiles,              \
-            .palette = name##_blind_token_palette,       \
-            .tid = NAME##_BLIND_TID,                     \
-            .pb = NAME##_BLIND_PB,                       \
-        },                                               \
-        .score_req_multipler = multi ,                   \
-        .reward = _reward ,                              \
-    },
+// clang-format off
+static Blind _blind_type_map[BLIND_TYPE_MAX] = {
+#define BLIND_INFO(NAME, name, multi, _reward)                                                                         \
+    {                                                                                                                  \
+        .type = BLIND_TYPE_##NAME,                                                                                     \
+        .gfx_info =                                                                                                    \
+        {                                                                                                              \
+                .tiles = name##_blind_gfxTiles,                                                                        \
+                .palette = name##_blind_token_palette,                                                                 \
+                .tid = NAME##_BLIND_TID,                                                                               \
+                .pb = NAME##_BLIND_PB,                                                                                 \
+        },                                                                                                             \
+        .score_req_multipler = multi,                                                                                  \
+        .reward = _reward,                                                                                             \
+},
     BLIND_TYPE_INFO_TABLE
 #undef BLIND_INFO
 };
+// clang-format on
 
-static void blind_gfx_init(enum BlindType type)
-{
-    // TODO: Re-add grit copy. You need to decouple the blind graphics first.
-    // This will allow this function to change the boss graphics info
-    //GRIT_CPY(&tile_mem[4][_blind_type_map[type].pal_info.tid], tiles);
-    BlindGfxInfo* p_gfx = &_blind_type_map[type].gfx_info;
-    memcpy32(&tile_mem[4][p_gfx->tid], p_gfx->tiles, BLIND_SPRITE_COPY_SIZE);
-    memcpy16(&pal_obj_bank[p_gfx->pb], p_gfx->palette, PAL_ROW_LEN);
-}
+static void _blind_gfx_init(enum BlindType type);
 
-
-__attribute__((unused))
-void blind_set_boss_graphics(const unsigned int* tiles, const u16* palette)
+__attribute__((unused)) void blind_set_boss_graphics(const unsigned int* tiles, const u16* palette)
 {
     // TODO: This function is unused and not fully fleshed out.
     // We need to support more boss blind graphics in the future.
@@ -55,18 +52,17 @@ void blind_set_boss_graphics(const unsigned int* tiles, const u16* palette)
     //
     // This will eventually be in it's own map mapping graphic data to
     // boss types.
-    
+
     _blind_type_map[BLIND_TYPE_BOSS].gfx_info.tiles = tiles;
     _blind_type_map[BLIND_TYPE_BOSS].gfx_info.palette = palette;
-    blind_gfx_init(BLIND_TYPE_BOSS);
+    _blind_gfx_init(BLIND_TYPE_BOSS);
 }
 
 void blind_init()
 {
-    for(int i = 0; i < BLIND_TYPE_MAX; i++)
+    for (int i = 0; i < BLIND_TYPE_MAX; i++)
     {
-        blind_gfx_init(i);
-        
+        _blind_gfx_init(i);
     }
 
     return;
@@ -74,7 +70,9 @@ void blind_init()
 
 int blind_get_requirement(enum BlindType type, int ante)
 {
-    if (ante < 0 || ante > MAX_ANTE) ante = 0; // Ensure ante is within valid range
+    // Ensure ante is within valid range
+    if (ante < 0 || ante > MAX_ANTE)
+        ante = 0;
 
     return fx2int(_blind_type_map[type].score_req_multipler * ante_lut[ante]);
 }
@@ -89,7 +87,7 @@ u16 blind_get_color(enum BlindType type, enum BlindColorIndex index)
     return _blind_type_map[type].gfx_info.palette[index];
 }
 
-Sprite *blind_token_new(enum BlindType type, int x, int y, int sprite_index)
+Sprite* blind_token_new(enum BlindType type, int x, int y, int sprite_index)
 {
     u16 a0 = ATTR0_SQUARE | ATTR0_4BPP;
     u16 a1 = ATTR1_SIZE_32x32;
@@ -100,4 +98,14 @@ Sprite *blind_token_new(enum BlindType type, int x, int y, int sprite_index)
     sprite_position(sprite, x, y);
 
     return sprite;
+}
+
+static void _blind_gfx_init(enum BlindType type)
+{
+    // TODO: Re-add grit copy. You need to decouple the blind graphics first.
+    // This will allow this function to change the boss graphics info
+    // GRIT_CPY(&tile_mem[4][_blind_type_map[type].pal_info.tid], tiles);
+    BlindGfxInfo* p_gfx = &_blind_type_map[type].gfx_info;
+    memcpy32(&tile_mem[4][p_gfx->tid], p_gfx->tiles, BLIND_SPRITE_COPY_SIZE);
+    memcpy16(&pal_obj_bank[p_gfx->pb], p_gfx->palette, PAL_ROW_LEN);
 }
