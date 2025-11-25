@@ -50,3 +50,4 @@ SpacesInLineCommentPrefix:
   Maximum: 1
 
 PenaltyReturnTypeOnItsOwnLine: 99999999
+AlignEscapedNewlines: LeftWithLastLine

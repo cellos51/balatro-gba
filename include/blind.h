@@ -26,9 +26,9 @@ enum BlindColorIndex
     BLIND_BACKGROUND_SHADOW_COLOR_INDEX = 7,
 };
 
-#define BLIND_TYPE_INFO_TABLE                                                                                          \
-    BLIND_INFO(SMALL, small, FIX_ONE, 3)                                                                               \
-    BLIND_INFO(BIG, big, (FIX_ONE * 3) / 2, 4)                                                                         \
+#define BLIND_TYPE_INFO_TABLE                  \
+    BLIND_INFO(SMALL, small, FIX_ONE, 3)       \
+    BLIND_INFO(BIG, big, (FIX_ONE * 3) / 2, 4) \
     BLIND_INFO(BOSS, boss, FIX_ONE * 2, 5)
 
 enum BlindType

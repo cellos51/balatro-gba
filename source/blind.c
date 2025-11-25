@@ -23,18 +23,18 @@ static const u16 boss_blind_token_palette[PAL_ROW_LEN] =
 
 // clang-format off
 static Blind _blind_type_map[BLIND_TYPE_MAX] = {
-#define BLIND_INFO(NAME, name, multi, _reward)                                                                         \
-    {                                                                                                                  \
-        .type = BLIND_TYPE_##NAME,                                                                                     \
-        .gfx_info =                                                                                                    \
-        {                                                                                                              \
-                .tiles = name##_blind_gfxTiles,                                                                        \
-                .palette = name##_blind_token_palette,                                                                 \
-                .tid = NAME##_BLIND_TID,                                                                               \
-                .pb = NAME##_BLIND_PB,                                                                                 \
-        },                                                                                                             \
-        .score_req_multipler = multi,                                                                                  \
-        .reward = _reward,                                                                                             \
+#define BLIND_INFO(NAME, name, multi, _reward)         \
+    {                                                  \
+        .type = BLIND_TYPE_##NAME,                     \
+        .gfx_info =                                    \
+        {                                              \
+                .tiles = name##_blind_gfxTiles,        \
+                .palette = name##_blind_token_palette, \
+                .tid = NAME##_BLIND_TID,               \
+                .pb = NAME##_BLIND_PB,                 \
+        },                                             \
+        .score_req_multipler = multi,                  \
+        .reward = _reward,                             \
 },
     BLIND_TYPE_INFO_TABLE
 #undef BLIND_INFO
