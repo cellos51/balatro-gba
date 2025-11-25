@@ -9,6 +9,12 @@
 #include <stdint.h>
 
 /**
+ * @def GBLA_UNUSED
+ * @brief A friendly wrapper around the not so friendly looking __attribute__ syntax for ((unused))
+ */
+#define GBLA_UNUSED __attribute__((unused))
+
+/**
  * @def UNDEFINED
  * @brief Universal representation of an undefined value
  */
