@@ -12,16 +12,16 @@ static void s_clip_se_rect_within_step_of_full_screen_vert(Rect* se_rect, int di
 static void s_bg_se_copy_or_move_rect_1_tile_vert(u16 bg_sbb, Rect se_rect, int direction, bool move);
 static void s_main_bg_se_copy_or_move_rect_1_tile_vert(Rect se_rect, int direction, bool move);
 static void s_main_bg_se_expand_3x3_copy_corners(const Rect* se_dest_rect,
-                                               const BG_POINT* src_top_left_pnt,
-                                               int dest_rect_width,
-                                               int dest_rect_height);
+                                                 const BG_POINT* src_top_left_pnt,
+                                                 int dest_rect_width,
+                                                 int dest_rect_height);
 static void s_main_bg_se_expand_3x3_copy_top_bottom(const Rect* se_dest_rect,
-                                                  const BG_POINT* src_top_left_pnt,
-                                                  int dest_rect_width);
+                                                    const BG_POINT* src_top_left_pnt,
+                                                    int dest_rect_width);
 static void s_main_bg_se_expand_3x3_copy_left_right(const Rect* se_dest_rect,
-                                                  const BG_POINT* src_top_left_pnt,
-                                                  int dest_rect_width,
-                                                  int dest_rect_height);
+                                                    const BG_POINT* src_top_left_pnt,
+                                                    int dest_rect_width,
+                                                    int dest_rect_height);
 
 const Rect FULL_SCREENBLOCK_RECT = {0, 0, SE_ROW_LEN - 1, SE_COL_LEN - 1};
 
@@ -278,9 +278,9 @@ static void s_main_bg_se_copy_or_move_rect_1_tile_vert(Rect se_rect, int directi
 }
 // Helper: Copy the corners of a 3x3 tile block
 static void s_main_bg_se_expand_3x3_copy_corners(const Rect* se_dest_rect,
-                                               const BG_POINT* src_top_left_pnt,
-                                               int dest_rect_width,
-                                               int dest_rect_height)
+                                                 const BG_POINT* src_top_left_pnt,
+                                                 int dest_rect_width,
+                                                 int dest_rect_height)
 {
     SE top_left_se = se_mat[MAIN_BG_SBB][src_top_left_pnt->y][src_top_left_pnt->x];
     se_mat[MAIN_BG_SBB][se_dest_rect->top][se_dest_rect->left] = top_left_se;
@@ -298,8 +298,8 @@ static void s_main_bg_se_expand_3x3_copy_corners(const Rect* se_dest_rect,
 
 // Helper: Copy the top and bottom sides of a 3x3 tile block
 static void s_main_bg_se_expand_3x3_copy_top_bottom(const Rect* se_dest_rect,
-                                                  const BG_POINT* src_top_left_pnt,
-                                                  int dest_rect_width)
+                                                    const BG_POINT* src_top_left_pnt,
+                                                    int dest_rect_width)
 {
     if (dest_rect_width > 2)
     {
@@ -314,9 +314,9 @@ static void s_main_bg_se_expand_3x3_copy_top_bottom(const Rect* se_dest_rect,
 
 // Helper: Copy the left and right sides of a 3x3 tile block
 static void s_main_bg_se_expand_3x3_copy_left_right(const Rect* se_dest_rect,
-                                                  const BG_POINT* src_top_left_pnt,
-                                                  int dest_rect_width,
-                                                  int dest_rect_height)
+                                                    const BG_POINT* src_top_left_pnt,
+                                                    int dest_rect_width,
+                                                    int dest_rect_height)
 {
     SE middle_left_se = se_mat[MAIN_BG_SBB][src_top_left_pnt->y + 1][src_top_left_pnt->x];
     SE middle_right_se = se_mat[MAIN_BG_SBB][src_top_left_pnt->y + 1][src_top_left_pnt->x + 2];
