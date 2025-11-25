@@ -31,12 +31,16 @@ enum BlindColorIndex
     BLIND_INFO(BIG, big, (FIX_ONE * 3) / 2, 4) \
     BLIND_INFO(BOSS, boss, FIX_ONE * 2, 5)
 
+// clang-format off
 enum BlindType
 {
-#define BLIND_INFO(NAME, name, multi, reward) BLIND_TYPE_##NAME,
-    BLIND_TYPE_INFO_TABLE BLIND_TYPE_MAX,
+#define BLIND_INFO(NAME, name, multi, reward) \
+    BLIND_TYPE_##NAME,
+    BLIND_TYPE_INFO_TABLE
 #undef BLIND_INFO
+    BLIND_TYPE_MAX,
 };
+// clang-format on
 
 enum BlindState
 {

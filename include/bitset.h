@@ -194,13 +194,13 @@ int bitset_itr_next(BitsetItr* itr);
  * @param name the name of the bitset
  * @param capacity the capacity of the bitset
  */
-#define BITSET_DEFINE(name, capacity)                                                                                  \
-    static uint32_t name##_w[BITSET_ARRAY_SIZE] = {0};                                                                 \
-    static Bitset name = {                                                                                             \
-        .w = name##_w,                                                                                                 \
-        .nbits = BITSET_BITS_PER_WORD,                                                                                 \
-        .nwords = BITSET_ARRAY_SIZE,                                                                                   \
-        .cap = capacity,                                                                                               \
+#define BITSET_DEFINE(name, capacity)                  \
+    static uint32_t name##_w[BITSET_ARRAY_SIZE] = {0}; \
+    static Bitset name = {                             \
+        .w = name##_w,                                 \
+        .nbits = BITSET_BITS_PER_WORD,                 \
+        .nwords = BITSET_ARRAY_SIZE,                   \
+        .cap = capacity,                               \
     };
 
 #endif // BITSET_H
