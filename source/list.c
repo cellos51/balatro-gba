@@ -1,18 +1,20 @@
-#include <stdbool.h>
 #include "list.h"
+
 #include "pool.h"
+
+#include <stdbool.h>
 
 /**
  * Remove a node from a list.
  *
  * Remove a @ref ListNode from a @ref List. There are no checks to ensure that the
  * passed `node` is actually part of the passed `list`. Handle with care.
- * This is used with the @ref ListItr specifically. 
+ * This is used with the @ref ListItr specifically.
  *
  * @param list pointer to a @ref List
- * @param node pointer to a @ref ListNode 
+ * @param node pointer to a @ref ListNode
  */
-static void _list_remove_node(List *list, ListNode *node);
+static void s_list_remove_node(List* list, ListNode* node);
 
 /**
  * Get the next @ref ListNode in a @ref ListItr
@@ -25,23 +27,23 @@ static void _list_remove_node(List *list, ListNode *node);
  *
  * @return A pointer to the @ref ListNode in the itr, otherwise return NULL.
  */
-static ListNode* _list_itr_node_next(ListItr* itr);
-
+static ListNode* s_list_itr_node_next(ListItr* itr);
 
 List list_create(void)
 {
-    List list = { .head = NULL, .tail = NULL, .len = 0 };
+    List list = {.head = NULL, .tail = NULL, .len = 0};
     return list;
 }
 
 void list_clear(List* list)
 {
-    if(list_is_empty(list)) return;
+    if (list_is_empty(list))
+        return;
 
     ListItr itr = list_itr_create(list);
     ListNode* ln;
 
-    while((ln = _list_itr_node_next(&itr)))
+    while ((ln = s_list_itr_node_next(&itr)))
     {
         POOL_FREE(ListNode, ln);
     }
@@ -56,9 +58,9 @@ bool list_is_empty(const List* list)
     return list->len == 0;
 }
 
-void list_push_front(List *list, void* data)
+void list_push_front(List* list, void* data)
 {
-    ListNode *node = POOL_GET(ListNode);
+    ListNode* node = POOL_GET(ListNode);
 
     node->data = data;
     node->prev = NULL;
@@ -78,7 +80,7 @@ void list_push_front(List *list, void* data)
     list->len++;
 }
 
-void list_push_back(List *list, void* data)
+void list_push_back(List* list, void* data)
 {
     ListNode* node = POOL_GET(ListNode);
     node->data = data;
@@ -101,13 +103,13 @@ void list_push_back(List *list, void* data)
 
 void list_insert(List* list, void* data, unsigned int idx)
 {
-    if(idx >= list->len)
+    if (idx >= list->len)
     {
         list_push_back(list, data);
         return;
     }
 
-    if(idx == 0)
+    if (idx == 0)
     {
         list_push_front(list, data);
         return;
@@ -121,11 +123,11 @@ void list_insert(List* list, void* data, unsigned int idx)
     ListItr itr = list_itr_create(list);
     ListNode* ln;
 
-    while((ln = _list_itr_node_next(&itr)))
+    while ((ln = s_list_itr_node_next(&itr)))
     {
-        if(idx == curr_idx++)
+        if (idx == curr_idx++)
         {
-            ListNode *node = POOL_GET(ListNode);
+            ListNode* node = POOL_GET(ListNode);
             node->prev = ln->prev;
             node->next = ln;
             ln->prev->next = node;
@@ -139,8 +141,10 @@ void list_insert(List* list, void* data, unsigned int idx)
 
 bool list_swap(List* list, unsigned int idx_a, unsigned int idx_b)
 {
-    if(idx_a >= list->len || idx_b >= list->len) return false;
-    if(idx_a == idx_b) return true; // swapping with yourself isn't technically an error
+    if (idx_a >= list->len || idx_b >= list->len)
+        return false;
+    if (idx_a == idx_b)
+        return true; // swapping with yourself isn't technically an error
 
     unsigned int curr_idx = 0;
     unsigned int max_idx = idx_a > idx_b ? idx_a : idx_b;
@@ -152,19 +156,18 @@ bool list_swap(List* list, unsigned int idx_a, unsigned int idx_b)
 
     do
     {
-        ln = _list_itr_node_next(&itr);
-        if(idx_a == curr_idx)
+        ln = s_list_itr_node_next(&itr);
+        if (idx_a == curr_idx)
         {
             node_a = ln;
             continue;
         }
-        if(idx_b == curr_idx)
+        if (idx_b == curr_idx)
         {
             node_b = ln;
             continue;
         }
-    }
-    while(max_idx != curr_idx++);
+    } while (max_idx != curr_idx++);
 
     // Just swap the data pointers
     void* tmp = node_a->data;
@@ -174,24 +177,24 @@ bool list_swap(List* list, unsigned int idx_a, unsigned int idx_b)
     return true;
 }
 
-static void _list_remove_node(List *list, ListNode *node)
+static void s_list_remove_node(List* list, ListNode* node)
 {
-    if(node->prev && !node->next) // end of list
+    if (node->prev && !node->next) // end of list
     {
         node->prev->next = NULL;
         list->tail = node->prev;
     }
-    else if(node->prev && node->next) // somewhere in between
+    else if (node->prev && node->next) // somewhere in between
     {
         node->prev->next = node->next;
         node->next->prev = node->prev;
     }
-    else if(node->next && !node->prev) // beginning of list
+    else if (node->next && !node->prev) // beginning of list
     {
         node->next->prev = NULL;
         list->head = node->next;
     }
-    else if(!node->prev && !node->next) // only element in list
+    else if (!node->prev && !node->next) // only element in list
     {
         list->head = NULL;
         list->tail = NULL;
@@ -209,15 +212,17 @@ int list_get_len(const List* list)
 
 void* list_get_at_idx(List* list, unsigned int idx)
 {
-    if(idx >= list_get_len(list)) return NULL;
+    if (idx >= list_get_len(list))
+        return NULL;
 
     int curr_idx = 0;
     ListItr itr = list_itr_create(list);
     void* data = NULL;
 
-    while((data = list_itr_next(&itr)))
+    while ((data = list_itr_next(&itr)))
     {
-        if (idx == curr_idx++) return data;
+        if (idx == curr_idx++)
+            return data;
     }
 
     return NULL;
@@ -225,17 +230,18 @@ void* list_get_at_idx(List* list, unsigned int idx)
 
 bool list_remove_at_idx(List* list, unsigned int idx)
 {
-    if(idx >= list_get_len(list)) return false;
+    if (idx >= list_get_len(list))
+        return false;
 
     int len = 0;
     ListItr itr = list_itr_create(list);
     ListNode* ln;
 
-    while((ln = _list_itr_node_next(&itr)))
+    while ((ln = s_list_itr_node_next(&itr)))
     {
-        if(idx == len++)
+        if (idx == len++)
         {
-            _list_remove_node(list, ln);
+            s_list_remove_node(list, ln);
             return true;
         }
     }
@@ -244,8 +250,7 @@ bool list_remove_at_idx(List* list, unsigned int idx)
 
 ListItr list_itr_create(List* list)
 {
-    ListItr itr =
-    {
+    ListItr itr = {
         .list = list,
         .next_node = !list_is_empty(list) ? list->head : NULL,
         .current_node = NULL,
@@ -257,8 +262,7 @@ ListItr list_itr_create(List* list)
 
 ListItr rev_list_itr_create(List* list)
 {
-    ListItr itr =
-    {
+    ListItr itr = {
         .list = list,
         .next_node = !list_is_empty(list) ? list->tail : NULL,
         .current_node = NULL,
@@ -270,20 +274,21 @@ ListItr rev_list_itr_create(List* list)
 
 void* list_itr_next(ListItr* itr)
 {
-    ListNode* ln = _list_itr_node_next(itr);
+    ListNode* ln = s_list_itr_node_next(itr);
     return ln ? ln->data : NULL;
 }
 
-static ListNode* _list_itr_node_next(ListItr* itr)
+static ListNode* s_list_itr_node_next(ListItr* itr)
 {
-    if(!itr->next_node) return NULL;
+    if (!itr->next_node)
+        return NULL;
 
     itr->current_node = itr->next_node;
 
     ListNode* ln = itr->next_node;
     ListNode* next_itr_node = (itr->direction == LIST_ITR_FORWARD) ? ln->next : ln->prev;
 
-    if(next_itr_node)
+    if (next_itr_node)
     {
         itr->next_node = next_itr_node;
         return ln;
@@ -295,8 +300,9 @@ static ListNode* _list_itr_node_next(ListItr* itr)
 
 void list_itr_remove_current_node(ListItr* itr)
 {
-    if(!itr || !itr->current_node) return;
+    if (!itr || !itr->current_node)
+        return;
     ListNode* tmp_prev = itr->current_node->prev;
-    _list_remove_node(itr->list, itr->current_node);
+    s_list_remove_node(itr->list, itr->current_node);
     itr->current_node = tmp_prev;
 }
