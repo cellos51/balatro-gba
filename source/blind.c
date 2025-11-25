@@ -4,6 +4,7 @@
 #include "boss_blind_gfx.h"
 #include "graphic_utils.h"
 #include "small_blind_gfx.h"
+#include "util.h"
 
 #include <tonc.h>
 
@@ -43,7 +44,7 @@ static Blind _blind_type_map[BLIND_TYPE_MAX] = {
 
 static void s_blind_gfx_init(enum BlindType type);
 
-__attribute__((unused)) void blind_set_boss_graphics(const unsigned int* tiles, const u16* palette)
+GBLA_UNUSED void blind_set_boss_graphics(const unsigned int* tiles, const u16* palette)
 {
     // TODO: This function is unused and not fully fleshed out.
     // We need to support more boss blind graphics in the future.
