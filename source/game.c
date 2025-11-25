@@ -351,7 +351,6 @@ static void discarded_jokers_update_loop(void);
 static void held_jokers_update_loop(void);
 static void jokers_update_loop(void);
 static void game_over_anim_frame(void);
-static int get_straight_and_flush_size(void);
 
 // Rects                                       left     top     right   bottom
 // Screenblock rects
@@ -606,11 +605,6 @@ static int straight_and_flush_size = STRAIGHT_AND_FLUSH_SIZE_DEFAULT;
 // Shop
 static int reroll_cost = REROLL_BASE_COST;
 
-int _get_straight_and_flush_size(void);
-{
-    return straight_and_flush_size;
-}
-
 static inline void _set_shop_joker_avail(int joker_id, bool avail)
 {
     bitset_set_idx(&_avail_jokers_bitset, joker_id, avail);
@@ -787,6 +781,11 @@ void set_game_speed(int new_game_speed)
 bool is_shortcut_joker_active(void)
 {
     return _shortcut_joker_count > 0;
+}
+
+int get_straight_and_flush_size(void)
+{
+    return straight_and_flush_size;
 }
 
 static inline void set_shop_joker_avail(int joker_id, bool avail)
@@ -4109,9 +4108,4 @@ static void jokers_update_loop()
 static void game_over_anim_frame()
 {
     main_bg_se_move_rect_1_tile_vert(GAME_OVER_ANIM_RECT, SE_UP);
-}
-
-static int get_straight_and_flush_size(void)
-{
-    return straight_and_flush_size;
 }
