@@ -24,7 +24,7 @@ void bitset_set_idx(Bitset* bitset, int idx, bool on)
     }
 }
 
-int bitset_allocate_idx(Bitset* bitset)
+int bitset_set_next_free_idx(Bitset* bitset)
 {
     for (uint32_t i = 0; i < bitset->nwords; i++)
     {

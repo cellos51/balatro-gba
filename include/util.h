@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#define GBLA_UNUSED __attribute__((unused))
+
 static inline int get_digits(int n) // https://stackoverflow.com/questions/1068849/how-do-i-determine-the-number-of-digits-of-an-integer-in-c
 {
     if (n < 10) return 1;
