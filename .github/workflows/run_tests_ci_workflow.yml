@@ -18,8 +18,9 @@ jobs:
 
       - name: Clang Format
         run: >
-          clang-format --dry-run -Werror
-          include/bitset.h source/bitset.c
+          clang-format --dry-run -Werror 
+          include/bitset.h source/bitset.c 
+          include/hand_analysis.h source/hand_analysis.c 
           include/list.h source/list.c
           include/sprite.h source/sprite.c 
           include/splash_screen.h source/splash_screen.c 
