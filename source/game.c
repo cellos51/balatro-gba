@@ -604,6 +604,26 @@ static int straight_and_flush_size = STRAIGHT_AND_FLUSH_SIZE_DEFAULT;
 
 // Shop
 static int reroll_cost = REROLL_BASE_COST;
+int get_straight_and_flush_size(void) 
+{
+    return straight_and_flush_size;
+}
+
+static inline void _set_shop_joker_avail(int joker_id, bool avail)
+{
+    bitset_set_idx(&_avail_jokers_bitset, joker_id, avail);
+}
+
+GBLA_UNUSED
+static inline bool _get_shop_joker_avail(int joker_id)
+{
+    return bitset_get_idx(&_avail_jokers_bitset, joker_id);
+}
+
+static inline int _get_num_shop_jokers_avail(void)
+{
+    return bitset_num_set_bits(&_avail_jokers_bitset);
+}
 
 void game_init()
 {
