@@ -9,15 +9,15 @@
 
 #define MISPRINT_MAX_MULT 23
 
-#define SCORE_ON_EVENT_ONLY_WITH_CARD(scored_card, restricted_event, checked_event, effect)                            \
-    if (checked_event != restricted_event || scored_card == NULL)                                                      \
-    {                                                                                                                  \
-        return effect;                                                                                                 \
+#define SCORE_ON_EVENT_ONLY_WITH_CARD(scored_card, restricted_event, checked_event, effect) \
+    if (checked_event != restricted_event || scored_card == NULL)                           \
+    {                                                                                       \
+        return effect;                                                                      \
     }
-#define SCORE_ON_EVENT_ONLY(restricted_event, checked_event, effect)                                                   \
-    if (checked_event != restricted_event)                                                                             \
-    {                                                                                                                  \
-        return effect;                                                                                                 \
+#define SCORE_ON_EVENT_ONLY(restricted_event, checked_event, effect) \
+    if (checked_event != restricted_event)                           \
+    {                                                                \
+        return effect;                                               \
     }
 
 // Joker Effect functions
@@ -863,12 +863,11 @@ static JokerEffect bootstraps_joker_effect(Joker* joker, Card* scored_card, enum
     return effect;
 }
 
-
 // Using GBLA_UNUSED, aka __attribute__((unused)), for jokers with no sprites yet to avoid warning
 // Remove the attribute once they have sprites
 // no graphics available but ready to be used if wanted when graphics available
 GBLA_UNUSED
-static JokerEffect shoot_the_moon_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event)
+static JokerEffect shoot_the_moon_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
 {
     JokerEffect effect = {0};
 
@@ -882,9 +881,8 @@ static JokerEffect shoot_the_moon_joker_effect(Joker *joker, Card *scored_card, 
     return effect;
 }
 
-
 GBLA_UNUSED
-static JokerEffect photograph_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event)
+static JokerEffect photograph_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
 {
     JokerEffect effect = {0};
     s32* p_first_face_index = &(joker->scoring_state);
@@ -918,7 +916,7 @@ static JokerEffect photograph_joker_effect(Joker *joker, Card *scored_card, enum
 
 // no graphics available but ready to be used if wanted when graphics available
 GBLA_UNUSED
-static JokerEffect triboulet_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event)
+static JokerEffect triboulet_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
 {
     JokerEffect effect = {0};
 
@@ -1084,7 +1082,7 @@ static JokerEffect hack_joker_effect(Joker* joker, Card* scored_card, enum Joker
 
 // Note: Joker expiration is not yet implemented so Seltzer cannot be made active before it does.
 GBLA_UNUSED
-static JokerEffect seltzer_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event)
+static JokerEffect seltzer_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
 {
     JokerEffect effect = {0};
     s32* p_last_retriggered_idx = &(joker->scoring_state);
