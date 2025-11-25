@@ -733,10 +733,10 @@ static JokerEffect bootstraps_joker_effect(Joker *joker, Card *scored_card, enum
 }
 
 
-// Using __attribute__((unused)) for jokers with no sprites yet to avoid warning
+// Using GBLA_UNUSED, aka __attribute__((unused)), for jokers with no sprites yet to avoid warning
 // Remove the attribute once they have sprites
 // no graphics available but ready to be used if wanted when graphics available
-__attribute__((unused))
+GBLA_UNUSED
 static JokerEffect shoot_the_moon_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event)
 {
     JokerEffect effect = {0};
@@ -752,7 +752,7 @@ static JokerEffect shoot_the_moon_joker_effect(Joker *joker, Card *scored_card, 
 }
 
 
-__attribute__((unused))
+GBLA_UNUSED
 static JokerEffect photograph_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event)
 {
     JokerEffect effect = {0};
@@ -787,7 +787,7 @@ static JokerEffect photograph_joker_effect(Joker *joker, Card *scored_card, enum
 
 
 // no graphics available but ready to be used if wanted when graphics available
-__attribute__((unused))
+GBLA_UNUSED
 static JokerEffect triboulet_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event)
 {
     JokerEffect effect = {0};
@@ -956,7 +956,7 @@ static JokerEffect hack_joker_effect(Joker *joker, Card *scored_card, enum Joker
 
 
 // Note: Joker expiration is not yet implemented so Seltzer cannot be made active before it does.
-__attribute__((unused))
+GBLA_UNUSED
 static JokerEffect seltzer_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event)
 {
     JokerEffect effect = {0};

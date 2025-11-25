@@ -277,7 +277,7 @@ static inline void _set_shop_joker_avail(int joker_id, bool avail)
     bitset_set_idx(&_avail_jokers_bitset, joker_id, avail);
 }
 
-__attribute__((unused))
+GBLA_UNUSED
 static inline bool _get_shop_joker_avail(int joker_id)
 {
     return bitset_get_idx(&_avail_jokers_bitset, joker_id);
