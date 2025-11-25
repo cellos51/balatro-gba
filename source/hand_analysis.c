@@ -212,8 +212,8 @@ bool hand_contains_flush(u8* suits)
     return false;
 }
 
-// Returns the number of cards in the best flush found or 0 if no flush of min_len is found, and marks them in
-// out_selection.
+// Returns the number of cards in the best flush found
+// or 0 if no flush of min_len is found, and marks them in out_selection.
 /**
  * Finds the largest flush (set of cards with the same suit) in the given array of played cards.
  * Marks the cards belonging to the best flush in the out_selection array.
