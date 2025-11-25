@@ -238,18 +238,26 @@ void tte_erase_rect_wrapper(Rect rect)
 
 void update_text_rect_to_right_align_str(Rect* rect, char* str, int overflow_direction)
 {
-    int str_len = strlen(str);
+    // TODO: Allow passing string length to avoid calling strlen()?
+    size_t str_len = strlen(str);
     if (overflow_direction == OVERFLOW_LEFT)
     {
-        rect->left = max(0, rect->right - str_len * TILE_SIZE);
+        rect->left = max(0, rect->right - str_len * TTE_CHAR_SIZE);
     }
     else if (overflow_direction == OVERFLOW_RIGHT)
     {
-        int num_fitting_digits = rect_width(rect) / TILE_SIZE;
-        if (str_len < num_fitting_digits)
-            rect->left += (num_fitting_digits - str_len) * TILE_SIZE;
+        int num_fitting_chars = rect_width(rect) / TTE_CHAR_SIZE;
+        if (str_len < num_fitting_chars)
+            rect->left += (num_fitting_chars - str_len) * TTE_CHAR_SIZE;
         //else nothing is to be updated, entire rect is filled and may overflow
     }
+}
+
+void update_text_rect_to_center_str(Rect* rect, char* str)
+{
+    int text_width = strlen(str) * TTE_CHAR_SIZE;
+    
+    rect->left += max(0, (rect_width(rect) - text_width) / 2);
 }
 
 void memcpy16_tile8_with_palette_offset(u16* dst, const u16* src, uint hwcount, u8 palette_offset)

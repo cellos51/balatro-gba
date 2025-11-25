@@ -580,7 +580,7 @@ static const Rect HAND_SIZE_RECT_PLAYING    = {128,     152,    152,    160 };
 static const Rect HAND_TYPE_RECT            = {8,       64,     64,     72  };
 // Score displayed in the same place as the hand type
 static const Rect TEMP_SCORE_RECT           = {8,       64,     64,     72  }; 
-static const Rect SCORE_RECT                = {32,      48,     64,     56  };
+static const Rect SCORE_RECT                = {24,      48,     64,     56  };
 
 static const Rect PLAYED_CARDS_SCORES_RECT  = {72,      48,     240,    56  };
 static const Rect HELD_CARDS_SCORES_RECT    = {72,      108,    240,    116 };
@@ -1133,31 +1133,17 @@ void display_temp_score(u32 value)
 
 void display_score(u32 value)
 {
+    Rect score_rect = SCORE_RECT;
     // Clear the existing text before redrawing
     tte_erase_rect_wrapper(SCORE_RECT);
     
-    char score_suffix = ' ';
-    u32 display_value = value;
+    char score_str_buff[UINT_MAX_DIGITS + 2];
+
+    truncate_uint_to_suffixed_str(value, rect_width(&score_rect)/TTE_CHAR_SIZE, score_str_buff);
     
-    if(value >= TEN_K)
-    {
-        score_suffix = 'k';
-        display_value = value / ONE_K; // 12,986 = 12k
-    }
+    update_text_rect_to_center_str(&score_rect, score_str_buff);
     
-    // Calculate text width: digits + suffix character (if 'k')
-    int num_digits = get_digits(display_value);
-    int text_width = num_digits * TILE_SIZE;
-    if(score_suffix == 'k')
-    {
-        text_width += TILE_SIZE; // Add width for 'k' suffix
-    }
-    
-    // Calculate center position within SCORE_RECT
-    int rect_width = SCORE_RECT.right - SCORE_RECT.left;
-    int x_offset = SCORE_RECT.left + (rect_width - text_width) / 2;
-    
-    tte_printf("#{P:%d,48; cx:0x%X000}%lu%c", x_offset, TTE_WHITE_PB, display_value, score_suffix);
+    tte_printf("#{P:%d,%d; cx:0x%X000}%s", score_rect.left, score_rect.top, TTE_WHITE_PB, score_str_buff);
 }
 
 void display_money()

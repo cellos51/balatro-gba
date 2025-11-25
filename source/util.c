@@ -30,7 +30,7 @@ void truncate_uint_to_suffixed_str(uint32_t num, int num_places, char out_str_bu
     char* suffix = "";
     
     /* UINT32_MAX is in the billions so no need to check larger numbers
-     * or perform complext mathmetaical operations.
+     * or perform complex mathmetaical operations.
      */
     if (overflow_size >= ONE_M_ZEROS)
     {
@@ -44,7 +44,7 @@ void truncate_uint_to_suffixed_str(uint32_t num, int num_places, char out_str_bu
     }
     else if (overflow_size > 0 
             || (inevitable_overflow && num_digits == 4)) 
-            // Special case - alleviate inevitable overflow for "1000" and truncate it "1K"
+            // Special case - alleviate inevitable overflow for 1000s and truncate them to "1K"s
     {
         num /= ONE_K;
         suffix = "K";
