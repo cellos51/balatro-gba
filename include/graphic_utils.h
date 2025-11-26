@@ -158,7 +158,7 @@ void tte_erase_rect_wrapper(Rect rect);
 void update_text_rect_to_right_align_str(Rect* rect, char* str, int overflow_direction);
 
 // TODO: Document
-void update_text_rect_to_center_str(Rect* rect, char* str);
+void update_text_rect_to_center_str(Rect* rect, char* str, bool bias_right);
 
 /*Copies 16 bit data from src to dst, applying a palette offset to the data.
  * This is intended solely for use with tile8/8bpp data for dst and src.

@@ -45,7 +45,6 @@ static inline int get_digits_even(int n)
 #define UINT_MAX_DIGITS 10 // strlen(str(UINT32_MAX)) = strlen("4294967295")
 #define UINT8_MAX_DIGITS 3 // strlen(str(UINT8_MAX)) = strlen("255")
 
-#define TEN_K 10000
 #define ONE_K 1000
 #define ONE_M 1000000
 #define ONE_B 1000000000
@@ -55,8 +54,8 @@ static inline int get_digits_even(int n)
 #define ONE_B_ZEROS 9
 
 // The suffix replaces everything past the third digit, e.g. "999K" -> "1M"
-// so it needs at least this number of places
-#define SUFFIXED_NUM_MIN_PLACES 4
+// so it needs at least this number of chars to be able to display any suffixed number
+#define SUFFIXED_NUM_MIN_REQ_CHARS 4
 
 int int_arr_max(int int_arr[], int size);
 

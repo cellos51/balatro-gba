@@ -1126,9 +1126,13 @@ void change_background(enum BackgroundId id)
 
 void display_temp_score(u32 value)
 {
-    int x_offset = 40 - get_digits_even(value) * TILE_SIZE;
+    char temp_score_str_buff[UINT_MAX_DIGITS + 2];
+    Rect temp_score_rect = TEMP_SCORE_RECT;
+    truncate_uint_to_suffixed_str(value, rect_width(&temp_score_rect)/TTE_CHAR_SIZE, temp_score_str_buff);
+    update_text_rect_to_center_str(&temp_score_rect, temp_score_str_buff, true);
+
     tte_erase_rect_wrapper(TEMP_SCORE_RECT);
-    tte_printf("#{P:%d,%d; cx:0x%X000}%lu", x_offset, TEMP_SCORE_RECT.top, TTE_WHITE_PB, value);
+    tte_printf("#{P:%d,%d; cx:0x%X000}%s", temp_score_rect.left, temp_score_rect.top, TTE_WHITE_PB, temp_score_str_buff);
 }
 
 void display_score(u32 value)
@@ -1140,8 +1144,7 @@ void display_score(u32 value)
     char score_str_buff[UINT_MAX_DIGITS + 2];
 
     truncate_uint_to_suffixed_str(value, rect_width(&score_rect)/TTE_CHAR_SIZE, score_str_buff);
-    
-    update_text_rect_to_center_str(&score_rect, score_str_buff);
+    update_text_rect_to_center_str(&score_rect, score_str_buff, true);
     
     tte_printf("#{P:%d,%d; cx:0x%X000}%s", score_rect.left, score_rect.top, TTE_WHITE_PB, score_str_buff);
 }

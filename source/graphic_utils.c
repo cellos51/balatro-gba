@@ -253,11 +253,15 @@ void update_text_rect_to_right_align_str(Rect* rect, char* str, int overflow_dir
     }
 }
 
-void update_text_rect_to_center_str(Rect* rect, char* str)
+void update_text_rect_to_center_str(Rect* rect, char* str, bool bias_right)
 {
-    int text_width = strlen(str) * TTE_CHAR_SIZE;
-    
-    rect->left += max(0, (rect_width(rect) - text_width) / 2);
+    int text_width_chars = strlen(str);
+    int rect_width_chars = rect_width(rect) / TTE_CHAR_SIZE;
+
+    /* Adding bias_right makes sure that we round up when biased right
+     * but round down when biased left.
+     */
+    rect->left += max(0, (rect_width_chars - text_width_chars + bias_right) / 2) * TTE_CHAR_SIZE;
 }
 
 void memcpy16_tile8_with_palette_offset(u16* dst, const u16* src, uint hwcount, u8 palette_offset)
