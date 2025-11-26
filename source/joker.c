@@ -265,7 +265,7 @@ void set_and_shift_text(char* str, int* cursor_pos_x, int* cursor_pos_y, int col
     *cursor_pos_x += joker_score_display_offset_px;
 }
 
-bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum JokerEvent joker_event, u32 *chips, u32 *mult, int *money, bool *retrigger, bool *expire)
+bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum JokerEvent joker_event, bool *expire)
 {
     if (joker_object == NULL)
     {
@@ -279,6 +279,11 @@ bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum
     {
         return false;
     }
+
+    u32*  chips     = get_chips();
+    u32*  mult      = get_mult();
+    int*  money     = get_money();
+    bool* retrigger = get_retrigger();
 
     if (effect_flags_ret & JOKER_EFFECT_FLAG_RETRIGGER)
     {

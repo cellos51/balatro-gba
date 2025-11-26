@@ -592,11 +592,11 @@ static u32 bull_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent jo
 
     // The wiki says it does nothing if money is 0 or below
     // This allows us to avoid scoring negative Chips
-    if (get_money() > 0)
+    if ((*get_money()) > 0)
     {
         *joker_effect = &shared_joker_effect;
 
-        (*joker_effect)->chips = get_money() * 2;
+        (*joker_effect)->chips = (*get_money()) * 2;
         effect_flags_ret = JOKER_EFFECT_FLAG_CHIPS;
     }
 
@@ -838,11 +838,11 @@ static u32 bootstraps_joker_effect(Joker *joker, Card *scored_card, enum JokerEv
     u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
 
     // Same protection as the Bull Joker
-    if (get_money() > 0)
+    if ((*get_money()) > 0)
     {
         *joker_effect = &shared_joker_effect;
 
-        (*joker_effect)->mult = (get_money() / 5) * 2;
+        (*joker_effect)->mult = ((*get_money()) / 5) * 2;
         effect_flags_ret = JOKER_EFFECT_FLAG_MULT;
     }
 
@@ -1102,11 +1102,11 @@ static u32 seltzer_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent
     switch (joker_event)
     {
         case JOKER_EVENT_ON_JOKER_CREATED:
-            (*p_hands_left_until_exp) = 10; // remaining retriggered hands
+            *p_hands_left_until_exp = 10; // remaining retriggered hands
             break;
 
         case JOKER_EVENT_ON_HAND_PLAYED:
-            (*p_last_retriggered_idx) = UNDEFINED;
+            *p_last_retriggered_idx = UNDEFINED;
             break;
         
         case JOKER_EVENT_ON_CARD_SCORED_END:
@@ -1118,13 +1118,9 @@ static u32 seltzer_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent
             (*joker_effect)->retrigger = ((*p_last_retriggered_idx) < get_scored_card_index());
             if ((*joker_effect)->retrigger)
             {
-                (*joker_effect)->retrigger = (*p_last_retriggered_idx < get_scored_card_index());
-                if ((*joker_effect)->retrigger)
-                {
-                    *p_last_retriggered_idx = get_scored_card_index();
-                    (*joker_effect)->message = "Again!";
-                    effect_flags_ret = JOKER_EFFECT_FLAG_RETRIGGER | JOKER_EFFECT_FLAG_MESSAGE;
-                }
+                *p_last_retriggered_idx = get_scored_card_index();
+                (*joker_effect)->message = "Again!";
+                effect_flags_ret = JOKER_EFFECT_FLAG_RETRIGGER | JOKER_EFFECT_FLAG_MESSAGE;
             } 
             break;
 
@@ -1137,10 +1133,10 @@ static u32 seltzer_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent
                 (*p_hands_left_until_exp)--;
                 // Need to do this for now because the message's memory can't really be allocated
                 // So we can't use snprintf to craft a message depending on the number of hands left
-                static char* seltzer_messages[9] = {
+                static const char* seltzer_messages[] = {
                     "1", "2", "3", "4", "5", "6", "7", "8", "9"
                 };
-                (*joker_effect)->message = seltzer_messages[(*p_hands_left_until_exp) - 1];
+                (*joker_effect)->message = (char*)seltzer_messages[(*p_hands_left_until_exp) - 1];
             }
             else
             {

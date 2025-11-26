@@ -1,6 +1,8 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include <stdint.h>
+
 #define MAX_HAND_SIZE 16
 #define MAX_DECK_SIZE 52
 #define MAX_JOKERS_HELD_SIZE 5 // This doesn't account for negatives right now.
@@ -56,6 +58,7 @@ enum PlayState
     PLAY_SCORING_CARD_JOKERS,
     PLAY_SCORING_HELD_CARDS,
     PLAY_SCORING_INDEPENDENT_JOKERS,
+    PLAY_SCORING_HAND_SCORED_END,
     PLAY_ENDING,
     PLAY_ENDED
 };
@@ -113,7 +116,12 @@ List*           get_jokers_list(void);
 int get_deck_top(void);
 int get_num_discards_remaining(void);
 int get_num_hands_remaining(void);
-int get_money(void);
+
+uint32_t*   get_chips(void);
+uint32_t*   get_mult(void);
+int*        get_money(void);
+bool*       get_retrigger(void);
+
 
 int get_game_speed(void);
 void set_game_speed(int new_game_speed);
