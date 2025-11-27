@@ -63,17 +63,15 @@ enum JokerEvent
 
 // These are flags that can be combined into a single u8 and returned by
 // JokerEffect functions to indicate what effects they had
-enum JokerEffectFlag
-{
-    JOKER_EFFECT_NONE      = 0,
-    JOKER_EFFECT_CHIPS     = 1,  // 1 << 0
-    JOKER_EFFECT_MULT      = 2,  // 1 << 1
-    JOKER_EFFECT_XMULT     = 4,  // 1 << 2
-    JOKER_EFFECT_MONEY     = 8,  // 1 << 3
-    JOKER_EFFECT_RETRIGGER = 16, // 1 << 4
-    JOKER_EFFECT_EXPIRE    = 32, // 1 << 5
-    JOKER_EFFECT_MESSAGE   = 64  // 1 << 6
-};
+
+#define JOKER_EFFECT_FLAG_NONE      0
+#define JOKER_EFFECT_FLAG_CHIPS     (1 << 0)
+#define JOKER_EFFECT_FLAG_MULT      (1 << 1)
+#define JOKER_EFFECT_FLAG_XMULT     (1 << 2)
+#define JOKER_EFFECT_FLAG_MONEY     (1 << 3)
+#define JOKER_EFFECT_FLAG_RETRIGGER (1 << 4)
+#define JOKER_EFFECT_FLAG_EXPIRE    (1 << 5)
+#define JOKER_EFFECT_FLAG_MESSAGE   (1 << 6)
 
 #define MAX_JOKER_OBJECTS 32 // The maximum number of joker objects that can be created at once
 
@@ -112,11 +110,10 @@ typedef struct  // These jokers are triggered after the played hand has finished
     u32 xmult;
     int money;
     bool retrigger; // Retrigger played hand (e.g. "Dusk" joker, even though on the wiki it says "On Scored" it makes more sense to have it here)
-    bool expire; // Joker is destroyed (food jokers)
     char* message; // Used to send custom messages e.g. "Extinct" or "-1" (Bananas and food Jokers)
 } JokerEffect;
 
-typedef u8 (*JokerEffectFunc)(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+typedef u32 (*JokerEffectFunc)(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
 typedef struct {
     u8 rarity;
     u8 base_value;

@@ -164,7 +164,7 @@ void joker_destroy(Joker **joker)
 u8 joker_get_score_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
     const JokerInfo *jinfo = get_joker_registry_entry(joker->id);
-    if (!jinfo) return JOKER_EFFECT_NONE;
+    if (!jinfo) return JOKER_EFFECT_FLAG_NONE;
 
     return jinfo->joker_effect_func(joker, scored_card, joker_event, joker_effect);
 }
@@ -273,14 +273,14 @@ bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum
     }
 
     JokerEffect* joker_effect = NULL;
-    u8 joker_ret = joker_get_score_effect(joker_object->joker, card_object->card, joker_event, &joker_effect);
+    u32 joker_ret = joker_get_score_effect(joker_object->joker, card_object->card, joker_event, &joker_effect);
 
-    if (joker_ret == JOKER_EFFECT_NONE)
+    if (joker_ret == JOKER_EFFECT_FLAG_NONE)
     {
         return false;
     }
 
-    if (joker_ret & JOKER_EFFECT_RETRIGGER)
+    if (joker_ret & JOKER_EFFECT_FLAG_RETRIGGER)
     {
         *retrigger = joker_effect->retrigger;
     }
@@ -301,7 +301,7 @@ bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum
     }
 
     mm_word sfx_id;
-    if (joker_ret & JOKER_EFFECT_CHIPS && joker_effect->chips > 0)
+    if (joker_ret & JOKER_EFFECT_FLAG_CHIPS)
     {
         *chips = u32_protected_add(*chips, joker_effect->chips);
         char score_buffer[INT_MAX_DIGITS + 2]; // For '+' and null terminator
@@ -309,7 +309,7 @@ bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum
         set_and_shift_text(score_buffer, &cursorPosX, &cursorPosY, TTE_BLUE_PB);
         sfx_id = SFX_CHIPS_GENERIC; // The joker chips effect is "generic"
     }
-    if (joker_ret & JOKER_EFFECT_MULT && joker_effect->mult > 0)
+    if (joker_ret & JOKER_EFFECT_FLAG_MULT)
     {
         *mult  = u32_protected_add(*mult,  joker_effect->mult);
         char score_buffer[INT_MAX_DIGITS + 2];
@@ -318,7 +318,7 @@ bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum
         sfx_id = SFX_MULT;
     }
     // if xmult is zero, DO NOT multiply by it
-    if (joker_ret & JOKER_EFFECT_XMULT && joker_effect->xmult > 0)
+    if (joker_ret & JOKER_EFFECT_FLAG_XMULT && joker_effect->xmult > 0)
     {
         *mult  = u32_protected_mult(*mult,  joker_effect->xmult);
         char score_buffer[INT_MAX_DIGITS + 2];
@@ -326,7 +326,7 @@ bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum
         set_and_shift_text(score_buffer, &cursorPosX, &cursorPosY, TTE_RED_PB);
         sfx_id = SFX_XMULT;
     }
-    if (joker_ret & JOKER_EFFECT_MONEY && joker_effect->money > 0)
+    if (joker_ret & JOKER_EFFECT_FLAG_MONEY)
     {
         *money += joker_effect->money;
         char score_buffer[INT_MAX_DIGITS + 2];
@@ -336,11 +336,11 @@ bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum
     }
     // custom message for Jokers (including retriggers where Jokers will say "Again!")
     // joker_effect->message will have been set if the Joker had anything custom to say
-    if (joker_ret & JOKER_EFFECT_MESSAGE && joker_effect->message != NULL && joker_effect->message[0] != '\0') // Message is not empty
+    if (joker_ret & JOKER_EFFECT_FLAG_MESSAGE)
     {
         set_and_shift_text(joker_effect->message, &cursorPosX, &cursorPosY, TTE_WHITE_PB);
     }
-    if (joker_ret & JOKER_EFFECT_EXPIRE && joker_effect->expire)
+    if (joker_ret & JOKER_EFFECT_FLAG_EXPIRE)
     {
         // TODO make Jokers expire
     }
