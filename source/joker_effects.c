@@ -41,7 +41,7 @@ static u32 sinful_joker_effect(Card *scored_card, u8 sinful_suit, enum JokerEven
 {
     SCORE_ON_EVENT_ONLY_WITH_CARD(scored_card, JOKER_EVENT_ON_CARD_SCORED, joker_event)
 
-    u8 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
+    u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
 
     if (scored_card->suit == sinful_suit)
     {
@@ -1136,6 +1136,7 @@ static u32 seltzer_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent
             else
             {
                 (*joker_effect)->message = "Drank!";
+                (*joker_effect)->expire = true;
                 effect_flags_ret |= JOKER_EFFECT_FLAG_EXPIRE;
             }
             break;
