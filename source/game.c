@@ -1179,7 +1179,7 @@ void hand_get_type(void)
 {
     // resetting all hand info
     hand_type = NONE;
-    memcpy16(&_contained_hands, 0, sizeof(_contained_hands));
+    memset16(&_contained_hands, 0, 1);
 
     // Idk if this is how Balatro does it but this is how I'm doing it
     if (hand_selections == 0 || hand_state == HAND_DISCARD)
