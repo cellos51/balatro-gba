@@ -21,6 +21,7 @@ jobs:
           clang-format --dry-run -Werror
           include/bitset.h source/bitset.c
           include/pool.h source/pool.c
+          include/card.h source/card.c 
           include/hand_analysis.h source/hand_analysis.c 
           include/list.h source/list.c
           include/sprite.h source/sprite.c 
