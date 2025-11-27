@@ -139,8 +139,12 @@ int joker_get_sell_value(const Joker* joker);
 JokerObject *joker_object_new(Joker *joker);
 void joker_object_destroy(JokerObject **joker_object);
 void joker_object_update(JokerObject *joker_object);
-void joker_object_shake(JokerObject *joker_object, mm_word sound_id); // This doesn't actually score anything, it just performs an animation and plays a sound effect
-bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum JokerEvent joker_event, bool *expire); // This scores the joker and returns true if it was scored successfully (Card = NULL means the joker is independent and not scored by a card)
+// This doesn't actually score anything, it just performs an animation and plays a sound effect
+void joker_object_shake(JokerObject *joker_object, mm_word sound_id);
+// This scores the joker and returns true if it was scored successfully
+// card_object = NULL means the joker_event does not concern a particular Card, i.e. Independend or On_Blind_Selected
+// as opposed to events that concern a particular card, i.e. On_Card_Scored or On_Card_Held
+bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum JokerEvent joker_event, bool *expire);
 
 void joker_object_set_selected(JokerObject* joker_object, bool selected);
 bool joker_object_is_selected(JokerObject* joker_object);

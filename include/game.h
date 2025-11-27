@@ -1,7 +1,7 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include <stdint.h>
+#include <tonc.h>
 
 #define MAX_HAND_SIZE 16
 #define MAX_DECK_SIZE 52
@@ -117,10 +117,13 @@ int get_deck_top(void);
 int get_num_discards_remaining(void);
 int get_num_hands_remaining(void);
 
-uint32_t*   get_chips(void);
-uint32_t*   get_mult(void);
-int*        get_money(void);
-bool*       get_retrigger(void);
+u32     get_chips(void);
+void    set_chips(u32 new_chips);
+u32     get_mult(void);
+void    set_mult(u32 new_mult);
+int     get_money(void);
+void    set_money(int new_money);
+void    set_retrigger(bool new_retrigger);
 
 
 int get_game_speed(void);

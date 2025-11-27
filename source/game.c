@@ -2,7 +2,6 @@
 
 #include <maxmod.h>
 #include <stdint.h>
-#include <tonc.h>
 #include <stdlib.h>
 
 #include "bitset.h"
@@ -230,7 +229,7 @@ static bool discarded_card = false;
 static ListItr _joker_scored_itr;
 static ListItr _joker_card_scored_end_itr;
 static ListItr _joker_round_end_itr;
-// if no jokers have had any effect at a certain step, do not reset timer to TM_ZERO
+// stores whether any joker has had any effect during a certain scoring step
 static bool has_any_joker_scored = false;
 
 static int selection_x = 0;
@@ -482,24 +481,39 @@ void set_game_speed(int new_game_speed)
 }
 
 
-uint32_t* get_chips(void)
+u32 get_chips(void)
 {
-    return &chips;
+    return chips;
 }
 
-uint32_t* get_mult(void)
+void set_chips(u32 new_chips)
 {
-    return &mult;
+    chips = new_chips;
 }
 
-int* get_money(void)
+u32 get_mult(void)
 {
-    return &money;
+    return mult;
 }
 
-bool* get_retrigger(void)
+void set_mult(u32 new_mult)
 {
-    return &retrigger;
+    mult = new_mult;
+}
+
+int get_money(void)
+{
+    return money;
+}
+
+void set_money(int new_money)
+{
+    money = new_money;
+}
+
+void set_retrigger(bool new_retrigger)
+{
+    retrigger = new_retrigger;
 }
 
 
@@ -2261,7 +2275,7 @@ static void play_starting_played_cards_update(int played_idx)
 }
 
 // returns true if the scoring loop has returned early
-static bool play_before_scoring_cards_update(int played_idx)
+static bool play_before_scoring_cards_update()
 {
     // Activate Jokers with an effect just before the hand is scored
     if (check_and_score_joker_for_event(&_joker_scored_itr, NULL, JOKER_EVENT_ON_HAND_PLAYED))
@@ -2273,13 +2287,8 @@ static bool play_before_scoring_cards_update(int played_idx)
     return false;
 }
 
-static bool play_scoring_held_cards_update(int played_idx);
-static bool play_scoring_independent_jokers_update(int played_idx);
-static bool play_scoring_hand_scored_end_update(int played_idx);
-static void play_ending_played_cards_update(int played_idx);
-
 // returns true if the scoring loop has returned early
-static bool play_scoring_cards_update(int played_idx)
+static bool play_scoring_cards_update(void)
 {
     if (timer % FRAMES(30) == 0 && timer > FRAMES(40))
     {
@@ -2300,12 +2309,6 @@ static bool play_scoring_cards_update(int played_idx)
             
             play_state = PLAY_SCORING_HELD_CARDS;
 
-            if (!has_any_joker_scored)
-            {
-                return play_scoring_held_cards_update(played_idx);
-            }
-            
-            has_any_joker_scored = false;
             return false;
         }
 
@@ -2334,8 +2337,6 @@ static bool play_scoring_cards_update(int played_idx)
             // Allow Joker scoring
             _joker_scored_itr = list_itr_create(&_owned_jokers_list);
             _joker_card_scored_end_itr = list_itr_create(&_owned_jokers_list);
-            // called joker_scored, but here tracks that a card has scored too
-            has_any_joker_scored = true;
         }
 
         play_state = PLAY_SCORING_CARD_JOKERS;
@@ -2347,7 +2348,7 @@ static bool play_scoring_cards_update(int played_idx)
 
 // Activate "on scored" Jokers for the previous scored card if any
 // returns true if the scoring loop has returned early
-static bool play_scoring_card_jokers_update(int played_idx)
+static bool play_scoring_card_jokers_update()
 {
     if (timer % FRAMES(30) == 0 && timer > FRAMES(40))
     {
@@ -2378,13 +2379,6 @@ static bool play_scoring_card_jokers_update(int played_idx)
         // increment index to start seeking the next scoring card from the next card
         scored_card_index++;
         play_state = PLAY_SCORING_CARDS;
-
-        if (!has_any_joker_scored)
-        {
-            return play_scoring_cards_update(played_idx);
-        }
-
-        has_any_joker_scored = false;
     }
 
     return false;
@@ -2393,7 +2387,7 @@ static bool play_scoring_card_jokers_update(int played_idx)
 // returns true if the scoring loop has returned early
 static bool play_scoring_held_cards_update(int played_idx)
 {
-    if ((timer % FRAMES(30) == 0) && timer > FRAMES(40))
+    if (played_idx == 0 && (timer % FRAMES(30) == 0) && timer > FRAMES(40))
     {
         tte_erase_rect_wrapper(HELD_CARDS_SCORES_RECT);
 
@@ -2411,13 +2405,6 @@ static bool play_scoring_held_cards_update(int played_idx)
         scored_card_index = 0;
         _joker_round_end_itr = list_itr_create(&_owned_jokers_list);
         play_state = PLAY_SCORING_INDEPENDENT_JOKERS;
-
-        if (!has_any_joker_scored)
-        {
-            return play_scoring_independent_jokers_update(played_idx);
-        }
-
-        has_any_joker_scored = false;
     }
 
     return false;
@@ -2440,13 +2427,6 @@ static bool play_scoring_independent_jokers_update(int played_idx)
         scored_card_index = played_top + 1; // Reset the scored card index to the top of the played stack
 
         play_state = PLAY_SCORING_HAND_SCORED_END;
-
-        if (!has_any_joker_scored)
-        {
-            return play_scoring_hand_scored_end_update(played_idx);
-        }
-
-        has_any_joker_scored = false;
     }
 
     return false;
@@ -2465,6 +2445,7 @@ static bool play_scoring_hand_scored_end_update(int played_idx)
             return true;
         }
 
+        timer = TM_ZERO;
         play_state = PLAY_ENDING;
     }
 
@@ -2571,7 +2552,7 @@ static void played_cards_update_loop()
             
             case PLAY_BEFORE_SCORING:
 
-                if (play_before_scoring_cards_update(played_idx))
+                if (play_before_scoring_cards_update())
                 {
                     return;
                 }
@@ -2579,7 +2560,7 @@ static void played_cards_update_loop()
 
             case PLAY_SCORING_CARDS:
 
-                if (play_scoring_cards_update(played_idx))
+                if (play_scoring_cards_update())
                 {
                     return;
                 }
@@ -2587,7 +2568,7 @@ static void played_cards_update_loop()
             
             case PLAY_SCORING_CARD_JOKERS:
 
-                if (play_scoring_card_jokers_update(played_idx))
+                if (play_scoring_card_jokers_update())
                 {
                     return;
                 }
@@ -3757,6 +3738,7 @@ static void game_main_menu_on_update()
     }
 }
 
+#define EXPIRE_ANIMATION_FRAME_COUNT 3
 static void expired_jokers_update_loop()
 {
     if(list_is_empty(&_expired_jokers_list)) {
@@ -3771,7 +3753,7 @@ static void expired_jokers_update_loop()
         joker_object_update(joker_object);
 
         // let just enough frames pass that we see it rotating and shrinking
-        if (timer % FRAMES(3) == 0)
+        if (timer % FRAMES(EXPIRE_ANIMATION_FRAME_COUNT) == 0)
         {
             // get joker idx
             int expired_joker_idx = 0;
@@ -3781,6 +3763,11 @@ static void expired_jokers_update_loop()
             {
                 expired_joker_idx++;
             }
+
+            // Removing expired Jokers here, instead of immediately like ones we
+            // sell or discard allow us to have a small shrink animation without
+            // the other owned Jokers rearranging themselves to fill the newly
+            // freed space, therefore obscuring the animation
             remove_owned_joker(expired_joker_idx);
             list_itr_remove_current_node(&itr);
             joker_object_destroy(&joker_object);

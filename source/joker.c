@@ -280,15 +280,16 @@ bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum
         return false;
     }
 
-    u32*  chips     = get_chips();
-    u32*  mult      = get_mult();
-    int*  money     = get_money();
-    bool* retrigger = get_retrigger();
+    u32  chips = get_chips();
+    u32  mult  = get_mult();
+    int  money = get_money();
 
     if (effect_flags_ret & JOKER_EFFECT_FLAG_RETRIGGER)
     {
-        *retrigger = joker_effect->retrigger;
+        set_retrigger(joker_effect->retrigger);
     }
+
+    // joker_effect.message will have been set if the Joker had anything custom to say
 
     int cursorPosX = TILE_SIZE; // Offset of one tile to better center the text on the card
     int cursorPosY = 0;
@@ -308,7 +309,7 @@ bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum
     mm_word sfx_id;
     if (effect_flags_ret & JOKER_EFFECT_FLAG_CHIPS)
     {
-        *chips = u32_protected_add(*chips, joker_effect->chips);
+        chips = u32_protected_add(chips, joker_effect->chips);
         char score_buffer[INT_MAX_DIGITS + 2]; // For '+' and null terminator
         snprintf(score_buffer, sizeof(score_buffer), "+%lu", joker_effect->chips);
         set_and_shift_text(score_buffer, &cursorPosX, &cursorPosY, TTE_BLUE_PB);
@@ -316,7 +317,7 @@ bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum
     }
     if (effect_flags_ret & JOKER_EFFECT_FLAG_MULT)
     {
-        *mult  = u32_protected_add(*mult,  joker_effect->mult);
+        mult = u32_protected_add(mult,  joker_effect->mult);
         char score_buffer[INT_MAX_DIGITS + 2];
         snprintf(score_buffer, sizeof(score_buffer), "+%lu", joker_effect->mult);
         set_and_shift_text(score_buffer, &cursorPosX, &cursorPosY, TTE_RED_PB);
@@ -325,7 +326,7 @@ bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum
     // if xmult is zero, DO NOT multiply by it
     if (effect_flags_ret & JOKER_EFFECT_FLAG_XMULT && joker_effect->xmult > 0)
     {
-        *mult  = u32_protected_mult(*mult,  joker_effect->xmult);
+        mult = u32_protected_mult(mult,  joker_effect->xmult);
         char score_buffer[INT_MAX_DIGITS + 2];
         snprintf(score_buffer, sizeof(score_buffer), "X%lu", joker_effect->xmult);
         set_and_shift_text(score_buffer, &cursorPosX, &cursorPosY, TTE_RED_PB);
@@ -333,7 +334,7 @@ bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum
     }
     if (effect_flags_ret & JOKER_EFFECT_FLAG_MONEY)
     {
-        *money += joker_effect->money;
+        money += joker_effect->money;
         char score_buffer[INT_MAX_DIGITS + 2];
         snprintf(score_buffer, sizeof(score_buffer), "%d$", joker_effect->money);
         set_and_shift_text(score_buffer, &cursorPosX, &cursorPosY, TTE_YELLOW_PB);
@@ -349,6 +350,10 @@ bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum
     {
         // TODO make Jokers expire
     }
+
+    set_chips(chips);
+    set_mult(mult);
+    set_money(money);
 
     joker_object_shake(joker_object, sfx_id);
 
