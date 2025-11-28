@@ -17,7 +17,7 @@ int int_arr_max(int int_arr[], int size)
     return max;
 }
 
-void truncate_uint_to_suffixed_str(uint32_t num, int num_req_chars, char out_str_buff[UINT_MAX_DIGITS + 2])
+void truncate_uint_to_suffixed_str(uint32_t num, int num_req_chars, char out_str_buff[UINT_MAX_DIGITS + 1])
 {
     bool inevitable_overflow = num_req_chars < SUFFIXED_NUM_MIN_REQ_CHARS;
     if (inevitable_overflow)

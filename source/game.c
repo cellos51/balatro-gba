@@ -1126,7 +1126,7 @@ void change_background(enum BackgroundId id)
 
 void display_temp_score(u32 value)
 {
-    char temp_score_str_buff[UINT_MAX_DIGITS + 2];
+    char temp_score_str_buff[UINT_MAX_DIGITS + 1];
     Rect temp_score_rect = TEMP_SCORE_RECT;
     truncate_uint_to_suffixed_str(value, rect_width(&temp_score_rect)/TTE_CHAR_SIZE, temp_score_str_buff);
     update_text_rect_to_center_str(&temp_score_rect, temp_score_str_buff, true);
@@ -1141,7 +1141,7 @@ void display_score(u32 value)
     // Clear the existing text before redrawing
     tte_erase_rect_wrapper(SCORE_RECT);
     
-    char score_str_buff[UINT_MAX_DIGITS + 2];
+    char score_str_buff[UINT_MAX_DIGITS + 1];
 
     truncate_uint_to_suffixed_str(value, rect_width(&score_rect)/TTE_CHAR_SIZE, score_str_buff);
     update_text_rect_to_center_str(&score_rect, score_str_buff, true);
@@ -1151,9 +1151,15 @@ void display_score(u32 value)
 
 void display_money()
 {
-    int x_offset = 32 - get_digits_odd(money) * TILE_SIZE;
+    Rect money_text_rect = MONEY_TEXT_RECT;
     tte_erase_rect_wrapper(MONEY_TEXT_RECT);
-    tte_printf("#{P:%d,%d; cx:0x%X000}$%d", x_offset, MONEY_TEXT_RECT.top, TTE_YELLOW_PB, money);
+
+    char money_str_buff[INT_MAX_DIGITS + 2]; // + 2 for null terminator and "$" sign
+    snprintf(money_str_buff, sizeof(money_str_buff), "$%d", money);
+    
+    update_text_rect_to_center_str(&money_text_rect, money_str_buff, false);
+
+    tte_printf("#{P:%d,%d; cx:0x%X000}%s", money_text_rect.left, money_text_rect.top, TTE_YELLOW_PB, money_str_buff);
 }
 
 // Show/Hide flaming score effect if we will score
@@ -1190,7 +1196,7 @@ void display_chips()
     chips_text_overflow_rect.left -= TTE_CHAR_SIZE;
     tte_erase_rect_wrapper(chips_text_overflow_rect);
 
-    char chips_str_buff[UINT_MAX_DIGITS + 2];
+    char chips_str_buff[UINT_MAX_DIGITS + 1];
     truncate_uint_to_suffixed_str(chips, rect_width(&chips_text_rect)/TTE_CHAR_SIZE, chips_str_buff);
 
     update_text_rect_to_right_align_str(&chips_text_rect, chips_str_buff, OVERFLOW_LEFT);
@@ -1419,7 +1425,7 @@ static void game_round_on_init()
     Rect blind_req_text_rect = BLIND_REQ_TEXT_RECT;
     u32 blind_requirement = blind_get_requirement(current_blind, ante);
     
-    char blind_req_str_buff[UINT_MAX_DIGITS + 2];
+    char blind_req_str_buff[UINT_MAX_DIGITS + 1];
 
     truncate_uint_to_suffixed_str(blind_requirement, rect_width(&BLIND_REQ_TEXT_RECT)/TTE_CHAR_SIZE, blind_req_str_buff);
     
