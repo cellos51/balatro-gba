@@ -1,5 +1,8 @@
 #include <util.h>
 #include <assert.h>
+#include <string.h>
+#include <stdio.h>
+
 
 void test_truncate_uint_to_suffixed_str()
 {
@@ -88,7 +91,7 @@ void test_truncate_uint_to_suffixed_str()
     assert(strcmp(suffixed_str_buff, "1B") == 0);
 
     suffixed_str_buff[0] = '\0';
-    truncate_uint_to_suffixed_str(3123123123, 4, suffixed_str_buff);
+    truncate_uint_to_suffixed_str((uint32_t)3123123123, 4, suffixed_str_buff);
     assert(strcmp(suffixed_str_buff, "3B") == 0);
 
     suffixed_str_buff[0] = '\0';
@@ -117,7 +120,7 @@ void test_truncate_uint_to_suffixed_str()
     assert(strcmp(suffixed_str_buff, "4294M") == 0);
 
     char max_uint_str_buff[UINT_MAX_DIGITS + 1] = {'\0'};
-    snprintf(max_uint_str_buff, sizeof(max_uint_str_buff), "%lu", UINT32_MAX);
+    snprintf(max_uint_str_buff, sizeof(max_uint_str_buff), "%u", UINT32_MAX);
 
     suffixed_str_buff[0] = '\0';
     truncate_uint_to_suffixed_str(UINT32_MAX, UINT_MAX_DIGITS, suffixed_str_buff);

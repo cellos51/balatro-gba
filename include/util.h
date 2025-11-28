@@ -3,9 +3,10 @@
 
 #include <stdint.h>
 
+
 #define GBLA_UNUSED __attribute__((unused))
 
-static inline int get_digits(int n) // https://stackoverflow.com/questions/1068849/how-do-i-determine-the-number-of-digits-of-an-integer-in-c
+static inline int u32_get_digits(uint32_t n) // https://stackoverflow.com/questions/1068849/how-do-i-determine-the-number-of-digits-of-an-integer-in-c
 {
     if (n < 10) return 1;
     if (n < 100) return 2;
@@ -19,14 +20,6 @@ static inline int get_digits(int n) // https://stackoverflow.com/questions/10688
     return 10;
 }
 
-static inline int get_digits_odd(int n)
-{
-    if (n < 100) return 1;
-    if (n < 10000) return 2;
-    if (n < 1000000) return 3;
-    if (n < 100000000) return 4;
-    return 5;
-}
 
 static inline int get_digits_even(int n)
 {

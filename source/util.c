@@ -25,7 +25,7 @@ void truncate_uint_to_suffixed_str(uint32_t num, int num_req_chars, char out_str
         num_req_chars = SUFFIXED_NUM_MIN_REQ_CHARS;
     }
 
-    int num_digits = get_digits(num);
+    int num_digits = u32_get_digits(num);
     int overflow_size = num_digits - num_req_chars;
     char* suffix = "";
     
@@ -52,7 +52,7 @@ void truncate_uint_to_suffixed_str(uint32_t num, int num_req_chars, char out_str
         suffix = "K";
     }
 
-    snprintf(out_str_buff, UINT_MAX_DIGITS + 2, "%lu%s", num, suffix);
+    snprintf(out_str_buff, UINT_MAX_DIGITS + 1, "%lu%s", num, suffix);
 }
 
 // Avoid uint overflow when add/multiplying score
