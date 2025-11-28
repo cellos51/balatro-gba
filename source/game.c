@@ -118,7 +118,7 @@ static uint rng_seed = 0;
 
 static uint timer = 0; // This might already exist in libtonc but idk so i'm just making my own
 static int game_speed = 1; // BY DEFAULT IS SET TO 1, but if changed to 2 or more, should speed up all (or most) of the game aspects that should be sped up by speed, as in the original game.
-static int background = 0;
+static enum BackgroundId background = BG_NONE;
 
 static StateInfo state_info[] = 
 {
@@ -850,18 +850,18 @@ void bg_copy_current_item_to_top_left_panel()
     main_bg_se_copy_rect(TOP_LEFT_ITEM_SRC_RECT, TOP_LEFT_PANEL_POINT);
 }
 
-void change_background(int id)
+void change_background(enum BackgroundId id)
 {
     if (background == id)
     {
         return;
     }
-    else if (id == BG_ID_CARD_SELECTING)
+    else if (id == BG_CARD_SELECTING)
     {
         tte_erase_rect_wrapper(HAND_SIZE_RECT_PLAYING);
         REG_WIN0V = (REG_WIN0V << 8) | 0x80; // Set window 0 top to 128
 
-        if (background == BG_ID_CARD_PLAYING)
+        if (background == BG_CARD_PLAYING)
         {
             int offset = 11;
             memcpy16(&se_mem[MAIN_BG_SBB][SE_ROW_LEN * offset], &background_gfxMap[SE_ROW_LEN * offset], SE_ROW_LEN * 8);
@@ -899,12 +899,12 @@ void change_background(int id)
             memcpy16(&pal_bg_mem[DISCARD_BTN_BORDER_PID], &pal_bg_mem[DISCARD_BTN_PID], 1);
         }
     }
-    else if (id == BG_ID_CARD_PLAYING)
+    else if (id == BG_CARD_PLAYING)
     {
-        if (background != BG_ID_CARD_SELECTING)
+        if (background != BG_CARD_SELECTING)
         {
-            change_background(BG_ID_CARD_SELECTING);
-            background = BG_ID_CARD_PLAYING;
+            change_background(BG_CARD_SELECTING);
+            background = BG_CARD_PLAYING;
         }
 
         REG_WIN0V = (REG_WIN0V << 8) | 0xA0; // Set window 0 bottom to 160
@@ -917,12 +917,12 @@ void change_background(int id)
 
         tte_erase_rect_wrapper(HAND_SIZE_RECT_SELECT);
     }
-    else if (id == BG_ID_ROUND_END)
+    else if (id == BG_ROUND_END)
     {
-        if (background != BG_ID_CARD_SELECTING && background != BG_ID_CARD_PLAYING)
+        if (background != BG_CARD_SELECTING && background != BG_CARD_PLAYING)
         {
-            change_background(BG_ID_CARD_SELECTING);
-            background = BG_ID_ROUND_END;
+            change_background(BG_CARD_SELECTING);
+            background = BG_ROUND_END;
         }
 
        toggle_windows(false, true); // Disable window 0 so it doesn't make the cashout menu transparent
@@ -930,7 +930,7 @@ void change_background(int id)
         main_bg_se_clear_rect(ROUND_END_MENU_RECT);
         tte_erase_rect_wrapper(HAND_SIZE_RECT);
     }
-    else if (id == BG_ID_SHOP)
+    else if (id == BG_SHOP)
     {
         toggle_windows(false, true);
 
@@ -950,7 +950,7 @@ void change_background(int id)
         memcpy16(&pal_bg_mem[REROLL_BTN_SELECTED_BORDER_PID], &pal_bg_mem[REROLL_BTN_PID], 1); // Disable the button highlight colors
         memcpy16(&pal_bg_mem[NEXT_ROUND_BTN_SELECTED_BORDER_PID], &pal_bg_mem[NEXT_ROUND_BTN_PID], 1); 
     }
-    else if (id == BG_ID_BLIND_SELECT)
+    else if (id == BG_BLIND_SELECT)
     {
         for(int i = 0; i < BLIND_TYPE_MAX; i++)
         {
@@ -1071,7 +1071,7 @@ void change_background(int id)
             }
         }
     }
-    else if (id == BG_ID_MAIN_MENU)
+    else if (id == BG_MAIN_MENU)
     {
         toggle_windows(false, false);
 
@@ -1411,7 +1411,7 @@ static void game_round_on_init()
 static void game_main_menu_on_init()
 {
     affine_background_change_background(AFFINE_BG_MAIN_MENU);
-    change_background(BG_ID_MAIN_MENU);
+    change_background(BG_MAIN_MENU);
     main_menu_ace = card_object_new(card_new(SPADES, ACE));
     card_object_set_sprite(main_menu_ace, 0); // Set the sprite for the ace of spades
     main_menu_ace->sprite_object->sprite->obj->attr0 |= ATTR0_AFF_DBL; // Make the sprite double sized
@@ -1525,7 +1525,7 @@ void game_start()
         }
     }
 
-    change_background(BG_ID_BLIND_SELECT);
+    change_background(BG_BLIND_SELECT);
 
     tte_printf("#{P:%d,%d; cx:0x%X000}%d/%d", DECK_SIZE_RECT.left, DECK_SIZE_RECT.top, TTE_WHITE_PB, deck_get_size(), deck_get_max_size()); // Deck size/max size
     
@@ -1756,7 +1756,7 @@ static void game_playing_discarded_cards_loop()
     // Discarded cards loop (mainly for shuffling)
     if (hand_get_size() == 0 && hand_state == HAND_SHUFFLING && discard_top >= -1 && timer > FRAMES(10))
     {
-        change_background(BG_ID_ROUND_END); // Change the background to the round end background. This is how it works in Balatro, so I'm doing it this way too.
+        change_background(BG_ROUND_END); // Change the background to the round end background. This is how it works in Balatro, so I'm doing it this way too.
 
         // We take each discarded card and put it back into the deck with a short animation
         static CardObject* discarded_card_object = NULL;
@@ -2559,11 +2559,11 @@ static void game_playing_ui_text_update()
 
     if (last_hand_size != hand_get_size() || last_deck_size != deck_get_size())
     {
-        if (background == BG_ID_CARD_SELECTING)
+        if (background == BG_CARD_SELECTING)
         {
             tte_printf("#{P:%d,%d; cx:0x%X000}%d/%d", HAND_SIZE_RECT_SELECT.left, HAND_SIZE_RECT_SELECT.top, TTE_WHITE_PB, hand_get_size(), hand_get_max_size()); // Hand size/max size
         }
-        else if (background == BG_ID_CARD_PLAYING)
+        else if (background == BG_CARD_PLAYING)
         {
             tte_printf("#{P:%d,%d; cx:0x%X000}%d/%d", HAND_SIZE_RECT_PLAYING.left, HAND_SIZE_RECT_PLAYING.top, TTE_WHITE_PB, hand_get_size(), hand_get_max_size()); // Hand size/max size
         }
@@ -2604,11 +2604,11 @@ static void game_playing_on_update()
     // Background logic (thissss might be moved to the card'ssss logic later. I'm a sssssnake)
     if (hand_state == HAND_DRAW || hand_state == HAND_DISCARD || hand_state == HAND_SELECT)
     {
-        change_background(BG_ID_CARD_SELECTING);
+        change_background(BG_CARD_SELECTING);
     }
     else if (hand_state != HAND_SHUFFLING)
     {
-        change_background(BG_ID_CARD_PLAYING);
+        change_background(BG_CARD_PLAYING);
     }
 
     game_playing_process_input_and_state();
@@ -2680,7 +2680,7 @@ static void game_round_end_start()
 {
     if (timer == TM_RESET_STATIC_VARS) // Reset static variables to default values upon re-entering the round end state
     {   
-        change_background(BG_ID_ROUND_END); // Change the background to the round end background
+        change_background(BG_ROUND_END); // Change the background to the round end background
         state_info[game_state].substate = START_EXPAND_POPUP; // Change the state to the next one
         timer = TM_ZERO; // Reset the timer
         blind_reward = blind_get_reward(current_blind);
@@ -3410,7 +3410,7 @@ static void game_shop_outro()
 
 static void game_shop_on_update()
 {
-    change_background(BG_ID_SHOP);
+    change_background(BG_SHOP);
 
     if (!list_is_empty(&_shop_jokers_list))
     {
@@ -3475,7 +3475,7 @@ static void game_blind_select_on_update()
 
 static void game_blind_select_start_anim_seq()
 {
-    change_background(BG_ID_BLIND_SELECT);
+    change_background(BG_BLIND_SELECT);
     main_bg_se_copy_rect_1_tile_vert(POP_MENU_ANIM_RECT, SE_UP);
     
     for (int i = 0; i < BLIND_TYPE_MAX; i++)
@@ -3519,7 +3519,7 @@ static void game_blind_select_handle_input()
             increment_blind(BLIND_STATE_SKIPPED);
             
             background = UNDEFINED; // Force refresh of the background
-            change_background(BG_ID_BLIND_SELECT);
+            change_background(BG_BLIND_SELECT);
     
             // TODO: Create a generic vertical move by any number of tiles to avoid for loops?
             for (int i = 0; i < 12; i++)
@@ -3585,7 +3585,7 @@ static void game_blind_select_display_blind_panel()
     
     if (timer == TM_DISP_BLIND_PANEL_START) // Switches to the selecting background and clears the blind panel area
     {
-        change_background(BG_ID_CARD_SELECTING);
+        change_background(BG_CARD_SELECTING);
     
         main_bg_se_clear_rect(ROUND_END_MENU_RECT);
     
@@ -3623,7 +3623,7 @@ static void game_blind_select_on_exit()
 
 static void game_main_menu_on_update()
 {
-    change_background(BG_ID_MAIN_MENU);
+    change_background(BG_MAIN_MENU);
 
     card_object_update(main_menu_ace);
     main_menu_ace->sprite_object->trotation = lu_sin((timer << 8) / 2) / 3;

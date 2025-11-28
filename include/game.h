@@ -12,13 +12,16 @@
 #define MAX_INTEREST 5 
 #define INTEREST_PER_5 1
 
-// TODO: Turn into enum?
-#define BG_ID_CARD_SELECTING 1
-#define BG_ID_CARD_PLAYING 2
-#define BG_ID_ROUND_END 3
-#define BG_ID_SHOP 4
-#define BG_ID_BLIND_SELECT 5
-#define BG_ID_MAIN_MENU 6
+enum BackgroundId
+{
+    BG_NONE,
+    BG_CARD_SELECTING,
+    BG_CARD_PLAYING,
+    BG_ROUND_END,
+    BG_SHOP,
+    BG_BLIND_SELECT,
+    BG_MAIN_MENU
+};
 
 // Input bindings
 #define SELECT_CARD KEY_A
