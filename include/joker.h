@@ -61,6 +61,18 @@ enum JokerEvent
     JOKER_EVENT_ON_BLIND_SELECTED,  // Triggers when selecting a blind (e.g. Dagger, Riff Raff, Madness..)
 };
 
+// These are flags that can be combined into a single u32 and returned by
+// JokerEffect functions to indicate which fields of the output JokerEffect are valid
+
+#define JOKER_EFFECT_FLAG_NONE      0
+#define JOKER_EFFECT_FLAG_CHIPS     (1 << 0)
+#define JOKER_EFFECT_FLAG_MULT      (1 << 1)
+#define JOKER_EFFECT_FLAG_XMULT     (1 << 2)
+#define JOKER_EFFECT_FLAG_MONEY     (1 << 3)
+#define JOKER_EFFECT_FLAG_RETRIGGER (1 << 4)
+#define JOKER_EFFECT_FLAG_EXPIRE    (1 << 5)
+#define JOKER_EFFECT_FLAG_MESSAGE   (1 << 6)
+
 #define MAX_JOKER_OBJECTS 32 // The maximum number of joker objects that can be created at once
 
 // Jokers in the game
@@ -98,15 +110,18 @@ typedef struct  // These jokers are triggered after the played hand has finished
     u32 xmult;
     int money;
     bool retrigger; // Retrigger played hand (e.g. "Dusk" joker, even though on the wiki it says "On Scored" it makes more sense to have it here)
-    bool expire; // Joker is destroyed (food jokers)
-    char* message; // Used to send custom messages e.g. "Extinct" or "-1" (Bananas and food Jokers)
+    bool expire; // Will make the Joker expire/destry itself if true (i.e. Bananas and fully consumed Food Jokers)
+    char* message; // Used to send custom messages e.g. "Extinct!" or "Again!"
 } JokerEffect;
 
-typedef JokerEffect (*JokerEffectFunc)(Joker *joker, Card *scored_card, enum JokerEvent joker_event);
+// JokerEffectFuncs take in a joker that will be scored, a scored_card that is not NULL when related to the given joker_event, and output a joker_effect storing the effects of the scored joker
+// They return a set of flags indicating what fields of the joker_effect are valid to access
+typedef u32 (*JokerEffectFunc)(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+
 typedef struct {
     u8 rarity;
     u8 base_value;
-    JokerEffectFunc joker_effect;
+    JokerEffectFunc joker_effect_func;
 } JokerInfo;
 const JokerInfo* get_joker_registry_entry(int joker_id);
 size_t get_joker_registry_size(void);
@@ -118,7 +133,7 @@ void joker_destroy(Joker **joker);
 
 // Unique effects like "Four Fingers" or "Credit Card" will be hard coded into game.c with a conditional check for the joker ID from the players owned jokers
 // game.c should probably be restructured so most of the variables in it are moved to some sort of global variable header file so they can be easily accessed and modified for the jokers
-JokerEffect joker_get_score_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event);
+u32 joker_get_score_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
 int joker_get_sell_value(const Joker* joker);
 
 JokerObject *joker_object_new(Joker *joker);
