@@ -1163,11 +1163,11 @@ void display_score(u32 value)
     tte_printf("#{P:%d,48; cx:0x%X000}%lu%c", x_offset, TTE_WHITE_PB, display_value, score_suffix);
 }
 
-void display_money(int value)
+void display_money()
 {
-    int x_offset = 32 - get_digits_odd(value) * TILE_SIZE;
+    int x_offset = 32 - get_digits_odd(money) * TILE_SIZE;
     tte_erase_rect_wrapper(MONEY_TEXT_RECT);
-    tte_printf("#{P:%d,%d; cx:0x%X000}$%d", x_offset, MONEY_TEXT_RECT.top, TTE_YELLOW_PB, value);
+    tte_printf("#{P:%d,%d; cx:0x%X000}$%d", x_offset, MONEY_TEXT_RECT.top, TTE_YELLOW_PB, money);
 }
 
 // Show/Hide flaming score effect if we will score
@@ -1575,7 +1575,7 @@ void game_start()
     display_hands(hands); // Hand
     display_discards(discards); // Discard
 
-    display_money(money); // Set the money display
+    display_money(); // Set the money display
 
     tte_printf("#{P:%d,%d; cx:0x%X000}%d#{cx:0x%X000}/%d", ANTE_TEXT_RECT.left, ANTE_TEXT_RECT.top, TTE_YELLOW_PB, ante, TTE_WHITE_PB, MAX_ANTE); // Ante
 
@@ -2230,10 +2230,6 @@ static bool check_and_score_joker_for_event(ListItr* starting_joker_itr, CardObj
     {
         if (joker_object_score(joker, card_object, joker_event))
         {
-            display_chips();
-            display_mult();
-            display_money(money);
-
             return true;
         }
     }
@@ -2700,7 +2696,7 @@ static int calculate_interest_reward()
 static void game_round_end_cashout()
 {
     money += hands + blind_get_reward(current_blind) + calculate_interest_reward(); // Reward the player
-    display_money(money);
+    display_money();
 
     hands = max_hands; // Reset the hands to the maximum
     discards = max_discards; // Reset the discards to the maximum
@@ -3153,7 +3149,7 @@ static void game_shop_intro()
 static void game_shop_reroll(int *reroll_cost)
 {
     money -= *reroll_cost;
-    display_money(money); // Update the money display
+    display_money(); // Update the money display
 
     ListItr itr = list_itr_create(&_shop_jokers_list);
     JokerObject* joker_object;
@@ -3232,7 +3228,7 @@ void game_sell_joker(int joker_idx)
     
     JokerObject* joker_object = (JokerObject*)list_get_at_idx(&_owned_jokers_list, joker_idx);
     money += joker_get_sell_value(joker_object->joker);
-    display_money(money);
+    display_money();
     erase_price_under_sprite_object(joker_object->sprite_object);
 
     remove_owned_joker(joker_idx);
@@ -3267,7 +3263,7 @@ static void game_shop_buy_joker(int shop_joker_idx)
     JokerObject *joker_object = (JokerObject*)list_get_at_idx(&_shop_jokers_list, shop_joker_idx);
 
     money -= joker_object->joker->value; // Deduct the money spent on the joker
-    display_money(money);                // Update the money display
+    display_money();                     // Update the money display
     erase_price_under_sprite_object(joker_object->sprite_object);
     sprite_object_set_focus(joker_object->sprite_object, false);
     add_to_held_jokers(joker_object);
@@ -3875,7 +3871,7 @@ static void game_over_on_exit()
     display_mult();
     display_hands(hands);
     display_discards(discards);
-    display_money(money);
+    display_money();
     tte_printf(
         "#{P:%d,%d; cx:0x%X000}%d#{cx:0x%X000}/%d",
         ANTE_TEXT_RECT.left,

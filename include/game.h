@@ -120,10 +120,13 @@ int get_num_hands_remaining(void);
 
 u32     get_chips(void);
 void    set_chips(u32 new_chips);
+void    display_chips();
 u32     get_mult(void);
 void    set_mult(u32 new_mult);
+void    display_mult();
 int     get_money(void);
 void    set_money(int new_money);
+void    display_money();
 void    set_retrigger(bool new_retrigger);
 
 

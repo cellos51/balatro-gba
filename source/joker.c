@@ -353,9 +353,15 @@ bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum
         list_push_back(get_expired_jokers_list(), joker_object);
     }
 
+    // Update values
     set_chips(chips);
     set_mult(mult);
     set_money(money);
+
+    // Update displays
+    display_chips();
+    display_mult();
+    display_money();
 
     joker_object_shake(joker_object, sfx_id);
 
