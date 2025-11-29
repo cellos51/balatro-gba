@@ -717,36 +717,56 @@ void set_seed(int seed)
     srand(rng_seed);
 }
 
-void sort_hand_by_suit()
+// Compare two cards for sorting by suit (primary) and rank (secondary)
+// Returns true if card_a should come before card_b
+static inline bool card_compare_by_suit(CardObject* card_a, CardObject* card_b)
 {
-    for (int a = 0; a < hand_top; a++)
+    if (card_a == NULL) return false;
+    if (card_b == NULL) return true;
+    if (card_a->card->suit != card_b->card->suit)
+        return card_a->card->suit < card_b->card->suit;
+    return card_a->card->rank < card_b->card->rank;
+}
+
+// Compare two cards for sorting by rank only
+// Returns true if card_a should come before card_b
+static inline bool card_compare_by_rank(CardObject* card_a, CardObject* card_b)
+{
+    if (card_a == NULL) return false;
+    if (card_b == NULL) return true;
+    return card_a->card->rank < card_b->card->rank;
+}
+
+// Insertion sort implementation for the hand array
+// Using insertion sort because:
+// 1. Hand size is small (max 16 cards)
+// 2. Often nearly sorted (one card added at a time)
+// 3. Low overhead on GBA hardware
+static void sort_hand(bool (*compare)(CardObject*, CardObject*))
+{
+    for (int i = 1; i <= hand_top; i++)
     {
-        for (int b = a + 1; b <= hand_top; b++)
+        CardObject* key = hand[i];
+        int j = i - 1;
+
+        // Shift elements that don't satisfy the comparison
+        while (j >= 0 && !compare(hand[j], key))
         {
-            if (hand[a] == NULL || (hand[b] != NULL && (hand[a]->card->suit > hand[b]->card->suit || (hand[a]->card->suit == hand[b]->card->suit && hand[a]->card->rank > hand[b]->card->rank))))
-            {
-                CardObject* temp = hand[a];
-                hand[a] = hand[b];
-                hand[b] = temp;
-            }
+            hand[j + 1] = hand[j];
+            j--;
         }
+        hand[j + 1] = key;
     }
 }
 
-void sort_hand_by_rank()
+static void sort_hand_by_suit()
 {
-    for (int a = 0; a < hand_top; a++)
-    {
-        for (int b = a + 1; b <= hand_top; b++)
-        {
-            if (hand[a] == NULL || (hand[b] != NULL && hand[a]->card->rank > hand[b]->card->rank))
-            {
-                CardObject* temp = hand[a];
-                hand[a] = hand[b];
-                hand[b] = temp;
-            }
-        }
-    }
+    sort_hand(card_compare_by_suit);
+}
+
+static void sort_hand_by_rank()
+{
+    sort_hand(card_compare_by_rank);
 }
 
 void sort_cards()
@@ -760,8 +780,10 @@ void sort_cards()
         sort_hand_by_rank();
     }
 
-    // Update the sprites in the hand by destroying them and creating new ones in the correct order
-    // (This is feels like a diabolical solution but like literally how else would you do this)
+    // Recreate sprites to update z-order based on new hand positions.
+    // Each card's sprite layer must match its position in the hand array
+    // for proper overlapping visuals. Since sprite layers are tied to
+    // OAM indices which can't be swapped, we destroy and recreate them.
     for (int i = 0; i <= hand_top; i++)
     {
         if (hand[i] != NULL)
@@ -775,8 +797,7 @@ void sort_cards()
     {
         if (hand[i] != NULL)
         {
-            //hand[i]->sprite = sprite_new(ATTR0_SQUARE | ATTR0_4BPP | ATTR0_AFF, ATTR1_SIZE_32, card_sprite_lut[hand[i]->card->suit][hand[i]->card->rank], 0, i);
-            card_object_set_sprite(hand[i], i); // Set the sprite for the card object
+            card_object_set_sprite(hand[i], i);
             sprite_position(card_object_get_sprite(hand[i]), fx2int(hand[i]->sprite_object->x), fx2int(hand[i]->sprite_object->y));
         }
     }
