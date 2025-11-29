@@ -392,6 +392,11 @@ List* get_jokers_list(void)
     return &_owned_jokers_list;
 }
 
+List* get_expired_jokers_list(void)
+{
+    return &_expired_jokers_list;
+}
+
 bool is_joker_owned(int joker_id)
 {
     ListItr itr = list_itr_create(&_owned_jokers_list);
@@ -2216,30 +2221,18 @@ static void cards_in_hand_update_loop()
     }
 }
 
-void joker_start_expire_animation(JokerObject *joker_object)
-{
-    joker_object_shake(joker_object, UNDEFINED);
-    list_push_back(&_expired_jokers_list, joker_object);
-}
-
 // returns true if a joker was scored, false otherwise
 static bool check_and_score_joker_for_event(ListItr* starting_joker_itr, CardObject* card_object, enum JokerEvent joker_event)
 {
     JokerObject* joker;
-    bool expire = false;
 
     while((joker = list_itr_next(starting_joker_itr)))
     {
-        if (joker_object_score(joker, card_object, joker_event, &expire))
+        if (joker_object_score(joker, card_object, joker_event))
         {
             display_chips();
             display_mult();
             display_money(money);
-
-            if (expire)
-            {
-                joker_start_expire_animation(joker);
-            }
 
             return true;
         }

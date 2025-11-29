@@ -144,7 +144,7 @@ void joker_object_shake(JokerObject *joker_object, mm_word sound_id);
 // This scores the joker and returns true if it was scored successfully
 // card_object = NULL means the joker_event does not concern a particular Card, i.e. Independend or On_Blind_Selected
 // as opposed to events that concern a particular card, i.e. On_Card_Scored or On_Card_Held
-bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum JokerEvent joker_event, bool *expire);
+bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum JokerEvent joker_event);
 
 void joker_object_set_selected(JokerObject* joker_object, bool selected);
 bool joker_object_is_selected(JokerObject* joker_object);

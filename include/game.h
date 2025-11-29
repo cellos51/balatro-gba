@@ -112,6 +112,7 @@ int             get_scored_card_index(void);
 bool            is_joker_owned(int joker_id);
 bool            card_is_face(Card *card);
 List*           get_jokers_list(void);
+List*           get_expired_jokers_list(void);
 
 int get_deck_top(void);
 int get_num_discards_remaining(void);

@@ -265,7 +265,7 @@ void set_and_shift_text(char* str, int* cursor_pos_x, int* cursor_pos_y, int col
     *cursor_pos_x += joker_score_display_offset_px;
 }
 
-bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum JokerEvent joker_event, bool *expire)
+bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum JokerEvent joker_event)
 {
     if (joker_object == NULL)
     {
@@ -346,9 +346,11 @@ bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum
     {
         set_and_shift_text(joker_effect->message, &cursorPosX, &cursorPosY, TTE_WHITE_PB);
     }
-    if (effect_flags_ret & JOKER_EFFECT_FLAG_EXPIRE)
+    // this will start the Joker expire animation
+    if (effect_flags_ret & JOKER_EFFECT_FLAG_EXPIRE && joker_effect->expire)
     {
-        *expire = joker_effect->expire;
+        joker_object_shake(joker_object, UNDEFINED);
+        list_push_back(get_expired_jokers_list(), joker_object);
     }
 
     set_chips(chips);
