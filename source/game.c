@@ -229,8 +229,6 @@ static bool discarded_card = false;
 static ListItr _joker_scored_itr;
 static ListItr _joker_card_scored_end_itr;
 static ListItr _joker_round_end_itr;
-// stores whether any joker has had any effect during a certain scoring step
-static bool has_any_joker_scored = false;
 
 static int selection_x = 0;
 static int selection_y = 0;
@@ -2243,7 +2241,6 @@ static bool check_and_score_joker_for_event(ListItr* starting_joker_itr, CardObj
                 joker_start_expire_animation(joker);
             }
 
-            has_any_joker_scored = true;
             return true;
         }
     }
