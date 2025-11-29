@@ -1128,9 +1128,9 @@ static u32 seltzer_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent
             *joker_effect = &shared_joker_effect;
             effect_flags_ret = JOKER_EFFECT_FLAG_MESSAGE;
 
+            (*p_hands_left_until_exp)--;
             if (*p_hands_left_until_exp > 0)
             {
-                (*p_hands_left_until_exp)--;
                 // Need to do this for now because the message's memory can't really be allocated
                 // So we can't use snprintf to craft a message depending on the number of hands left
                 static const char* seltzer_messages[] = {

@@ -346,9 +346,9 @@ bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum
     {
         set_and_shift_text(joker_effect->message, &cursorPosX, &cursorPosY, TTE_WHITE_PB);
     }
-    if (effect_flags_ret & JOKER_EFFECT_FLAG_EXPIRE && joker_effect->expire)
+    if (effect_flags_ret & JOKER_EFFECT_FLAG_EXPIRE)
     {
-        // TODO make Jokers expire
+        *expire = joker_effect->expire;
     }
 
     set_chips(chips);
