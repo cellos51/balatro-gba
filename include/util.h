@@ -70,7 +70,7 @@ int int_arr_max(int int_arr[], int size);
  *                      which wouldn't be otherwise.
  *                      
  * @param out_str       An output buffer to write the resulting string to. 
- *                      Must be of size INT_MAX_DIGITS + 1. + 1 for null-terminator.
+ *                      Must be of size UINT_MAX_DIGITS + 1. + 1 for null-terminator.
  *                      At that size the suffix character will always be accounted for since
  *                      a number with more digits than UINT_MAX_DIGITS will not be handled nor truncated.
  */
