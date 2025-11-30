@@ -8,8 +8,8 @@
 
 #include <tonc.h>
 
-// +1 is added because we'll actually be indexing at 1, but if something causes you to go to ante 0, there will still be
-// a value there.
+// +1 is added because we'll actually be indexing at 1, but if something causes you to go to ante 0,
+// there will still be a value there.
 static const int ante_lut[MAX_ANTE + 1] = {100, 300, 800, 2000, 5000, 11000, 20000, 35000, 50000};
 
 // Palettes for the blinds (Transparency, Text Color, Shadow, Highlight, Main Color) Use this:

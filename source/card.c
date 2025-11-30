@@ -10,7 +10,8 @@
 #include "pool.h"
 #include "soundbank.h"
 
-// Card sprites lookup table. First index is the suit, second index is the rank. The value is the tile index.
+// Card sprites lookup table. First index is the suit, second index is the rank. The value is the
+// tile index.
 const static u16 _card_sprite_lut[NUM_SUITS][NUM_RANKS] = {
     {0,   16,  32,  48,  64,  80,  96,  112, 128, 144, 160, 176, 192},
     {208, 224, 240, 256, 272, 288, 304, 320, 336, 352, 368, 384, 400},
@@ -88,11 +89,19 @@ void card_object_update(CardObject* card_object)
 void card_object_set_sprite(CardObject* card_object, int layer)
 {
     int tile_index = CARD_TID + (layer * CARD_SPRITE_OFFSET);
-    memcpy32(&tile_mem[4][tile_index],
-             &deck_gfxTiles[_card_sprite_lut[card_object->card->suit][card_object->card->rank] * TILE_SIZE],
-             TILE_SIZE * CARD_SPRITE_OFFSET);
-    Sprite* sprite =
-        sprite_new(ATTR0_SQUARE | ATTR0_4BPP | ATTR0_AFF, ATTR1_SIZE_32, tile_index, 0, layer + CARD_STARTING_LAYER);
+    memcpy32(
+        &tile_mem[4][tile_index],
+        &deck_gfxTiles
+            [_card_sprite_lut[card_object->card->suit][card_object->card->rank] * TILE_SIZE],
+        TILE_SIZE * CARD_SPRITE_OFFSET
+    );
+    Sprite* sprite = sprite_new(
+        ATTR0_SQUARE | ATTR0_4BPP | ATTR0_AFF,
+        ATTR1_SIZE_32,
+        tile_index,
+        0,
+        layer + CARD_STARTING_LAYER
+    );
     sprite_object_set_sprite(card_object->sprite_object, sprite);
 }
 
