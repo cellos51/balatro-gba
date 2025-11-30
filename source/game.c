@@ -342,20 +342,6 @@ static inline Card *discard_pop()
     return discard_pile[discard_top--];
 }
 
-// Resets bottom row bg tiles of the top left panel (shop/blind) after
-// it is dismissed to match the rest of the game panel background.
-static inline void reset_top_left_panel_bottom_row()
-{
-    int y = 6;
-
-    memset16(&se_mem[MAIN_BG_SBB][32 * (y - 1)], 0x0006, 1);
-    memset16(&se_mem[MAIN_BG_SBB][1 + 32 * (y - 1)], 0x0007, 2);
-    memset16(&se_mem[MAIN_BG_SBB][3 + 32 * (y - 1)], 0x0008, 1);
-    memset16(&se_mem[MAIN_BG_SBB][4 + 32 * (y - 1)], 0x0009, 3);
-    memset16(&se_mem[MAIN_BG_SBB][7 + 32 * (y - 1)], 0x000A, 1);
-    memset16(&se_mem[MAIN_BG_SBB][8 + 32 * (y - 1)], 0x0406, 1);
-}
-
 // get-functions, for other files to view game state (mainly for jokers)
 CardObject **get_hand_array(void)
 {
@@ -552,6 +538,7 @@ static const Rect TOP_LEFT_PANEL_ANIM_RECT  = {0,       0,      8,      4  };
  * TOP_LEFT_PANEL_ANIM_RECT should be used for animations, 
  * TOP_LEFT_PANEL_RECT for copies etc. but mind the overlap
  */
+static const Rect TOP_LEFT_PANEL_BOTTOM_ROW_RESET_RECT = {0, 28, 8,     28 };
 static const BG_POINT TOP_LEFT_BLIND_TITLE_POINT = {0,  21, };
 static const Rect BIG_BLIND_TITLE_SRC_RECT  = {0,       26,     8,      26 };
 static const Rect BOSS_BLIND_TITLE_SRC_RECT = {0,       27,     8,      27 };
@@ -881,6 +868,16 @@ bool card_is_face(Card *card)
 void bg_copy_current_item_to_top_left_panel()
 {
     main_bg_se_copy_rect(TOP_LEFT_ITEM_SRC_RECT, TOP_LEFT_PANEL_POINT);
+}
+
+// Resets bottom row bg tiles of the top left panel (shop/blind) after
+// it is dismissed to match the rest of the game panel background.
+static inline void reset_top_left_panel_bottom_row()
+{
+    BG_POINT top_left_panel_bottom_row_pos = TOP_LEFT_PANEL_POINT;
+    // Use the source rect height to offset to the bottom row point
+    top_left_panel_bottom_row_pos.y += rect_height(&TOP_LEFT_ITEM_SRC_RECT) - 1;
+    main_bg_se_copy_rect(TOP_LEFT_PANEL_BOTTOM_ROW_RESET_RECT, top_left_panel_bottom_row_pos);
 }
 
 void change_background(enum BackgroundId id)
