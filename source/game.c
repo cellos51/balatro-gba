@@ -747,13 +747,12 @@ static void sort_hand(bool (*compare)(CardObject*, CardObject*))
     for (int i = 1; i <= hand_top; i++)
     {
         CardObject* key = hand[i];
-        int j = i - 1;
+        int j;
 
         // Shift elements that don't satisfy the comparison
-        while (j >= 0 && !compare(hand[j], key))
+        for (j = i - 1; j >= 0 && !compare(hand[j], key); j--)
         {
             hand[j + 1] = hand[j];
-            j--;
         }
         hand[j + 1] = key;
     }
