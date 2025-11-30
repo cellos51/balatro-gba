@@ -2,7 +2,6 @@
 
 #include <maxmod.h>
 #include <stdint.h>
-#include <tonc.h>
 #include <stdlib.h>
 
 #include "bitset.h"
@@ -238,6 +237,7 @@ static bool sort_by_suit = false;
 
 static List _owned_jokers_list;
 static List _discarded_jokers_list;
+static List _expired_jokers_list;
 
 BITSET_DEFINE(_avail_jokers_bitset, MAX_DEFINABLE_JOKERS)
 static List _shop_jokers_list;
@@ -392,6 +392,11 @@ List* get_jokers_list(void)
     return &_owned_jokers_list;
 }
 
+List* get_expired_jokers_list(void)
+{
+    return &_expired_jokers_list;
+}
+
 bool is_joker_owned(int joker_id)
 {
     ListItr itr = list_itr_create(&_owned_jokers_list);
@@ -478,9 +483,40 @@ void set_game_speed(int new_game_speed)
     game_speed = new_game_speed;
 }
 
+
+u32 get_chips(void)
+{
+    return chips;
+}
+
+void set_chips(u32 new_chips)
+{
+    chips = new_chips;
+}
+
+u32 get_mult(void)
+{
+    return mult;
+}
+
+void set_mult(u32 new_mult)
+{
+    mult = new_mult;
+}
+
 int get_money(void)
 {
     return money;
+}
+
+void set_money(int new_money)
+{
+    money = new_money;
+}
+
+void set_retrigger(bool new_retrigger)
+{
+    retrigger = new_retrigger;
 }
 
 
@@ -1127,11 +1163,11 @@ void display_score(u32 value)
     tte_printf("#{P:%d,48; cx:0x%X000}%lu%c", x_offset, TTE_WHITE_PB, display_value, score_suffix);
 }
 
-void display_money(int value)
+void display_money()
 {
-    int x_offset = 32 - get_digits_odd(value) * TILE_SIZE;
+    int x_offset = 32 - get_digits_odd(money) * TILE_SIZE;
     tte_erase_rect_wrapper(MONEY_TEXT_RECT);
-    tte_printf("#{P:%d,%d; cx:0x%X000}$%d", x_offset, MONEY_TEXT_RECT.top, TTE_YELLOW_PB, value);
+    tte_printf("#{P:%d,%d; cx:0x%X000}$%d", x_offset, MONEY_TEXT_RECT.top, TTE_YELLOW_PB, money);
 }
 
 // Show/Hide flaming score effect if we will score
@@ -1474,6 +1510,7 @@ void game_init()
     // Initialize all jokers list once
     _owned_jokers_list = list_create();
     _discarded_jokers_list = list_create();
+    _expired_jokers_list = list_create();
     _shop_jokers_list = list_create();
     // TODO: Move this to an initialization of the play scoring states
     _joker_scored_itr = list_itr_create(&_owned_jokers_list);
@@ -1538,7 +1575,7 @@ void game_start()
     display_hands(hands); // Hand
     display_discards(discards); // Discard
 
-    display_money(money); // Set the money display
+    display_money(); // Set the money display
 
     tte_printf("#{P:%d,%d; cx:0x%X000}%d#{cx:0x%X000}/%d", ANTE_TEXT_RECT.left, ANTE_TEXT_RECT.top, TTE_YELLOW_PB, ante, TTE_WHITE_PB, MAX_ANTE); // Ante
 
@@ -2191,12 +2228,8 @@ static bool check_and_score_joker_for_event(ListItr* starting_joker_itr, CardObj
 
     while((joker = list_itr_next(starting_joker_itr)))
     {
-        if (joker_object_score(joker, card_object, joker_event, &chips, &mult, &money, &retrigger))
+        if (joker_object_score(joker, card_object, joker_event))
         {
-            display_chips();
-            display_mult();
-            display_money(money);
-
             return true;
         }
     }
@@ -2241,7 +2274,7 @@ static bool play_before_scoring_cards_update()
 }
 
 // returns true if the scoring loop has returned early
-static bool play_scoring_cards_update()
+static bool play_scoring_cards_update(void)
 {
     if (timer % FRAMES(30) == 0 && timer > FRAMES(40))
     {
@@ -2261,6 +2294,7 @@ static bool play_scoring_cards_update()
             scored_card_index = hand_top;
             
             play_state = PLAY_SCORING_HELD_CARDS;
+
             return false;
         }
 
@@ -2331,7 +2365,6 @@ static bool play_scoring_card_jokers_update()
         // increment index to start seeking the next scoring card from the next card
         scored_card_index++;
         play_state = PLAY_SCORING_CARDS;
-        return false;
     }
 
     return false;
@@ -2356,7 +2389,7 @@ static bool play_scoring_held_cards_update(int played_idx)
         }
 
         scored_card_index = 0;
-
+        _joker_round_end_itr = list_itr_create(&_owned_jokers_list);
         play_state = PLAY_SCORING_INDEPENDENT_JOKERS;
     }
 
@@ -2377,15 +2410,29 @@ static bool play_scoring_independent_jokers_update(int played_idx)
             return true;
         }
 
-        // Trigger hand end effect for all jokers once they are done scoring
+        scored_card_index = played_top + 1; // Reset the scored card index to the top of the played stack
+
+        play_state = PLAY_SCORING_HAND_SCORED_END;
+    }
+
+    return false;
+}
+
+// Trigger hand end effect for all jokers once they are done scoring
+static bool play_scoring_hand_scored_end_update(int played_idx)
+{
+    if (played_idx == 0 && (timer % FRAMES(30) == 0) && timer > FRAMES(40))
+    {
+
+        tte_erase_rect_wrapper(PLAYED_CARDS_SCORES_RECT);
+
         if (check_and_score_joker_for_event(&_joker_round_end_itr, NULL, JOKER_EVENT_ON_HAND_SCORED_END))
         {
             return true;
         }
 
-        play_state = PLAY_ENDING;
         timer = TM_ZERO;
-        scored_card_index = played_top + 1; // Reset the scored card index to the top of the played stack
+        play_state = PLAY_ENDING;
     }
 
     return false;
@@ -2528,6 +2575,14 @@ static void played_cards_update_loop()
                     return;
                 }
                 break;
+            
+            case PLAY_SCORING_HAND_SCORED_END:
+
+                if (play_scoring_hand_scored_end_update(played_idx))
+                {
+                    return;
+                }
+                break;
 
             case PLAY_ENDING:
 
@@ -2641,7 +2696,7 @@ static int calculate_interest_reward()
 static void game_round_end_cashout()
 {
     money += hands + blind_get_reward(current_blind) + calculate_interest_reward(); // Reward the player
-    display_money(money);
+    display_money();
 
     hands = max_hands; // Reset the hands to the maximum
     discards = max_discards; // Reset the discards to the maximum
@@ -3094,7 +3149,7 @@ static void game_shop_intro()
 static void game_shop_reroll(int *reroll_cost)
 {
     money -= *reroll_cost;
-    display_money(money); // Update the money display
+    display_money(); // Update the money display
 
     ListItr itr = list_itr_create(&_shop_jokers_list);
     JokerObject* joker_object;
@@ -3173,7 +3228,7 @@ void game_sell_joker(int joker_idx)
     
     JokerObject* joker_object = (JokerObject*)list_get_at_idx(&_owned_jokers_list, joker_idx);
     money += joker_get_sell_value(joker_object->joker);
-    display_money(money);
+    display_money();
     erase_price_under_sprite_object(joker_object->sprite_object);
 
     remove_owned_joker(joker_idx);
@@ -3208,7 +3263,7 @@ static void game_shop_buy_joker(int shop_joker_idx)
     JokerObject *joker_object = (JokerObject*)list_get_at_idx(&_shop_jokers_list, shop_joker_idx);
 
     money -= joker_object->joker->value; // Deduct the money spent on the joker
-    display_money(money);                // Update the money display
+    display_money();                     // Update the money display
     erase_price_under_sprite_object(joker_object->sprite_object);
     sprite_object_set_focus(joker_object->sprite_object, false);
     add_to_held_jokers(joker_object);
@@ -3669,6 +3724,43 @@ static void game_main_menu_on_update()
     }
 }
 
+#define EXPIRE_ANIMATION_FRAME_COUNT 3
+static void expired_jokers_update_loop()
+{
+    if(list_is_empty(&_expired_jokers_list)) {
+        return;
+    }
+
+    ListItr itr = list_itr_create(&_expired_jokers_list);
+    JokerObject* joker_object;
+
+    while((joker_object = list_itr_next(&itr)))
+    {
+        joker_object_update(joker_object);
+
+        // let just enough frames pass that we see it rotating and shrinking
+        if (timer % FRAMES(EXPIRE_ANIMATION_FRAME_COUNT) == 0)
+        {
+            // get joker idx
+            int expired_joker_idx = 0;
+            ListItr joker_itr = list_itr_create(&_owned_jokers_list);
+            JokerObject* expired_joker;
+            while ((expired_joker = list_itr_next(&joker_itr)) && expired_joker != joker_object)
+            {
+                expired_joker_idx++;
+            }
+
+            // Removing expired Jokers here, instead of immediately like ones we
+            // sell or discard allow us to have a small shrink animation without
+            // the other owned Jokers rearranging themselves to fill the newly
+            // freed space, therefore obscuring the animation
+            remove_owned_joker(expired_joker_idx);
+            list_itr_remove_current_node(&itr);
+            joker_object_destroy(&joker_object);
+        }
+    }
+}
+
 static void discarded_jokers_update_loop()
 {
     if(list_is_empty(&_discarded_jokers_list)) {
@@ -3720,6 +3812,7 @@ static void jokers_update_loop()
 {
     held_jokers_update_loop();
     discarded_jokers_update_loop();
+    expired_jokers_update_loop();
 }
 
 static void game_over_anim_frame()
@@ -3767,6 +3860,7 @@ static void game_over_on_exit()
 
     list_clear(&_owned_jokers_list);
     list_clear(&_discarded_jokers_list);
+    list_clear(&_expired_jokers_list);
     list_clear(&_shop_jokers_list);
 
     game_init();
@@ -3777,7 +3871,7 @@ static void game_over_on_exit()
     display_mult();
     display_hands(hands);
     display_discards(discards);
-    display_money(money);
+    display_money();
     tte_printf(
         "#{P:%d,%d; cx:0x%X000}%d#{cx:0x%X000}/%d",
         ANTE_TEXT_RECT.left,

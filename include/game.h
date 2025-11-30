@@ -1,6 +1,8 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include <tonc.h>
+
 #define MAX_HAND_SIZE 16
 #define MAX_DECK_SIZE 52
 #define MAX_JOKERS_HELD_SIZE 5 // This doesn't account for negatives right now.
@@ -56,6 +58,7 @@ enum PlayState
     PLAY_SCORING_CARD_JOKERS,
     PLAY_SCORING_HELD_CARDS,
     PLAY_SCORING_INDEPENDENT_JOKERS,
+    PLAY_SCORING_HAND_SCORED_END,
     PLAY_ENDING,
     PLAY_ENDED
 };
@@ -109,11 +112,23 @@ int             get_scored_card_index(void);
 bool            is_joker_owned(int joker_id);
 bool            card_is_face(Card *card);
 List*           get_jokers_list(void);
+List*           get_expired_jokers_list(void);
 
 int get_deck_top(void);
 int get_num_discards_remaining(void);
 int get_num_hands_remaining(void);
-int get_money(void);
+
+u32     get_chips(void);
+void    set_chips(u32 new_chips);
+void    display_chips();
+u32     get_mult(void);
+void    set_mult(u32 new_mult);
+void    display_mult();
+int     get_money(void);
+void    set_money(int new_money);
+void    display_money();
+void    set_retrigger(bool new_retrigger);
+
 
 int get_game_speed(void);
 void set_game_speed(int new_game_speed);

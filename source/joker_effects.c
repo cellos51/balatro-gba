@@ -976,7 +976,9 @@ static u32 blueprint_brainstorm_joker_effect(Joker *joker, Card *scored_card, en
 
     // No need for this kind of init since these Jokers
     // will have their data copied when needed
-    if (joker_event == JOKER_EVENT_ON_JOKER_CREATED || joker_event == JOKER_EVENT_ON_ROUND_END)
+    if (joker_event == JOKER_EVENT_ON_JOKER_CREATED ||
+        joker_event == JOKER_EVENT_ON_HAND_SCORED_END ||
+        joker_event == JOKER_EVENT_ON_ROUND_END)
     {
         return effect_flags_ret;
     }
@@ -1090,8 +1092,6 @@ static u32 hack_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent jo
 }
 
 
-// Note: Joker expiration is not yet implemented so Seltzer cannot be made active before it does.
-GBLA_UNUSED
 static u32 seltzer_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
     u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
@@ -1110,28 +1110,33 @@ static u32 seltzer_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent
             break;
         
         case JOKER_EVENT_ON_CARD_SCORED_END:
-            // Works the same way as Dusk, but checks if it can still trigger
-            if (*p_hands_left_until_exp > 0)
+            // Works the same way as Dusk
+            // No need to check for p_hands_left_until_exp because the Joker
+            // will be destroyed the moment we hit 0
+            *joker_effect = &shared_joker_effect;
+
+            (*joker_effect)->retrigger = ((*p_last_retriggered_idx) < get_scored_card_index());
+            if ((*joker_effect)->retrigger)
             {
-                *joker_effect = &shared_joker_effect;
-                
-                (*joker_effect)->retrigger = (*p_last_retriggered_idx < get_scored_card_index());
-                if ((*joker_effect)->retrigger)
-                {
-                    *p_last_retriggered_idx = get_scored_card_index();
-                    (*joker_effect)->message = "Again!";
-                    effect_flags_ret = JOKER_EFFECT_FLAG_RETRIGGER | JOKER_EFFECT_FLAG_MESSAGE;
-                }
+                *p_last_retriggered_idx = get_scored_card_index();
+                (*joker_effect)->message = "Again!";
+                effect_flags_ret = JOKER_EFFECT_FLAG_RETRIGGER | JOKER_EFFECT_FLAG_MESSAGE;
             } 
             break;
 
         case JOKER_EVENT_ON_HAND_SCORED_END:
             *joker_effect = &shared_joker_effect;
             effect_flags_ret = JOKER_EFFECT_FLAG_MESSAGE;
+
+            (*p_hands_left_until_exp)--;
             if (*p_hands_left_until_exp > 0)
             {
-                *p_hands_left_until_exp -= 1;
-                (*joker_effect)->message = "-1";
+                // Need to do this for now because the message's memory can't really be allocated
+                // So we can't use snprintf to craft a message depending on the number of hands left
+                static const char* seltzer_messages[] = {
+                    "1", "2", "3", "4", "5", "6", "7", "8", "9"
+                };
+                (*joker_effect)->message = (char*)seltzer_messages[(*p_hands_left_until_exp) - 1];
             }
             else
             {
@@ -1244,12 +1249,12 @@ const JokerInfo joker_registry[] =
     { UNCOMMON_JOKER,  7, joker_effect_noop,                }, // 48 Four Fingers
     { COMMON_JOKER,    4, scholar_joker_effect              }, // 49
     { UNCOMMON_JOKER,  8, fibonnaci_joker_effect            }, // 50
+    { UNCOMMON_JOKER,  6, seltzer_joker_effect,             }, // 51
     
     // The following jokers don't have sprites yet,
     // uncomment them when their sprites are added.
 #if 0
 
-    { UNCOMMON_JOKER, 6, seltzer_joker_effect,          },
     { COMMON_JOKER,   5, shoot_the_moon_joker_effect,   },
 #endif
 };
