@@ -1210,7 +1210,7 @@ void display_mult()
     mult_text_overflow_rect.right += TTE_CHAR_SIZE;
     tte_erase_rect_wrapper(mult_text_overflow_rect);
 
-    char mult_str_buff[UINT_MAX_DIGITS + 2];
+    char mult_str_buff[UINT_MAX_DIGITS + 1];
     truncate_uint_to_suffixed_str(mult, rect_width(&MULT_TEXT_RECT)/TTE_CHAR_SIZE, mult_str_buff);
 
     tte_printf("#{P:%d,%d; cx:0x%X000;}%s", MULT_TEXT_RECT.left, MULT_TEXT_RECT.top, TTE_WHITE_PB, mult_str_buff);
@@ -2771,7 +2771,7 @@ static void game_round_end_display_finished_blind()
      * and the blind requirement will not increase past ante 8
      * so there's enough room for sure.
      */
-    char blind_req_str_buff[UINT_MAX_DIGITS + 2];
+    char blind_req_str_buff[UINT_MAX_DIGITS + 1];
     snprintf(blind_req_str_buff, sizeof(blind_req_str_buff), "%lu", blind_req);
 
     update_text_rect_to_right_align_str(&blind_req_rect, blind_req_str_buff, OVERFLOW_RIGHT);
