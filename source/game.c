@@ -253,7 +253,10 @@ static void game_playing_process_card_draw(void);
 static bool game_round_is_over(void);
 static void game_playing_handle_round_over(void);
 static void game_playing_discarded_cards_loop(void);
-static void card_in_hand_loop_handle_discard_and_shuffling(int card_idx, FIXED* hand_x, FIXED* hand_y, bool* break_loop);
+static void card_in_hand_loop_handle_discard_and_shuffling(int card_idx,
+                                                           FIXED* hand_x,
+                                                           FIXED* hand_y,
+                                                           bool* break_loop);
 static void select_flush_and_straight_cards_in_played_hand(void);
 static void select_all_five_cards_in_played_hand(void);
 static void select_four_of_a_kind_cards_in_played_hand(void);
@@ -445,8 +448,7 @@ static const Selection SHOP_INIT_SEL = {-1, 1};
 SelectionGrid shop_selection_grid = {shop_selection_rows, NUM_ELEM_IN_ARR(shop_selection_rows), SHOP_INIT_SEL};
 
 // This is a stupid way to do this but I don't care
-static const int HAND_SPACING_LUT[MAX_HAND_SIZE] =
-    {28, 28, 28, 28, 27, 21, 18, 15, 13, 12, 10, 9, 9, 8, 8, 7}; 
+static const int HAND_SPACING_LUT[MAX_HAND_SIZE] = {28, 28, 28, 28, 27, 21, 18, 15, 13, 12, 10, 9, 9, 8, 8, 7};
 
 static const HandValues hand_base_values[] = {
     {.chips = 0,   .mult = 0,  .display_name = NULL     }, // NONE
