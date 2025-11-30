@@ -130,4 +130,5 @@ void test_truncate_uint_to_suffixed_str()
 int main()
 {
     test_truncate_uint_to_suffixed_str();
+    return 0;
 }
