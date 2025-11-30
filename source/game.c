@@ -1165,7 +1165,7 @@ void display_money()
 void check_flaming_score()
 {
     u32 curr_score = u32_protected_mult(chips, mult);
-    int required_score = blind_get_requirement(current_blind, ante);
+    u32 required_score = blind_get_requirement(current_blind, ante);
     if (curr_score >= required_score && !score_flames_active)
     {
         // start flaming score
