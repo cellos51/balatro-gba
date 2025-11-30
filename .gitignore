@@ -1,6 +1,8 @@
 /.vscode
+/.idea
 /build
 /.vs
+_codeql_detected_source_root
 *.sln
 *.vcxproj*
 /balatro-gba/x64/**
