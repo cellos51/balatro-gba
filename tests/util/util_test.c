@@ -8,8 +8,7 @@ void test_truncate_uint_to_suffixed_str()
 {
     /*
      * I want to avoid testing the rounding so it can be easily changed
-     * so all tests are numbers that are rounded down regardless of method
-     * rounding method.
+     * so all tests are numbers that are rounded down regardless of rounding method.
      * That way the function can be modified to round to nearest integer easily.
      */
 
