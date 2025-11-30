@@ -1,32 +1,37 @@
 #ifndef GAME_H
 #define GAME_H
 
-#define MAX_HAND_SIZE        16
-#define MAX_DECK_SIZE        52
-#define MAX_JOKERS_HELD_SIZE 5 // This doesn't account for negatives right now.
-#define MAX_SHOP_JOKERS      2 // TODO: Make this dynamic and allow for other items besides jokers
-#define MAX_SELECTION_SIZE   5
-#define FRAMES(x)            (((x) + _game_speed - 1) / _game_speed)
+#include <tonc.h>
 
-// TODO: Can make these dynamic to support interest-related jokers and vouchers
-#define MAX_INTEREST   5
+#define MAX_HAND_SIZE 16
+#define MAX_DECK_SIZE 52
+#define MAX_JOKERS_HELD_SIZE 5 // This doesn't account for negatives right now.
+#define MAX_SHOP_JOKERS 2 // TODO: Make this dynamic and allow for other items besides jokers
+#define MAX_SELECTION_SIZE 5
+#define FRAMES(x) (((x) + game_speed - 1) / game_speed)
+
+ // TODO: Can make these dynamic to support interest-related jokers and vouchers
+#define MAX_INTEREST 5 
 #define INTEREST_PER_5 1
 
-// TODO: Turn into enum?
-#define BG_ID_CARD_SELECTING 1
-#define BG_ID_CARD_PLAYING   2
-#define BG_ID_ROUND_END      3
-#define BG_ID_SHOP           4
-#define BG_ID_BLIND_SELECT   5
-#define BG_ID_MAIN_MENU      6
+enum BackgroundId
+{
+    BG_NONE,
+    BG_CARD_SELECTING,
+    BG_CARD_PLAYING,
+    BG_ROUND_END,
+    BG_SHOP,
+    BG_BLIND_SELECT,
+    BG_MAIN_MENU
+};
 
 // Input bindings
-#define SELECT_CARD    KEY_A
+#define SELECT_CARD KEY_A
 #define DESELECT_CARDS KEY_B
-#define PEEK_DECK      KEY_L // Not implemented
-#define SORT_HAND      KEY_R
-#define PAUSE_GAME     KEY_START // Not implemented
-#define SELL_KEY       KEY_L
+#define PEEK_DECK KEY_L // Not implemented
+#define SORT_HAND KEY_R
+#define PAUSE_GAME KEY_START // Not implemented
+#define SELL_KEY KEY_L
 
 // Enum value names in ../include/def_state_info_table.h
 enum GameState
@@ -42,8 +47,7 @@ enum HandState
 {
     HAND_DRAW,
     HAND_SELECT,
-    // This is a misnomer because it's used for the deck, but it mechanically makes sense to be a state of the hand
-    HAND_SHUFFLING,
+    HAND_SHUFFLING, // This is actually a misnomer because it's used for the deck, but it mechanically makes sense to be a state of the hand
     HAND_DISCARD,
     HAND_PLAY,
     HAND_PLAYING
@@ -57,6 +61,7 @@ enum PlayState
     PLAY_SCORING_CARD_JOKERS,
     PLAY_SCORING_HELD_CARDS,
     PLAY_SCORING_INDEPENDENT_JOKERS,
+    PLAY_SCORING_HAND_SCORED_END,
     PLAY_ENDING,
     PLAY_ENDED
 };
@@ -80,7 +85,7 @@ enum HandType
     FLUSH_FIVE
 };
 
-typedef struct
+typedef struct 
 {
     int substate;
     void (*on_init)();
@@ -88,7 +93,12 @@ typedef struct
     void (*on_exit)();
 } StateInfo;
 
-struct List;
+// Game functions
+void game_init();
+void game_update();
+void game_change_state(enum GameState new_game_state);
+
+struct List; 
 typedef struct List List;
 
 // Utility functions for other files
@@ -96,25 +106,32 @@ typedef struct CardObject CardObject; // forward declaration, actually declared 
 typedef struct Card Card;
 typedef struct JokerObject JokerObject;
 
-// Game functions
-void game_init();
-void game_update();
-void game_change_state(enum GameState new_game_state);
-
-CardObject** get_hand_array(void);
-int get_hand_top(void);
-int hand_get_size(void);
-CardObject** get_played_array(void);
-int get_played_top(void);
-int get_scored_card_index(void);
-bool is_joker_owned(int joker_id);
-bool card_is_face(Card* card);
-List* get_jokers_list(void);
+CardObject**    get_hand_array(void);
+int             get_hand_top(void);
+int             hand_get_size(void);
+CardObject**    get_played_array(void);
+int             get_played_top(void);
+int             get_scored_card_index(void);
+bool            is_joker_owned(int joker_id);
+bool            card_is_face(Card *card);
+List*           get_jokers_list(void);
+List*           get_expired_jokers_list(void);
 
 int get_deck_top(void);
 int get_num_discards_remaining(void);
 int get_num_hands_remaining(void);
-int get_money(void);
+
+u32     get_chips(void);
+void    set_chips(u32 new_chips);
+void    display_chips();
+u32     get_mult(void);
+void    set_mult(u32 new_mult);
+void    display_mult();
+int     get_money(void);
+void    set_money(int new_money);
+void    display_money();
+void    set_retrigger(bool new_retrigger);
+
 
 int get_game_speed(void);
 void set_game_speed(int new_game_speed);
