@@ -909,29 +909,6 @@ static u32 photograph_joker_effect(Joker *joker, Card *scored_card, enum JokerEv
     return effect_flags_ret;
 }
 
-
-// no graphics available but ready to be used if wanted when graphics available
-GBLA_UNUSED
-static u32 triboulet_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
-{
-    SCORE_ON_EVENT_ONLY_WITH_CARD(scored_card, JOKER_EVENT_ON_CARD_SCORED, joker_event)
-
-    u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
-
-    switch (scored_card->rank)
-    {
-        case QUEEN:
-        case KING:
-            *joker_effect = &shared_joker_effect;
-            (*joker_effect)->xmult = 2;
-            effect_flags_ret = JOKER_EFFECT_FLAG_XMULT;
-        default:
-            break;
-    }
-
-    return effect_flags_ret;
-}
-
 static u32 dusk_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
     u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
