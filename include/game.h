@@ -14,6 +14,22 @@
 #define MAX_INTEREST 5 
 #define INTEREST_PER_5 1
 
+// Input bindings
+#define SELECT_CARD KEY_A
+#define DESELECT_CARDS KEY_B
+#define PEEK_DECK KEY_L // Not implemented
+#define SORT_HAND KEY_R
+#define PAUSE_GAME KEY_START // Not implemented
+#define SELL_KEY KEY_L
+
+struct List; 
+typedef struct List List;
+
+// Utility functions for other files
+typedef struct CardObject CardObject;
+typedef struct Card Card;
+typedef struct JokerObject JokerObject;
+
 enum BackgroundId
 {
     BG_NONE,
@@ -24,14 +40,6 @@ enum BackgroundId
     BG_BLIND_SELECT,
     BG_MAIN_MENU
 };
-
-// Input bindings
-#define SELECT_CARD KEY_A
-#define DESELECT_CARDS KEY_B
-#define PEEK_DECK KEY_L // Not implemented
-#define SORT_HAND KEY_R
-#define PAUSE_GAME KEY_START // Not implemented
-#define SELL_KEY KEY_L
 
 // Enum value names in ../include/def_state_info_table.h
 enum GameState
@@ -97,14 +105,6 @@ typedef struct
 void game_init();
 void game_update();
 void game_change_state(enum GameState new_game_state);
-
-struct List; 
-typedef struct List List;
-
-// Utility functions for other files
-typedef struct CardObject CardObject; // forward declaration, actually declared in card.h
-typedef struct Card Card;
-typedef struct JokerObject JokerObject;
 
 CardObject**    get_hand_array(void);
 int             get_hand_top(void);
