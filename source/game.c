@@ -1129,7 +1129,7 @@ void display_temp_score(u32 value)
     char temp_score_str_buff[UINT_MAX_DIGITS + 1];
     Rect temp_score_rect = TEMP_SCORE_RECT;
     truncate_uint_to_suffixed_str(value, rect_width(&temp_score_rect)/TTE_CHAR_SIZE, temp_score_str_buff);
-    update_text_rect_to_center_str(&temp_score_rect, temp_score_str_buff, true);
+    update_text_rect_to_center_str(&temp_score_rect, temp_score_str_buff, SCREEN_RIGHT);
 
     tte_erase_rect_wrapper(TEMP_SCORE_RECT);
     tte_printf("#{P:%d,%d; cx:0x%X000}%s", temp_score_rect.left, temp_score_rect.top, TTE_WHITE_PB, temp_score_str_buff);
@@ -1144,7 +1144,7 @@ void display_score(u32 value)
     char score_str_buff[UINT_MAX_DIGITS + 1];
 
     truncate_uint_to_suffixed_str(value, rect_width(&score_rect)/TTE_CHAR_SIZE, score_str_buff);
-    update_text_rect_to_center_str(&score_rect, score_str_buff, true);
+    update_text_rect_to_center_str(&score_rect, score_str_buff, SCREEN_RIGHT);
     
     tte_printf("#{P:%d,%d; cx:0x%X000}%s", score_rect.left, score_rect.top, TTE_WHITE_PB, score_str_buff);
 }
@@ -1157,7 +1157,8 @@ void display_money()
     char money_str_buff[INT_MAX_DIGITS + 2]; // + 2 for null terminator and "$" sign
     snprintf(money_str_buff, sizeof(money_str_buff), "$%d", money);
     
-    update_text_rect_to_center_str(&money_text_rect, money_str_buff, false);
+    // Bias left so the number is cetnered and the "$" sign is on the left
+    update_text_rect_to_center_str(&money_text_rect, money_str_buff, SCREEN_LEFT);
 
     tte_printf("#{P:%d,%d; cx:0x%X000}%s", money_text_rect.left, money_text_rect.top, TTE_YELLOW_PB, money_str_buff);
 }

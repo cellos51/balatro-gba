@@ -20,6 +20,14 @@ static inline int u32_get_digits(uint32_t n) // https://stackoverflow.com/questi
     return 10;
 }
 
+static inline int get_digits_even(int n)
+{
+    if (n < 100) return 1;
+    if (n < 10000) return 2;
+    if (n < 1000000) return 3;
+    if (n < 100000000) return 4;
+    return 5;
+}
 
 static inline int get_digits_even(int n)
 {
@@ -52,8 +60,25 @@ static inline int get_digits_even(int n)
 
 int int_arr_max(int int_arr[], int size);
 
-// TODO: Documentation
-void truncate_uint_to_suffixed_str(uint32_t num, int num_places, char out_str[UINT_MAX_DIGITS + 1]);
+/** 
+ * @brief   Truncate an unsigned number into a suffixed string representation e.g. 12000 -> "12K"
+ *          The least significant digits are rounded down e.g. 12345 -> "12K", 12987 -> "12K"
+ *          
+ * @param num           The number to truncate, can be anything from 0 to UINT32_MAX.
+ *  
+ * @param num_req_chars The number of characters to constrain the string to.
+ *                      The function will use up as much characters as it can
+ *                      to maintain as much accuracy as possible. 
+ *                      So if num_req_chars > u32_get_digits(num) the number will not
+ *                      be truncated and numbers are not fully truncated if not necessary.
+ *                      e.g. 123000000 -> "123000K" for num_req_chars = 7.
+ *                      
+ * @param out_str       An output buffer to write the resulting string to. 
+ *                      Must be of size INT_MAX_DIGITS + 1. + 1 for null-terminator.
+ *                      At that size the suffix character will always be accounted for since
+ *                      a number with more digits than UINT_MAX_DIGITS will not be handled nor truncated.
+ */
+void truncate_uint_to_suffixed_str(uint32_t num, int num_req_chars, char out_str[UINT_MAX_DIGITS + 1]);
 
 uint32_t u32_protected_add (uint32_t a, uint32_t b);
 uint16_t u16_protected_add (uint16_t a, uint16_t b);

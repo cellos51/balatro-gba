@@ -253,10 +253,17 @@ void update_text_rect_to_right_align_str(Rect* rect, char* str, int overflow_dir
     }
 }
 
-void update_text_rect_to_center_str(Rect* rect, char* str, bool bias_right)
+void update_text_rect_to_center_str(Rect* rect, char* str, int bias_direction)
 {
+    if (rect == NULL || str == NULL)
+    {
+        return;
+    }
+
     int text_width_chars = strlen(str);
     int rect_width_chars = rect_width(rect) / TTE_CHAR_SIZE;
+
+    bool bias_right = (bias_direction == SCREEN_RIGHT);
 
     /* Adding bias_right makes sure that we round up when biased right
      * but round down when biased left.

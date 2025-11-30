@@ -49,6 +49,7 @@
 #define SE_ROW_LEN 32
 #define SE_COL_LEN 32
 
+// TODO: Change direction defines into enums (separate for vertical and horizontal)
 // Since y direction goes from the top of the screen to the bottom
 #define SCREEN_UP 	-1
 #define SCREEN_DOWN 1
@@ -142,23 +143,38 @@ void main_bg_se_move_rect_1_tile_vert(Rect se_rect, int direction);
 // A wrapper for tte_erase_rect that would use the rect struct
 void tte_erase_rect_wrapper(Rect rect);
 
-// TODO: Update documentation
-/* Changes rect->left so it fits the digits of num exactly when right aligned to rect->right.
- * Assumes num is not negative.
+/* Changes rect->left so it fits a string exactly when right aligned to rect->right.
  * 
- * overflow_direction determines the direction the number will overflow
+ * overflow_direction determines the direction the string will overflow
  * if it's too large to fit inside the rect. 
  * Should be either OVERFLOW_LEFT or OVERFLOW_RIGHT.
  * 
- * The rect is in number of pixels but should be a multiple of TILE_SIZE
+ * The rect is in number of pixels but should be a multiple of TTE_CHAR_SIZE
  * so it's a whole number of tiles to fit TTE characters
  * 
  * Note that both rect->left and rect-right need to be defined, top and bottom don't matter
  */
 void update_text_rect_to_right_align_str(Rect* rect, char* str, int overflow_direction);
 
-// TODO: Document
-void update_text_rect_to_center_str(Rect* rect, char* str, bool bias_right);
+
+/** 
+ * @brief Updates a rect so a string is centered within it.
+ * 
+ * @param rect  The rect provided, the provided values are used to determine the center
+ *              and it is then updated so the string starting in rect->left is centered
+ *              The rect is in number of pixels but should be a multiple of TTE_CHAR_SIZE
+ *              so it's a whole number of tiles to fit TTE characters.
+ * 
+ * @param str   The string, the center of the string will be at the center of the updated rect.
+ * 
+ * @param bias_direction    Which direction to bias when the string can't be evenly centered
+ *                          with respect to char tiles. Must be either SCREEN_LEFT or SCREEN_RIGHT
+ *                          Examples:
+ *                          | |S|T|R| |     - Can be evenly centered, bias has no effect
+ *                          | | |S|T|R| |   - Bias right
+ *                          | |S|T|R| | |   - Bias left
+ */
+void update_text_rect_to_center_str(Rect* rect, char* str, int bias_direction);
 
 /*Copies 16 bit data from src to dst, applying a palette offset to the data.
  * This is intended solely for use with tile8/8bpp data for dst and src.
