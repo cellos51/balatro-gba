@@ -29,15 +29,6 @@ static inline int get_digits_even(int n)
     return 5;
 }
 
-static inline int get_digits_even(int n)
-{
-    if (n < 10) return 1;
-    if (n < 1000) return 2;
-    if (n < 100000) return 3;
-    if (n < 10000000) return 4;
-    return 5;
-}
-
 #define UNDEFINED -1
 
 #define NUM_ELEM_IN_ARR(arr) (sizeof(arr) / sizeof((arr)[0]))
@@ -68,10 +59,15 @@ int int_arr_max(int int_arr[], int size);
  *  
  * @param num_req_chars The number of characters to constrain the string to.
  *                      The function will use up as much characters as it can
- *                      to maintain as much accuracy as possible. 
- *                      So if num_req_chars > u32_get_digits(num) the number will not
- *                      be truncated and numbers are not fully truncated if not necessary.
- *                      e.g. 123000000 -> "123000K" for num_req_chars = 7.
+ *                      in order to maintain as much accuracy as possible. 
+ *                      So numbers are not fully truncated if not necessary,
+ *                      e.g. 123123000 -> "123123K" for example value 7, 
+ *                      and if num_req_chars > u32_get_digits(num) the number will not
+ *                      be truncated at all.
+ *                      Passing less than SUFFIXED_NUM_MIN_REQ_CHARS may result in an 
+ *                      output string longer than num_req_chars but
+ *                      can be done to truncate 1000s -> "1K", 2000 -> "2K" etc.
+ *                      which wouldn't be otherwise.
  *                      
  * @param out_str       An output buffer to write the resulting string to. 
  *                      Must be of size INT_MAX_DIGITS + 1. + 1 for null-terminator.

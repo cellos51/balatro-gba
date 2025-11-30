@@ -173,6 +173,8 @@ void update_text_rect_to_right_align_str(Rect* rect, char* str, int overflow_dir
  *                          | |S|T|R| |     - Can be evenly centered, bias has no effect
  *                          | | |S|T|R| |   - Bias right
  *                          | |S|T|R| | |   - Bias left
+ *                          |A|B|C|D| |     - Bias left
+ *  *                       | |A|B|C|D|     - Bias right
  */
 void update_text_rect_to_center_str(Rect* rect, char* str, int bias_direction);
 
