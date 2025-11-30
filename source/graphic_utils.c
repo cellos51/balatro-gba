@@ -4,7 +4,7 @@
 
 #include "util.h"
 #include "graphic_utils.h"
-#include "string.h"
+#include <string.h>
 
 const Rect FULL_SCREENBLOCK_RECT = { 0, 0, SE_ROW_LEN - 1, SE_COL_LEN - 1};
 
