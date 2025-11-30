@@ -1154,7 +1154,7 @@ void display_money()
     char money_str_buff[INT_MAX_DIGITS + 2]; // + 2 for null terminator and "$" sign
     snprintf(money_str_buff, sizeof(money_str_buff), "$%d", money);
     
-    // Bias left so the number is cetnered and the "$" sign is on the left
+    // Bias left so the number is centered and the "$" sign is on the left
     update_text_rect_to_center_str(&money_text_rect, money_str_buff, SCREEN_LEFT);
 
     tte_printf("#{P:%d,%d; cx:0x%X000}%s", money_text_rect.left, money_text_rect.top, TTE_YELLOW_PB, money_str_buff);
