@@ -32,7 +32,7 @@ void truncate_uint_to_suffixed_str(uint32_t num, int num_req_chars, char out_str
     /* If there is overflow, divide by the next suffixed power of 10
      * to truncate the number back within num_req_chars.
      * UINT32_MAX is in the billions so no need to check larger numbers
-     * or perform complex mathmetaical operations.
+     * or perform complex mathematical operations.
      */
     if (overflow_size >= ONE_M_ZEROS)
     {
