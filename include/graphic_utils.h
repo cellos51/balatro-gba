@@ -176,7 +176,7 @@ void update_text_rect_to_right_align_str(Rect* rect, const char* str, int overfl
  *                          |A|B|C|D| |     - Bias left
  *                          | |A|B|C|D|     - Bias right
  */
-void update_text_rect_to_center_str(Rect* rect, char* str, int bias_direction);
+void update_text_rect_to_center_str(Rect* rect, const char* str, int bias_direction);
 
 /*Copies 16 bit data from src to dst, applying a palette offset to the data.
  * This is intended solely for use with tile8/8bpp data for dst and src.

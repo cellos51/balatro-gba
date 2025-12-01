@@ -253,7 +253,7 @@ void update_text_rect_to_right_align_str(Rect* rect, const char* str, int overfl
     }
 }
 
-void update_text_rect_to_center_str(Rect* rect, char* str, int bias_direction)
+void update_text_rect_to_center_str(Rect* rect, const char* str, int bias_direction)
 {
     if (rect == NULL || str == NULL)
     {
