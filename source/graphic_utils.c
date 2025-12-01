@@ -239,7 +239,7 @@ void tte_erase_rect_wrapper(Rect rect)
 void update_text_rect_to_right_align_str(Rect* rect, const char* str, enum OverflowDir overflow_direction)
 {
     // TODO: Allow passing string length to avoid calling strlen()?
-    size_t str_len = strlen(str);
+    int str_len = strlen(str);
     if (overflow_direction == OVERFLOW_LEFT)
     {
         rect->left = max(0, rect->right - str_len * TTE_CHAR_SIZE);

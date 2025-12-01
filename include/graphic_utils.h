@@ -86,15 +86,12 @@ SE main_bg_se_get_se(BG_POINT pos);
 
 INLINE int rect_width(const Rect* rect)
 {
-    /* Extra parens to avoid issues in case compiler turns INLINE into macro
-     * Not sure if necessary, could be just paranoia
-     */ 
-    return (((rect)->right) - ((rect)->left) + 1);
+    return max(0, rect->right - rect->left + 1);
 }
 
 INLINE int rect_height(const Rect* rect)
 {
-    return (((rect)->bottom) - ((rect)->top) + 1);
+    return max(0, rect->bottom - rect->top + 1);
 }
 
 /* Copies an SE rect vertically in direction by a single tile.
