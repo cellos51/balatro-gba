@@ -56,7 +56,7 @@ enum HandState
     HAND_DRAW,
     HAND_SELECT,
     // This is actually a misnomer because it's used for the deck
-    HAND_SHUFFLING, 
+    HAND_SHUFFLING,
     HAND_DISCARD,
     HAND_PLAY,
     HAND_PLAYING
