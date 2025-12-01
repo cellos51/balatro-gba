@@ -32,14 +32,14 @@ SE main_bg_se_get_se(BG_POINT pos)
 
 // Clips a rect of screenblock entries to be within one step of 
 // screenblock boundaries vertically depending on direction.
-static void clip_se_rect_within_step_of_full_screen_vert(Rect* se_rect, int direction)
+static void clip_se_rect_within_step_of_full_screen_vert(Rect* se_rect, enum ScreenVertDir direction)
 {
     Rect bounding_rect = FULL_SCREENBLOCK_RECT;
-    if (direction == SE_UP)
+    if (direction == SCREEN_UP)
     {
         bounding_rect.top += 1;
     }
-    else if (direction == SE_DOWN)
+    else if (direction == SCREEN_DOWN)
     {
         bounding_rect.bottom -= 1;
     }
@@ -61,10 +61,10 @@ void main_bg_se_clear_rect(Rect se_rect)
 }
 
 // Internal static function to merge implementation of move/copy functions.
-static void bg_se_copy_or_move_rect_1_tile_vert(u16 bg_sbb, Rect se_rect, int direction, bool move)
+static void bg_se_copy_or_move_rect_1_tile_vert(u16 bg_sbb, Rect se_rect, enum ScreenVertDir direction, bool move)
 {
      if (se_rect.left > se_rect.right
-        || (direction != SE_UP && direction != SE_DOWN))
+        || (direction != SCREEN_UP && direction != SCREEN_DOWN))
     {
         return;
     }
@@ -72,8 +72,8 @@ static void bg_se_copy_or_move_rect_1_tile_vert(u16 bg_sbb, Rect se_rect, int di
     // Clip to avoid read/write overflow of the screenblock
     clip_se_rect_within_step_of_full_screen_vert(&se_rect, direction);
 
-    int start = (direction == SE_UP) ? se_rect.top : se_rect.bottom;
-    int end = (direction == SE_UP) ? se_rect.bottom : se_rect.top;
+    int start = (direction == SCREEN_UP) ? se_rect.top : se_rect.bottom;
+    int end = (direction == SCREEN_UP) ? se_rect.bottom : se_rect.top;
 
     for (int y = start; y != end - direction; y -= direction)
     {
@@ -88,27 +88,27 @@ static void bg_se_copy_or_move_rect_1_tile_vert(u16 bg_sbb, Rect se_rect, int di
     }
 }
 
-static void main_bg_se_copy_or_move_rect_1_tile_vert(Rect se_rect, int direction, bool move)
+static void main_bg_se_copy_or_move_rect_1_tile_vert(Rect se_rect, enum ScreenVertDir direction, bool move)
 {
    bg_se_copy_or_move_rect_1_tile_vert(MAIN_BG_SBB, se_rect, direction, move);
 }
 
-void bg_se_copy_rect_1_tile_vert(u16 bg_sbb, Rect se_rect, int direction)
+void bg_se_copy_rect_1_tile_vert(u16 bg_sbb, Rect se_rect, enum ScreenVertDir direction)
 {
     bg_se_copy_or_move_rect_1_tile_vert(MAIN_BG_SBB, se_rect, direction, false);
 }
 
-void bg_se_move_rect_1_tile_vert(u16 bg_sbb, Rect se_rect, int direction)
+void bg_se_move_rect_1_tile_vert(u16 bg_sbb, Rect se_rect, enum ScreenVertDir direction)
 {
     bg_se_copy_or_move_rect_1_tile_vert(MAIN_BG_SBB, se_rect, direction, true);
 }
 
-void main_bg_se_copy_rect_1_tile_vert(Rect se_rect, int direction)
+void main_bg_se_copy_rect_1_tile_vert(Rect se_rect, enum ScreenVertDir direction)
 {
     main_bg_se_copy_or_move_rect_1_tile_vert(se_rect, direction, false);
 }
 
-void main_bg_se_move_rect_1_tile_vert(Rect se_rect, int direction)
+void main_bg_se_move_rect_1_tile_vert(Rect se_rect, enum ScreenVertDir direction)
 {
     main_bg_se_copy_or_move_rect_1_tile_vert(se_rect, direction, true);
 }
@@ -236,7 +236,7 @@ void tte_erase_rect_wrapper(Rect rect)
     tte_erase_rect(rect.left, rect.top, rect.right, rect.bottom);
 }
 
-void update_text_rect_to_right_align_str(Rect* rect, const char* str, int overflow_direction)
+void update_text_rect_to_right_align_str(Rect* rect, const char* str, enum OverflowDir overflow_direction)
 {
     // TODO: Allow passing string length to avoid calling strlen()?
     size_t str_len = strlen(str);
@@ -253,7 +253,7 @@ void update_text_rect_to_right_align_str(Rect* rect, const char* str, int overfl
     }
 }
 
-void update_text_rect_to_center_str(Rect* rect, const char* str, int bias_direction)
+void update_text_rect_to_center_str(Rect* rect, const char* str, enum ScreenHorzDir bias_direction)
 {
     if (rect == NULL || str == NULL)
     {

@@ -942,7 +942,7 @@ void change_background(enum BackgroundId id)
 
         for (int i = 0; i <= 2; i++)
         {
-            main_bg_se_move_rect_1_tile_vert(HAND_BG_RECT_SELECTING, SE_DOWN);
+            main_bg_se_move_rect_1_tile_vert(HAND_BG_RECT_SELECTING, SCREEN_DOWN);
         }
 
         tte_erase_rect_wrapper(HAND_SIZE_RECT_SELECT);
@@ -1040,7 +1040,7 @@ void change_background(enum BackgroundId id)
                     int x_from = 0;
                     int y_from = 27;
 
-                    main_bg_se_copy_rect_1_tile_vert(curr_blind_rect, SE_UP);
+                    main_bg_se_copy_rect_1_tile_vert(curr_blind_rect, SCREEN_UP);
 
                     int x_to = curr_blind_rect.left;
                     int y_to = 31;
@@ -2740,7 +2740,7 @@ static void game_round_end_start()
 
 static void game_round_end_start_expand_popup()
 {
-    main_bg_se_copy_rect_1_tile_vert(POP_MENU_ANIM_RECT, SE_UP);
+    main_bg_se_copy_rect_1_tile_vert(POP_MENU_ANIM_RECT, SCREEN_UP);
     
     if (timer == TM_END_POP_MENU_ANIM)
     {
@@ -2754,7 +2754,7 @@ static void game_round_end_extend_black_panel_down(int black_panel_bottom)
     Rect single_line_rect = ROUND_END_MENU_RECT;
     single_line_rect.bottom = black_panel_bottom;
     single_line_rect.top = single_line_rect.bottom - 1;
-    main_bg_se_copy_rect_1_tile_vert(single_line_rect, SE_DOWN);
+    main_bg_se_copy_rect_1_tile_vert(single_line_rect, SCREEN_DOWN);
 }
 
 static void game_round_end_display_finished_blind()
@@ -2836,7 +2836,7 @@ static void game_round_end_panel_exit()
     // magic numbers.
     if (timer < 8)
     {
-        main_bg_se_copy_rect_1_tile_vert(TOP_LEFT_PANEL_ANIM_RECT, SE_UP);
+        main_bg_se_copy_rect_1_tile_vert(TOP_LEFT_PANEL_ANIM_RECT, SCREEN_UP);
     
         if (timer == 1) // Copied from shop. Feels slightly too niche of a function for me personally to make one.
         {
@@ -2989,7 +2989,7 @@ static void game_round_end_dismiss_round_end_panel()
 {
     Rect round_end_down = ROUND_END_MENU_RECT;
     round_end_down.top--;
-    main_bg_se_copy_rect_1_tile_vert(round_end_down, SE_DOWN);
+    main_bg_se_copy_rect_1_tile_vert(round_end_down, SCREEN_DOWN);
     
     if (timer >= TM_DISMISS_ROUND_END_TM)
     {
@@ -3115,7 +3115,7 @@ static void game_shop_create_items()
 // Intro sequence (menu and shop icon coming into frame)
 static void game_shop_intro()
 {
-    main_bg_se_copy_rect_1_tile_vert(POP_MENU_ANIM_RECT, SE_UP);
+    main_bg_se_copy_rect_1_tile_vert(POP_MENU_ANIM_RECT, SCREEN_UP);
 
     if (timer == TM_CREATE_SHOP_ITEMS_WAIT)
     {
@@ -3426,9 +3426,9 @@ static void game_shop_lights_anim_frame()
 static void game_shop_outro()
 {
     // Shift the shop panel
-    main_bg_se_move_rect_1_tile_vert(POP_MENU_ANIM_RECT, SE_DOWN);
+    main_bg_se_move_rect_1_tile_vert(POP_MENU_ANIM_RECT, SCREEN_DOWN);
 
-    main_bg_se_copy_rect_1_tile_vert(TOP_LEFT_PANEL_ANIM_RECT, SE_UP);
+    main_bg_se_copy_rect_1_tile_vert(TOP_LEFT_PANEL_ANIM_RECT, SCREEN_UP);
 
     // TODO: make heads or tails of what's going on here and replace
     // magic numbers.
@@ -3531,7 +3531,7 @@ static void game_blind_select_on_update()
 static void game_blind_select_start_anim_seq()
 {
     change_background(BG_BLIND_SELECT);
-    main_bg_se_copy_rect_1_tile_vert(POP_MENU_ANIM_RECT, SE_UP);
+    main_bg_se_copy_rect_1_tile_vert(POP_MENU_ANIM_RECT, SCREEN_UP);
     
     for (int i = 0; i < BLIND_TYPE_MAX; i++)
     {
@@ -3579,7 +3579,7 @@ static void game_blind_select_handle_input()
             // TODO: Create a generic vertical move by any number of tiles to avoid for loops?
             for (int i = 0; i < 12; i++)
             {
-                main_bg_se_copy_rect_1_tile_vert(POP_MENU_ANIM_RECT, SE_UP);
+                main_bg_se_copy_rect_1_tile_vert(POP_MENU_ANIM_RECT, SCREEN_UP);
             }
     
             for (int i = 0; i < BLIND_TYPE_MAX; i++)
@@ -3611,7 +3611,7 @@ static void game_blind_select_selected_anim_seq()
     {
         Rect blinds_rect = POP_MENU_ANIM_RECT;
         blinds_rect.top -= 1; // Because of the raised blind
-        main_bg_se_move_rect_1_tile_vert(blinds_rect, SE_DOWN);
+        main_bg_se_move_rect_1_tile_vert(blinds_rect, SCREEN_DOWN);
     
         for (int i = 0; i < BLIND_TYPE_MAX; i++)
         {
@@ -3817,7 +3817,7 @@ static void jokers_update_loop()
 
 static void game_over_anim_frame()
 {
-    main_bg_se_move_rect_1_tile_vert(GAME_OVER_ANIM_RECT, SE_UP);
+    main_bg_se_move_rect_1_tile_vert(GAME_OVER_ANIM_RECT, SCREEN_UP);
 }
 
 static void game_lose_on_update()
