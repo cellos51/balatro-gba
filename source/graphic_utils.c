@@ -236,7 +236,7 @@ void tte_erase_rect_wrapper(Rect rect)
     tte_erase_rect(rect.left, rect.top, rect.right, rect.bottom);
 }
 
-void update_text_rect_to_right_align_str(Rect* rect, char* str, int overflow_direction)
+void update_text_rect_to_right_align_str(Rect* rect, const char* str, int overflow_direction)
 {
     // TODO: Allow passing string length to avoid calling strlen()?
     size_t str_len = strlen(str);
