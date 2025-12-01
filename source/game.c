@@ -17,6 +17,7 @@
 #include "audio_utils.h"
 #include "selection_grid.h"
 #include "splash_screen.h"
+#include "sort.h"
 
 #include "background_gfx.h"
 #include "background_shop_gfx.h"
@@ -719,8 +720,11 @@ void set_seed(int seed)
 
 // Compare two cards for sorting by suit (primary) and rank (secondary)
 // Returns true if card_a should come before card_b
-static inline bool card_compare_by_suit(CardObject* card_a, CardObject* card_b)
+static inline bool card_compare_by_suit(void* a, void* b)
 {
+    CardObject* card_a = (CardObject*)a;
+    CardObject* card_b = (CardObject*)b;
+    
     if (card_a == NULL) return false;
     if (card_b == NULL) return true;
     if (card_a->card->suit != card_b->card->suit)
@@ -730,42 +734,24 @@ static inline bool card_compare_by_suit(CardObject* card_a, CardObject* card_b)
 
 // Compare two cards for sorting by rank only
 // Returns true if card_a should come before card_b
-static inline bool card_compare_by_rank(CardObject* card_a, CardObject* card_b)
+static inline bool card_compare_by_rank(void* a, void* b)
 {
+    CardObject* card_a = (CardObject*)a;
+    CardObject* card_b = (CardObject*)b;
+    
     if (card_a == NULL) return false;
     if (card_b == NULL) return true;
     return card_a->card->rank < card_b->card->rank;
 }
 
-// Insertion sort implementation for the hand array
-// Using insertion sort because:
-// 1. Hand size is small
-// 2. Often nearly sorted (one card added at a time)
-// 3. Low overhead on GBA hardware
-static void sort_hand(bool (*compare)(CardObject*, CardObject*))
-{
-    for (int i = 1; i <= hand_top; i++)
-    {
-        CardObject* key = hand[i];
-        int j;
-
-        // Shift elements that don't satisfy the comparison
-        for (j = i - 1; j >= 0 && !compare(hand[j], key); j--)
-        {
-            hand[j + 1] = hand[j];
-        }
-        hand[j + 1] = key;
-    }
-}
-
 static void sort_hand_by_suit()
 {
-    sort_hand(card_compare_by_suit);
+    insertion_sort((void**)hand, hand_top + 1, card_compare_by_suit);
 }
 
 static void sort_hand_by_rank()
 {
-    sort_hand(card_compare_by_rank);
+    insertion_sort((void**)hand, hand_top + 1, card_compare_by_rank);
 }
 
 void sort_cards()
