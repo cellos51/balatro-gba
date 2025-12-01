@@ -154,7 +154,7 @@ void tte_erase_rect_wrapper(Rect rect);
  * 
  * Note that both rect->left and rect-right need to be defined, top and bottom don't matter
  */
-void update_text_rect_to_right_align_str(Rect* rect, char* str, int overflow_direction);
+void update_text_rect_to_right_align_str(Rect* rect, const char* str, int overflow_direction);
 
 
 /** 
