@@ -739,7 +739,7 @@ static inline bool card_compare_by_rank(CardObject* card_a, CardObject* card_b)
 
 // Insertion sort implementation for the hand array
 // Using insertion sort because:
-// 1. Hand size is small (max 16 cards)
+// 1. Hand size is small
 // 2. Often nearly sorted (one card added at a time)
 // 3. Low overhead on GBA hardware
 static void sort_hand(bool (*compare)(CardObject*, CardObject*))
