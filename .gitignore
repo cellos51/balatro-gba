@@ -7,3 +7,5 @@
 /tests/bitset/build
 /tests/list/build
 /tests/pool/build
+tests/util/.vscode
+tests/util/build
