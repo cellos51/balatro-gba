@@ -215,7 +215,7 @@ INLINE int rect_height(const Rect* rect)
  * @brief Copies an SE rect vertically in direction by a single tile.
  *
  * NOTE: This does not work with TTE_SBB, probably because it's 4BPP...
- * 
+ *
  * If you are doing this operation you are probably doing this in the main
  * background and you should use main_bg_se_copy_rect_1_tile_vert() instead.
  *
