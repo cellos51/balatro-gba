@@ -45,11 +45,9 @@
 #define SFX_DEFAULT_PAN MM_PAN_CENTER
 
 /**
- * @brief Play a sound effect
+ * @brief Play a sound effect, wrapper for mmEffectEx()
  *
- * @param id the sound id to play, name an all caps derivation of the
- *             associated in the `audio/` directory. E.g. `audio/card_draw.wav`
- *             becomes SFX_CARD_DRAW
+ * @param id the sound id to play, from maxmod compiled soundbank.h header
  * @param rate the pitch rate, the default value is @ref MM_BASE_PTCH_RATE
  */
 void play_sfx(mm_word id, mm_word rate);
