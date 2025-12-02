@@ -87,7 +87,7 @@ Joker* joker_new(u8 id)
     joker->persistent_state = 0;
 
     // initialize persistent Joker data if needed
-    JokerEffect *joker_effect = NULL;
+    JokerEffect* joker_effect = NULL;
     jinfo->joker_effect_func(joker, NULL, JOKER_EVENT_ON_JOKER_CREATED, &joker_effect);
 
     return joker;
@@ -99,10 +99,11 @@ void joker_destroy(Joker** joker)
     *joker = NULL;
 }
 
-u32 joker_get_score_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
+u32 joker_get_score_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect** joker_effect)
 {
-    const JokerInfo *jinfo = get_joker_registry_entry(joker->id);
-    if (!jinfo) return JOKER_EFFECT_FLAG_NONE;
+    const JokerInfo* jinfo = get_joker_registry_entry(joker->id);
+    if (!jinfo)
+        return JOKER_EFFECT_FLAG_NONE;
 
     return jinfo->joker_effect_func(joker, scored_card, joker_event, joker_effect);
 }
@@ -198,7 +199,7 @@ void set_and_shift_text(char* str, int* cursor_pos_x, int* cursor_pos_y, int col
     *cursor_pos_x += joker_score_display_offset_px;
 }
 
-bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum JokerEvent joker_event)
+bool joker_object_score(JokerObject* joker_object, CardObject* card_object, enum JokerEvent joker_event)
 {
     if (joker_object == NULL)
     {
@@ -213,9 +214,9 @@ bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum
         return false;
     }
 
-    u32  chips = get_chips();
-    u32  mult  = get_mult();
-    int  money = get_money();
+    u32 chips = get_chips();
+    u32 mult = get_mult();
+    int money = get_money();
 
     if (effect_flags_ret & JOKER_EFFECT_FLAG_RETRIGGER)
     {
@@ -250,7 +251,7 @@ bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum
     }
     if (effect_flags_ret & JOKER_EFFECT_FLAG_MULT)
     {
-        mult = u32_protected_add(mult,  joker_effect->mult);
+        mult = u32_protected_add(mult, joker_effect->mult);
         char score_buffer[INT_MAX_DIGITS + 2];
         snprintf(score_buffer, sizeof(score_buffer), "+%lu", joker_effect->mult);
         set_and_shift_text(score_buffer, &cursorPosX, &cursorPosY, TTE_RED_PB);
@@ -259,7 +260,7 @@ bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum
     // if xmult is zero, DO NOT multiply by it
     if (effect_flags_ret & JOKER_EFFECT_FLAG_XMULT && joker_effect->xmult > 0)
     {
-        mult = u32_protected_mult(mult,  joker_effect->xmult);
+        mult = u32_protected_mult(mult, joker_effect->xmult);
         char score_buffer[INT_MAX_DIGITS + 2];
         snprintf(score_buffer, sizeof(score_buffer), "X%lu", joker_effect->xmult);
         set_and_shift_text(score_buffer, &cursorPosX, &cursorPosY, TTE_RED_PB);
