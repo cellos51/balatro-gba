@@ -17,6 +17,7 @@
 #include "audio_utils.h"
 #include "selection_grid.h"
 #include "splash_screen.h"
+#include "sort.h"
 
 #include "background_gfx.h"
 #include "background_shop_gfx.h"
@@ -701,36 +702,42 @@ void set_seed(int seed)
     srand(rng_seed);
 }
 
-void sort_hand_by_suit()
+// Compare two cards for sorting by suit (primary) and rank (secondary)
+// Returns true if card_a should come before card_b
+static bool card_compare_by_suit(void* a, void* b)
 {
-    for (int a = 0; a < hand_top; a++)
-    {
-        for (int b = a + 1; b <= hand_top; b++)
-        {
-            if (hand[a] == NULL || (hand[b] != NULL && (hand[a]->card->suit > hand[b]->card->suit || (hand[a]->card->suit == hand[b]->card->suit && hand[a]->card->rank > hand[b]->card->rank))))
-            {
-                CardObject* temp = hand[a];
-                hand[a] = hand[b];
-                hand[b] = temp;
-            }
-        }
-    }
+    CardObject* card_a = (CardObject*)a;
+    CardObject* card_b = (CardObject*)b;
+    
+    if (card_a == NULL) return false;
+    if (card_b == NULL) return true;
+    if (card_a->card->suit != card_b->card->suit)
+        return card_a->card->suit < card_b->card->suit;
+    return card_a->card->rank < card_b->card->rank;
 }
 
-void sort_hand_by_rank()
+// Compare two cards for sorting by rank only
+// Returns true if card_a should come before card_b
+static bool card_compare_by_rank(void* a, void* b)
 {
-    for (int a = 0; a < hand_top; a++)
-    {
-        for (int b = a + 1; b <= hand_top; b++)
-        {
-            if (hand[a] == NULL || (hand[b] != NULL && hand[a]->card->rank > hand[b]->card->rank))
-            {
-                CardObject* temp = hand[a];
-                hand[a] = hand[b];
-                hand[b] = temp;
-            }
-        }
-    }
+    CardObject* card_a = (CardObject*)a;
+    CardObject* card_b = (CardObject*)b;
+    
+    if (card_a == NULL) return false;
+    if (card_b == NULL) return true;
+    return card_a->card->rank < card_b->card->rank;
+}
+
+static void sort_hand_by_suit()
+{
+    SortArgs args = {(void**)hand, hand_top + 1, card_compare_by_suit};
+    insertion_sort(args);
+}
+
+static void sort_hand_by_rank()
+{
+    SortArgs args = {(void**)hand, hand_top + 1, card_compare_by_rank};
+    insertion_sort(args);
 }
 
 void sort_cards()
@@ -744,8 +751,9 @@ void sort_cards()
         sort_hand_by_rank();
     }
 
-    // Update the sprites in the hand by destroying them and creating new ones in the correct order
-    // (This is feels like a diabolical solution but like literally how else would you do this)
+    // Reset sprites to update z-order based on new hand positions.
+    // Each card's sprite layer must match its position in the hand array
+    // for proper overlapping visuals.
     for (int i = 0; i <= hand_top; i++)
     {
         if (hand[i] != NULL)
@@ -759,8 +767,7 @@ void sort_cards()
     {
         if (hand[i] != NULL)
         {
-            //hand[i]->sprite = sprite_new(ATTR0_SQUARE | ATTR0_4BPP | ATTR0_AFF, ATTR1_SIZE_32, card_sprite_lut[hand[i]->card->suit][hand[i]->card->rank], 0, i);
-            card_object_set_sprite(hand[i], i); // Set the sprite for the card object
+            card_object_set_sprite(hand[i], i);
             sprite_position(card_object_get_sprite(hand[i]), fx2int(hand[i]->sprite_object->x), fx2int(hand[i]->sprite_object->y));
         }
     }
