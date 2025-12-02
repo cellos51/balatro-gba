@@ -188,7 +188,7 @@ typedef RECT Rect;
 /**
  * @brief Gets the screenblock entry for the given coordinates (x, y).
  *
- * @param pos a @ref BG_POINT with x and y are in number of tiles.
+ * @param pos a @ref BG_POINT with x and y in number of tiles.
  *
  * @return The screenblock entry.
  */
@@ -222,6 +222,9 @@ INLINE int rect_height(const Rect* rect)
  * @brief Copies an SE rect vertically in direction by a single tile.
  *
  * NOTE: This does not work with TTE_SBB, probably because it's 4BPP...
+ * 
+ * If you are doing this operation you are probably doing this in the main
+ * background and you should use main_bg_se_copy_rect_1_tile_vert() instead.
  *
  * @param bg_sbb the SBB of the background in which to move the rect: the
  * direction must be either SE_UP or SE_DOWN.
@@ -336,7 +339,7 @@ void update_text_rect_to_right_align_num(Rect* rect, int num, int overflow_direc
  *
  * @param palette_offset palette offset to shift to
  */
-void memcpy16_tile8_with_palette_offset(u16* dst, const u16* src, uint wcount, u8 palette_offset);
+void memcpy16_tile8_with_palette_offset(u16* dst, const u16* src, uint hwcount, u8 palette_offset);
 
 /**
  * @brief Copies 32 bit data from src to dst, applying a palette offset to the data.

@@ -10,7 +10,7 @@
 
 /**
  * @def MM_FULL_VOLUME
- * @brief The maxium volume for maxmod
+ * @brief The maximum volume for maxmod mm_sound_effect.volume
  *
  * Represented as the max value of a unsigned char.
  */
@@ -18,9 +18,7 @@
 
 /**
  * @def MM_PAN_CENTER
- * @brief The center pan of stereo audio for maxmode
- *
- * Represented as half the max value of an unsigned char.
+ * @brief The center pan of stereo audio for maxmod
  */
 #define MM_PAN_CENTER 128
 
@@ -34,7 +32,7 @@
 
 /**
  * @def SFX_DEFAULT_VOLUME
- * @brief Default volume for sound effects (loudest by default)
+ * @brief Default volume for sound effects
  */
 #define SFX_DEFAULT_VOLUME MM_FULL_VOLUME
 

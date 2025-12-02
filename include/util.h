@@ -58,7 +58,7 @@
  * @param a left operator **a + b**
  * @param b left operator **a + b**
  *
- * @return the result of **a + b** or **UINT32_MAX**
+ * @return the result of **a + b** or **UINT32_MAX** in case of overflow
  */
 uint32_t u32_protected_add(uint32_t a, uint32_t b);
 
@@ -68,7 +68,7 @@ uint32_t u32_protected_add(uint32_t a, uint32_t b);
  * @param a left operator **a + b**
  * @param b left operator **a + b**
  *
- * @return the result of **a + b** or **UINT16_MAX**
+ * @return the result of **a + b** or **UINT16_MAX** in case of overflow
  */
 uint16_t u16_protected_add(uint16_t a, uint16_t b);
 
@@ -78,7 +78,7 @@ uint16_t u16_protected_add(uint16_t a, uint16_t b);
  * @param a left operator **a * b**
  * @param b left operator **a * b**
  *
- * @return the result of **a * b** or **UINT32_MAX**
+ * @return the result of **a * b** or **UINT32_MAX** in case of overflow
  */
 uint32_t u32_protected_mult(uint32_t a, uint32_t b);
 
@@ -88,7 +88,7 @@ uint32_t u32_protected_mult(uint32_t a, uint32_t b);
  * @param a left operator **a * b**
  * @param b left operator **a * b**
  *
- * @return the result of **a * b** or **UINT16_MAX**
+ * @return the result of **a * b** or **UINT16_MAX** in case of overflow
  */
 uint16_t u16_protected_mult(uint16_t a, uint16_t b);
 
@@ -146,13 +146,13 @@ static inline int get_digits_odd(int n)
 }
 
 /**
- * @brief Get the number of digits closest to it's "even" value
+ * @brief Get the number of digits closest to it's "even" value, i.e. ceil(digits/2)
  *
  * Useful for centering text on tiles
  *
  * @param n value to find the number of even decimal digits of
  *
- * @return The closest number of digits that is an even value.
+ * @return The value of ceil(get_digits(n)/2)
  */
 static inline int get_digits_even(int n)
 {
