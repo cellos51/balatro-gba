@@ -25,7 +25,7 @@ static const unsigned int* joker_gfxTiles[] = {
 
 static const unsigned short* joker_gfxPal[] = {
 #define DEF_JOKER_GFX(idx) joker_gfx##idx##Pal,
-#include "../include/def_joker_gfx_table.h"
+#include "def_joker_gfx_table.h"
 #undef DEF_JOKER_GFX
 };
 
