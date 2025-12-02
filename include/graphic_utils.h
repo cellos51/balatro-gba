@@ -58,13 +58,6 @@
  */
 #define TILE_SIZE 8
 
-/**
- * @def EFFECT_TEXT_SEPARATION_AMOUNT
- *
- * @brief If we need to show multiple effects at once
- */
-#define EFFECT_TEXT_SEPARATION_AMOUNT 32
-
 /** @} */
 
 /**
