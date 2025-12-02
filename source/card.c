@@ -91,6 +91,8 @@ void card_object_set_sprite(CardObject* card_object, int layer)
     memcpy32(&tile_mem[4][tile_index],
              &deck_gfxTiles[_card_sprite_lut[card_object->card->suit][card_object->card->rank] * TILE_SIZE],
              TILE_SIZE * CARD_SPRITE_OFFSET);
+    // Create a new sprite with the specified layer. Since sprite layers are tied to
+    // OAM indices which can't be swapped, sprites must be recreated when z-order changes.
     Sprite* sprite =
         sprite_new(ATTR0_SQUARE | ATTR0_4BPP | ATTR0_AFF, ATTR1_SIZE_32, tile_index, 0, layer + CARD_STARTING_LAYER);
     sprite_object_set_sprite(card_object->sprite_object, sprite);

@@ -720,7 +720,7 @@ void set_seed(int seed)
 
 // Compare two cards for sorting by suit (primary) and rank (secondary)
 // Returns true if card_a should come before card_b
-static inline bool card_compare_by_suit(void* a, void* b)
+static bool card_compare_by_suit(void* a, void* b)
 {
     CardObject* card_a = (CardObject*)a;
     CardObject* card_b = (CardObject*)b;
@@ -734,7 +734,7 @@ static inline bool card_compare_by_suit(void* a, void* b)
 
 // Compare two cards for sorting by rank only
 // Returns true if card_a should come before card_b
-static inline bool card_compare_by_rank(void* a, void* b)
+static bool card_compare_by_rank(void* a, void* b)
 {
     CardObject* card_a = (CardObject*)a;
     CardObject* card_b = (CardObject*)b;
@@ -746,12 +746,14 @@ static inline bool card_compare_by_rank(void* a, void* b)
 
 static void sort_hand_by_suit()
 {
-    insertion_sort((void**)hand, hand_top + 1, card_compare_by_suit);
+    SortArgs args = {(void**)hand, hand_top + 1, card_compare_by_suit};
+    insertion_sort(args);
 }
 
 static void sort_hand_by_rank()
 {
-    insertion_sort((void**)hand, hand_top + 1, card_compare_by_rank);
+    SortArgs args = {(void**)hand, hand_top + 1, card_compare_by_rank};
+    insertion_sort(args);
 }
 
 void sort_cards()
@@ -765,10 +767,9 @@ void sort_cards()
         sort_hand_by_rank();
     }
 
-    // Recreate sprites to update z-order based on new hand positions.
+    // Reset sprites to update z-order based on new hand positions.
     // Each card's sprite layer must match its position in the hand array
-    // for proper overlapping visuals. Since sprite layers are tied to
-    // OAM indices which can't be swapped, we destroy and recreate them.
+    // for proper overlapping visuals.
     for (int i = 0; i <= hand_top; i++)
     {
         if (hand[i] != NULL)

@@ -1,15 +1,38 @@
+/** @file sort.h
+ *
+ *  @brief Generic sorting algorithms
+ */
 #ifndef SORT_H
 #define SORT_H
 
 #include <stdbool.h>
 
 /**
- * Generic insertion sort implementation
- * 
- * @param array Array of pointers to sort
- * @param size Number of elements in the array
- * @param compare Comparison function that returns true if first arg should come before second arg
+ * @brief Arguments for sorting algorithms
  */
-void insertion_sort(void** array, int size, bool (*compare)(void*, void*));
+typedef struct SortArgs
+{
+    /**
+     * @brief Array of pointers to sort
+     */
+    void** array;
+
+    /**
+     * @brief Number of elements in the array
+     */
+    int size;
+
+    /**
+     * @brief Comparison function that returns true if first arg should come before second arg
+     */
+    bool (*compare)(void*, void*);
+} SortArgs;
+
+/**
+ * @brief Generic insertion sort implementation
+ * 
+ * @param args Arguments for the sorting algorithm
+ */
+void insertion_sort(SortArgs args);
 
 #endif // SORT_H
