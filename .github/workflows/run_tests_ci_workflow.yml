@@ -24,6 +24,8 @@ jobs:
           include/audio_utils.h source/audio_utils.c 
           include/graphic_utils.h source/graphic_utils.c 
           include/util.h source/util.c
+          include/pool.h source/pool.c
+          include/card.h source/card.c 
           include/hand_analysis.h source/hand_analysis.c 
           include/list.h source/list.c
           include/sprite.h source/sprite.c 
