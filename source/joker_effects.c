@@ -9,70 +9,71 @@
 
 #define MISPRINT_MAX_MULT 23
 
-#define SCORE_ON_EVENT_ONLY_WITH_CARD(scored_card, restricted_event, checked_event, effect) \
-    if (checked_event != restricted_event || scored_card == NULL)                           \
-    {                                                                                       \
-        return effect;                                                                      \
-    }
-#define SCORE_ON_EVENT_ONLY(restricted_event, checked_event, effect) \
-    if (checked_event != restricted_event)                           \
-    {                                                                \
-        return effect;                                               \
-    }
+#define SCORE_ON_EVENT_ONLY_WITH_CARD(scored_card, restricted_event, checked_event) \
+if (checked_event != restricted_event || scored_card == NULL) \
+{ \
+    return JOKER_EFFECT_FLAG_NONE; \
+}
+#define SCORE_ON_EVENT_ONLY(restricted_event, checked_event) \
+if (checked_event != restricted_event) \
+{ \
+    return JOKER_EFFECT_FLAG_NONE; \
+}
+
+static JokerEffect shared_joker_effect = {0};
 
 // Joker Effect functions
-static JokerEffect joker_effect_noop(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect default_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect sinful_joker_effect(Card* scored_card, u8 sinful_suit, enum JokerEvent joker_event);
-static JokerEffect greedy_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect lusty_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect wrathful_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect gluttonous_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect jolly_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect zany_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect mad_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect crazy_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect droll_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect sly_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect wily_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect clever_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect devious_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect crafty_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect half_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect joker_stencil_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect misprint_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect walkie_talkie_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect fibonnaci_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect banner_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect mystic_summit_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect blackboard_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect blue_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect raised_fist_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect reserved_parking_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect business_card_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect scholar_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect scary_face_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect abstract_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect bull_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect smiley_face_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect even_steven_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect odd_todd_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect acrobat_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect hanging_chad_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect the_duo_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect the_trio_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect the_family_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect the_order_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect the_tribe_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect bootstraps_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect shoot_the_moon_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect photograph_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect triboulet_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect dusk_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect blueprint_brainstorm_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect hack_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect seltzer_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
-static JokerEffect sock_and_buskin_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event);
+static u32 joker_effect_noop(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 default_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 sinful_joker_effect(Card* scored_card, u8 sinful_suit, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 greedy_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 lusty_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 wrathful_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 gluttonous_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 jolly_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 zany_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 mad_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 crazy_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 droll_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 sly_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 wily_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 clever_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 devious_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 crafty_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 half_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 joker_stencil_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 misprint_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 walkie_talkie_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 fibonnaci_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 banner_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 mystic_summit_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 blackboard_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 blue_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 raised_fist_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 reserved_parking_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 business_card_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 scholar_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 scary_face_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 abstract_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 bull_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 smiley_face_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 even_steven_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 odd_todd_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 acrobat_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 hanging_chad_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 the_duo_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 the_trio_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 the_family_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 the_order_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 the_tribe_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 bootstraps_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 shoot_the_moon_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 photograph_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 dusk_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 blueprint_brainstorm_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 hack_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 seltzer_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
+static u32 sock_and_buskin_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect);
 
 /* The index of a joker in the registry matches its ID.
  * The joker sprites are matched by ID so the position in the registry
@@ -135,10 +136,10 @@ const JokerInfo joker_registry[] = {
     {UNCOMMON_JOKER, 7,  joker_effect_noop                }, // 48 Four Fingers
     {COMMON_JOKER,   4,  scholar_joker_effect             }, // 49
     {UNCOMMON_JOKER, 8,  fibonnaci_joker_effect           }, // 50
+    { UNCOMMON_JOKER,  6, seltzer_joker_effect,             }, // 51
 // The following jokers don't have sprites yet,
 // uncomment them when their sprites are added.
 #if 0
-    { UNCOMMON_JOKER, 6, seltzer_joker_effect,          },
     { COMMON_JOKER,   5, shoot_the_moon_joker_effect,   },
 #endif
 };
@@ -159,61 +160,62 @@ size_t get_joker_registry_size(void)
     return joker_registry_size;
 }
 
-static JokerEffect joker_effect_noop(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 joker_effect_noop(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    return (JokerEffect){0};
+    return JOKER_EFFECT_FLAG_NONE;
 }
 
-static JokerEffect default_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 default_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    JokerEffect effect = {0};
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event)
+    *joker_effect = &shared_joker_effect;
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
+    (*joker_effect)->mult = 4;
 
-    effect.mult = 4;
-    return effect;
+    return JOKER_EFFECT_FLAG_MULT;
 }
 
-static JokerEffect sinful_joker_effect(Card* scored_card, u8 sinful_suit, enum JokerEvent joker_event)
+static u32 sinful_joker_effect(Card *scored_card, u8 sinful_suit, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    JokerEffect effect = {0};
+    SCORE_ON_EVENT_ONLY_WITH_CARD(scored_card, JOKER_EVENT_ON_CARD_SCORED, joker_event)
 
-    SCORE_ON_EVENT_ONLY_WITH_CARD(scored_card, JOKER_EVENT_ON_CARD_SCORED, joker_event, effect)
+    u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
 
     if (scored_card->suit == sinful_suit)
     {
-        effect.mult = 3;
+        *joker_effect = &shared_joker_effect;
+
+        (*joker_effect)->mult = 3;
+        effect_flags_ret = JOKER_EFFECT_FLAG_MULT;
     }
-
-    return effect;
+    return effect_flags_ret;
 }
 
-static JokerEffect greedy_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 greedy_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    return sinful_joker_effect(scored_card, DIAMONDS, joker_event);
+    return sinful_joker_effect(scored_card, DIAMONDS, joker_event, joker_effect);
 }
 
-static JokerEffect lusty_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 lusty_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    return sinful_joker_effect(scored_card, HEARTS, joker_event);
+    return sinful_joker_effect(scored_card, HEARTS, joker_event, joker_effect);
 }
 
-static JokerEffect wrathful_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 wrathful_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    return sinful_joker_effect(scored_card, SPADES, joker_event);
+    return sinful_joker_effect(scored_card, SPADES, joker_event, joker_effect);
 }
 
-static JokerEffect gluttonous_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 gluttonous_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    return sinful_joker_effect(scored_card, CLUBS, joker_event);
+    return sinful_joker_effect(scored_card, CLUBS, joker_event, joker_effect);
 }
 
-static JokerEffect jolly_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 jolly_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    JokerEffect effect = {0};
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event)
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
-
+    u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
     // This is really inefficient but the only way at the moment to check for whole-hand conditions
     u8 suits[NUM_SUITS];
     u8 ranks[NUM_RANKS];
@@ -221,17 +223,20 @@ static JokerEffect jolly_joker_effect(Joker* joker, Card* scored_card, enum Joke
 
     if (hand_contains_n_of_a_kind(ranks) >= 2)
     {
-        effect.mult = 8;
+        *joker_effect = &shared_joker_effect;
+
+        (*joker_effect)->mult = 8;
+        effect_flags_ret = JOKER_EFFECT_FLAG_MULT;
     }
 
-    return effect;
+    return effect_flags_ret;
 }
 
-static JokerEffect zany_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 zany_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    JokerEffect effect = {0};
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event)
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
+    u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
 
     // This is really inefficient but the only way at the moment to check for whole-hand conditions
     u8 suits[NUM_SUITS];
@@ -240,17 +245,20 @@ static JokerEffect zany_joker_effect(Joker* joker, Card* scored_card, enum Joker
 
     if (hand_contains_n_of_a_kind(ranks) >= 3)
     {
-        effect.mult = 12;
+        *joker_effect = &shared_joker_effect;
+
+        (*joker_effect)->mult = 12;
+        effect_flags_ret = JOKER_EFFECT_FLAG_MULT;
     }
 
-    return effect;
+    return effect_flags_ret;
 }
 
-static JokerEffect mad_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 mad_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    JokerEffect effect = {0};
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event)
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
+    u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
 
     u8 suits[NUM_SUITS];
     u8 ranks[NUM_RANKS];
@@ -258,17 +266,20 @@ static JokerEffect mad_joker_effect(Joker* joker, Card* scored_card, enum JokerE
 
     if (hand_contains_two_pair(ranks))
     {
-        effect.mult = 10;
+        *joker_effect = &shared_joker_effect;
+
+        (*joker_effect)->mult = 10;
+        effect_flags_ret = JOKER_EFFECT_FLAG_MULT;
     }
 
-    return effect;
+    return effect_flags_ret;
 }
 
-static JokerEffect crazy_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 crazy_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    JokerEffect effect = {0};
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event)
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
+    u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
 
     u8 suits[NUM_SUITS];
     u8 ranks[NUM_RANKS];
@@ -276,17 +287,20 @@ static JokerEffect crazy_joker_effect(Joker* joker, Card* scored_card, enum Joke
 
     if (hand_contains_straight(ranks))
     {
-        effect.mult = 12;
+        *joker_effect = &shared_joker_effect;
+
+        (*joker_effect)->mult = 12;
+        effect_flags_ret = JOKER_EFFECT_FLAG_MULT;
     }
 
-    return effect;
+    return effect_flags_ret;
 }
 
-static JokerEffect droll_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 droll_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    JokerEffect effect = {0};
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event)
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
+    u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
 
     u8 suits[NUM_SUITS];
     u8 ranks[NUM_RANKS];
@@ -294,17 +308,20 @@ static JokerEffect droll_joker_effect(Joker* joker, Card* scored_card, enum Joke
 
     if (hand_contains_flush(suits))
     {
-        effect.mult = 10;
+        *joker_effect = &shared_joker_effect;
+
+        (*joker_effect)->mult = 10;
+        effect_flags_ret = JOKER_EFFECT_FLAG_MULT;
     }
 
-    return effect;
+    return effect_flags_ret;
 }
 
-static JokerEffect sly_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 sly_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    JokerEffect effect = {0};
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event)
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
+    u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
 
     u8 suits[NUM_SUITS];
     u8 ranks[NUM_RANKS];
@@ -312,17 +329,20 @@ static JokerEffect sly_joker_effect(Joker* joker, Card* scored_card, enum JokerE
 
     if (hand_contains_n_of_a_kind(ranks) >= 2)
     {
-        effect.chips = 50;
+        *joker_effect = &shared_joker_effect;
+
+        (*joker_effect)->chips = 50;
+        effect_flags_ret = JOKER_EFFECT_FLAG_CHIPS;
     }
 
-    return effect;
+    return effect_flags_ret;
 }
 
-static JokerEffect wily_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 wily_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    JokerEffect effect = {0};
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event)
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
+    u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
 
     u8 suits[NUM_SUITS];
     u8 ranks[NUM_RANKS];
@@ -330,17 +350,20 @@ static JokerEffect wily_joker_effect(Joker* joker, Card* scored_card, enum Joker
 
     if (hand_contains_n_of_a_kind(ranks) >= 3)
     {
-        effect.chips = 100;
+        *joker_effect = &shared_joker_effect;
+
+        (*joker_effect)->chips = 100;
+        effect_flags_ret = JOKER_EFFECT_FLAG_CHIPS;
     }
 
-    return effect;
+    return effect_flags_ret;
 }
 
-static JokerEffect clever_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 clever_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    JokerEffect effect = {0};
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event)
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
+    u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
 
     u8 suits[NUM_SUITS];
     u8 ranks[NUM_RANKS];
@@ -348,17 +371,20 @@ static JokerEffect clever_joker_effect(Joker* joker, Card* scored_card, enum Jok
 
     if (hand_contains_two_pair(ranks))
     {
-        effect.chips = 80;
+        *joker_effect = &shared_joker_effect;
+
+        (*joker_effect)->chips = 80;
+        effect_flags_ret = JOKER_EFFECT_FLAG_CHIPS;
     }
 
-    return effect;
+    return effect_flags_ret;
 }
 
-static JokerEffect devious_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 devious_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    JokerEffect effect = {0};
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event)
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
+    u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
 
     u8 suits[NUM_SUITS];
     u8 ranks[NUM_RANKS];
@@ -366,17 +392,20 @@ static JokerEffect devious_joker_effect(Joker* joker, Card* scored_card, enum Jo
 
     if (hand_contains_straight(ranks))
     {
-        effect.chips = 100;
+        *joker_effect = &shared_joker_effect;
+
+        (*joker_effect)->chips = 100;
+        effect_flags_ret = JOKER_EFFECT_FLAG_CHIPS;
     }
 
-    return effect;
+    return effect_flags_ret;
 }
 
-static JokerEffect crafty_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 crafty_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    JokerEffect effect = {0};
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event)
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
+    u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
 
     u8 suits[NUM_SUITS];
     u8 ranks[NUM_RANKS];
@@ -384,39 +413,45 @@ static JokerEffect crafty_joker_effect(Joker* joker, Card* scored_card, enum Jok
 
     if (hand_contains_flush(suits))
     {
-        effect.chips = 80;
+        *joker_effect = &shared_joker_effect;
+
+        (*joker_effect)->chips = 80;
+        effect_flags_ret = JOKER_EFFECT_FLAG_CHIPS;
     }
 
-    return effect;
+    return effect_flags_ret;
 }
 
-static JokerEffect half_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 half_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    JokerEffect effect = {0};
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event)
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
+    u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
 
     int played_size = get_played_top() + 1;
     if (played_size <= 3)
     {
-        effect.mult = 20;
+        *joker_effect = &shared_joker_effect;
+
+        (*joker_effect)->mult = 20;
+        effect_flags_ret = JOKER_EFFECT_FLAG_MULT;
     }
 
-    return effect;
+    return effect_flags_ret;
 }
 
-static JokerEffect joker_stencil_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 joker_stencil_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    JokerEffect effect = {0};
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event)
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
+    *joker_effect = &shared_joker_effect;
 
     List* jokers = get_jokers_list();
 
     // +1 xmult per empty joker slot...
     int num_jokers = list_get_len(jokers);
 
-    effect.xmult = (MAX_JOKERS_HELD_SIZE)-num_jokers;
+    (*joker_effect)->xmult = (MAX_JOKERS_HELD_SIZE) - num_jokers;
 
     // ...and also each stencil_joker adds +1 xmult
     ListItr itr = list_itr_create(jokers);
@@ -424,45 +459,47 @@ static JokerEffect joker_stencil_effect(Joker* joker, Card* scored_card, enum Jo
 
     while ((joker_object = list_itr_next(&itr)))
     {
-        if (joker_object->joker->id == STENCIL_JOKER_ID)
-            effect.xmult++;
+        if (joker_object->joker->id == STENCIL_JOKER_ID) (*joker_effect)->xmult++;
     }
 
-    return effect;
+    return JOKER_EFFECT_FLAG_XMULT;
 }
 
 #define MISPRINT_MAX_MULT 23
-static JokerEffect misprint_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 misprint_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    JokerEffect effect = {0};
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event)
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
+    *joker_effect = &shared_joker_effect;
 
-    effect.mult = random() % (MISPRINT_MAX_MULT + 1);
+    (*joker_effect)->mult = random() % (MISPRINT_MAX_MULT + 1);
 
-    return effect;
+    return JOKER_EFFECT_FLAG_MULT;
 }
 
-static JokerEffect walkie_talkie_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 walkie_talkie_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    JokerEffect effect = {0};
+    SCORE_ON_EVENT_ONLY_WITH_CARD(scored_card, JOKER_EVENT_ON_CARD_SCORED, joker_event)
 
-    SCORE_ON_EVENT_ONLY_WITH_CARD(scored_card, JOKER_EVENT_ON_CARD_SCORED, joker_event, effect)
+    u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
 
     if (scored_card->rank == TEN || scored_card->rank == FOUR)
     {
-        effect.chips = 10;
-        effect.mult = 4;
+        *joker_effect = &shared_joker_effect;
+
+        (*joker_effect)->chips = 10;
+        (*joker_effect)->mult = 4;
+        effect_flags_ret = JOKER_EFFECT_FLAG_CHIPS | JOKER_EFFECT_FLAG_MULT;
     }
 
-    return effect;
+    return effect_flags_ret;
 }
 
-static JokerEffect fibonnaci_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 fibonnaci_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    JokerEffect effect = {0};
+    SCORE_ON_EVENT_ONLY_WITH_CARD(scored_card, JOKER_EVENT_ON_CARD_SCORED, joker_event)
 
-    SCORE_ON_EVENT_ONLY_WITH_CARD(scored_card, JOKER_EVENT_ON_CARD_SCORED, joker_event, effect)
+    u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
 
     switch (scored_card->rank)
     {
@@ -471,45 +508,56 @@ static JokerEffect fibonnaci_joker_effect(Joker* joker, Card* scored_card, enum 
         case THREE:
         case FIVE:
         case EIGHT:
-            effect.mult = 8;
+            *joker_effect = &shared_joker_effect;
+            (*joker_effect)->mult = 8;
+            effect_flags_ret = JOKER_EFFECT_FLAG_MULT;
             break;
         default:
             break;
     }
 
-    return effect;
+    return effect_flags_ret;
 }
 
-static JokerEffect banner_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 banner_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    JokerEffect effect = {0};
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event)
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
+    u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
 
-    effect.chips = 30 * get_num_discards_remaining();
+    if (get_num_discards_remaining() > 0)
+    {
+        *joker_effect = &shared_joker_effect;
 
-    return effect;
+        (*joker_effect)->chips = 30 * get_num_discards_remaining();
+        effect_flags_ret = JOKER_EFFECT_FLAG_CHIPS;
+    }
+
+    return effect_flags_ret;
 }
 
-static JokerEffect mystic_summit_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 mystic_summit_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    JokerEffect effect = {0};
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event)
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
+    u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
 
     if (get_num_discards_remaining() == 0)
     {
-        effect.mult = 15;
+        *joker_effect = &shared_joker_effect;
+
+        (*joker_effect)->mult = 15;
+        effect_flags_ret = JOKER_EFFECT_FLAG_MULT;
     }
 
-    return effect;
+    return effect_flags_ret;
 }
 
-static JokerEffect blackboard_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 blackboard_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    JokerEffect effect = {0};
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event)
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
+    u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
 
     bool all_cards_are_spades_or_clubs = true;
     CardObject** hand = get_hand_array();
@@ -525,27 +573,32 @@ static JokerEffect blackboard_joker_effect(Joker* joker, Card* scored_card, enum
     }
 
     if (all_cards_are_spades_or_clubs)
-        effect.xmult = 3;
+    {
+        *joker_effect = &shared_joker_effect;
 
-    return effect;
+        (*joker_effect)->xmult = 3;
+        effect_flags_ret = JOKER_EFFECT_FLAG_XMULT;
+    }
+
+    return effect_flags_ret;
 }
 
-static JokerEffect blue_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 blue_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    JokerEffect effect = {0};
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event)
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
+    *joker_effect = &shared_joker_effect;
 
-    effect.chips = (get_deck_top() + 1) * 2;
+    (*joker_effect)->chips = (get_deck_top() + 1) * 2;
 
-    return effect;
+    return JOKER_EFFECT_FLAG_CHIPS;
 }
 
-static JokerEffect raised_fist_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 raised_fist_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    JokerEffect effect = {0};
-
     s32* p_lowest_value_index = &(joker->scoring_state);
+
+    u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
 
     switch (joker_event)
     {
@@ -572,7 +625,10 @@ static JokerEffect raised_fist_joker_effect(Joker* joker, Card* scored_card, enu
         case JOKER_EVENT_ON_CARD_HELD:
             if (get_scored_card_index() == *p_lowest_value_index)
             {
-                effect.mult = 2 * card_get_value(scored_card);
+                *joker_effect = &shared_joker_effect;
+
+                (*joker_effect)->mult = 2 * card_get_value(scored_card);
+                effect_flags_ret = JOKER_EFFECT_FLAG_MULT;
             }
             break;
 
@@ -580,109 +636,133 @@ static JokerEffect raised_fist_joker_effect(Joker* joker, Card* scored_card, enu
             break;
     }
 
-    return effect;
-}
+    return effect_flags_ret;
+} 
 
-static JokerEffect reserved_parking_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 reserved_parking_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    JokerEffect effect = {0};
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_ON_CARD_HELD, joker_event)
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_ON_CARD_HELD, joker_event, effect)
+    u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
 
     if ((random() % 2 == 0) && card_is_face(scored_card))
     {
-        effect.money++;
+        *joker_effect = &shared_joker_effect;
+
+        (*joker_effect)->money = 1;
+        effect_flags_ret = JOKER_EFFECT_FLAG_MONEY;
     }
 
-    return effect;
+    return effect_flags_ret;
 };
 
-static JokerEffect business_card_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 business_card_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    JokerEffect effect = {0};
+    SCORE_ON_EVENT_ONLY_WITH_CARD(scored_card, JOKER_EVENT_ON_CARD_SCORED, joker_event)
 
-    SCORE_ON_EVENT_ONLY_WITH_CARD(scored_card, JOKER_EVENT_ON_CARD_SCORED, joker_event, effect)
+    u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
 
     if ((random() % 2 == 0) && card_is_face(scored_card))
     {
-        effect.money = 2;
+        *joker_effect = &shared_joker_effect;
+
+        (*joker_effect)->money = 2;
+        effect_flags_ret = JOKER_EFFECT_FLAG_MONEY;
     }
 
-    return effect;
+    return effect_flags_ret;
 }
 
-static JokerEffect scholar_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 scholar_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    JokerEffect effect = {0};
+    SCORE_ON_EVENT_ONLY_WITH_CARD(scored_card, JOKER_EVENT_ON_CARD_SCORED, joker_event)
 
-    SCORE_ON_EVENT_ONLY_WITH_CARD(scored_card, JOKER_EVENT_ON_CARD_SCORED, joker_event, effect)
+    u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
 
     if (scored_card->rank == ACE)
     {
-        effect.chips = 20;
-        effect.mult = 4;
+        *joker_effect = &shared_joker_effect;
+
+        (*joker_effect)->chips = 20;
+        (*joker_effect)->mult = 4;
+        effect_flags_ret = JOKER_EFFECT_FLAG_CHIPS | JOKER_EFFECT_FLAG_MULT;
     }
 
-    return effect;
+    return effect_flags_ret;
 }
 
-static JokerEffect scary_face_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 scary_face_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    JokerEffect effect = {0};
+    SCORE_ON_EVENT_ONLY_WITH_CARD(scored_card, JOKER_EVENT_ON_CARD_SCORED, joker_event)
 
-    SCORE_ON_EVENT_ONLY_WITH_CARD(scored_card, JOKER_EVENT_ON_CARD_SCORED, joker_event, effect)
+    u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
 
     if (card_is_face(scored_card))
     {
-        effect.chips = 30;
+        *joker_effect = &shared_joker_effect;
+
+        (*joker_effect)->chips = 30;
+        effect_flags_ret = JOKER_EFFECT_FLAG_CHIPS;
     }
 
-    return effect;
+    return effect_flags_ret;
 }
 
-static JokerEffect abstract_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 abstract_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    JokerEffect effect = {0};
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event)
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
+    *joker_effect = &shared_joker_effect;
 
     // +1 xmult per occupied joker slot
     int num_jokers = list_get_len(get_jokers_list());
-    effect.mult = num_jokers * 3;
 
-    return effect;
+    (*joker_effect)->mult = num_jokers * 3;
+
+    return JOKER_EFFECT_FLAG_MULT;
 }
 
-static JokerEffect bull_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 bull_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    JokerEffect effect = {0};
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event)
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
+    u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
 
-    effect.chips = get_money() * 2;
+    // The wiki says it does nothing if money is 0 or below
+    // This allows us to avoid scoring negative Chips
+    if (get_money() > 0)
+    {
+        *joker_effect = &shared_joker_effect;
 
-    return effect;
+        (*joker_effect)->chips = get_money() * 2;
+        effect_flags_ret = JOKER_EFFECT_FLAG_CHIPS;
+    }
+
+    return effect_flags_ret;
 }
 
-static JokerEffect smiley_face_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 smiley_face_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    JokerEffect effect = {0};
+    SCORE_ON_EVENT_ONLY_WITH_CARD(scored_card, JOKER_EVENT_ON_CARD_SCORED, joker_event)
 
-    SCORE_ON_EVENT_ONLY_WITH_CARD(scored_card, JOKER_EVENT_ON_CARD_SCORED, joker_event, effect)
+    u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
 
     if (card_is_face(scored_card))
     {
-        effect.mult = 5;
+        *joker_effect = &shared_joker_effect;
+
+        (*joker_effect)->mult = 5;
+        effect_flags_ret = JOKER_EFFECT_FLAG_MULT;
     }
 
-    return effect;
+    return effect_flags_ret;
 }
 
-static JokerEffect even_steven_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 even_steven_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    JokerEffect effect = {0};
+    SCORE_ON_EVENT_ONLY_WITH_CARD(scored_card, JOKER_EVENT_ON_CARD_SCORED, joker_event)
 
-    SCORE_ON_EVENT_ONLY_WITH_CARD(scored_card, JOKER_EVENT_ON_CARD_SCORED, joker_event, effect)
+    u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
 
     switch (scored_card->rank)
     {
@@ -693,46 +773,55 @@ static JokerEffect even_steven_joker_effect(Joker* joker, Card* scored_card, enu
         default:
             if (card_get_value(scored_card) % 2 == 0)
             {
-                effect.mult = 4;
+                *joker_effect = &shared_joker_effect;
+
+                (*joker_effect)->mult = 4;
+                effect_flags_ret = JOKER_EFFECT_FLAG_MULT;
             }
             break;
     }
 
-    return effect;
+    return effect_flags_ret;
 }
 
-static JokerEffect odd_todd_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 odd_todd_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    JokerEffect effect = {0};
+    SCORE_ON_EVENT_ONLY_WITH_CARD(scored_card, JOKER_EVENT_ON_CARD_SCORED, joker_event)
 
-    SCORE_ON_EVENT_ONLY_WITH_CARD(scored_card, JOKER_EVENT_ON_CARD_SCORED, joker_event, effect)
+    u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
 
     if (card_get_value(scored_card) % 2 == 1) // todo test ace
     {
-        effect.chips = 31;
+        *joker_effect = &shared_joker_effect;
+
+        (*joker_effect)->chips = 31;
+        effect_flags_ret = JOKER_EFFECT_FLAG_CHIPS;
     }
 
-    return effect;
+    return effect_flags_ret;
 }
 
-static JokerEffect acrobat_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 acrobat_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    JokerEffect effect = {0};
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event)
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
-
+    u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
+    
     // 0 remaining hands mean we're scoring the last hand
     if (get_num_hands_remaining() == 0)
     {
-        effect.xmult = 3;
+        *joker_effect = &shared_joker_effect;
+
+        (*joker_effect)->xmult = 3;
+        effect_flags_ret = JOKER_EFFECT_FLAG_XMULT;
     }
 
-    return effect;
+    return effect_flags_ret;
 }
 
-static JokerEffect hanging_chad_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 hanging_chad_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    JokerEffect effect = {0};
+    u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
     s32* p_remaining_retriggers = &(joker->scoring_state);
 
     switch (joker_event)
@@ -745,11 +834,14 @@ static JokerEffect hanging_chad_joker_effect(Joker* joker, Card* scored_card, en
         // p_remaining_retriggers will always reach 0 on the first card, then retrigger
         // will be false and scoring will go onto the next card
         case JOKER_EVENT_ON_CARD_SCORED_END:
-            effect.retrigger = (*p_remaining_retriggers > 0);
-            if (effect.retrigger)
+            *joker_effect = &shared_joker_effect;
+    
+            (*joker_effect)->retrigger = (*p_remaining_retriggers > 0);
+            if ((*joker_effect)->retrigger)
             {
-                (*p_remaining_retriggers)--;
-                effect.message = "Again!";
+                *p_remaining_retriggers -= 1;
+                (*joker_effect)->message = "Again!";
+                effect_flags_ret = JOKER_EFFECT_FLAG_RETRIGGER | JOKER_EFFECT_FLAG_MESSAGE;
             }
             break;
 
@@ -757,15 +849,15 @@ static JokerEffect hanging_chad_joker_effect(Joker* joker, Card* scored_card, en
             break;
     }
 
-    return effect;
+    return effect_flags_ret;
 }
 
-static JokerEffect the_duo_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 the_duo_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    JokerEffect effect = {0};
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event)
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
-
+    u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
+    
     // This is really inefficient but the only way at the moment to check for whole-hand conditions
     u8 suits[NUM_SUITS];
     u8 ranks[NUM_RANKS];
@@ -773,17 +865,20 @@ static JokerEffect the_duo_joker_effect(Joker* joker, Card* scored_card, enum Jo
 
     if (hand_contains_n_of_a_kind(ranks) >= 2)
     {
-        effect.xmult = 2;
+        *joker_effect = &shared_joker_effect;
+
+        (*joker_effect)->xmult = 2;
+        effect_flags_ret = JOKER_EFFECT_FLAG_XMULT;
     }
 
-    return effect;
+    return effect_flags_ret;
 }
 
-static JokerEffect the_trio_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 the_trio_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    JokerEffect effect = {0};
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event)
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
+    u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
 
     // This is really inefficient but the only way at the moment to check for whole-hand conditions
     u8 suits[NUM_SUITS];
@@ -792,17 +887,21 @@ static JokerEffect the_trio_joker_effect(Joker* joker, Card* scored_card, enum J
 
     if (hand_contains_n_of_a_kind(ranks) >= 3)
     {
-        effect.xmult = 3;
+        *joker_effect = &shared_joker_effect;
+
+        (*joker_effect)->xmult = 3;
+        effect_flags_ret = JOKER_EFFECT_FLAG_XMULT;
     }
-    return effect;
+
+    return effect_flags_ret;
 }
 
-static JokerEffect the_family_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 the_family_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    JokerEffect effect = {0};
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event)
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
-
+    u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
+    
     // This is really inefficient but the only way at the moment to check for whole-hand conditions
     u8 suits[NUM_SUITS];
     u8 ranks[NUM_RANKS];
@@ -810,17 +909,21 @@ static JokerEffect the_family_joker_effect(Joker* joker, Card* scored_card, enum
 
     if (hand_contains_n_of_a_kind(ranks) >= 4)
     {
-        effect.xmult = 4;
+        *joker_effect = &shared_joker_effect;
+
+        (*joker_effect)->xmult = 4;
+        effect_flags_ret = JOKER_EFFECT_FLAG_XMULT;
     }
 
-    return effect;
-}
+    return effect_flags_ret;
+ }
 
-static JokerEffect the_order_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+
+static u32 the_order_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    JokerEffect effect = {0};
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event)
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
+    u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
 
     u8 suits[NUM_SUITS];
     u8 ranks[NUM_RANKS];
@@ -828,17 +931,20 @@ static JokerEffect the_order_joker_effect(Joker* joker, Card* scored_card, enum 
 
     if (hand_contains_straight(ranks))
     {
-        effect.xmult = 3;
+        *joker_effect = &shared_joker_effect;
+
+        (*joker_effect)->xmult = 3;
+        effect_flags_ret = JOKER_EFFECT_FLAG_XMULT;
     }
 
-    return effect;
+    return effect_flags_ret;
 }
 
-static JokerEffect the_tribe_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 the_tribe_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    JokerEffect effect = {0};
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event)
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
+    u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
 
     u8 suits[NUM_SUITS];
     u8 ranks[NUM_RANKS];
@@ -846,45 +952,59 @@ static JokerEffect the_tribe_joker_effect(Joker* joker, Card* scored_card, enum 
 
     if (hand_contains_flush(suits))
     {
-        effect.xmult = 2;
+        *joker_effect = &shared_joker_effect;
+
+        (*joker_effect)->xmult = 2;
+        effect_flags_ret = JOKER_EFFECT_FLAG_XMULT;
     }
 
-    return effect;
+    return effect_flags_ret;
 }
 
-static JokerEffect bootstraps_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 bootstraps_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    JokerEffect effect = {0};
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event)
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_INDEPENDENT, joker_event, effect)
+    u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
 
-    effect.mult = (get_money() / 5) * 2;
+    // Same protection as the Bull Joker
+    if (get_money() > 0)
+    {
+        *joker_effect = &shared_joker_effect;
 
-    return effect;
+        (*joker_effect)->mult = (get_money() / 5) * 2;
+        effect_flags_ret = JOKER_EFFECT_FLAG_MULT;
+    }
+
+    return effect_flags_ret;
 }
 
 // Using GBLA_UNUSED, aka __attribute__((unused)), for jokers with no sprites yet to avoid warning
 // Remove the attribute once they have sprites
 // no graphics available but ready to be used if wanted when graphics available
 GBLA_UNUSED
-static JokerEffect shoot_the_moon_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 shoot_the_moon_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    JokerEffect effect = {0};
+    SCORE_ON_EVENT_ONLY(JOKER_EVENT_ON_CARD_HELD, joker_event)
 
-    SCORE_ON_EVENT_ONLY(JOKER_EVENT_ON_CARD_HELD, joker_event, effect)
+    u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
 
     if (scored_card->rank == QUEEN)
     {
-        effect.mult = u32_protected_add(effect.mult, 13);
+        *joker_effect = &shared_joker_effect;
+
+        (*joker_effect)->mult = 13;
+        effect_flags_ret = JOKER_EFFECT_FLAG_MULT;
     }
 
-    return effect;
+    return effect_flags_ret;
 }
 
 GBLA_UNUSED
-static JokerEffect photograph_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 photograph_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    JokerEffect effect = {0};
+    u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
+
     s32* p_first_face_index = &(joker->scoring_state);
 
     switch (joker_event)
@@ -904,39 +1024,23 @@ static JokerEffect photograph_joker_effect(Joker* joker, Card* scored_card, enum
             // and we will catch potential retriggers
             if (*p_first_face_index == get_scored_card_index())
             {
-                effect.xmult = 2;
+                *joker_effect = &shared_joker_effect;
+
+                (*joker_effect)->xmult = 2;
+                effect_flags_ret = JOKER_EFFECT_FLAG_XMULT;
             }
             break;
         default:
             break;
     }
 
-    return effect;
+    return effect_flags_ret;
 }
 
-// no graphics available but ready to be used if wanted when graphics available
-GBLA_UNUSED
-static JokerEffect triboulet_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 dusk_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    JokerEffect effect = {0};
+    u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
 
-    SCORE_ON_EVENT_ONLY_WITH_CARD(scored_card, JOKER_EVENT_ON_CARD_SCORED, joker_event, effect)
-
-    switch (scored_card->rank)
-    {
-        case KING:
-        case QUEEN:
-            effect.xmult = 2;
-        default:
-            break;
-    }
-
-    return effect;
-}
-
-static JokerEffect dusk_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
-{
-    JokerEffect effect = {0};
     s32* p_last_retriggered_index = &(joker->scoring_state);
 
     switch (joker_event)
@@ -950,11 +1054,14 @@ static JokerEffect dusk_joker_effect(Joker* joker, Card* scored_card, enum Joker
             // Only retrigger current card if it's strictly after the last one we retriggered
             if (get_num_hands_remaining() == 0)
             {
-                effect.retrigger = (*p_last_retriggered_index < get_scored_card_index());
-                if (effect.retrigger)
+                *joker_effect = &shared_joker_effect;
+
+                (*joker_effect)->retrigger = (*p_last_retriggered_index < get_scored_card_index());
+                if ((*joker_effect)->retrigger)
                 {
                     *p_last_retriggered_index = get_scored_card_index();
-                    effect.message = "Again!";
+                    (*joker_effect)->message = "Again!";
+                    effect_flags_ret = JOKER_EFFECT_FLAG_RETRIGGER | JOKER_EFFECT_FLAG_MESSAGE;
                 }
             }
 
@@ -964,18 +1071,20 @@ static JokerEffect dusk_joker_effect(Joker* joker, Card* scored_card, enum Joker
             break;
     }
 
-    return effect;
+    return effect_flags_ret;
 }
 
-static JokerEffect blueprint_brainstorm_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 blueprint_brainstorm_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect** joker_effect)
 {
-    JokerEffect effect = {0};
+    u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
 
     // No need for this kind of init since these Jokers
     // will have their data copied when needed
-    if (joker_event == JOKER_EVENT_ON_JOKER_CREATED || joker_event == JOKER_EVENT_ON_ROUND_END)
+    if (joker_event == JOKER_EVENT_ON_JOKER_CREATED ||
+        joker_event == JOKER_EVENT_ON_HAND_SCORED_END ||
+        joker_event == JOKER_EVENT_ON_ROUND_END)
     {
-        return effect;
+        return effect_flags_ret;
     }
 
     // find ourselves in the Jokers list
@@ -994,7 +1103,7 @@ static JokerEffect blueprint_brainstorm_joker_effect(Joker* joker, Card* scored_
     // be part of the Jokers list, but being extra careful doesn't cost much
     if (copied_joker_object == NULL)
     {
-        return effect;
+        return effect_flags_ret;
     }
 
     // find the copied Joker, may need to bounce around Blueprints and a Brainstorm
@@ -1029,10 +1138,10 @@ static JokerEffect blueprint_brainstorm_joker_effect(Joker* joker, Card* scored_
 
                 // Then regardless of if we copied the data above, apply the
                 // copied JokerEffect function to the local data
-                effect = copied_joker_info->joker_effect(joker, scored_card, joker_event);
+                effect_flags_ret = copied_joker_info->joker_effect_func(joker, scored_card, joker_event, joker_effect);
 
                 // make also sure we don't expire
-                effect.expire = false;
+                effect_flags_ret &= ~JOKER_EFFECT_FLAG_EXPIRE;
 
                 // exit the loop
                 copied_joker_object = NULL;
@@ -1041,12 +1150,13 @@ static JokerEffect blueprint_brainstorm_joker_effect(Joker* joker, Card* scored_
         }
     } while (copied_joker_object != NULL && brainstorm_counter < 2);
 
-    return effect;
+    return effect_flags_ret;
 }
 
-static JokerEffect hack_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 hack_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    JokerEffect effect = {0};
+    u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
+
     s32* p_last_retriggered_index = &(joker->scoring_state);
 
     switch (joker_event)
@@ -1063,11 +1173,14 @@ static JokerEffect hack_joker_effect(Joker* joker, Card* scored_card, enum Joker
                 case THREE:
                 case FOUR:
                 case FIVE:
-                    effect.retrigger = (*p_last_retriggered_index < get_scored_card_index());
-                    if (effect.retrigger)
+                    *joker_effect = &shared_joker_effect;
+
+                    (*joker_effect)->retrigger = (*p_last_retriggered_index < get_scored_card_index());
+                    if ((*joker_effect)->retrigger)
                     {
                         *p_last_retriggered_index = get_scored_card_index();
-                        effect.message = "Again!";
+                        (*joker_effect)->message = "Again!";
+                        effect_flags_ret = JOKER_EFFECT_FLAG_RETRIGGER | JOKER_EFFECT_FLAG_MESSAGE;
                     }
                     break;
             }
@@ -1077,14 +1190,13 @@ static JokerEffect hack_joker_effect(Joker* joker, Card* scored_card, enum Joker
             break;
     }
 
-    return effect;
+    return effect_flags_ret;
 }
 
-// Note: Joker expiration is not yet implemented so Seltzer cannot be made active before it does.
-GBLA_UNUSED
-static JokerEffect seltzer_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 seltzer_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    JokerEffect effect = {0};
+    u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
+
     s32* p_last_retriggered_idx = &(joker->scoring_state);
     s32* p_hands_left_until_exp = &(joker->persistent_state);
 
@@ -1099,28 +1211,39 @@ static JokerEffect seltzer_joker_effect(Joker* joker, Card* scored_card, enum Jo
             break;
 
         case JOKER_EVENT_ON_CARD_SCORED_END:
-            // Works the same way as Dusk, but checks if it can still trigger
-            if (*p_hands_left_until_exp > 0)
+            // Works the same way as Dusk
+            // No need to check for p_hands_left_until_exp because the Joker
+            // will be destroyed the moment we hit 0
+            *joker_effect = &shared_joker_effect;
+
+            (*joker_effect)->retrigger = ((*p_last_retriggered_idx) < get_scored_card_index());
+            if ((*joker_effect)->retrigger)
             {
-                effect.retrigger = (*p_last_retriggered_idx < get_scored_card_index());
-                if (effect.retrigger)
-                {
-                    *p_last_retriggered_idx = get_scored_card_index();
-                    effect.message = "Again!";
-                }
-            }
+                *p_last_retriggered_idx = get_scored_card_index();
+                (*joker_effect)->message = "Again!";
+                effect_flags_ret = JOKER_EFFECT_FLAG_RETRIGGER | JOKER_EFFECT_FLAG_MESSAGE;
+            } 
             break;
 
         case JOKER_EVENT_ON_HAND_SCORED_END:
+            *joker_effect = &shared_joker_effect;
+            effect_flags_ret = JOKER_EFFECT_FLAG_MESSAGE;
+
+            (*p_hands_left_until_exp)--;
             if (*p_hands_left_until_exp > 0)
             {
-                (*p_hands_left_until_exp)--;
-                effect.message = "-1";
+                // Need to do this for now because the message's memory can't really be allocated
+                // So we can't use snprintf to craft a message depending on the number of hands left
+                static const char* seltzer_messages[] = {
+                    "1", "2", "3", "4", "5", "6", "7", "8", "9"
+                };
+                (*joker_effect)->message = (char*)seltzer_messages[(*p_hands_left_until_exp) - 1];
             }
             else
             {
-                effect.expire = true;
-                effect.message = "Drank!";
+                (*joker_effect)->message = "Drank!";
+                (*joker_effect)->expire = true;
+                effect_flags_ret |= JOKER_EFFECT_FLAG_EXPIRE;
             }
             break;
 
@@ -1128,12 +1251,13 @@ static JokerEffect seltzer_joker_effect(Joker* joker, Card* scored_card, enum Jo
             break;
     }
 
-    return effect;
+    return effect_flags_ret;
 }
 
-static JokerEffect sock_and_buskin_joker_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event)
+static u32 sock_and_buskin_joker_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
 {
-    JokerEffect effect = {0};
+    u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
+
     s32* p_last_retriggered_face_index = &(joker->scoring_state);
 
     switch (joker_event)
@@ -1143,13 +1267,15 @@ static JokerEffect sock_and_buskin_joker_effect(Joker* joker, Card* scored_card,
             break;
 
         case JOKER_EVENT_ON_CARD_SCORED_END:
+            *joker_effect = &shared_joker_effect;
+
             // Works the same way as Dusk, but for face cards
-            effect.retrigger =
-                ((*p_last_retriggered_face_index < get_scored_card_index()) && card_is_face(scored_card));
-            if (effect.retrigger)
+            (*joker_effect)->retrigger = ((*p_last_retriggered_face_index < get_scored_card_index()) && card_is_face(scored_card));
+            if ((*joker_effect)->retrigger)
             {
                 *p_last_retriggered_face_index = get_scored_card_index();
-                effect.message = "Again!";
+                (*joker_effect)->message = "Again!";
+                effect_flags_ret = JOKER_EFFECT_FLAG_RETRIGGER | JOKER_EFFECT_FLAG_MESSAGE;
             }
             break;
 
@@ -1157,5 +1283,5 @@ static JokerEffect sock_and_buskin_joker_effect(Joker* joker, Card* scored_card,
             break;
     }
 
-    return effect;
+    return effect_flags_ret;
 }

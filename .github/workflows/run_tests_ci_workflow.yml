@@ -24,6 +24,8 @@ jobs:
           include/def_balatro_mempool.h
           include/def_joker_gfx_table.h
           include/def_state_info_table.h
+          include/pool.h source/pool.c
+          include/card.h source/card.c 
           include/hand_analysis.h source/hand_analysis.c 
           include/list.h source/list.c
           include/sprite.h source/sprite.c 
