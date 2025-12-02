@@ -11,8 +11,6 @@
 /**
  * @def MM_FULL_VOLUME
  * @brief The maximum volume for maxmod mm_sound_effect.volume
- *
- * Represented as the max value of a unsigned char.
  */
 #define MM_FULL_VOLUME 255
 
