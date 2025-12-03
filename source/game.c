@@ -173,7 +173,7 @@ typedef struct
 // efficient. Well, this is the answer.
 // Thanks!
 // https://github.com/cellos51/balatro-gba/issues/137#issuecomment-3322485129
-static void noop()
+static void noop(void)
 {
 }
 
@@ -432,7 +432,7 @@ static const BG_POINT MAIN_MENU_ACE_T       = {88,      26};
 
 static uint rng_seed = 0;
 
-typedef void (*SubStateActionFn)();
+typedef void (*SubStateActionFn)(void);
 
 static uint timer = 0; // This might already exist in libtonc but idk so i'm just making my own
 // BY DEFAULT IS SET TO 1, but if changed to 2 or more, should speed up all (or most) of the game
