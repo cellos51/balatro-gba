@@ -130,6 +130,10 @@
 
 #define EXPIRE_ANIMATION_FRAME_COUNT 3
 
+#define CARD_FOCUSED_UNSEL_Y 10
+#define CARD_UNFOCUSED_SEL_Y 15
+#define CARD_FOCUSED_SEL_Y 20
+
 enum GameShopStates
 {
     GAME_SHOP_INTRO,
@@ -267,7 +271,6 @@ static void print_price_under_sprite_object(SpriteObject* sprite_object, int pri
 static void game_round_end_extend_black_panel_down(int black_panel_bottom);
 
 static void remove_owned_joker(int owned_joker_idx);
-
 // Consts
 
 // clang-format off
@@ -302,6 +305,7 @@ static const Rect TOP_LEFT_PANEL_ANIM_RECT  = {0,       0,      8,      4  };
  * TOP_LEFT_PANEL_ANIM_RECT should be used for animations, 
  * TOP_LEFT_PANEL_RECT for copies etc. but mind the overlap
  */
+static const Rect TOP_LEFT_PANEL_BOTTOM_ROW_RESET_RECT = {0, 28, 8,     28 };
 static const BG_POINT TOP_LEFT_BLIND_TITLE_POINT = {0,  21, };
 static const Rect BIG_BLIND_TITLE_SRC_RECT  = {0,       26,     8,      26 };
 static const Rect BOSS_BLIND_TITLE_SRC_RECT = {0,       27,     8,      27 };
@@ -330,7 +334,7 @@ static const Rect HAND_SIZE_RECT_PLAYING    = {128,     152,    152,    160 };
 static const Rect HAND_TYPE_RECT            = {8,       64,     64,     72  };
 // Score displayed in the same place as the hand type
 static const Rect TEMP_SCORE_RECT           = {8,       64,     64,     72  }; 
-static const Rect SCORE_RECT                = {32,      48,     64,     56  };
+static const Rect SCORE_RECT                = {24,      48,     64,     56  };
 
 static const Rect PLAYED_CARDS_SCORES_RECT  = {72,      48,     240,    56  };
 static const Rect HELD_CARDS_SCORES_RECT    = {72,      108,    240,    116 };
@@ -613,20 +617,6 @@ static inline Card* discard_pop()
     if (discard_top < 0)
         return NULL;
     return discard_pile[discard_top--];
-}
-
-// Resets bottom row bg tiles of the top left panel (shop/blind) after
-// it is dismissed to match the rest of the game panel background.
-static inline void reset_top_left_panel_bottom_row()
-{
-    int y = 6;
-
-    memset16(&se_mem[MAIN_BG_SBB][32 * (y - 1)], 0x0006, 1);
-    memset16(&se_mem[MAIN_BG_SBB][1 + 32 * (y - 1)], 0x0007, 2);
-    memset16(&se_mem[MAIN_BG_SBB][3 + 32 * (y - 1)], 0x0008, 1);
-    memset16(&se_mem[MAIN_BG_SBB][4 + 32 * (y - 1)], 0x0009, 3);
-    memset16(&se_mem[MAIN_BG_SBB][7 + 32 * (y - 1)], 0x000A, 1);
-    memset16(&se_mem[MAIN_BG_SBB][8 + 32 * (y - 1)], 0x0406, 1);
 }
 
 static inline void jokers_available_to_shop_init(void)
@@ -979,25 +969,35 @@ void set_retrigger(bool new_retrigger)
     retrigger = new_retrigger;
 }
 
-void display_money(void)
+void display_money()
 {
-    int x_offset = 32 - get_digits_odd(money) * TILE_SIZE;
+    Rect money_text_rect = MONEY_TEXT_RECT;
     tte_erase_rect_wrapper(MONEY_TEXT_RECT);
-    tte_printf("#{P:%d,%d; cx:0x%X000}$%d", x_offset, MONEY_TEXT_RECT.top, TTE_YELLOW_PB, money);
+
+    char money_str_buff[INT_MAX_DIGITS + 2]; // + 2 for null terminator and "$" sign
+    snprintf(money_str_buff, sizeof(money_str_buff), "$%d", money);
+    
+    // Bias left so the number is centered and the "$" sign is on the left
+    update_text_rect_to_center_str(&money_text_rect, money_str_buff, SCREEN_LEFT);
+
+    tte_printf("#{P:%d,%d; cx:0x%X000}%s", money_text_rect.left, money_text_rect.top, TTE_YELLOW_PB, money_str_buff);
 }
 
 void display_chips(void)
 {
     Rect chips_text_rect = CHIPS_TEXT_RECT;
-    tte_erase_rect_wrapper(CHIPS_TEXT_RECT);
-    update_text_rect_to_right_align_num(&chips_text_rect, chips, OVERFLOW_LEFT);
-    tte_printf(
-        "#{P:%d,%d; cx:0x%X000;}%lu",
-        chips_text_rect.left,
-        chips_text_rect.top,
-        TTE_WHITE_PB,
-        chips
-    );
+
+    // In case of overflow, the rect overflow left by 1 char
+    Rect chips_text_overflow_rect = chips_text_rect;
+    chips_text_overflow_rect.left -= TTE_CHAR_SIZE;
+    tte_erase_rect_wrapper(chips_text_overflow_rect);
+
+    char chips_str_buff[UINT_MAX_DIGITS + 1];
+    truncate_uint_to_suffixed_str(chips, rect_width(&chips_text_rect)/TTE_CHAR_SIZE, chips_str_buff);
+
+    update_text_rect_to_right_align_str(&chips_text_rect, chips_str_buff, OVERFLOW_LEFT);
+
+    tte_printf("#{P:%d,%d; cx:0x%X000;}%s", chips_text_rect.left, chips_text_rect.top, TTE_WHITE_PB, chips_str_buff);
     check_flaming_score();
 }
 
@@ -1095,6 +1095,16 @@ static void bg_copy_current_item_to_top_left_panel(void)
     main_bg_se_copy_rect(TOP_LEFT_ITEM_SRC_RECT, TOP_LEFT_PANEL_POINT);
 }
 
+// Resets bottom row bg tiles of the top left panel (shop/blind) after
+// it is dismissed to match the rest of the game panel background.
+static inline void reset_top_left_panel_bottom_row()
+{
+    BG_POINT top_left_panel_bottom_row_pos = TOP_LEFT_PANEL_POINT;
+    // Use the source rect height to offset to the bottom row point
+    top_left_panel_bottom_row_pos.y += rect_height(&TOP_LEFT_ITEM_SRC_RECT) - 1;
+    main_bg_se_copy_rect(TOP_LEFT_PANEL_BOTTOM_ROW_RESET_RECT, top_left_panel_bottom_row_pos);
+}
+
 static void change_background(enum BackgroundId id)
 {
     if (background == id)
@@ -1176,7 +1186,7 @@ static void change_background(enum BackgroundId id)
 
         for (int i = 0; i <= 2; i++)
         {
-            main_bg_se_move_rect_1_tile_vert(HAND_BG_RECT_SELECTING, SE_DOWN);
+            main_bg_se_move_rect_1_tile_vert(HAND_BG_RECT_SELECTING, SCREEN_DOWN);
         }
 
         tte_erase_rect_wrapper(HAND_SIZE_RECT_SELECT);
@@ -1304,7 +1314,7 @@ static void change_background(enum BackgroundId id)
                     int x_from = 0;
                     int y_from = 27;
 
-                    main_bg_se_copy_rect_1_tile_vert(curr_blind_rect, SE_UP);
+                    main_bg_se_copy_rect_1_tile_vert(curr_blind_rect, SCREEN_UP);
 
                     int x_to = curr_blind_rect.left;
                     int y_to = 31;
@@ -1414,46 +1424,35 @@ static void change_background(enum BackgroundId id)
 
 static void display_temp_score(u32 value)
 {
-    int x_offset = 40 - get_digits_even(value) * TILE_SIZE;
+    char temp_score_str_buff[UINT_MAX_DIGITS + 1];
+    Rect temp_score_rect = TEMP_SCORE_RECT;
+    truncate_uint_to_suffixed_str(value, rect_width(&temp_score_rect)/TTE_CHAR_SIZE, temp_score_str_buff);
+    update_text_rect_to_center_str(&temp_score_rect, temp_score_str_buff, SCREEN_RIGHT);
+
     tte_erase_rect_wrapper(TEMP_SCORE_RECT);
-    tte_printf("#{P:%d,%d; cx:0x%X000}%lu", x_offset, TEMP_SCORE_RECT.top, TTE_WHITE_PB, value);
+    tte_printf("#{P:%d,%d; cx:0x%X000}%s", temp_score_rect.left, temp_score_rect.top, TTE_WHITE_PB, temp_score_str_buff);
 }
 
 static void display_score(u32 value)
 {
+    Rect score_rect = SCORE_RECT;
     // Clear the existing text before redrawing
     tte_erase_rect_wrapper(SCORE_RECT);
+    
+    char score_str_buff[UINT_MAX_DIGITS + 1];
 
-    char score_suffix = ' ';
-    u32 display_value = value;
-
-    if (value >= TEN_K)
-    {
-        score_suffix = 'k';
-        display_value = value / ONE_K; // 12,986 = 12k
-    }
-
-    // Calculate text width: digits + suffix character (if 'k')
-    int num_digits = get_digits(display_value);
-    int text_width = num_digits * TILE_SIZE;
-    if (score_suffix == 'k')
-    {
-        text_width += TILE_SIZE; // Add width for 'k' suffix
-    }
-
-    // Calculate center position within SCORE_RECT
-    int rect_width = SCORE_RECT.right - SCORE_RECT.left;
-    int x_offset = SCORE_RECT.left + (rect_width - text_width) / 2;
-
-    tte_printf("#{P:%d,48; cx:0x%X000}%lu%c", x_offset, TTE_WHITE_PB, display_value, score_suffix);
+    truncate_uint_to_suffixed_str(value, rect_width(&score_rect)/TTE_CHAR_SIZE, score_str_buff);
+    update_text_rect_to_center_str(&score_rect, score_str_buff, SCREEN_RIGHT);
+    
+    tte_printf("#{P:%d,%d; cx:0x%X000}%s", score_rect.left, score_rect.top, TTE_WHITE_PB, score_str_buff);
 }
 
 // Show/Hide flaming score effect if we will score
 // more than the required amount or not
 static void check_flaming_score(void)
 {
-    int curr_score = chips * mult;
-    int required_score = blind_get_requirement(current_blind, ante);
+    u32 curr_score = u32_protected_mult(chips, mult);
+    u32 required_score = blind_get_requirement(current_blind, ante);
     if (curr_score >= required_score && !score_flames_active)
     {
         // start flaming score
@@ -1475,19 +1474,13 @@ static void check_flaming_score(void)
 
 static void display_round(int value)
 {
-    // tte_erase_rect_wrapper(ROUND_TEXT_RECT);
-    tte_printf(
-        "#{P:%d,%d; cx:0x%X000}%d",
-        ROUND_TEXT_RECT.left,
-        ROUND_TEXT_RECT.top,
-        TTE_YELLOW_PB,
-        round
-    );
+    //tte_erase_rect_wrapper(ROUND_TEXT_RECT);
+    tte_printf("#{P:%d,%d; cx:0x%X000}%d", ROUND_TEXT_RECT.left, ROUND_TEXT_RECT.top, TTE_YELLOW_PB, round);
 }
 
 static void display_hands(int value)
 {
-    // tte_erase_rect_wrapper(HANDS_TEXT_RECT);
+    //tte_erase_rect_wrapper(HANDS_TEXT_RECT);
     tte_printf("#{P:%d,%d; cx:0xD000}%d", HANDS_TEXT_RECT.left, HANDS_TEXT_RECT.top, hands); // Hand
 }
 
@@ -1690,28 +1683,19 @@ static inline void deck_shuffle(void)
     }
 }
 
-static void game_round_on_init(void)
+static void game_round_on_init()
 {
     hand_state = HAND_DRAW;
     cards_drawn = 0;
     hand_selections = 0;
 
-    // Create the blind token sprite at the top left corner
-    playing_blind_token = blind_token_new(
-        current_blind,
-        CUR_BLIND_TOKEN_POS.x,
-        CUR_BLIND_TOKEN_POS.y,
-        MAX_SELECTION_SIZE + MAX_HAND_SIZE + 1
-    );
+    playing_blind_token = blind_token_new(current_blind, CUR_BLIND_TOKEN_POS.x, CUR_BLIND_TOKEN_POS.y, MAX_SELECTION_SIZE + MAX_HAND_SIZE + 1); // Create the blind token sprite at the top left corner
     // TODO: Hide blind token and display it after sliding blind rect animation
-    // if (playing_blind_token != NULL)
+    //if (playing_blind_token != NULL)
     //{
     //    obj_hide(playing_blind_token->obj); // Hide the blind token sprite for now
     //}
-
-    // Create the blind token sprite for round end
-    round_end_blind_token =
-        blind_token_new(current_blind, 81, 86, MAX_SELECTION_SIZE + MAX_HAND_SIZE + 2);
+    round_end_blind_token = blind_token_new(current_blind, 81, 86, MAX_SELECTION_SIZE + MAX_HAND_SIZE + 2); // Create the blind token sprite for round end
 
     if (round_end_blind_token != NULL)
     {
@@ -1719,45 +1703,17 @@ static void game_round_on_init(void)
     }
 
     Rect blind_req_text_rect = BLIND_REQ_TEXT_RECT;
-    int blind_requirement = blind_get_requirement(current_blind, ante);
+    u32 blind_requirement = blind_get_requirement(current_blind, ante);
+    
+    char blind_req_str_buff[UINT_MAX_DIGITS + 1];
 
-    // TODO: Address Copilot review at
-    // https://github.com/cellos51/balatro-gba/pull/46#pullrequestreview-3045772903
-    char score_suffix = ' ';
-    if (blind_requirement >= TEN_K)
-    {
-        // clear existing text
-        tte_erase_rect_wrapper(blind_req_text_rect);
-
-        score_suffix = 'k';
-        blind_requirement /= ONE_K; // 11,000 = 11k
-    }
-
+    truncate_uint_to_suffixed_str(blind_requirement, rect_width(&BLIND_REQ_TEXT_RECT)/TTE_CHAR_SIZE, blind_req_str_buff);
+    
     // Update text rect for right alignment AFTER shortening the number
-    update_text_rect_to_right_align_num(&blind_req_text_rect, blind_requirement, OVERFLOW_RIGHT);
+    update_text_rect_to_right_align_str(&blind_req_text_rect, blind_req_str_buff, OVERFLOW_RIGHT);
 
-    // If we added a suffix, adjust position to account for the extra character
-    if (score_suffix == 'k')
-    {
-        // Move left by one character width to make room for 'k'
-        blind_req_text_rect.left -= TILE_SIZE;
-    }
-
-    tte_printf(
-        "#{P:%d,%d; cx:0x%X000}%d%c",
-        blind_req_text_rect.left,
-        blind_req_text_rect.top,
-        TTE_RED_PB,
-        blind_requirement,
-        score_suffix
-    );
-    tte_printf(
-        "#{P:%d,%d; cx:0x%X000}$%d",
-        BLIND_REWARD_RECT.left,
-        BLIND_REWARD_RECT.top,
-        TTE_YELLOW_PB,
-        blind_get_reward(current_blind)
-    );
+    tte_printf("#{P:%d,%d; cx:0x%X000}%s", blind_req_text_rect.left, blind_req_text_rect.top, TTE_RED_PB, blind_req_str_buff);
+    tte_printf("#{P:%d,%d; cx:0x%X000}$%d", BLIND_REWARD_RECT.left, BLIND_REWARD_RECT.top, TTE_YELLOW_PB, blind_get_reward(current_blind)); // Blind reward
 
     deck_shuffle(); // Shuffle the deck at the start of the round
 }
@@ -1768,8 +1724,7 @@ static void game_main_menu_on_init()
     change_background(BG_MAIN_MENU);
     main_menu_ace = card_object_new(card_new(SPADES, ACE));
     card_object_set_sprite(main_menu_ace, 0); // Set the sprite for the ace of spades
-    // Make the sprite double sized
-    main_menu_ace->sprite_object->sprite->obj->attr0 |= ATTR0_AFF_DBL;
+    main_menu_ace->sprite_object->sprite->obj->attr0 |= ATTR0_AFF_DBL; // Make the sprite double sized
     main_menu_ace->sprite_object->tx = int2fx(MAIN_MENU_ACE_T.x);
     main_menu_ace->sprite_object->x = main_menu_ace->sprite_object->tx;
     main_menu_ace->sprite_object->ty = int2fx(MAIN_MENU_ACE_T.y);
@@ -1859,8 +1814,7 @@ static inline bool hand_play(void)
 
 static inline void game_playing_process_hand_select_input(void)
 {
-    static bool discard_button_highlighted =
-        false; // true = play button highlighted, false = discard button highlighted
+    static bool discard_button_highlighted = false; // true = play button highlighted, false = discard button highlighted
 
     if (key_hit(KEY_LEFT))
     {
@@ -1987,16 +1941,11 @@ static inline void card_draw(void)
     play_sfx(SFX_CARD_DRAW, MM_BASE_PITCH_RATE + cards_drawn * PITCH_STEP_DRAW_SFX);
 }
 
-static void display_ante(int value)
+static inline void display_ante(int value)
 {
-    tte_printf(
-        "#{P:%d,%d; cx:0xC000}%d#{cx:0xF000}/%d",
-        ANTE_TEXT_RECT.left,
-        ANTE_TEXT_RECT.top,
-        value,
-        MAX_ANTE
-    );
+    tte_printf("#{P:%d,%d; cx:0xC000}%d#{cx:0xF000}/%d", ANTE_TEXT_RECT.left, ANTE_TEXT_RECT.top, value, MAX_ANTE);
 }
+
 
 static inline void game_playing_handle_round_over(void)
 {
@@ -3164,8 +3113,8 @@ static void game_round_end_start()
 
 static void game_round_end_start_expand_popup()
 {
-    main_bg_se_copy_rect_1_tile_vert(POP_MENU_ANIM_RECT, SE_UP);
-
+    main_bg_se_copy_rect_1_tile_vert(POP_MENU_ANIM_RECT, SCREEN_UP);
+    
     if (timer == TM_END_POP_MENU_ANIM)
     {
         state_info[game_state].substate = DISPLAY_FINISHED_BLIND;
@@ -3178,7 +3127,7 @@ static void game_round_end_extend_black_panel_down(int black_panel_bottom)
     Rect single_line_rect = ROUND_END_MENU_RECT;
     single_line_rect.bottom = black_panel_bottom;
     single_line_rect.top = single_line_rect.bottom - 1;
-    main_bg_se_copy_rect_1_tile_vert(single_line_rect, SE_DOWN);
+    main_bg_se_copy_rect_1_tile_vert(single_line_rect, SCREEN_DOWN);
 }
 
 static void game_round_end_display_finished_blind()
@@ -3192,17 +3141,19 @@ static void game_round_end_display_finished_blind()
         current_ante--;
 
     Rect blind_req_rect = ROUND_END_BLIND_REQ_RECT;
-    int blind_req = blind_get_requirement(current_blind, current_ante);
-    update_text_rect_to_right_align_num(&blind_req_rect, blind_req, OVERFLOW_RIGHT);
+    u32 blind_req = blind_get_requirement(current_blind, current_ante);
 
-    tte_printf(
-        "#{P:%d,%d; cx:0x%X000}%d",
-        blind_req_rect.left,
-        blind_req_rect.top,
-        TTE_RED_PB,
-        blind_req
-    );
+    /* Not bothering to truncate here because there are 8 tiles
+     * and the blind requirement will not increase past ante 8
+     * so there's enough room for sure.
+     */
+    char blind_req_str_buff[UINT_MAX_DIGITS + 1];
+    snprintf(blind_req_str_buff, sizeof(blind_req_str_buff), "%lu", blind_req);
 
+    update_text_rect_to_right_align_str(&blind_req_rect, blind_req_str_buff, OVERFLOW_RIGHT);
+    
+    tte_printf("#{P:%d,%d; cx:0x%X000}%s", blind_req_rect.left, blind_req_rect.top, TTE_RED_PB, blind_req_str_buff);
+    
     if (timer == TM_START_ROUND_END_REWARDS_ANIM)
     {
         game_round_end_extend_black_panel_down(ROUND_END_BLACK_PANEL_INIT_BOTTOM_SE);
@@ -3278,10 +3229,9 @@ static void game_round_end_panel_exit()
     // magic numbers.
     if (timer < 8)
     {
-        main_bg_se_copy_rect_1_tile_vert(TOP_LEFT_PANEL_ANIM_RECT, SE_UP);
-
-        // Copied from shop. Feels slightly too niche of a function for me personally to make one.
-        if (timer == 1)
+        main_bg_se_copy_rect_1_tile_vert(TOP_LEFT_PANEL_ANIM_RECT, SCREEN_UP);
+    
+        if (timer == 1) // Copied from shop. Feels slightly too niche of a function for me personally to make one.
         {
             reset_top_left_panel_bottom_row();
         }
@@ -3473,8 +3423,8 @@ static void game_round_end_dismiss_round_end_panel()
 {
     Rect round_end_down = ROUND_END_MENU_RECT;
     round_end_down.top--;
-    main_bg_se_copy_rect_1_tile_vert(round_end_down, SE_DOWN);
-
+    main_bg_se_copy_rect_1_tile_vert(round_end_down, SCREEN_DOWN);
+    
     if (timer >= TM_DISMISS_ROUND_END_TM)
     {
         timer = TM_ZERO;
@@ -3599,7 +3549,7 @@ static void game_shop_create_items(void)
 // Intro sequence (menu and shop icon coming into frame)
 static void game_shop_intro()
 {
-    main_bg_se_copy_rect_1_tile_vert(POP_MENU_ANIM_RECT, SE_UP);
+    main_bg_se_copy_rect_1_tile_vert(POP_MENU_ANIM_RECT, SCREEN_UP);
 
     if (timer == TM_CREATE_SHOP_ITEMS_WAIT)
     {
@@ -3915,9 +3865,9 @@ static void game_shop_process_user_input()
 static void game_shop_outro()
 {
     // Shift the shop panel
-    main_bg_se_move_rect_1_tile_vert(POP_MENU_ANIM_RECT, SE_DOWN);
+    main_bg_se_move_rect_1_tile_vert(POP_MENU_ANIM_RECT, SCREEN_DOWN);
 
-    main_bg_se_copy_rect_1_tile_vert(TOP_LEFT_PANEL_ANIM_RECT, SE_UP);
+    main_bg_se_copy_rect_1_tile_vert(TOP_LEFT_PANEL_ANIM_RECT, SCREEN_UP);
 
     // TODO: make heads or tails of what's going on here and replace
     // magic numbers.
@@ -4046,8 +3996,8 @@ static void game_blind_select_on_update()
 static void game_blind_select_start_anim_seq()
 {
     change_background(BG_BLIND_SELECT);
-    main_bg_se_copy_rect_1_tile_vert(POP_MENU_ANIM_RECT, SE_UP);
-
+    main_bg_se_copy_rect_1_tile_vert(POP_MENU_ANIM_RECT, SCREEN_UP);
+    
     for (int i = 0; i < BLIND_TYPE_MAX; i++)
     {
         sprite_position(
@@ -4098,7 +4048,7 @@ static void game_blind_select_handle_input()
             // TODO: Create a generic vertical move by any number of tiles to avoid for loops?
             for (int i = 0; i < 12; i++)
             {
-                main_bg_se_copy_rect_1_tile_vert(POP_MENU_ANIM_RECT, SE_UP);
+                main_bg_se_copy_rect_1_tile_vert(POP_MENU_ANIM_RECT, SCREEN_UP);
             }
 
             for (int i = 0; i < BLIND_TYPE_MAX; i++)
@@ -4142,8 +4092,8 @@ static void game_blind_select_selected_anim_seq()
     {
         Rect blinds_rect = POP_MENU_ANIM_RECT;
         blinds_rect.top -= 1; // Because of the raised blind
-        main_bg_se_move_rect_1_tile_vert(blinds_rect, SE_DOWN);
-
+        main_bg_se_move_rect_1_tile_vert(blinds_rect, SCREEN_DOWN);
+    
         for (int i = 0; i < BLIND_TYPE_MAX; i++)
         {
             sprite_position(
@@ -4330,7 +4280,7 @@ static void game_main_menu_on_update()
 
 static void game_over_anim_frame(void)
 {
-    main_bg_se_move_rect_1_tile_vert(GAME_OVER_ANIM_RECT, SE_UP);
+    main_bg_se_move_rect_1_tile_vert(GAME_OVER_ANIM_RECT, SCREEN_UP);
 }
 
 static void game_lose_on_update()

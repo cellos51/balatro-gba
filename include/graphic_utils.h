@@ -50,16 +50,23 @@
 #define SE_COL_LEN 32
 
 // Since y direction goes from the top of the screen to the bottom
-#define SCREEN_UP 	-1
-#define SCREEN_DOWN 1
-#define SCREEN_LEFT -1
-#define SCREEN_RIGHT 1
+enum ScreenVertDir
+{
+    SCREEN_UP = -1,
+    SCREEN_DOWN = 1
+};
 
-#define SE_UP	SCREEN_UP
-#define SE_DOWN SCREEN_DOWN
+enum ScreenHorzDir
+{
+    SCREEN_LEFT = -1,
+    SCREEN_RIGHT = 1
+};
 
-#define OVERFLOW_LEFT	SCREEN_LEFT
-#define OVERFLOW_RIGHT	SCREEN_RIGHT
+enum OverflowDir
+{
+    OVERFLOW_LEFT = SCREEN_LEFT,
+    OVERFLOW_RIGHT = SCREEN_RIGHT
+};
 
 // Tile size in pixels, both height and width as tiles are square
 #define TILE_SIZE 8
@@ -79,25 +86,21 @@ SE main_bg_se_get_se(BG_POINT pos);
 
 INLINE int rect_width(const Rect* rect)
 {
-    /* Extra parens to avoid issues in case compiler turns INLINE into macro
-     * Not sure if necessary, could be just paranoia
-     */ 
-    return (((rect)->right) - ((rect)->left) + 1);
+    return max(0, rect->right - rect->left + 1);
 }
 
 INLINE int rect_height(const Rect* rect)
 {
-    return (((rect)->bottom) - ((rect)->top) + 1);
+    return max(0, rect->bottom - rect->top + 1);
 }
 
 /* Copies an SE rect vertically in direction by a single tile.
  * bg_sbb is the SBB of the background in which to move the rect
- * direction must be either SE_UP or SE_DOWN.
  * se_rect dimensions are in number of tiles.
  * 
  * NOTE: This does not work with TTE_SBB, probably because it's 4BPP...
  */
-void bg_se_copy_rect_1_tile_vert(u16 bg_sbb, Rect se_rect, int direction);
+void bg_se_copy_rect_1_tile_vert(u16 bg_sbb, Rect se_rect, enum ScreenVertDir direction);
 
 /* Clears a rect in the main background.
  * The se_rect dimensions need to be in number of tiles.
@@ -105,10 +108,9 @@ void bg_se_copy_rect_1_tile_vert(u16 bg_sbb, Rect se_rect, int direction);
 void main_bg_se_clear_rect(Rect se_rect);
 
 /* Copies a rect in the main background vertically in direction by a single tile.
- * direction must be either SE_UP or SE_DOWN.
  * se_rect dimensions are in number of tiles.
  */
-void main_bg_se_copy_rect_1_tile_vert(Rect se_rect, int direction);
+void main_bg_se_copy_rect_1_tile_vert(Rect se_rect, enum ScreenVertDir direction);
 
 /* Copies a rect in the main background from se_rect to the position (x, y).
  * se_rect dimensions are in number of tiles.
@@ -134,27 +136,46 @@ void main_bg_se_copy_expand_3x3_rect(Rect se_rect_dest, BG_POINT se_rect_src_3x3
 /* Moves a rect in the main background vertically in direction by a single tile.
  * Note that tiles in the previous location will be transparent (0x000)
  * so maybe copy would be a better choice if you don't want to delete things
- * direction must be either SE_UP or SE_DOWN.
  * se_rect dimensions are in number of tiles.
  */
-void main_bg_se_move_rect_1_tile_vert(Rect se_rect, int direction);
+void main_bg_se_move_rect_1_tile_vert(Rect se_rect, enum ScreenVertDir direction);
 
 // A wrapper for tte_erase_rect that would use the rect struct
 void tte_erase_rect_wrapper(Rect rect);
 
-/* Changes rect->left so it fits the digits of num exactly when right aligned to rect->right.
- * Assumes num is not negative.
+/* Changes rect->left so it fits a string exactly when right aligned to rect->right.
  * 
- * overflow_direction determines the direction the number will overflow
- * if it's too large to fit inside the rect. 
- * Should be either OVERFLOW_LEFT or OVERFLOW_RIGHT.
+ * overflow_direction determines the direction the string will overflow
+ * if it's too large to fit inside the rect.
  * 
- * The rect is in number of pixels but should be a multiple of TILE_SIZE
+ * The rect is in number of pixels but should be a multiple of TTE_CHAR_SIZE
  * so it's a whole number of tiles to fit TTE characters
  * 
  * Note that both rect->left and rect-right need to be defined, top and bottom don't matter
  */
-void update_text_rect_to_right_align_num(Rect* rect, int num, int overflow_direction);
+void update_text_rect_to_right_align_str(Rect* rect, const char* str, enum OverflowDir overflow_direction);
+
+
+/** 
+ * @brief Updates a rect so a string is centered within it.
+ * 
+ * @param rect  The rect provided, the provided values are used to determine the center
+ *              and it is then updated so the string starting in rect->left is centered
+ *              The rect is in number of pixels but should be a multiple of TTE_CHAR_SIZE
+ *              so it's a whole number of tiles to fit TTE characters.
+ * 
+ * @param str   The string, the center of the string will be at the center of the updated rect.
+ * 
+ * @param bias_direction    Which direction to bias when the string can't be evenly centered
+ *                          with respect to char tiles.
+ *                          Examples:
+ *                          | |S|T|R| |     - Can be evenly centered, bias has no effect
+ *                          | | |S|T|R| |   - Bias right
+ *                          | |S|T|R| | |   - Bias left
+ *                          |A|B|C|D| |     - Bias left
+ *                          | |A|B|C|D|     - Bias right
+ */
+void update_text_rect_to_center_str(Rect* rect, const char* str, enum ScreenHorzDir bias_direction);
 
 /*Copies 16 bit data from src to dst, applying a palette offset to the data.
  * This is intended solely for use with tile8/8bpp data for dst and src.
