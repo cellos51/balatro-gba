@@ -2,7 +2,8 @@
 #define BLIND_H
 
 #include "sprite.h"
-// The GBA's max uint value is around 4 billion, so we're going to not add endless mode for simplicity's sake
+// The GBA's max uint value is around 4 billion, so we're going to not add endless mode for
+// simplicity's sake
 #define MAX_ANTE 8
 
 #define SMALL_BLIND_PB 1

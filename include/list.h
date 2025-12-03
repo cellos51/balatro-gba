@@ -5,8 +5,8 @@
  *  List Implementation
  *  ===================
  *
- *  - This @ref List operates as a linked list @ref ListNodes. It operates as a regular doubly-linked list
- *  but doesn't allocate memory and rather gets @ref ListNodes from a pool.
+ *  - This @ref List operates as a linked list @ref ListNodes. It operates as a regular
+ * doubly-linked list but doesn't allocate memory and rather gets @ref ListNodes from a pool.
  */
 #ifndef LIST_H
 #define LIST_H
@@ -23,7 +23,8 @@ typedef struct ListNode ListNode;
 struct ListNode
 {
     /**
-     * @brief The previous @ref ListNode in the associated @ref List, NULL if at the `head` of the list
+     * @brief The previous @ref ListNode in the associated @ref List, NULL if at the `head` of the
+     * list
      */
     ListNode* prev;
 
@@ -99,8 +100,9 @@ typedef struct
 /**
  * Create a list.
  *
- * While this function does not allocate memory for the list itself, the list does allocate memory for each element.
- * So every created list must be freed with @ref list_clear to ensure the list's nodes are deleted properly.
+ * While this function does not allocate memory for the list itself, the list does allocate memory
+ * for each element. So every created list must be freed with @ref list_clear to ensure the list's
+ * nodes are deleted properly.
  *
  * @return A @ref List with head and tail reset.
  */

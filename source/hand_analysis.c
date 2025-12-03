@@ -221,7 +221,8 @@ bool hand_contains_flush(u8* suits)
  * @param played        Array of pointers to CardObject representing played cards.
  * @param top           Index of the top of the played stack.
  * @param min_len       Minimum number of cards required for a flush.
- * @param out_selection Output array of bools; set to true for cards in the best flush, false otherwise.
+ * @param out_selection Output array of bools; set to true for cards in the best flush, false
+ * otherwise.
  * @return              The number of cards in the best flush found, or 0 if no flush meets min_len.
  */
 int find_flush_in_played_cards(CardObject** played, int top, int min_len, bool* out_selection)
@@ -265,9 +266,15 @@ int find_flush_in_played_cards(CardObject** played, int top, int min_len, bool* 
     return 0;
 }
 
-// Returns the number of cards in the best straight or 0 if no straight of min_len is found, marks as true them in
-// out_selection[]. This is mostly from Google Gemini
-int find_straight_in_played_cards(CardObject** played, int top, bool shortcut_active, int min_len, bool* out_selection)
+// Returns the number of cards in the best straight or 0 if no straight of min_len is found, marks
+// as true them in out_selection[]. This is mostly from Google Gemini
+int find_straight_in_played_cards(
+    CardObject** played,
+    int top,
+    bool shortcut_active,
+    int min_len,
+    bool* out_selection
+)
 {
     if (top < 0)
         return 0;

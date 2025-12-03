@@ -22,6 +22,7 @@ jobs:
           include/bitset.h source/bitset.c
           include/pool.h source/pool.c
           include/card.h source/card.c 
+          include/game.h source/game.c 
           include/hand_analysis.h source/hand_analysis.c 
           include/list.h source/list.c
           include/sprite.h source/sprite.c 
