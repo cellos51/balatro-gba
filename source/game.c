@@ -1924,13 +1924,53 @@ static inline void game_playing_process_hand_select_input(void)
     static bool discard_button_highlighted =
         false; // true = play button highlighted, false = discard button highlighted
 
+    // card moving logic
+    static bool can_move_card = true;
+    static bool moving_card = false; // true if we are currently moving a card around
+    static bool card_moved_too_fast = false; // see define of CARD_SWAP_TIME_THRESHOLD
+    static uint move_timer = TM_ZERO;        // idem
+
+    // Register timer when we hit A to pick a card
+    // If we try to move the picked card before CARD_SWAP_TIME_THRESHOLD frames,
+    // We will select it instead of moving it
+    if (key_hit(SELECT_CARD))
+    {
+        move_timer = timer;
+    }
+
     if (key_hit(KEY_LEFT))
     {
         if (selection_y == 0)
         {
-            // The reason why this adds 1 is because the hand is drawn from right to left. There is
-            // no particular reason for this, it's just how I did it.
-            hand_set_focus(selection_x + 1);
+            // Do not use FRAMES(x) here as we are counting real frames ignoring game speed
+            card_moved_too_fast = (timer - move_timer) < CARD_SWAP_TIME_THRESHOLD;
+
+            // swap cards around if A is held down when pressing D-pad keys
+            if (key_is_down(SELECT_CARD) && can_move_card && !card_moved_too_fast)
+            {
+                if (selection_x < hand_top)
+                {
+                    swap_cards_in_hand(selection_x, selection_x + 1);
+                    moving_card = true;
+                    rearrange_card_sprites();
+                    hand_set_focus(selection_x + 1);
+                }
+            }
+            else
+            {
+                // select current card if we tried moving it too fast
+                if (card_moved_too_fast && !moving_card)
+                {
+                    select_current_card();
+                    // raise this flag to prevent selecting the next card when releasing A
+                    moving_card = true;
+                    // and also this one so we don't drag the next card along if we don't release A
+                    can_move_card = false;
+                }
+                // The reason why this adds 1 is because the hand is drawn from right to left.
+                // There is no particular reason for this, it's just how I did it.
+                hand_set_focus(selection_x + 1);
+            }
         }
         else
         {
@@ -1941,7 +1981,29 @@ static inline void game_playing_process_hand_select_input(void)
     {
         if (selection_y == 0)
         {
-            hand_set_focus(selection_x - 1);
+            card_moved_too_fast = (timer - move_timer) < CARD_SWAP_TIME_THRESHOLD;
+
+            if (key_is_down(SELECT_CARD) && can_move_card && !card_moved_too_fast)
+            {
+                if (selection_x > 0)
+                {
+                    swap_cards_in_hand(selection_x, selection_x - 1);
+                    moving_card = true;
+                    rearrange_card_sprites();
+                    hand_set_focus(selection_x - 1);
+                }
+            }
+            else
+            {
+                if (card_moved_too_fast && !moving_card)
+                {
+                    select_current_card();
+                    moving_card = true;
+                    can_move_card = false;
+                }
+
+                hand_set_focus(selection_x - 1);
+            }
         }
         else
         {
