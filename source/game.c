@@ -389,9 +389,12 @@ static StateInfo state_info[] = {
 };
 
 SelectionGridRow shop_selection_rows[] = {
-    {0, jokers_sel_row_get_size, jokers_sel_row_on_selection_changed, jokers_sel_row_on_key_transit},
-    {1, shop_top_row_get_size,shop_top_row_on_selection_changed, shop_top_row_on_key_transit},
-    {2, shop_reroll_row_get_size, shop_reroll_row_on_selection_changed, shop_reroll_row_on_key_transit}
+    {0, jokers_sel_row_get_size, jokers_sel_row_on_selection_changed,
+        jokers_sel_row_on_key_transit},
+    {1, shop_top_row_get_size,shop_top_row_on_selection_changed,
+        shop_top_row_on_key_transit},
+    {2, shop_reroll_row_get_size, shop_reroll_row_on_selection_changed,
+        shop_reroll_row_on_key_transit}
 };
 
 static const Selection SHOP_INIT_SEL = {-1, 1};
