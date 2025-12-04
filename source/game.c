@@ -1919,6 +1919,17 @@ static inline bool hand_play(void)
     return true;
 }
 
+// When holding A, if we press an arrow key too fast, we should select the card
+// and change focus to the next one, instead of swapping them
+// This should fix inputs sometimes not registering when quickly selecting cards
+#define CARD_SWAP_TIME_THRESHOLD 5
+
+static inline void select_current_card(void)
+{
+    hand_toggle_card_selection();
+    set_hand();
+}
+
 static inline void game_playing_process_hand_select_input(void)
 {
     static bool discard_button_highlighted =
@@ -2075,10 +2086,16 @@ static inline void game_playing_process_hand_select_input(void)
         // Discard button highlight color
         memcpy16(&pal_bg_mem[DISCARD_BTN_BORDER_PID], &pal_bg_mem[DISCARD_BTN_PID], 1);
 
-        if (key_hit(SELECT_CARD))
+        // select card if we were not moving it around
+        if (key_released(SELECT_CARD))
         {
-            hand_toggle_card_selection();
-            set_hand();
+            if (!moving_card)
+            {
+                select_current_card();
+            }
+            moving_card = false;
+            can_move_card = true;
+            move_timer = TM_ZERO;
         }
 
         if (key_hit(DESELECT_CARDS))
