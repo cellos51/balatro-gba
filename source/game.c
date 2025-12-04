@@ -1045,42 +1045,42 @@ void display_mult(void)
 }
 
 
-void swap_cards_in_hand(int a, int b)
+static void swap_cards_in_hand(int idx_a, int idx_b)
 {
-    CardObject* temp = hand[a];
-    hand[a] = hand[b];
-    hand[b] = temp;
+    CardObject* temp = hand[idx_a];
+    hand[idx_a] = hand[idx_b];
+    hand[idx_b] = temp;
 }
 
-void sort_hand_by_suit()
+static void sort_hand_by_suit()
 {
-    for (int a = 0; a < hand_top; a++)
+    for (int idx_a = 0; idx_a < hand_top; idx_a++)
     {
-        for (int b = a + 1; b <= hand_top; b++)
+        for (int idx_b = idx_a + 1; idx_b <= hand_top; idx_b++)
         {
-            if (hand[a] == NULL || (hand[b] != NULL && (hand[a]->card->suit > hand[b]->card->suit || (hand[a]->card->suit == hand[b]->card->suit && hand[a]->card->rank > hand[b]->card->rank))))
+            if (hand[idx_a] == NULL || (hand[idx_b] != NULL && (hand[idx_a]->card->suit > hand[idx_b]->card->suit || (hand[idx_a]->card->suit == hand[idx_b]->card->suit && hand[idx_a]->card->rank > hand[idx_b]->card->rank))))
             {
-                swap_cards_in_hand(a, b);
+                swap_cards_in_hand(idx_a, idx_b);
             }
         }
     }
 }
 
-void sort_hand_by_rank()
+static void sort_hand_by_rank()
 {
-    for (int a = 0; a < hand_top; a++)
+    for (int idx_a = 0; idx_a < hand_top; idx_a++)
     {
-        for (int b = a + 1; b <= hand_top; b++)
+        for (int idx_b = idx_a + 1; idx_b <= hand_top; idx_b++)
         {
-            if (hand[a] == NULL || (hand[b] != NULL && hand[a]->card->rank > hand[b]->card->rank))
+            if (hand[idx_a] == NULL || (hand[idx_b] != NULL && hand[idx_a]->card->rank > hand[idx_b]->card->rank))
             {
-                swap_cards_in_hand(a, b);
+                swap_cards_in_hand(idx_a, idx_b);
             }
         }
     }
 }
 
-void rearrange_card_sprites()
+static void rearrange_card_sprites()
 {
     // Update the sprites in the hand by destroying them and creating new ones in the correct order
     // (This feels like a diabolical solution but like literally how else would you do this)
