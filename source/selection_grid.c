@@ -75,7 +75,7 @@ void selection_grid_process_input(SelectionGrid *selection_grid)
     selection_grid_process_directional_input(selection_grid);
 
     u32 non_directional_key = KEY_ANY & ~KEY_DIR;
-    if (key_hit(non_directional_key))
+    if (key_hit(non_directional_key) || key_released(non_directional_key))
     {
         Selection* selection = &selection_grid->selection; // To make the next line shorter and more readable
         selection_grid->rows[selection->y].on_key_hit(selection_grid, selection);
