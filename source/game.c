@@ -3671,12 +3671,14 @@ static void jokers_sel_row_on_selection_changed(
 )
 {
     // swap Jokers if the A button is held down and all Jokers are on the same row
-    bool swapping = key_is_down(SELECT_CARD) && new_selection->y == row_idx && prev_selection->y == row_idx;
+    bool swapping =
+        key_is_down(SELECT_CARD) && new_selection->y == row_idx && prev_selection->y == row_idx;
 
     if (prev_selection->y == row_idx)
     {
-        JokerObject* joker_object = (JokerObject*)list_get_at_idx(&_owned_jokers_list, prev_selection->x);
-        if(joker_object != NULL)
+        JokerObject* joker_object =
+            (JokerObject*)list_get_at_idx(&_owned_jokers_list, prev_selection->x);
+        if (joker_object != NULL)
         {
             erase_price_under_sprite_object(joker_object->sprite_object);
             // keep focus on current Joker if swapping
@@ -3689,8 +3691,9 @@ static void jokers_sel_row_on_selection_changed(
 
     if (new_selection->y == row_idx)
     {
-        JokerObject* joker_object = (JokerObject*)list_get_at_idx(&_owned_jokers_list, new_selection->x);
-        if(joker_object != NULL)
+        JokerObject* joker_object =
+            (JokerObject*)list_get_at_idx(&_owned_jokers_list, new_selection->x);
+        if (joker_object != NULL)
         {
             if (!swapping)
             {
@@ -3698,14 +3701,21 @@ static void jokers_sel_row_on_selection_changed(
             }
             if (!key_is_down(SELECT_CARD))
             {
-                print_price_under_sprite_object(joker_object->sprite_object, joker_get_sell_value(joker_object->joker));
+                print_price_under_sprite_object(
+                    joker_object->sprite_object,
+                    joker_get_sell_value(joker_object->joker)
+                );
             }
         }
     }
 
     if (swapping)
     {
-        list_swap(&_owned_jokers_list, (unsigned int)prev_selection->x, (unsigned int)new_selection->x);
+        list_swap(
+            &_owned_jokers_list,
+            (unsigned int)prev_selection->x,
+            (unsigned int)new_selection->x
+        );
     }
 }
 
@@ -3742,7 +3752,10 @@ static void jokers_sel_row_on_key_hit(SelectionGrid* selection_grid, Selection* 
         }
         else
         {
-            print_price_under_sprite_object(joker_object->sprite_object, joker_get_sell_value(joker_object->joker));
+            print_price_under_sprite_object(
+                joker_object->sprite_object,
+                joker_get_sell_value(joker_object->joker)
+            );
         }
     }
 
