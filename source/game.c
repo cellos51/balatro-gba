@@ -3670,29 +3670,42 @@ static void jokers_sel_row_on_selection_changed(
     const Selection* new_selection
 )
 {
+    // swap Jokers if the A button is held down and all Jokers are on the same row
+    bool swapping = key_is_down(SELECT_CARD) && new_selection->y == row_idx && prev_selection->y == row_idx;
+
     if (prev_selection->y == row_idx)
     {
-        JokerObject* joker_object =
-            (JokerObject*)list_get_at_idx(&_owned_jokers_list, prev_selection->x);
-        if (joker_object != NULL)
+        JokerObject* joker_object = (JokerObject*)list_get_at_idx(&_owned_jokers_list, prev_selection->x);
+        if(joker_object != NULL)
         {
             erase_price_under_sprite_object(joker_object->sprite_object);
-            sprite_object_set_focus(joker_object->sprite_object, false);
+            // keep focus on current Joker if swapping
+            if (!swapping)
+            {
+                sprite_object_set_focus(joker_object->sprite_object, false);
+            }
         }
     }
 
     if (new_selection->y == row_idx)
     {
-        JokerObject* joker_object =
-            (JokerObject*)list_get_at_idx(&_owned_jokers_list, new_selection->x);
-        if (joker_object != NULL)
+        JokerObject* joker_object = (JokerObject*)list_get_at_idx(&_owned_jokers_list, new_selection->x);
+        if(joker_object != NULL)
         {
-            sprite_object_set_focus(joker_object->sprite_object, true);
-            print_price_under_sprite_object(
-                joker_object->sprite_object,
-                joker_get_sell_value(joker_object->joker)
-            );
+            if (!swapping)
+            {
+                sprite_object_set_focus(joker_object->sprite_object, true);
+            }
+            if (!key_is_down(SELECT_CARD))
+            {
+                print_price_under_sprite_object(joker_object->sprite_object, joker_get_sell_value(joker_object->joker));
+            }
         }
+    }
+
+    if (swapping)
+    {
+        list_swap(&_owned_jokers_list, (unsigned int)prev_selection->x, (unsigned int)new_selection->x);
     }
 }
 
