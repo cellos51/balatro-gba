@@ -241,7 +241,7 @@ static bool check_and_score_joker_for_event(
 );
 static int calculate_interest_reward(void);
 static void game_over_anim_frame(void);
-static void shop_reroll_row_on_key_hit(SelectionGrid* selection_grid, Selection* selection);
+static void shop_reroll_row_on_key_transit(SelectionGrid* selection_grid, Selection* selection);
 static void shop_reroll_row_on_selection_changed(
     SelectionGrid* selection_grid,
     int row_idx,
@@ -255,9 +255,9 @@ static void shop_top_row_on_selection_changed(
     const Selection* prev_selection,
     const Selection* new_selection
 );
-static void shop_top_row_on_key_hit(SelectionGrid* selection_grid, Selection* selection);
+static void shop_top_row_on_key_transit(SelectionGrid* selection_grid, Selection* selection);
 static int shop_top_row_get_size(void);
-static void jokers_sel_row_on_key_hit(SelectionGrid* selection_grid, Selection* selection);
+static void jokers_sel_row_on_key_transit(SelectionGrid* selection_grid, Selection* selection);
 static void jokers_sel_row_on_selection_changed(
     SelectionGrid* selection_grid,
     int row_idx,
@@ -389,9 +389,13 @@ static StateInfo state_info[] = {
 };
 
 SelectionGridRow shop_selection_rows[] = {
-    {0, jokers_sel_row_get_size,  jokers_sel_row_on_selection_changed,  jokers_sel_row_on_key_hit },
-    {1, shop_top_row_get_size,    shop_top_row_on_selection_changed,    shop_top_row_on_key_hit   },
-    {2, shop_reroll_row_get_size, shop_reroll_row_on_selection_changed, shop_reroll_row_on_key_hit}
+    {0,
+     jokers_sel_row_get_size,  jokers_sel_row_on_selection_changed,
+     jokers_sel_row_on_key_transit                                                              },
+    {1, shop_top_row_get_size, shop_top_row_on_selection_changed,    shop_top_row_on_key_transit},
+    {2,
+     shop_reroll_row_get_size, shop_reroll_row_on_selection_changed,
+     shop_reroll_row_on_key_transit                                                             }
 };
 
 static const Selection SHOP_INIT_SEL = {-1, 1};
@@ -3681,7 +3685,7 @@ static void jokers_sel_row_on_selection_changed(
         if (joker_object != NULL)
         {
             erase_price_under_sprite_object(joker_object->sprite_object);
-            // keep focus on current Joker if swapping
+            // Don't change focus from current Joker if swapping
             if (!swapping)
             {
                 sprite_object_set_focus(joker_object->sprite_object, false);
@@ -3741,7 +3745,7 @@ static inline void game_sell_joker(int joker_idx)
     joker_start_discard_animation(joker_object);
 }
 
-static void jokers_sel_row_on_key_hit(SelectionGrid* selection_grid, Selection* selection)
+static void jokers_sel_row_on_key_transit(SelectionGrid* selection_grid, Selection* selection)
 {
     JokerObject* joker_object = (JokerObject*)list_get_at_idx(&_owned_jokers_list, selection->x);
     if (joker_object != NULL)
@@ -3750,7 +3754,7 @@ static void jokers_sel_row_on_key_hit(SelectionGrid* selection_grid, Selection* 
         {
             erase_price_under_sprite_object(joker_object->sprite_object);
         }
-        else
+        else if (key_released(SELECT_CARD))
         {
             print_price_under_sprite_object(
                 joker_object->sprite_object,
@@ -3792,7 +3796,7 @@ static inline void game_shop_buy_joker(int shop_joker_idx)
     list_remove_at_idx(&_shop_jokers_list, shop_joker_idx); // Remove the joker from the shop
 }
 
-static void shop_top_row_on_key_hit(SelectionGrid* selection_grid, Selection* selection)
+static void shop_top_row_on_key_transit(SelectionGrid* selection_grid, Selection* selection)
 {
     if (!key_hit(SELECT_CARD))
         return;
@@ -3948,8 +3952,12 @@ static inline void game_shop_reroll(int* reroll_cost)
     );
 }
 
-static void shop_reroll_row_on_key_hit(SelectionGrid* selection_grid, Selection* selection)
+static void shop_reroll_row_on_key_transit(SelectionGrid* selection_grid, Selection* selection)
 {
+    if (!key_hit(SELECT_CARD))
+    {
+        return;
+    }
     if (money >= reroll_cost)
     {
         game_shop_reroll(&reroll_cost);
