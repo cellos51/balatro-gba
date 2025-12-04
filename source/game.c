@@ -1044,26 +1044,29 @@ void display_mult(void)
     check_flaming_score();
 }
 
-static inline void sort_hand_by_suit(void)
+
+void swap_cards_in_hand(int a, int b)
+{
+    CardObject* temp = hand[a];
+    hand[a] = hand[b];
+    hand[b] = temp;
+}
+
+void sort_hand_by_suit()
 {
     for (int a = 0; a < hand_top; a++)
     {
         for (int b = a + 1; b <= hand_top; b++)
         {
-            if (hand[a] == NULL ||
-                (hand[b] != NULL && (hand[a]->card->suit > hand[b]->card->suit ||
-                                     (hand[a]->card->suit == hand[b]->card->suit &&
-                                      hand[a]->card->rank > hand[b]->card->rank))))
+            if (hand[a] == NULL || (hand[b] != NULL && (hand[a]->card->suit > hand[b]->card->suit || (hand[a]->card->suit == hand[b]->card->suit && hand[a]->card->rank > hand[b]->card->rank))))
             {
-                CardObject* temp = hand[a];
-                hand[a] = hand[b];
-                hand[b] = temp;
+                swap_cards_in_hand(a, b);
             }
         }
     }
 }
 
-static inline void sort_hand_by_rank(void)
+void sort_hand_by_rank()
 {
     for (int a = 0; a < hand_top; a++)
     {
@@ -1071,15 +1074,60 @@ static inline void sort_hand_by_rank(void)
         {
             if (hand[a] == NULL || (hand[b] != NULL && hand[a]->card->rank > hand[b]->card->rank))
             {
-                CardObject* temp = hand[a];
-                hand[a] = hand[b];
-                hand[b] = temp;
+                swap_cards_in_hand(a, b);
             }
         }
     }
 }
 
-static void sort_cards(void)
+void rearrange_card_sprites()
+{
+    // Update the sprites in the hand by destroying them and creating new ones in the correct order
+    // (This feels like a diabolical solution but like literally how else would you do this)
+    for (int i = 0; i <= hand_top; i++)
+    {
+        // a NULL card will only happen if we rearrange the sprites without having sorted them before
+        // Any NULL CardObject will be replaced by shifting all elements forward
+        if (hand[i] == NULL)
+        {
+            int non_null_card_idx = i; // don't start at i+1 to avoid potential illegal array access
+            for ( ; non_null_card_idx <= hand_top; non_null_card_idx++)
+            {
+                if (hand[non_null_card_idx] != NULL)
+                {
+                    break;
+                }
+            }
+
+            // exit loop if there are no non-NULL cards left/there are no more sprites to destroy
+            if (non_null_card_idx > hand_top)
+            {
+                break;
+            }
+
+            // if there is one, shift it and all the cards that follow
+            for (int j = 0; j <= hand_top - non_null_card_idx + 1; j++)
+            {
+                hand[i + j] = hand[non_null_card_idx + j];
+            }
+        }
+
+        // card_object_get_sprite() will not work here since we need the address
+        sprite_destroy(&(hand[i]->sprite_object->sprite));
+    }
+
+    for (int i = 0; i <= hand_top; i++)
+    {
+        if (hand[i] != NULL)
+        {
+            //hand[i]->sprite = sprite_new(ATTR0_SQUARE | ATTR0_4BPP | ATTR0_AFF, ATTR1_SIZE_32, card_sprite_lut[hand[i]->card->suit][hand[i]->card->rank], 0, i);
+            card_object_set_sprite(hand[i], i); // Set the sprite for the card object
+            sprite_position(card_object_get_sprite(hand[i]), fx2int(hand[i]->sprite_object->x), fx2int(hand[i]->sprite_object->y));
+        }
+    }
+}
+
+void sort_cards()
 {
     if (sort_by_suit)
     {
@@ -1090,31 +1138,7 @@ static void sort_cards(void)
         sort_hand_by_rank();
     }
 
-    // Update the sprites in the hand by destroying them and creating new ones in the correct order
-    // (This is feels like a diabolical solution but like literally how else would you do this)
-    for (int i = 0; i <= hand_top; i++)
-    {
-        if (hand[i] != NULL)
-        {
-            // card_object_get_sprite() will not work here since we need the address
-            sprite_destroy(&(hand[i]->sprite_object->sprite));
-        }
-    }
-
-    for (int i = 0; i <= hand_top; i++)
-    {
-        if (hand[i] != NULL)
-        {
-            // hand[i]->sprite = sprite_new(ATTR0_SQUARE | ATTR0_4BPP | ATTR0_AFF, ATTR1_SIZE_32,
-            // card_sprite_lut[hand[i]->card->suit][hand[i]->card->rank], 0, i);
-            card_object_set_sprite(hand[i], i); // Set the sprite for the card object
-            sprite_position(
-                card_object_get_sprite(hand[i]),
-                fx2int(hand[i]->sprite_object->x),
-                fx2int(hand[i]->sprite_object->y)
-            );
-        }
-    }
+    rearrange_card_sprites();
 }
 
 /* Copies the appropriate item into the top left panel (blind/shop icon)
