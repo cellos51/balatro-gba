@@ -3733,12 +3733,25 @@ static inline void game_sell_joker(int joker_idx)
 
 static void jokers_sel_row_on_key_hit(SelectionGrid* selection_grid, Selection* selection)
 {
-    if (!key_hit(SELL_KEY))
-        return;
+    JokerObject* joker_object = (JokerObject*)list_get_at_idx(&_owned_jokers_list, selection->x);
+    if (joker_object != NULL)
+    {
+        if (key_hit(SELECT_CARD))
+        {
+            erase_price_under_sprite_object(joker_object->sprite_object);
+        }
+        else
+        {
+            print_price_under_sprite_object(joker_object->sprite_object, joker_get_sell_value(joker_object->joker));
+        }
+    }
 
-    game_sell_joker(selection->x);
-    // Move the selection away from the jokers so it doesn't point to an invalid place
-    selection_grid_move_selection_vert(selection_grid, SCREEN_DOWN);
+    if (key_hit(SELL_KEY))
+    {
+        game_sell_joker(selection->x);
+        // Move the selection away from the jokers so it doesn't point to an invalid place
+        selection_grid_move_selection_vert(selection_grid, SCREEN_DOWN);
+    }
 }
 
 // Shop input
