@@ -1044,7 +1044,6 @@ void display_mult(void)
     check_flaming_score();
 }
 
-
 static void swap_cards_in_hand(int idx_a, int idx_b)
 {
     CardObject* temp = hand[idx_a];
@@ -1058,7 +1057,10 @@ static void sort_hand_by_suit()
     {
         for (int idx_b = idx_a + 1; idx_b <= hand_top; idx_b++)
         {
-            if (hand[idx_a] == NULL || (hand[idx_b] != NULL && (hand[idx_a]->card->suit > hand[idx_b]->card->suit || (hand[idx_a]->card->suit == hand[idx_b]->card->suit && hand[idx_a]->card->rank > hand[idx_b]->card->rank))))
+            if (hand[idx_a] == NULL ||
+                (hand[idx_b] != NULL && (hand[idx_a]->card->suit > hand[idx_b]->card->suit ||
+                                         (hand[idx_a]->card->suit == hand[idx_b]->card->suit &&
+                                          hand[idx_a]->card->rank > hand[idx_b]->card->rank))))
             {
                 swap_cards_in_hand(idx_a, idx_b);
             }
@@ -1072,7 +1074,8 @@ static void sort_hand_by_rank()
     {
         for (int idx_b = idx_a + 1; idx_b <= hand_top; idx_b++)
         {
-            if (hand[idx_a] == NULL || (hand[idx_b] != NULL && hand[idx_a]->card->rank > hand[idx_b]->card->rank))
+            if (hand[idx_a] == NULL ||
+                (hand[idx_b] != NULL && hand[idx_a]->card->rank > hand[idx_b]->card->rank))
             {
                 swap_cards_in_hand(idx_a, idx_b);
             }
@@ -1086,12 +1089,12 @@ static void rearrange_card_sprites()
     // (This feels like a diabolical solution but like literally how else would you do this)
     for (int i = 0; i <= hand_top; i++)
     {
-        // a NULL card will only happen if we rearrange the sprites without having sorted them before
-        // Any NULL CardObject will be replaced by shifting all elements forward
+        // a NULL card will only happen if we rearrange the sprites without having sorted them
+        // before Any NULL CardObject will be replaced by shifting all elements forward
         if (hand[i] == NULL)
         {
             int non_null_card_idx = i; // don't start at i+1 to avoid potential illegal array access
-            for ( ; non_null_card_idx <= hand_top; non_null_card_idx++)
+            for (; non_null_card_idx <= hand_top; non_null_card_idx++)
             {
                 if (hand[non_null_card_idx] != NULL)
                 {
@@ -1120,9 +1123,14 @@ static void rearrange_card_sprites()
     {
         if (hand[i] != NULL)
         {
-            //hand[i]->sprite = sprite_new(ATTR0_SQUARE | ATTR0_4BPP | ATTR0_AFF, ATTR1_SIZE_32, card_sprite_lut[hand[i]->card->suit][hand[i]->card->rank], 0, i);
+            // hand[i]->sprite = sprite_new(ATTR0_SQUARE | ATTR0_4BPP | ATTR0_AFF, ATTR1_SIZE_32,
+            // card_sprite_lut[hand[i]->card->suit][hand[i]->card->rank], 0, i);
             card_object_set_sprite(hand[i], i); // Set the sprite for the card object
-            sprite_position(card_object_get_sprite(hand[i]), fx2int(hand[i]->sprite_object->x), fx2int(hand[i]->sprite_object->y));
+            sprite_position(
+                card_object_get_sprite(hand[i]),
+                fx2int(hand[i]->sprite_object->x),
+                fx2int(hand[i]->sprite_object->y)
+            );
         }
     }
 }
@@ -1937,7 +1945,7 @@ static inline void game_playing_process_hand_select_input(void)
 
     // card moving logic
     static bool can_move_card = true;
-    static bool moving_card = false; // true if we are currently moving a card around
+    static bool moving_card = false;         // true if we are currently moving a card around
     static bool card_moved_too_fast = false; // see define of CARD_SWAP_TIME_THRESHOLD
     static uint move_timer = TM_ZERO;        // idem
 
