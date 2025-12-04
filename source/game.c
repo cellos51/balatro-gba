@@ -3703,6 +3703,9 @@ static void jokers_sel_row_on_selection_changed(
             {
                 sprite_object_set_focus(joker_object->sprite_object, true);
             }
+            // If we land on this row while the A button is being held, we are in swapping mode
+            // This means that we need to hide the prise, whether we were already
+            // on this row or if we come from another
             if (!key_is_down(SELECT_CARD))
             {
                 print_price_under_sprite_object(
