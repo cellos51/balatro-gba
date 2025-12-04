@@ -2208,7 +2208,7 @@ static inline void card_in_hand_loop_handle_discard_and_shuffling(
             {
                 discard_push(hand[card_idx]->card);
                 card_object_destroy(&hand[card_idx]);
-                sort_cards();
+                rearrange_card_sprites();
 
                 hand_top--;
                 // This technically isn't drawing cards, I'm just reusing the variable
@@ -3116,7 +3116,7 @@ static inline void cards_in_hand_update_loop(void)
                         played_push(hand[i]);
                         sprite_destroy(&hand[i]->sprite_object->sprite);
                         hand[i] = NULL;
-                        sort_cards();
+                        rearrange_card_sprites();
 
                         play_sfx(
                             SFX_CARD_DRAW,
