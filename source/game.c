@@ -3953,10 +3953,6 @@ static inline void game_shop_reroll(int* reroll_cost)
 
 static void shop_reroll_row_on_key_transit(SelectionGrid* selection_grid, Selection* selection)
 {
-    if (!key_hit(SELECT_CARD))
-    {
-        return;
-    }
     if (money >= reroll_cost)
     {
         game_shop_reroll(&reroll_cost);
