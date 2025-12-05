@@ -474,7 +474,7 @@ static int current_blind = BLIND_TYPE_SMALL;
 
 // The current state of the blinds, this is used to determine what the game is doing at any given
 // time
-static enum BlindState blinds[BLIND_TYPE_MAX] = {
+static enum BlindState blinds_states[BLIND_TYPE_MAX] = {
     BLIND_STATE_CURRENT,
     BLIND_STATE_UPCOMING,
     BLIND_STATE_UPCOMING
@@ -647,9 +647,9 @@ void game_init()
     discards = max_discards;
     timer = TM_ZERO;
     current_blind = BLIND_TYPE_SMALL;
-    blinds[0] = BLIND_STATE_CURRENT;
-    blinds[1] = BLIND_STATE_UPCOMING;
-    blinds[2] = BLIND_STATE_UPCOMING;
+    blinds_states[0] = BLIND_STATE_CURRENT;
+    blinds_states[1] = BLIND_STATE_UPCOMING;
+    blinds_states[2] = BLIND_STATE_UPCOMING;
     ante = STARTING_ANTE;
     money = STARTING_MONEY;
     score = STARTING_SCORE;
@@ -1313,7 +1313,7 @@ static void change_background(enum BackgroundId id)
             curr_blind_rect.left += i * rect_width(&SINGLE_BLIND_SELECT_RECT);
             curr_blind_rect.right += i * rect_width(&SINGLE_BLIND_SELECT_RECT);
 
-            if (blinds[i] != BLIND_STATE_CURRENT &&
+            if (blinds_states[i] != BLIND_STATE_CURRENT &&
                 (i == BLIND_TYPE_SMALL || i == BLIND_TYPE_BIG)) // Make the skip button gray
             {
                 BG_POINT skip_blind_btn_pos_dest = {
@@ -1329,7 +1329,7 @@ static void change_background(enum BackgroundId id)
                 main_bg_se_copy_rect(skip_blind_btn_rect_src, skip_blind_btn_pos_dest);
             }
 
-            switch (blinds[i])
+            switch (blinds_states[i])
             {
                 case BLIND_STATE_CURRENT: // Raise the blind panel up a bit
                 {
@@ -1706,14 +1706,14 @@ static void increment_blind(enum BlindState increment_reason)
     if (current_blind >= BLIND_TYPE_MAX)
     {
         current_blind = 0;
-        blinds[0] = BLIND_STATE_CURRENT;  // Reset the blinds to the first one
-        blinds[1] = BLIND_STATE_UPCOMING; // Set the next blind to upcoming
-        blinds[2] = BLIND_STATE_UPCOMING; // Set the next blind to upcoming
+        blinds_states[0] = BLIND_STATE_CURRENT;  // Reset the blinds to the first one
+        blinds_states[1] = BLIND_STATE_UPCOMING; // Set the next blind to upcoming
+        blinds_states[2] = BLIND_STATE_UPCOMING; // Set the next blind to upcoming
     }
     else
     {
-        blinds[current_blind] = BLIND_STATE_CURRENT;
-        blinds[current_blind - 1] = increment_reason;
+        blinds_states[current_blind] = BLIND_STATE_CURRENT;
+        blinds_states[current_blind - 1] = increment_reason;
     }
 }
 
@@ -4112,7 +4112,7 @@ static Rect game_blind_select_get_req_score_rect(enum BlindType blind)
     blind_req_score_rect.left += blind * rect_width(&SINGLE_BLIND_SELECT_RECT) * TILE_SIZE;
     blind_req_score_rect.right += blind * rect_width(&SINGLE_BLIND_SELECT_RECT) * TILE_SIZE;
 
-    if (blinds[blind] == BLIND_STATE_CURRENT)
+    if (blinds_states[blind] == BLIND_STATE_CURRENT)
     {
         // Current blind is raised
         blind_req_score_rect.top -= TILE_SIZE;
