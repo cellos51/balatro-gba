@@ -26,6 +26,7 @@ jobs:
           include/def_state_info_table.h
           include/pool.h source/pool.c
           include/card.h source/card.c 
+          include/game.h source/game.c 
           include/hand_analysis.h source/hand_analysis.c 
           include/list.h source/list.c
           include/sprite.h source/sprite.c 

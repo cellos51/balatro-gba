@@ -181,8 +181,8 @@ void sprite_object_update(SpriteObject* sprite_object)
 
     // set velocity to 0 if it's close enough to the target
     const FIXED epsilon = float2fx(0.01f);
-    if (sprite_object->vx < epsilon && sprite_object->vx > -epsilon && sprite_object->vy < epsilon &&
-        sprite_object->vy > -epsilon)
+    if (sprite_object->vx < epsilon && sprite_object->vx > -epsilon &&
+        sprite_object->vy < epsilon && sprite_object->vy > -epsilon)
     {
         sprite_object->vx = 0;
         sprite_object->vy = 0;
@@ -215,7 +215,8 @@ void sprite_object_update(SpriteObject* sprite_object)
     if (sprite_object->vrotation < epsilon && sprite_object->vrotation > -epsilon)
     {
         sprite_object->vrotation = 0;
-        sprite_object->rotation = sprite_object->trotation; // Set the rotation to the target rotation
+        // Set the rotation to the target rotation
+        sprite_object->rotation = sprite_object->trotation;
     }
     else
     {
@@ -223,10 +224,13 @@ void sprite_object_update(SpriteObject* sprite_object)
         sprite_object->rotation += sprite_object->vrotation;
     }
 
-    obj_aff_rotscale(sprite_object->sprite->aff,
-                     sprite_object->scale,
-                     sprite_object->scale,
-                     -sprite_object->vx + sprite_object->rotation); // Apply rotation and scale to the sprite
+    // Apply rotation and scale to the sprite
+    obj_aff_rotscale(
+        sprite_object->sprite->aff,
+        sprite_object->scale,
+        sprite_object->scale,
+        -sprite_object->vx + sprite_object->rotation
+    );
     sprite_position(sprite_object->sprite, fx2int(sprite_object->x), fx2int(sprite_object->y));
 }
 

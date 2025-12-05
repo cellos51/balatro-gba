@@ -34,10 +34,11 @@ int bitset_set_next_free_idx(Bitset* bitset)
         // https://gcc.gnu.org/onlinedocs/gcc/Bit-Operation-Builtins.html#index-_005f_005fbuiltin_005fctz
         //
         // By using the bitwise inverse of the word, you can skip words that are full
-        // quickly (where the value is 0 or 'false' since all bits are '1', or 'in use').  Any value greater
-        // than 0 indicates there is a free slot. Then, when counting the trailing 0's, you can test very quickly
-        // where the first free slot is. This operation prevents looping through every bit of filled flags, and
-        // will instead operate only on the first word with free slots.
+        // quickly (where the value is 0 or 'false' since all bits are '1', or 'in use').  Any value
+        // greater than 0 indicates there is a free slot. Then, when counting the trailing 0's, you
+        // can test very quickly where the first free slot is. This operation prevents looping
+        // through every bit of filled flags, and will instead operate only on the first word with
+        // free slots.
         if (inv)
         {
             int bit = __builtin_ctz(inv);
@@ -100,7 +101,8 @@ int bitset_find_idx_of_nth_set(const Bitset* bitset, int n)
         if (tracker > n)
         {
             // The index is here somewhere
-            // this one is to count the 1's not the offset, underflow to -1 is good for finding the 0 index
+            // this one is to count the 1's not the offset, underflow to -1 is good for finding the
+            // 0 index
             int base = prev_tracker - 1;
             // this one is for the actual offset we want to map the id to
             int offset = bitset->nbits * i;

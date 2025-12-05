@@ -8,9 +8,10 @@
 
 #include <tonc.h>
 
-// +1 is added because we'll actually be indexing at 1, but if something causes you to go to ante 0, there will still be
-// a value there.
-static const int ante_lut[MAX_ANTE + 1] = {100, 300, 800, 2000, 5000, 11000, 20000, 35000, 50000};
+// Maps the ante number to the base blind requirement for that ante.
+// The game starts at ante 1 which is at index 1 for base requirement 300.
+// Ante 0 is also there in case it is ever reached.
+static const u32 ante_lut[] = {100, 300, 800, 2000, 5000, 11000, 20000, 35000, 50000};
 
 // Palettes for the blinds (Transparency, Text Color, Shadow, Highlight, Main Color) Use this:
 // http://www.budmelvin.com/dev/15bitconverter.html
@@ -70,7 +71,7 @@ void blind_init()
     return;
 }
 
-int blind_get_requirement(enum BlindType type, int ante)
+u32 blind_get_requirement(enum BlindType type, int ante)
 {
     // Ensure ante is within valid range
     if (ante < 0 || ante > MAX_ANTE)
