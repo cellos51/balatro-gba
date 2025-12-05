@@ -1312,7 +1312,7 @@ static void change_background(enum BackgroundId id)
             // There's no gap between them
             curr_blind_rect.left += i * rect_width(&SINGLE_BLIND_SELECT_RECT);
             curr_blind_rect.right += i * rect_width(&SINGLE_BLIND_SELECT_RECT);
-            
+
             if (blinds[i] != BLIND_STATE_CURRENT &&
                 (i == BLIND_TYPE_SMALL || i == BLIND_TYPE_BIG)) // Make the skip button gray
             {
@@ -4096,8 +4096,10 @@ static void game_blind_select_erase_blind_reqs_and_rewards()
         // To account for overflow
         blind_req_and_reward_rect.right += TILE_SIZE;
 
-        blind_req_and_reward_rect.left += curr_blind * rect_width(&SINGLE_BLIND_SELECT_RECT) * TILE_SIZE;
-        blind_req_and_reward_rect.right += curr_blind * rect_width(&SINGLE_BLIND_SELECT_RECT) * TILE_SIZE;
+        blind_req_and_reward_rect.left +=
+            curr_blind * rect_width(&SINGLE_BLIND_SELECT_RECT) * TILE_SIZE;
+        blind_req_and_reward_rect.right +=
+            curr_blind * rect_width(&SINGLE_BLIND_SELECT_RECT) * TILE_SIZE;
 
         tte_erase_rect_wrapper(blind_req_and_reward_rect);
     }
@@ -4123,18 +4125,18 @@ static Rect game_blind_select_get_req_score_rect(enum BlindType blind)
 static inline void game_blind_select_print_blind_req(enum BlindType blind)
 {
     Rect blind_req_score_rect = game_blind_select_get_req_score_rect(blind);
-        
+
     u32 blind_req = blind_get_requirement(blind, ante);
 
     char blind_req_str_buff[UINT_MAX_DIGITS + 1];
     truncate_uint_to_suffixed_str(
-        blind_req, 
-        rect_width(&blind_req_score_rect)/TTE_CHAR_SIZE, 
+        blind_req,
+        rect_width(&blind_req_score_rect) / TTE_CHAR_SIZE,
         blind_req_str_buff
     );
 
     update_text_rect_to_right_align_str(&blind_req_score_rect, blind_req_str_buff, OVERFLOW_RIGHT);
-    
+
     tte_printf(
         "#{P:%d,%d; cx:0x%X000}%s",
         blind_req_score_rect.left,
@@ -4155,7 +4157,7 @@ static inline void game_blind_select_print_blind_reward(enum BlindType blind)
 
     char blind_reward_str_buff[UINT_MAX_DIGITS + 2]; // +2 for null terminator and "$"
     snprintf(blind_reward_str_buff, sizeof(blind_reward_str_buff), "$%d", blind_reward);
-    
+
     update_text_rect_to_right_align_str(&blind_reward_rect, blind_reward_str_buff, OVERFLOW_RIGHT);
 
     tte_printf(
@@ -4166,7 +4168,6 @@ static inline void game_blind_select_print_blind_reward(enum BlindType blind)
         blind_reward_str_buff
     );
 }
-
 
 static void game_blind_select_print_blinds_reqs_and_rewards()
 {
