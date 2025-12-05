@@ -76,6 +76,6 @@ jobs:
 
   clang-format-job:
     name: Run clang-format test
-    needs: unit-tests-job 
+    needs: unit-tests-job build
     uses: ./.github/workflows/clang_format_ci_workflow.yml
 
