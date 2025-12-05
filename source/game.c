@@ -3679,14 +3679,11 @@ static void jokers_sel_row_on_selection_changed(
     {
         JokerObject* joker_object =
             (JokerObject*)list_get_at_idx(&_owned_jokers_list, prev_selection->x);
-        if (joker_object != NULL)
+        // Don't change focus from current Joker if swapping
+        if (joker_object != NULL && !swapping)
         {
             erase_price_under_sprite_object(joker_object->sprite_object);
-            // Don't change focus from current Joker if swapping
-            if (!swapping)
-            {
-                sprite_object_set_focus(joker_object->sprite_object, false);
-            }
+            sprite_object_set_focus(joker_object->sprite_object, false);
         }
     }
 
