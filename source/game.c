@@ -387,13 +387,14 @@ static StateInfo state_info[] = {
 #include "../include/def_state_info_table.h"
 #undef DEF_STATE_INFO
 };
-
+// TODO: Properly format this and make clang-format happy with it.
+// clang-format off
 SelectionGridRow shop_selection_rows[] = {
     {0, jokers_sel_row_get_size,  jokers_sel_row_on_selection_changed,  jokers_sel_row_on_key_transit },
     {1, shop_top_row_get_size,    shop_top_row_on_selection_changed,    shop_top_row_on_key_transit   },
     {2, shop_reroll_row_get_size, shop_reroll_row_on_selection_changed, shop_reroll_row_on_key_transit}
 };
-
+// clang-format on
 static const Selection SHOP_INIT_SEL = {-1, 1};
 
 SelectionGrid shop_selection_grid = {
