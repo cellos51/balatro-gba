@@ -552,6 +552,11 @@ static int four_fingers_joker_count = 0;
 static int straight_and_flush_size = STRAIGHT_AND_FLUSH_SIZE_DEFAULT;
 
 GBLA_UNUSED
+static inline bool is_shop_joker_avail(int joker_id)
+{
+    return bitset_get_idx(&_avail_jokers_bitset, joker_id);
+}
+
 static inline void set_shop_joker_avail(int joker_id, bool avail)
 {
     bitset_set_idx(&_avail_jokers_bitset, joker_id, avail);
@@ -3582,14 +3587,14 @@ static void game_shop_create_items(void)
     {
         int joker_id = 0;
 #ifdef TEST_JOKER_ID0 // Allow defining an ID for a joker to always appear in shop and be tested
-        if (_get_shop_joker_avail(TEST_JOKER_ID0))
+        if (is_shop_joker_avail(TEST_JOKER_ID0))
         {
             joker_id = TEST_JOKER_ID0;
         }
         else
 #endif
 #ifdef TEST_JOKER_ID1
-            if (_get_shop_joker_avail(TEST_JOKER_ID1))
+            if (is_shop_joker_avail(TEST_JOKER_ID1))
         {
             joker_id = TEST_JOKER_ID1;
         }
