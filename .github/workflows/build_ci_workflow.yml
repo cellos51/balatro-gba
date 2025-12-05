@@ -21,13 +21,8 @@ on:
         default: true
 
 jobs:
-  clang-format-job:
-    name: Run clang-format test
-    uses: ./.github/workflows/clang_format_ci_workflow.yml
-
   unit-tests-job:
     name: Run unit tests
-    needs: clang-format-job
     uses: ./.github/workflows/unit_tests_ci_workflow.yml
 
   build:
@@ -78,3 +73,9 @@ jobs:
           name: build-out
           path: build
           retention-days: 5
+
+  clang-format-job:
+    name: Run clang-format test
+    needs: unit-tests-job 
+    uses: ./.github/workflows/clang_format_ci_workflow.yml
+
