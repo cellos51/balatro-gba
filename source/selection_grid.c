@@ -78,8 +78,8 @@ void selection_grid_process_input(SelectionGrid* selection_grid)
     u32 non_directional_key = KEY_ANY & ~KEY_DIR;
     if (key_transit(non_directional_key))
     {
-        Selection* selection =
-            &selection_grid->selection; // To make the next line shorter and more readable
+        // To make the next line shorter and more readable
+        Selection* selection = &selection_grid->selection;
         selection_grid->rows[selection->y].on_key_transit(selection_grid, selection);
     }
 }
