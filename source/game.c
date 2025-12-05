@@ -4384,59 +4384,77 @@ static void game_blind_select_erase_blind_reqs_and_rewards()
     }
 }
 
-static void game_blind_select_print_blind_reqs_and_rewards()
+static Rect game_blind_select_get_req_score_rect(enum BlindType blind)
+{
+    Rect blind_req_score_rect = SINGLE_BLIND_SEL_REQ_SCORE_RECT;
+
+    blind_req_score_rect.left += blind * rect_width(&SINGLE_BLIND_SELECT_RECT) * TILE_SIZE;
+    blind_req_score_rect.right += blind * rect_width(&SINGLE_BLIND_SELECT_RECT) * TILE_SIZE;
+
+    if (blinds[blind] == BLIND_STATE_CURRENT)
+    {
+        // Current blind is raised
+        blind_req_score_rect.top -= TILE_SIZE;
+        blind_req_score_rect.bottom -= TILE_SIZE;
+    }
+
+    return blind_req_score_rect;
+}
+
+static inline void game_blind_select_print_blind_req(enum BlindType blind)
+{
+    Rect blind_req_score_rect = game_blind_select_get_req_score_rect(blind);
+        
+    u32 blind_req = blind_get_requirement(blind, ante);
+
+    char blind_req_str_buff[UINT_MAX_DIGITS + 1];
+    truncate_uint_to_suffixed_str(
+        blind_req, 
+        rect_width(&blind_req_score_rect)/TTE_CHAR_SIZE, 
+        blind_req_str_buff
+    );
+
+    update_text_rect_to_right_align_str(&blind_req_score_rect, blind_req_str_buff, OVERFLOW_RIGHT);
+    
+    tte_printf(
+        "#{P:%d,%d; cx:0x%X000}%s",
+        blind_req_score_rect.left,
+        blind_req_score_rect.top,
+        TTE_RED_PB,
+        blind_req_str_buff
+    );
+}
+
+static inline void game_blind_select_print_blind_reward(enum BlindType blind)
+{
+    int blind_reward = blind_get_reward(blind);
+    Rect blind_reward_rect = game_blind_select_get_req_score_rect(blind);
+
+    // The reward is right below the score.
+    blind_reward_rect.top += TILE_SIZE;
+    blind_reward_rect.bottom += TILE_SIZE;
+
+    char blind_reward_str_buff[UINT_MAX_DIGITS + 2]; // +2 for null terminator and "$"
+    snprintf(blind_reward_str_buff, sizeof(blind_reward_str_buff), "$%d", blind_reward);
+    
+    update_text_rect_to_right_align_str(&blind_reward_rect, blind_reward_str_buff, OVERFLOW_RIGHT);
+
+    tte_printf(
+        "#{P:%d,%d; cx:0x%X000}%s",
+        blind_reward_rect.left,
+        blind_reward_rect.top,
+        TTE_YELLOW_PB,
+        blind_reward_str_buff
+    );
+}
+
+
+static void game_blind_select_print_blinds_reqs_and_rewards()
 {
     for (enum BlindType curr_blind = 0; curr_blind < BLIND_TYPE_MAX; curr_blind++)
     {
-        Rect blind_req_score_rect = SINGLE_BLIND_SEL_REQ_SCORE_RECT;
-        
-        if (blinds[curr_blind] == BLIND_STATE_CURRENT)
-        {
-            blind_req_score_rect.top -= TILE_SIZE;
-            blind_req_score_rect.bottom -= TILE_SIZE;
-        }
-
-        blind_req_score_rect.left += curr_blind * rect_width(&SINGLE_BLIND_SELECT_RECT) * TILE_SIZE;
-        blind_req_score_rect.right += curr_blind * rect_width(&SINGLE_BLIND_SELECT_RECT) * TILE_SIZE;
-
-        u32 blind_req = blind_get_requirement(curr_blind, ante);
-
-        char blind_req_str_buff[UINT_MAX_DIGITS + 1];
-        truncate_uint_to_suffixed_str(
-            blind_req, 
-            rect_width(&blind_req_score_rect)/TTE_CHAR_SIZE, 
-            blind_req_str_buff
-        );
-
-        update_text_rect_to_right_align_str(&blind_req_score_rect, blind_req_str_buff, OVERFLOW_RIGHT);
-        
-        tte_printf(
-            "#{P:%d,%d; cx:0x%X000}%s",
-            blind_req_score_rect.left,
-            blind_req_score_rect.top,
-            TTE_RED_PB,
-            blind_req_str_buff
-        );
-
-        int blind_reward = blind_get_reward(curr_blind);
-        Rect blind_reward_rect = blind_req_score_rect;
-
-        // The reward is right below the score.
-        blind_reward_rect.top += TILE_SIZE;
-        blind_reward_rect.bottom += TILE_SIZE;
-        char blind_reward_str_buff[UINT_MAX_DIGITS + 2]; // +2 for null terminator and "$"
-
-        snprintf(blind_reward_str_buff, sizeof(blind_reward_str_buff), "$%d", blind_reward);
-        
-        update_text_rect_to_right_align_str(&blind_reward_rect, blind_reward_str_buff, OVERFLOW_RIGHT);
-
-        tte_printf(
-            "#{P:%d,%d; cx:0x%X000}%s",
-            blind_reward_rect.left,
-            blind_reward_rect.top,
-            TTE_YELLOW_PB,
-            blind_reward_str_buff
-        );
+        game_blind_select_print_blind_req(curr_blind);
+        game_blind_select_print_blind_reward(curr_blind);
     }
 }
 
@@ -4455,7 +4473,7 @@ static void game_blind_select_start_anim_seq()
 
     if (timer == TM_END_ANIM_SEQ)
     {
-        game_blind_select_print_blind_reqs_and_rewards();
+        game_blind_select_print_blinds_reqs_and_rewards();
         state_info[game_state].substate = BLIND_SELECT;
         timer = TM_ZERO; // Reset the timer
     }
@@ -4480,7 +4498,7 @@ static void game_blind_select_handle_input()
     else if (key_hit(SELECT_CARD))
     {
         game_blind_select_erase_blind_reqs_and_rewards();
-        
+
         if (selection_y == 0) // Blind selected
         {
             play_sfx(SFX_BUTTON, MM_BASE_PITCH_RATE, BUTTON_SFX_VOLUME);
@@ -4511,7 +4529,7 @@ static void game_blind_select_handle_input()
                 );
             }
 
-            game_blind_select_print_blind_reqs_and_rewards();
+            game_blind_select_print_blinds_reqs_and_rewards();
 
             timer = TM_ZERO;
         }
