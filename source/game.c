@@ -357,6 +357,8 @@ static const Rect BLIND_REWARD_RECT         = {40,      32,     64,     40  };
 static const Rect BLIND_REQ_TEXT_RECT       = {32,      24,     64,     32  };
 static const Rect SHOP_PRICES_TEXT_RECT     = {72,      56,     192,    160 };
 
+static const Rect SINGLE_BLIND_SEL_REQ_SCORE_RECT = {80, 120,    104,     128  };
+
 // Rects with UNDEFINED are only used in tte_printf, they need to be fully defined
 // to be used with tte_erase_rect_wrapper()
 static const Rect HANDS_TEXT_RECT           = {16,      104,    UNDEFINED, UNDEFINED };
@@ -1380,7 +1382,7 @@ static void change_background(enum BackgroundId id)
             // There's no gap between them
             curr_blind_rect.left += i * rect_width(&SINGLE_BLIND_SELECT_RECT);
             curr_blind_rect.right += i * rect_width(&SINGLE_BLIND_SELECT_RECT);
-
+            
             if (blinds[i] != BLIND_STATE_CURRENT &&
                 (i == BLIND_TYPE_SMALL || i == BLIND_TYPE_BIG)) // Make the skip button gray
             {
@@ -4362,6 +4364,82 @@ static void game_blind_select_on_update()
     blind_select_state_actions[substate]();
 }
 
+static void game_blind_select_erase_blind_reqs_and_rewards()
+{
+    for (enum BlindType curr_blind = 0; curr_blind < BLIND_TYPE_MAX; curr_blind++)
+    {
+        Rect blind_req_and_reward_rect = SINGLE_BLIND_SEL_REQ_SCORE_RECT;
+
+        // To account for both raised blind and reward
+        blind_req_and_reward_rect.top -= TILE_SIZE;
+        blind_req_and_reward_rect.bottom += TILE_SIZE;
+
+        // To account for overflow
+        blind_req_and_reward_rect.right += TILE_SIZE;
+
+        blind_req_and_reward_rect.left += curr_blind * rect_width(&SINGLE_BLIND_SELECT_RECT) * TILE_SIZE;
+        blind_req_and_reward_rect.right += curr_blind * rect_width(&SINGLE_BLIND_SELECT_RECT) * TILE_SIZE;
+
+        tte_erase_rect_wrapper(blind_req_and_reward_rect);
+    }
+}
+
+static void game_blind_select_print_blind_reqs_and_rewards()
+{
+    for (enum BlindType curr_blind = 0; curr_blind < BLIND_TYPE_MAX; curr_blind++)
+    {
+        Rect blind_req_score_rect = SINGLE_BLIND_SEL_REQ_SCORE_RECT;
+        
+        if (blinds[curr_blind] == BLIND_STATE_CURRENT)
+        {
+            blind_req_score_rect.top -= TILE_SIZE;
+            blind_req_score_rect.bottom -= TILE_SIZE;
+        }
+
+        blind_req_score_rect.left += curr_blind * rect_width(&SINGLE_BLIND_SELECT_RECT) * TILE_SIZE;
+        blind_req_score_rect.right += curr_blind * rect_width(&SINGLE_BLIND_SELECT_RECT) * TILE_SIZE;
+
+        u32 blind_req = blind_get_requirement(curr_blind, ante);
+
+        char blind_req_str_buff[UINT_MAX_DIGITS + 1];
+        truncate_uint_to_suffixed_str(
+            blind_req, 
+            rect_width(&blind_req_score_rect)/TTE_CHAR_SIZE, 
+            blind_req_str_buff
+        );
+
+        update_text_rect_to_right_align_str(&blind_req_score_rect, blind_req_str_buff, OVERFLOW_RIGHT);
+        
+        tte_printf(
+            "#{P:%d,%d; cx:0x%X000}%s",
+            blind_req_score_rect.left,
+            blind_req_score_rect.top,
+            TTE_RED_PB,
+            blind_req_str_buff
+        );
+
+        int blind_reward = blind_get_reward(curr_blind);
+        Rect blind_reward_rect = blind_req_score_rect;
+
+        // The reward is right below the score.
+        blind_reward_rect.top += TILE_SIZE;
+        blind_reward_rect.bottom += TILE_SIZE;
+        char blind_reward_str_buff[UINT_MAX_DIGITS + 2]; // +2 for null terminator and "$"
+
+        snprintf(blind_reward_str_buff, sizeof(blind_reward_str_buff), "$%d", blind_reward);
+        
+        update_text_rect_to_right_align_str(&blind_reward_rect, blind_reward_str_buff, OVERFLOW_RIGHT);
+
+        tte_printf(
+            "#{P:%d,%d; cx:0x%X000}%s",
+            blind_reward_rect.left,
+            blind_reward_rect.top,
+            TTE_YELLOW_PB,
+            blind_reward_str_buff
+        );
+    }
+}
+
 static void game_blind_select_start_anim_seq()
 {
     main_bg_se_copy_rect_1_tile_vert(POP_MENU_ANIM_RECT, SCREEN_UP);
@@ -4377,6 +4455,7 @@ static void game_blind_select_start_anim_seq()
 
     if (timer == TM_END_ANIM_SEQ)
     {
+        game_blind_select_print_blind_reqs_and_rewards();
         state_info[game_state].substate = BLIND_SELECT;
         timer = TM_ZERO; // Reset the timer
     }
@@ -4400,6 +4479,8 @@ static void game_blind_select_handle_input()
     }
     else if (key_hit(SELECT_CARD))
     {
+        game_blind_select_erase_blind_reqs_and_rewards();
+        
         if (selection_y == 0) // Blind selected
         {
             play_sfx(SFX_BUTTON, MM_BASE_PITCH_RATE, BUTTON_SFX_VOLUME);
@@ -4429,6 +4510,8 @@ static void game_blind_select_handle_input()
                     blind_select_tokens[i]->pos.y - (TILE_SIZE * 12)
                 );
             }
+
+            game_blind_select_print_blind_reqs_and_rewards();
 
             timer = TM_ZERO;
         }
