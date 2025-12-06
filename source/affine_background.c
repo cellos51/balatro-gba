@@ -7,8 +7,8 @@
 #define ANIMATION_SPEED_DIVISOR 16
 
 // Prepare screen during VBLANK
-// Pre-computes the affine matrices values for each scanline and stores in bgaff_arr. This is to be done in VBLANK so
-// the HBLANK code can just fetch the values quickly.
+// Pre-computes the affine matrices values for each scanline and stores in bgaff_arr. This is to be
+// done in VBLANK so the HBLANK code can just fetch the values quickly.
 static IWRAM_CODE void s_affine_background_prep_bgaff_arr();
 
 static BG_AFFINE _bgaff_arr[SCREEN_HEIGHT + 1];
@@ -48,8 +48,10 @@ void affine_background_update()
         _asx.scr_y = 0;
         _asx.tex_x += 5;
         _asx.tex_y += 12;
-        _asx.sx = ((lu_sin(_timer * 100)) >> 8) + 256;          // Scale the sine value to fit in a s16
-        _asx.sy = ((lu_sin(_timer * 100 + 0x4000)) >> 8) + 256; // Scale the sine value to fit in a s16
+        // Scale the sine value to fit in a s16
+        _asx.sx = ((lu_sin(_timer * 100)) >> 8) + 256;
+        // Scale the sine value to fit in a s16
+        _asx.sy = ((lu_sin(_timer * 100 + 0x4000)) >> 8) + 256;
         _asx.alpha = 0;
 
         bg_rotscale_ex(&_bgaff_arr[0], &_asx);
@@ -61,7 +63,8 @@ void affine_background_update()
 
 void affine_background_set_color(COLOR color)
 {
-    affine_background_change_background(_background); // Reload the palette to reset any previous color scaling
+    // Reload the palette to reset any previous color scaling
+    affine_background_change_background(_background);
     for (int i = 0; i < AFFINE_BG_PAL_LEN; i++)
     {
         clr_rgbscale(&pal_bg_mem[AFFINE_BG_PB] + i, &pal_bg_mem[AFFINE_BG_PB] + i, 1, color);
@@ -84,10 +87,12 @@ void affine_background_change_background(enum AffineBackgroundID new_bg)
             REG_BG2CNT |= BG_AFF_16x16;
             REG_IE |= IRQ_HBLANK; // Enable HBLANK
 
-            memcpy32_tile8_with_palette_offset((u32*)&tile8_mem[AFFINE_BG_CBB],
-                                               (const u32*)affine_main_menu_background_gfxTiles,
-                                               affine_main_menu_background_gfxTilesLen / 4,
-                                               AFFINE_BG_PB);
+            memcpy32_tile8_with_palette_offset(
+                (u32*)&tile8_mem[AFFINE_BG_CBB],
+                (const u32*)affine_main_menu_background_gfxTiles,
+                affine_main_menu_background_gfxTilesLen / 4,
+                AFFINE_BG_PB
+            );
             GRIT_CPY(&se_mem[AFFINE_BG_SBB], affine_main_menu_background_gfxMap);
             affine_background_load_palette(affine_main_menu_background_gfxPal);
             break;
@@ -96,10 +101,12 @@ void affine_background_change_background(enum AffineBackgroundID new_bg)
             REG_BG2CNT |= BG_AFF_32x32;
             REG_IE &= ~IRQ_HBLANK; // Disable HBLANK
 
-            memcpy32_tile8_with_palette_offset((u32*)&tile8_mem[AFFINE_BG_CBB],
-                                               (const u32*)affine_background_gfxTiles,
-                                               affine_background_gfxTilesLen / 4,
-                                               AFFINE_BG_PB);
+            memcpy32_tile8_with_palette_offset(
+                (u32*)&tile8_mem[AFFINE_BG_CBB],
+                (const u32*)affine_background_gfxTiles,
+                affine_background_gfxTilesLen / 4,
+                AFFINE_BG_PB
+            );
             GRIT_CPY(&se_mem[AFFINE_BG_SBB], affine_background_gfxMap);
             affine_background_load_palette(affine_background_gfxPal);
             break;

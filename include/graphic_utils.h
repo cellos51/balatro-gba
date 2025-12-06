@@ -187,7 +187,7 @@ INLINE int rect_height(const Rect* rect)
  *
  * bg_sbb is the SBB of the background in which to move the rect
  * se_rect dimensions are in number of tiles.
- * 
+ *
  * NOTE: This does not work with TTE_SBB, probably because it's 4BPP...
  *
  * If you are doing this operation you are probably doing this in the main
@@ -237,8 +237,8 @@ void main_bg_se_copy_rect(Rect se_rect, BG_POINT dest_pos);
  * 3. The sides are stretched
  * 4. The center is filled.
  *
- * @param se_rect_dest destination for 3x3 copy, if rect sides are length 2, then the sides are not copied, only the
- * corners. **But dest rect sides must be at least 2.**
+ * @param se_rect_dest destination for 3x3 copy, if rect sides are length 2, then the sides are not
+ * copied, only the corners. **But dest rect sides must be at least 2.**
  *
  * @param se_rect_src_3x3_top_left points to the top left corner of the source 3x3 rect.
  */
@@ -263,34 +263,37 @@ void main_bg_se_move_rect_1_tile_vert(Rect se_rect, enum ScreenVertDir direction
 void tte_erase_rect_wrapper(Rect rect);
 
 /**
- * @brief Changes rect->left so it fits the digits of num exactly when right aligned to rect->right. Assumes num is not
- * negative.
+ * @brief Changes rect->left so it fits the digits of num exactly when right aligned to rect->right.
+ * Assumes num is not negative.
  *
  * overflow_direction determines the direction the number will overflow
  * if it's too large to fit inside the rect.
  *
  * Note that both rect->left and rect-right need to be defined, top and bottom don't matter
  *
- * @param rect is in number of pixels but should be a multiple of TILE_SIZE, so it's a whole number of tiles to fit TTE
- * characters
+ * @param rect is in number of pixels but should be a multiple of TILE_SIZE, so it's a whole number
+ * of tiles to fit TTE characters
  *
  * @param num number to display
  *
  * @param overflow_direction either OVERFLOW_LEFT or OVERFLOW_RIGHT.
  */
-void update_text_rect_to_right_align_str(Rect* rect, const char* str, enum OverflowDir overflow_direction);
+void update_text_rect_to_right_align_str(
+    Rect* rect,
+    const char* str,
+    enum OverflowDir overflow_direction
+);
 
-
-/** 
+/**
  * @brief Updates a rect so a string is centered within it.
- * 
+ *
  * @param rect  The rect provided, the provided values are used to determine the center
  *              and it is then updated so the string starting in rect->left is centered
  *              The rect is in number of pixels but should be a multiple of TTE_CHAR_SIZE
  *              so it's a whole number of tiles to fit TTE characters.
- * 
+ *
  * @param str   The string, the center of the string will be at the center of the updated rect.
- * 
+ *
  * @param bias_direction    Which direction to bias when the string can't be evenly centered
  *                          with respect to char tiles.
  *                          Examples:
