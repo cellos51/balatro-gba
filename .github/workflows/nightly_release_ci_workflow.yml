@@ -24,4 +24,5 @@ jobs:
     needs: build-job
     steps:
       - name: Say cool
-        run: echo "cool"
+        run: |
+          echo "cool"
