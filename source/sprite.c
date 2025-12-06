@@ -280,7 +280,8 @@ void sprite_object_set_focus(SpriteObject* sprite_object, bool focus)
 
 void sprite_object_get_size(SpriteObject* sprite_object, int* height, int* width)
 {
-    if (sprite_object == NULL || sprite_object->sprite == NULL || sprite_object->sprite->obj == NULL)
+    if (sprite_object == NULL || sprite_object->sprite == NULL ||
+        sprite_object->sprite->obj == NULL)
     {
         *height = 0;
         *width = 0;
@@ -288,20 +289,20 @@ void sprite_object_get_size(SpriteObject* sprite_object, int* height, int* width
     }
 
     OBJ_ATTR* obj = sprite_object->sprite->obj;
-    
+
     int shape = (obj->attr0 >> 14) & 0x3;
     int size = (obj->attr1 >> 14) & 0x3;
-    
+
     // todo: define as a global
     int size_table[3][4][2] = {
         // Square shapes
-        {{8,8}, {16,16}, {32,32}, {64,64}},
-        // Wide shapes  
-        {{16,8}, {32,8}, {32,16}, {64,32}},
+        {{8, 8},  {16, 16}, {32, 32}, {64, 64}},
+        // Wide shapes
+        {{16, 8}, {32, 8},  {32, 16}, {64, 32}},
         // Tall shapes
-        {{8,16}, {8,32}, {16,32}, {32,64}}
+        {{8, 16}, {8, 32},  {16, 32}, {32, 64}}
     };
-    
+
     *width = size_table[shape][size][0];
     *height = size_table[shape][size][1];
     return;

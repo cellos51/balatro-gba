@@ -3688,7 +3688,10 @@ static void jokers_sel_row_on_selection_changed(
             (JokerObject*)list_get_at_idx(&_owned_jokers_list, prev_selection->x);
         if (joker_object != NULL)
         {
-            erase_price_under_sprite_object(joker_object->sprite_object, joker_object->joker->value);
+            erase_price_under_sprite_object(
+                joker_object->sprite_object,
+                joker_object->joker->value
+            );
             sprite_object_set_focus(joker_object->sprite_object, false);
         }
     }
