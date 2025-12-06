@@ -14,5 +14,3 @@ jobs:
 
       - name: Run Unit Tests
         run: cd tests && ./run_tests.sh
-
- 

@@ -48,7 +48,7 @@ void splash_screen_on_update()
     tte_erase_screen();
 }
 
-void splash_screen_on_exit( )
+void splash_screen_on_exit()
 {
     mmStart(MOD_MAIN_THEME, MM_PLAY_LOOP);
 }
