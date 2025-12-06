@@ -15,14 +15,14 @@ typedef void (*RowOnSelectionChangedFunc)(SelectionGrid* selection_grid, int row
 typedef int (*RowGetSizeFunc)();
 // Called for any non-directional key hit
 // The key will not be passed, the function will have to check key_hit() etc. for the key it wants to check
-typedef void (*RowOnKeyHitFunc)(SelectionGrid* selection_grid, Selection* selection);
+typedef void (*RowOnKeyTransitFunc)(SelectionGrid* selection_grid, Selection* selection);
 
 struct SelectionGridRow
 {
     int row_idx;
     RowGetSizeFunc get_size; 
     RowOnSelectionChangedFunc on_selection_changed; 
-    RowOnKeyHitFunc on_key_hit;
+    RowOnKeyTransitFunc on_key_transit;
 };
 
 struct SelectionGrid
