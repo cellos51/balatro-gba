@@ -5,7 +5,7 @@ on:
   workflow_call:
 
 jobs:
-  run_test:
+  run-test:
     name: Verify code formatting
     runs-on: ubuntu-latest
     steps:

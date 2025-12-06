@@ -17,6 +17,7 @@ jobs:
 
   nightly:
     name: Deploy nightly
+    needs: build-job
     strategy:
       fail-fast: false
     runs-on: ubuntu-latest
