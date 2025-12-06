@@ -57,6 +57,7 @@ void sprite_object_set_selected(SpriteObject* sprite_object, bool selected);
 bool sprite_object_is_selected(SpriteObject* sprite_object);
 Sprite* sprite_object_get_sprite(SpriteObject* sprite_object);
 void sprite_object_set_focus(SpriteObject* sprite_object, bool focus);
+void sprite_object_get_size(SpriteObject* sprite_object, int* height, int* width);
 bool sprite_object_is_focused(SpriteObject* sprite_object);
 
 INLINE void sprite_position(Sprite* sprite, int x, int y)
