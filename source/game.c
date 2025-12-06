@@ -1035,61 +1035,79 @@ void display_mult(void)
     check_flaming_score();
 }
 
-static inline void sort_hand_by_suit(void)
+static void swap_cards_in_hand(int idx_a, int idx_b)
 {
-    for (int a = 0; a < hand_top; a++)
+    CardObject* temp = hand[idx_a];
+    hand[idx_a] = hand[idx_b];
+    hand[idx_b] = temp;
+}
+
+static void sort_hand_by_suit()
+{
+    for (int idx_a = 0; idx_a < hand_top; idx_a++)
     {
-        for (int b = a + 1; b <= hand_top; b++)
+        for (int idx_b = idx_a + 1; idx_b <= hand_top; idx_b++)
         {
-            if (hand[a] == NULL ||
-                (hand[b] != NULL && (hand[a]->card->suit > hand[b]->card->suit ||
-                                     (hand[a]->card->suit == hand[b]->card->suit &&
-                                      hand[a]->card->rank > hand[b]->card->rank))))
+            if (hand[idx_a] == NULL ||
+                (hand[idx_b] != NULL && (hand[idx_a]->card->suit > hand[idx_b]->card->suit ||
+                                         (hand[idx_a]->card->suit == hand[idx_b]->card->suit &&
+                                          hand[idx_a]->card->rank > hand[idx_b]->card->rank))))
             {
-                CardObject* temp = hand[a];
-                hand[a] = hand[b];
-                hand[b] = temp;
+                swap_cards_in_hand(idx_a, idx_b);
             }
         }
     }
 }
 
-static inline void sort_hand_by_rank(void)
+static void sort_hand_by_rank()
 {
-    for (int a = 0; a < hand_top; a++)
+    for (int idx_a = 0; idx_a < hand_top; idx_a++)
     {
-        for (int b = a + 1; b <= hand_top; b++)
+        for (int idx_b = idx_a + 1; idx_b <= hand_top; idx_b++)
         {
-            if (hand[a] == NULL || (hand[b] != NULL && hand[a]->card->rank > hand[b]->card->rank))
+            if (hand[idx_a] == NULL ||
+                (hand[idx_b] != NULL && hand[idx_a]->card->rank > hand[idx_b]->card->rank))
             {
-                CardObject* temp = hand[a];
-                hand[a] = hand[b];
-                hand[b] = temp;
+                swap_cards_in_hand(idx_a, idx_b);
             }
         }
     }
 }
 
-static void sort_cards(void)
+static void rearrange_card_sprites()
 {
-    if (sort_by_suit)
-    {
-        sort_hand_by_suit();
-    }
-    else
-    {
-        sort_hand_by_rank();
-    }
-
     // Update the sprites in the hand by destroying them and creating new ones in the correct order
-    // (This is feels like a diabolical solution but like literally how else would you do this)
+    // (This feels like a diabolical solution but like literally how else would you do this)
     for (int i = 0; i <= hand_top; i++)
     {
-        if (hand[i] != NULL)
+        // a NULL card will only happen if we rearrange the sprites without having sorted them
+        // before Any NULL CardObject will be replaced by shifting all elements forward
+        if (hand[i] == NULL)
         {
-            // card_object_get_sprite() will not work here since we need the address
-            sprite_destroy(&(hand[i]->sprite_object->sprite));
+            int non_null_card_idx = i; // don't start at i+1 to avoid potential illegal array access
+            for (; non_null_card_idx <= hand_top; non_null_card_idx++)
+            {
+                if (hand[non_null_card_idx] != NULL)
+                {
+                    break;
+                }
+            }
+
+            // exit loop if there are no non-NULL cards left/there are no more sprites to destroy
+            if (non_null_card_idx > hand_top)
+            {
+                break;
+            }
+
+            // if there is one, shift it and all the cards that follow
+            for (int j = 0; j <= hand_top - non_null_card_idx + 1; j++)
+            {
+                hand[i + j] = hand[non_null_card_idx + j];
+            }
         }
+
+        // card_object_get_sprite() will not work here since we need the address
+        sprite_destroy(&(hand[i]->sprite_object->sprite));
     }
 
     for (int i = 0; i <= hand_top; i++)
@@ -1106,6 +1124,20 @@ static void sort_cards(void)
             );
         }
     }
+}
+
+void sort_cards()
+{
+    if (sort_by_suit)
+    {
+        sort_hand_by_suit();
+    }
+    else
+    {
+        sort_hand_by_rank();
+    }
+
+    rearrange_card_sprites();
 }
 
 /* Copies the appropriate item into the top left panel (blind/shop icon)
@@ -1882,18 +1914,69 @@ static inline bool hand_play(void)
     return true;
 }
 
+// When holding A, if we press an arrow key too fast, we should select the card
+// and change focus to the next one, instead of swapping them
+// This should fix inputs sometimes not registering when quickly selecting cards
+#define CARD_SWAP_TIME_THRESHOLD 5
+
+static inline void select_current_card(void)
+{
+    hand_toggle_card_selection();
+    set_hand();
+}
+
 static inline void game_playing_process_hand_select_input(void)
 {
     static bool discard_button_highlighted =
         false; // true = play button highlighted, false = discard button highlighted
 
+    // card moving logic
+    static bool can_move_card = true;
+    static bool moving_card = false;         // true if we are currently moving a card around
+    static bool card_moved_too_fast = false; // see define of CARD_SWAP_TIME_THRESHOLD
+    static uint move_timer = TM_ZERO;        // idem
+
+    // Register timer when we hit A to pick a card
+    // If we try to move the picked card before CARD_SWAP_TIME_THRESHOLD frames,
+    // We will select it instead of moving it
+    if (key_hit(SELECT_CARD))
+    {
+        move_timer = timer;
+    }
+
     if (key_hit(KEY_LEFT))
     {
         if (selection_y == 0)
         {
-            // The reason why this adds 1 is because the hand is drawn from right to left. There is
-            // no particular reason for this, it's just how I did it.
-            hand_set_focus(selection_x + 1);
+            // Do not use FRAMES(x) here as we are counting real frames ignoring game speed
+            card_moved_too_fast = (timer - move_timer) < CARD_SWAP_TIME_THRESHOLD;
+
+            // swap cards around if A is held down when pressing D-pad keys
+            if (key_is_down(SELECT_CARD) && can_move_card && !card_moved_too_fast)
+            {
+                if (selection_x < hand_top)
+                {
+                    swap_cards_in_hand(selection_x, selection_x + 1);
+                    moving_card = true;
+                    rearrange_card_sprites();
+                    hand_set_focus(selection_x + 1);
+                }
+            }
+            else
+            {
+                // select current card if we tried moving it too fast
+                if (card_moved_too_fast && !moving_card)
+                {
+                    select_current_card();
+                    // raise this flag to prevent selecting the next card when releasing A
+                    moving_card = true;
+                    // and also this one so we don't drag the next card along if we don't release A
+                    can_move_card = false;
+                }
+                // The reason why this adds 1 is because the hand is drawn from right to left.
+                // There is no particular reason for this, it's just how I did it.
+                hand_set_focus(selection_x + 1);
+            }
         }
         else
         {
@@ -1904,7 +1987,29 @@ static inline void game_playing_process_hand_select_input(void)
     {
         if (selection_y == 0)
         {
-            hand_set_focus(selection_x - 1);
+            card_moved_too_fast = (timer - move_timer) < CARD_SWAP_TIME_THRESHOLD;
+
+            if (key_is_down(SELECT_CARD) && can_move_card && !card_moved_too_fast)
+            {
+                if (selection_x > 0)
+                {
+                    swap_cards_in_hand(selection_x, selection_x - 1);
+                    moving_card = true;
+                    rearrange_card_sprites();
+                    hand_set_focus(selection_x - 1);
+                }
+            }
+            else
+            {
+                if (card_moved_too_fast && !moving_card)
+                {
+                    select_current_card();
+                    moving_card = true;
+                    can_move_card = false;
+                }
+
+                hand_set_focus(selection_x - 1);
+            }
         }
         else
         {
@@ -1972,10 +2077,16 @@ static inline void game_playing_process_hand_select_input(void)
         // Discard button highlight color
         memcpy16(&pal_bg_mem[DISCARD_BTN_BORDER_PID], &pal_bg_mem[DISCARD_BTN_PID], 1);
 
-        if (key_hit(SELECT_CARD))
+        // select card if we were not moving it around
+        if (key_released(SELECT_CARD))
         {
-            hand_toggle_card_selection();
-            set_hand();
+            if (!moving_card)
+            {
+                select_current_card();
+            }
+            moving_card = false;
+            can_move_card = true;
+            move_timer = TM_ZERO;
         }
 
         if (key_hit(DESELECT_CARDS))
@@ -2080,7 +2191,7 @@ static inline void card_in_hand_loop_handle_discard_and_shuffling(
             {
                 discard_push(hand[card_idx]->card);
                 card_object_destroy(&hand[card_idx]);
-                sort_cards();
+                rearrange_card_sprites();
 
                 hand_top--;
                 // This technically isn't drawing cards, I'm just reusing the variable
@@ -2958,7 +3069,7 @@ static inline void cards_in_hand_update_loop(void)
                         played_push(hand[i]);
                         sprite_destroy(&hand[i]->sprite_object->sprite);
                         hand[i] = NULL;
-                        sort_cards();
+                        rearrange_card_sprites();
 
                         play_sfx(
                             SFX_CARD_DRAW,
