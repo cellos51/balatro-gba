@@ -93,6 +93,15 @@ uint32_t u32_protected_mult(uint32_t a, uint32_t b);
 uint16_t u16_protected_mult(uint16_t a, uint16_t b);
 
 /**
+ * @brief Truncate a uint to a suffixed stream
+ *
+ * @param num number to convert
+ * @param num_req_chars Number of chars to display
+ * #param out_str_buff buffer that string will be saved too
+ */
+void truncate_uint_to_suffixed_str(uint32_t num, int num_req_chars, char out_str_buff[UINT_MAX_DIGITS + 1]);
+
+/**
  * @brief Get the number of digits in a number
  * https://stackoverflow.com/questions/1068849/how-do-i-determine-the-number-of-digits-of-an-integer-in-c
  *
