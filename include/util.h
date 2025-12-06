@@ -37,6 +37,10 @@
 #define ONE_M_ZEROS 6
 #define ONE_B_ZEROS 9
 
+// The suffix replaces everything past the third digit, e.g. "999K" -> "1M"
+// so it needs at least this number of chars to be able to display any suffixed number
+#define SUFFIXED_NUM_MIN_REQ_CHARS 4
+
 /**
  * @brief Avoid overflow when adding two u32 integers
  *
