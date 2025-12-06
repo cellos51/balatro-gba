@@ -21,7 +21,6 @@ jobs:
     strategy:
       fail-fast: false
     runs-on: ubuntu-latest
-    needs: build-job
     steps:
       - name: Say cool
         run: |
