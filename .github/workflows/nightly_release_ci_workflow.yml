@@ -17,10 +17,10 @@ jobs:
 
   nightly:
     name: Deploy nightly
+    needs: build-job
     strategy:
       fail-fast: false
     runs-on: ubuntu-latest
-    needs: build-job
     steps:
       - name: Download the build output
         uses: actions/download-artifact@v5
