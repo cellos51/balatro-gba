@@ -27,7 +27,6 @@ jobs:
 
   unit-tests-job:
     name: Run unit tests
-    needs: clang-format-job
     uses: ./.github/workflows/unit_tests_ci_workflow.yml
 
   build:
