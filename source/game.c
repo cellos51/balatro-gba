@@ -56,8 +56,8 @@
 
 #define STARTING_ROUND 0
 #define STARTING_ANTE  1
-#define STARTING_MONEY 20
-#define STARTING_SCORE 299
+#define STARTING_MONEY 4
+#define STARTING_SCORE 0
 
 #define TEN_K 10000
 #define ONE_K 1000
@@ -133,8 +133,6 @@
 #define CARD_FOCUSED_UNSEL_Y 10
 #define CARD_UNFOCUSED_SEL_Y 15
 #define CARD_FOCUSED_SEL_Y   20
-
-#define TEST_JOKER_ID0 BLUEPRINT_JOKER_ID
 
 enum GameShopStates
 {
