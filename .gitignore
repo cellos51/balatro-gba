@@ -8,3 +8,5 @@
 /tests/list/build
 /tests/pool/build
 doc
+tests/util/.vscode
+tests/util/build

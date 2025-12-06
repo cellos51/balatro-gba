@@ -1,4 +1,5 @@
 #include "graphic_utils.h"
+#include <string.h>
 
 #include "util.h"
 
@@ -30,6 +31,23 @@ SE main_bg_se_get_se(BG_POINT pos)
     return se_mat[MAIN_BG_SBB][pos.y][pos.x];
 }
 
+// Clips a rect of screenblock entries to be within one step of 
+// screenblock boundaries vertically depending on direction.
+static void clip_se_rect_within_step_of_full_screen_vert(Rect* se_rect, enum ScreenVertDir direction)
+{
+    Rect bounding_rect = FULL_SCREENBLOCK_RECT;
+    if (direction == SCREEN_UP)
+    {
+        bounding_rect.top += 1;
+    }
+    else if (direction == SCREEN_DOWN)
+    {
+        bounding_rect.bottom -= 1;
+    }
+    
+    clip_se_rect_to_bounding_rect(se_rect, &bounding_rect);
+}
+
 void main_bg_se_clear_rect(Rect se_rect)
 {
     if (se_rect.left > se_rect.right)
@@ -43,22 +61,55 @@ void main_bg_se_clear_rect(Rect se_rect)
     }
 }
 
-void bg_se_copy_rect_1_tile_vert(u16 bg_sbb, Rect se_rect, int direction)
+// Internal static function to merge implementation of move/copy functions.
+static void bg_se_copy_or_move_rect_1_tile_vert(u16 bg_sbb, Rect se_rect, enum ScreenVertDir direction, bool move)
+{
+     if (se_rect.left > se_rect.right
+        || (direction != SCREEN_UP && direction != SCREEN_DOWN))
+    {
+        return;
+    }
+
+    // Clip to avoid read/write overflow of the screenblock
+    clip_se_rect_within_step_of_full_screen_vert(&se_rect, direction);
+
+    int start = (direction == SCREEN_UP) ? se_rect.top : se_rect.bottom;
+    int end = (direction == SCREEN_UP) ? se_rect.bottom : se_rect.top;
+
+    for (int y = start; y != end - direction; y -= direction)
+    {
+        memcpy16(&(se_mat[bg_sbb][y + direction][se_rect.left]),
+                 &se_mat[bg_sbb][y][se_rect.left],
+                 rect_width(&se_rect));
+    }
+
+    if (move)
+    {
+        memset16(&se_mat[bg_sbb][end][se_rect.left], 0x0000, rect_width(&se_rect));
+    }
+}
+
+static void main_bg_se_copy_or_move_rect_1_tile_vert(Rect se_rect, enum ScreenVertDir direction, bool move)
+{
+   bg_se_copy_or_move_rect_1_tile_vert(MAIN_BG_SBB, se_rect, direction, move);
+}
+
+void bg_se_copy_rect_1_tile_vert(u16 bg_sbb, Rect se_rect, enum ScreenVertDir direction)
 {
     s_bg_se_copy_or_move_rect_1_tile_vert(MAIN_BG_SBB, se_rect, direction, false);
 }
 
-void bg_se_move_rect_1_tile_vert(u16 bg_sbb, Rect se_rect, int direction)
+void bg_se_move_rect_1_tile_vert(u16 bg_sbb, Rect se_rect, enum ScreenVertDir direction)
 {
     s_bg_se_copy_or_move_rect_1_tile_vert(MAIN_BG_SBB, se_rect, direction, true);
 }
 
-void main_bg_se_copy_rect_1_tile_vert(Rect se_rect, int direction)
+void main_bg_se_copy_rect_1_tile_vert(Rect se_rect, enum ScreenVertDir direction)
 {
     s_main_bg_se_copy_or_move_rect_1_tile_vert(se_rect, direction, false);
 }
 
-void main_bg_se_move_rect_1_tile_vert(Rect se_rect, int direction)
+void main_bg_se_move_rect_1_tile_vert(Rect se_rect, enum ScreenVertDir direction)
 {
     s_main_bg_se_copy_or_move_rect_1_tile_vert(se_rect, direction, true);
 }
@@ -145,20 +196,39 @@ void tte_erase_rect_wrapper(Rect rect)
     tte_erase_rect(rect.left, rect.top, rect.right, rect.bottom);
 }
 
-void update_text_rect_to_right_align_num(Rect* rect, int num, int overflow_direction)
+void update_text_rect_to_right_align_str(Rect* rect, const char* str, enum OverflowDir overflow_direction)
 {
-    int num_digits = get_digits(num);
+    // TODO: Allow passing string length to avoid calling strlen()?
+    int str_len = strlen(str);
     if (overflow_direction == OVERFLOW_LEFT)
     {
-        rect->left = max(0, rect->right - num_digits * TILE_SIZE);
+        rect->left = max(0, rect->right - str_len * TTE_CHAR_SIZE);
     }
     else if (overflow_direction == OVERFLOW_RIGHT)
     {
-        int num_fitting_digits = rect_width(rect) / TILE_SIZE;
-        if (num_digits < num_fitting_digits)
-            rect->left += (num_fitting_digits - num_digits) * TILE_SIZE;
-        // else nothing is to be updated, entire rect is filled and may overflow
+        int num_fitting_chars = rect_width(rect) / TTE_CHAR_SIZE;
+        if (str_len < num_fitting_chars)
+            rect->left += (num_fitting_chars - str_len) * TTE_CHAR_SIZE;
+        //else nothing is to be updated, entire rect is filled and may overflow
     }
+}
+
+void update_text_rect_to_center_str(Rect* rect, const char* str, enum ScreenHorzDir bias_direction)
+{
+    if (rect == NULL || str == NULL)
+    {
+        return;
+    }
+
+    int text_width_chars = strlen(str);
+    int rect_width_chars = rect_width(rect) / TTE_CHAR_SIZE;
+
+    bool bias_right = (bias_direction == SCREEN_RIGHT);
+
+    /* Adding bias_right makes sure that we round up when biased right
+     * but round down when biased left.
+     */
+    rect->left += max(0, (rect_width_chars - text_width_chars + bias_right) / 2) * TTE_CHAR_SIZE;
 }
 
 void memcpy16_tile8_with_palette_offset(u16* dst, const u16* src, uint hwcount, u8 palette_offset)

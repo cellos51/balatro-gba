@@ -2,7 +2,8 @@
 #define BLIND_H
 
 #include "sprite.h"
-// The GBA's max uint value is around 4 billion, so we're going to not add endless mode for simplicity's sake
+// The GBA's max uint value is around 4 billion, so we're going to not add endless mode for
+// simplicity's sake
 #define MAX_ANTE 8
 
 #define SMALL_BLIND_PB 1
@@ -72,7 +73,7 @@ void blind_init();
 
 void blind_set_boss_graphics(const unsigned int* tiles, const u16* palette);
 
-int blind_get_requirement(enum BlindType type, int ante);
+u32 blind_get_requirement(enum BlindType type, int ante);
 int blind_get_reward(enum BlindType type);
 u16 blind_get_color(enum BlindType type, enum BlindColorIndex index);
 

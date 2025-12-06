@@ -13,7 +13,7 @@ AllowShortLoopsOnASingleLine: false
 PointerAlignment: Left
 
 # Column limit
-ColumnLimit: 120
+ColumnLimit: 100
 
 # Case labels
 IndentCaseLabels: true
@@ -42,7 +42,8 @@ BinPackParameters: false
 
 AllowAllArgumentsOnNextLine: false
 AllowAllParametersOfDeclarationOnNextLine: false
-AlignAfterOpenBracket: Align
+AlignAfterOpenBracket: BlockIndent
+PenaltyBreakBeforeFirstCallParameter: 0
 
 ReflowComments: true
 SpacesInLineCommentPrefix:
