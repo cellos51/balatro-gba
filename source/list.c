@@ -1,6 +1,6 @@
 #include "list.h"
 
-#include "pool.h "
+#include "pool.h"
 
 #include <stdbool.h>
 
@@ -14,7 +14,7 @@
  * @param list pointer to a @ref List
  * @param node pointer to a @ref ListNode
  */
-static void s_list_remove_node(List* list, ListNode* node);
+static void s_list_remove_node(List* list, ListNode* node); 
 
 /**
  * Get the next @ref ListNode in a @ref ListItr
