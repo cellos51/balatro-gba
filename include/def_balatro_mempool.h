@@ -1,7 +1,7 @@
-#include "sprite.h"
-#include "joker.h"
 #include "card.h"
+#include "joker.h"
 #include "list.h"
+#include "sprite.h"
 
 POOL_ENTRY(Sprite, MAX_SPRITES);
 POOL_ENTRY(SpriteObject, MAX_SPRITE_OBJECTS);
