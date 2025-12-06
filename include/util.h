@@ -81,12 +81,28 @@ uint32_t u32_protected_mult(uint32_t a, uint32_t b);
  */
 uint16_t u16_protected_mult(uint16_t a, uint16_t b);
 
-/**
- * @brief Truncate a uint to a suffixed stream
- *
- * @param num number to convert
- * @param num_req_chars Number of chars to display
- * #param out_str_buff buffer that string will be saved too
+ /** 
+ * @brief   Truncate an unsigned number into a suffixed string representation e.g. 12000 -> "12K"
+ *          The least significant digits are rounded down e.g. 12345 -> "12K", 12987 -> "12K"
+ *          
+ * @param num           The number to truncate, can be anything from 0 to UINT32_MAX.
+ *  
+ * @param num_req_chars The number of characters to constrain the string to.
+ *                      The function will use up as much characters as it can
+ *                      in order to maintain as much accuracy as possible. 
+ *                      So numbers are not fully truncated if not necessary,
+ *                      e.g. 123123000 -> "123123K" for example value 7, 
+ *                      and if num_req_chars > u32_get_digits(num) the number will not
+ *                      be truncated at all.
+ *                      Passing less than SUFFIXED_NUM_MIN_REQ_CHARS may result in an 
+ *                      output string longer than num_req_chars but
+ *                      can be done to truncate 1000s -> "1K", 2000 -> "2K" etc.
+ *                      which wouldn't be otherwise.
+ *                      
+ * @param out_str       An output buffer to write the resulting string to. 
+ *                      Must be of size UINT_MAX_DIGITS + 1. + 1 for null-terminator.
+ *                      At that size the suffix character will always be accounted for since
+ *                      a number with more digits than UINT_MAX_DIGITS will not be handled nor truncated.
  */
 void truncate_uint_to_suffixed_str(
     uint32_t num,

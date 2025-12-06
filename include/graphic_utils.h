@@ -175,7 +175,7 @@ INLINE int rect_width(const Rect* rect)
  *
  * @param rect a @ref Rect to measure
  *
- * @return The height of the rectangle.
+ * @return The height of the rectangle, or 0 if rect->right < rect->left
  */
 INLINE int rect_height(const Rect* rect)
 {
