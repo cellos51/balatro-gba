@@ -159,15 +159,6 @@ enum OverflowDir
 typedef RECT Rect;
 
 /**
- * @brief Gets the screenblock entry for the given coordinates (x, y).
- *
- * @param pos a @ref BG_POINT with x and y in number of tiles.
- *
- * @return The screenblock entry.
- */
-SE main_bg_se_get_se(BG_POINT pos);
-
-/**
  * @brief Get the width of a rectangle
  *
  * @param rect a @ref Rect to measure
@@ -235,17 +226,6 @@ void main_bg_se_copy_rect_1_tile_vert(Rect se_rect, enum ScreenVertDir direction
  * @param dest_pos x and y are the coordinates in number of tiles.
  */
 void main_bg_se_copy_rect(Rect se_rect, BG_POINT dest_pos);
-
-/**
- * @brief Copies a screen entry to a rect in the main background.
- *
- * The tile is copied to the top left corner of the rect.
- *
- * @param tile SE of the tile to copy from
- *
- * @param se_rect destination of copy, dimensions are in number of tiles.
- */
-void main_bg_se_fill_rect_with_se(SE tile, Rect se_rect);
 
 /**
  * @brief Copies a 3x3 rect and expands it to a passed size.
