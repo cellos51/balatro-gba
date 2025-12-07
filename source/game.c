@@ -266,7 +266,7 @@ static void jokers_sel_row_on_selection_changed(
 );
 static int jokers_sel_row_get_size(void);
 static void game_shop_create_items(void);
-static void erase_price_under_sprite_object(SpriteObject* sprite_object, int price);
+static void erase_price_under_sprite_object(SpriteObject* sprite_object);
 static void print_price_under_sprite_object(SpriteObject* sprite_object, int price);
 static void game_round_end_extend_black_panel_down(int black_panel_bottom);
 
@@ -3517,29 +3517,38 @@ static void game_round_end_dismiss_round_end_panel()
 
 static void print_price_under_sprite_object(SpriteObject* sprite_object, int price)
 {
-    int width = 0;
     int height = 0;
 
-    sprite_object_get_size(sprite_object, &width, &height);
+    if (sprite_object_get_height(sprite_object, &height) == false)
+    {
+        // fallback
+        height = CARD_SPRITE_SIZE;
+    }
 
     int x = fx2int(sprite_object->tx) + TILE_SIZE - (get_digits_even(price) - 1) * TILE_SIZE;
     int y = fx2int(sprite_object->ty) + height + TILE_SIZE;
+
     tte_printf("#{P:%d,%d; cx:0x%X000}$%d", x, y, TTE_YELLOW_PB, price);
 }
 
-static void erase_price_under_sprite_object(SpriteObject* sprite_object, int price)
+static void erase_price_under_sprite_object(SpriteObject* sprite_object)
 {
     int width = 0;
     int height = 0;
 
-    sprite_object_get_size(sprite_object, &width, &height);
+    if (sprite_object_get_dimensions(sprite_object, &width, &height) == false)
+    {
+        // fallback
+        height = CARD_SPRITE_SIZE;
+        width = CARD_SPRITE_SIZE / 2;
+    }
 
     Rect price_rect;
     price_rect.left = fx2int(sprite_object->tx);
-    // todo: fix the + 4 offset, don't know why its needed
-    price_rect.top = fx2int(sprite_object->ty) + height + TILE_SIZE + 4;
+    price_rect.top = fx2int(sprite_object->ty) + height + TILE_SIZE;
     price_rect.right = price_rect.left + width;
-    price_rect.bottom = price_rect.top + TTE_CHAR_SIZE;
+    price_rect.bottom = price_rect.top + TILE_SIZE + SPRITE_FOCUS_RAISE_PX;
+
     tte_erase_rect_wrapper(price_rect);
 }
 
@@ -3688,10 +3697,7 @@ static void jokers_sel_row_on_selection_changed(
             (JokerObject*)list_get_at_idx(&_owned_jokers_list, prev_selection->x);
         if (joker_object != NULL)
         {
-            erase_price_under_sprite_object(
-                joker_object->sprite_object,
-                joker_object->joker->value
-            );
+            erase_price_under_sprite_object(joker_object->sprite_object);
             sprite_object_set_focus(joker_object->sprite_object, false);
         }
     }
@@ -3726,7 +3732,7 @@ static inline void game_sell_joker(int joker_idx)
     JokerObject* joker_object = (JokerObject*)list_get_at_idx(&_owned_jokers_list, joker_idx);
     money += joker_get_sell_value(joker_object->joker);
     display_money();
-    erase_price_under_sprite_object(joker_object->sprite_object, joker_object->joker->value);
+    erase_price_under_sprite_object(joker_object->sprite_object);
 
     remove_owned_joker(joker_idx);
 
@@ -3762,7 +3768,7 @@ static inline void game_shop_buy_joker(int shop_joker_idx)
 
     money -= joker_object->joker->value; // Deduct the money spent on the joker
     display_money();                     // Update the money display
-    erase_price_under_sprite_object(joker_object->sprite_object, joker_object->joker->value);
+    erase_price_under_sprite_object(joker_object->sprite_object);
     sprite_object_set_focus(joker_object->sprite_object, false);
     add_to_held_jokers(joker_object);
     list_remove_at_idx(&_shop_jokers_list, shop_joker_idx); // Remove the joker from the shop

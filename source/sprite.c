@@ -9,10 +9,7 @@
 #include <maxmod.h>
 #include <stdlib.h>
 #include <tonc.h>
-
-#define MAX_SPRITES           128
-#define MAX_AFFINES           32
-#define SPRITE_FOCUS_RAISE_PX 10
+#include <tonc_oam.h>
 
 OBJ_ATTR obj_buffer[MAX_SPRITES];
 OBJ_AFFINE* obj_aff_buffer = (OBJ_AFFINE*)obj_buffer;
@@ -278,34 +275,42 @@ void sprite_object_set_focus(SpriteObject* sprite_object, bool focus)
     sprite_object->ty = sprite_object->ty + int2fx((focus ? -1 : 1) * SPRITE_FOCUS_RAISE_PX);
 }
 
-void sprite_object_get_size(SpriteObject* sprite_object, int* height, int* width)
+bool sprite_object_get_width(SpriteObject* sprite_object, int* width)
 {
     if (sprite_object == NULL || sprite_object->sprite == NULL ||
-        sprite_object->sprite->obj == NULL)
+        sprite_object->sprite->obj == NULL || width == NULL)
     {
-        *height = 0;
-        *width = 0;
-        return;
+        return false;
     }
 
-    OBJ_ATTR* obj = sprite_object->sprite->obj;
+    *width = obj_get_width(sprite_object->sprite->obj);
+    return true;
+}
 
-    int shape = (obj->attr0 >> 14) & 0x3;
-    int size = (obj->attr1 >> 14) & 0x3;
+bool sprite_object_get_height(SpriteObject* sprite_object, int* height)
+{
+    if (sprite_object == NULL || sprite_object->sprite == NULL ||
+        sprite_object->sprite->obj == NULL || height == NULL)
+    {
+        return false;
+    }
 
-    // todo: define as a global
-    int size_table[3][4][2] = {
-        // Square shapes
-        {{8, 8},  {16, 16}, {32, 32}, {64, 64}},
-        // Wide shapes
-        {{16, 8}, {32, 8},  {32, 16}, {64, 32}},
-        // Tall shapes
-        {{8, 16}, {8, 32},  {16, 32}, {32, 64}}
-    };
+    *height = obj_get_height(sprite_object->sprite->obj);
+    return true;
+}
 
-    *width = size_table[shape][size][0];
-    *height = size_table[shape][size][1];
-    return;
+bool sprite_object_get_dimensions(SpriteObject* sprite_object, int* width, int* height)
+{
+    if (sprite_object == NULL || sprite_object->sprite == NULL ||
+        sprite_object->sprite->obj == NULL || width == NULL || height == NULL)
+    {
+        return false;
+    }
+
+    const u8* size = obj_get_size(sprite_object->sprite->obj);
+    *width = size[0];
+    *height = size[1];
+    return true;
 }
 
 bool sprite_object_is_focused(SpriteObject* sprite_object)
