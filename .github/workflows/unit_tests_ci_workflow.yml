@@ -1,0 +1,16 @@
+name: Run Unit Tests
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  run-unit-tests:
+    name: Run Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Run Unit Tests
+        run: cd tests && ./run_tests.sh
