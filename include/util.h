@@ -119,7 +119,7 @@ void truncate_uint_to_suffixed_str(
  *
  * @return the number of digits in a number
  */
-static inline int u32_get_digits(uint32_t n) 
+static inline int u32_get_digits(uint32_t n)
 {
     if (n < 10)
         return 1;
