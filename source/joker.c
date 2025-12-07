@@ -39,10 +39,10 @@ const static u8 edition_price_lut[MAX_EDITIONS] = {
 
 /* So for the card objects, I needed them to be properly sorted
    which is why they let you specify the layer index when creating a new card object.
-   Since the cards would overlap a lot in your hand, If they weren't sorted properly, it would look like a mess.
-   The joker objects are functionally identical to card objects, so they use the same logic.
-   But I'm going to use a simpler approach for the joker objects
-   since I'm lazy and sorting them wouldn't look good enough to warrant the effort.
+   Since the cards would overlap a lot in your hand, If they weren't sorted properly, it would look
+   like a mess. The joker objects are functionally identical to card objects, so they use the same
+   logic. But I'm going to use a simpler approach for the joker objects since I'm lazy and sorting
+   them wouldn't look good enough to warrant the effort.
 */
 static bool _used_layers[MAX_JOKER_OBJECTS] = {false}; // Track used layers for joker sprites
 // TODO: Refactor sorting into SpriteObject?
@@ -99,7 +99,12 @@ void joker_destroy(Joker** joker)
     *joker = NULL;
 }
 
-u32 joker_get_score_effect(Joker* joker, Card* scored_card, enum JokerEvent joker_event, JokerEffect** joker_effect)
+u32 joker_get_score_effect(
+    Joker* joker,
+    Card* scored_card,
+    enum JokerEvent joker_event,
+    JokerEffect** joker_effect
+)
 {
     const JokerInfo* jinfo = get_joker_registry_entry(joker->id);
     if (!jinfo)
@@ -144,16 +149,22 @@ JokerObject* joker_object_new(Joker* joker)
     int joker_pb = s_allocate_pb_if_needed(joker->id);
     s_joker_pb_add_sprite_user(joker_pb);
 
-    memcpy32(&tile_mem[4][tile_index],
-             &joker_gfxTiles[joker_spritesheet_idx][joker_idx * TILE_SIZE * JOKER_SPRITE_OFFSET],
-             TILE_SIZE * JOKER_SPRITE_OFFSET);
+    memcpy32(
+        &tile_mem[4][tile_index],
+        &joker_gfxTiles[joker_spritesheet_idx][joker_idx * TILE_SIZE * JOKER_SPRITE_OFFSET],
+        TILE_SIZE * JOKER_SPRITE_OFFSET
+    );
 
-    sprite_object_set_sprite(joker_object->sprite_object,
-                             sprite_new(ATTR0_SQUARE | ATTR0_4BPP | ATTR0_AFF,
-                                        ATTR1_SIZE_32,
-                                        tile_index,
-                                        joker_pb,
-                                        JOKER_STARTING_LAYER + layer));
+    sprite_object_set_sprite(
+        joker_object->sprite_object,
+        sprite_new(
+            ATTR0_SQUARE | ATTR0_4BPP | ATTR0_AFF,
+            ATTR1_SIZE_32,
+            tile_index,
+            joker_pb,
+            JOKER_STARTING_LAYER + layer
+        )
+    );
 
     return joker_object;
 }
@@ -166,9 +177,11 @@ void joker_object_destroy(JokerObject** joker_object)
     int layer = sprite_get_layer(joker_object_get_sprite(*joker_object)) - JOKER_STARTING_LAYER;
     _used_layers[layer] = false;
     s_joker_pb_remove_sprite_user(sprite_get_pb(joker_object_get_sprite(*joker_object)));
-    if (s_joker_pb_get_num_sprite_users((sprite_get_pb(joker_object_get_sprite(*joker_object)))) == 0)
+    if (s_joker_pb_get_num_sprite_users((sprite_get_pb(joker_object_get_sprite(*joker_object)))) ==
+        0)
     {
-        _joker_spritesheet_pb_map[s_joker_get_spritesheet_idx((*joker_object)->joker->id)] = UNDEFINED;
+        _joker_spritesheet_pb_map[s_joker_get_spritesheet_idx((*joker_object)->joker->id)] =
+            UNDEFINED;
     }
 
     sprite_object_destroy(&(*joker_object)->sprite_object); // Destroy the sprite
@@ -199,7 +212,11 @@ void set_and_shift_text(char* str, int* cursor_pos_x, int* cursor_pos_y, int col
     *cursor_pos_x += joker_score_display_offset_px;
 }
 
-bool joker_object_score(JokerObject* joker_object, CardObject* card_object, enum JokerEvent joker_event)
+bool joker_object_score(
+    JokerObject* joker_object,
+    CardObject* card_object,
+    enum JokerEvent joker_event
+)
 {
     if (joker_object == NULL)
     {
@@ -207,7 +224,8 @@ bool joker_object_score(JokerObject* joker_object, CardObject* card_object, enum
     }
 
     JokerEffect* joker_effect = NULL;
-    u32 effect_flags_ret = joker_get_score_effect(joker_object->joker, card_object->card, joker_event, &joker_effect);
+    u32 effect_flags_ret =
+        joker_get_score_effect(joker_object->joker, card_object->card, joker_event, &joker_effect);
 
     if (effect_flags_ret == JOKER_EFFECT_FLAG_NONE)
     {
@@ -339,7 +357,8 @@ int joker_get_random_rarity()
     {
         joker_rarity = RARE_JOKER;
     }
-    else if (rarity_roll < COMMON_JOKER_CHANCE + UNCOMMON_JOKER_CHANCE + RARE_JOKER_CHANCE + LEGENDARY_JOKER_CHANCE)
+    else if (rarity_roll < COMMON_JOKER_CHANCE + UNCOMMON_JOKER_CHANCE + RARE_JOKER_CHANCE +
+                               LEGENDARY_JOKER_CHANCE)
     {
         joker_rarity = LEGENDARY_JOKER;
     }
@@ -349,7 +368,8 @@ int joker_get_random_rarity()
 
 static int s_get_num_spritesheets()
 {
-    return (get_joker_registry_size() + NUM_JOKERS_PER_SPRITESHEET - 1) / NUM_JOKERS_PER_SPRITESHEET;
+    return (get_joker_registry_size() + NUM_JOKERS_PER_SPRITESHEET - 1) /
+           NUM_JOKERS_PER_SPRITESHEET;
 }
 
 static int s_joker_get_spritesheet_idx(u8 joker_id)
@@ -357,7 +377,6 @@ static int s_joker_get_spritesheet_idx(u8 joker_id)
     return joker_id / NUM_JOKERS_PER_SPRITESHEET;
 }
 
-// TODO: This should be generalized so any sprite can have dynamic swapping
 static void s_joker_pb_add_sprite_user(int pb)
 {
     _joker_pb_num_sprite_users[pb - JOKER_BASE_PB]++;
@@ -408,9 +427,11 @@ static int s_allocate_pb_if_needed(u8 joker_id)
     else
     {
         _joker_spritesheet_pb_map[joker_spritesheet_idx] = joker_pb;
-        memcpy16(&pal_obj_mem[PAL_ROW_LEN * joker_pb],
-                 joker_gfxPal[joker_spritesheet_idx],
-                 NUM_ELEM_IN_ARR(joker_gfx0Pal));
+        memcpy16(
+            &pal_obj_mem[PAL_ROW_LEN * joker_pb],
+            joker_gfxPal[joker_spritesheet_idx],
+            NUM_ELEM_IN_ARR(joker_gfx0Pal)
+        );
     }
 
     return joker_pb;
