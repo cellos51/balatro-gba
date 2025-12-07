@@ -21,14 +21,17 @@ on:
         default: true
 
 jobs:
-  run-tests-job:
-    name: Run tests
-    uses: ./.github/workflows/run_tests_ci_workflow.yml
+  clang-format-job:
+    name: Run clang-format test
+    uses: ./.github/workflows/clang_format_ci_workflow.yml
+
+  unit-tests-job:
+    name: Run unit tests
+    uses: ./.github/workflows/unit_tests_ci_workflow.yml
 
   build:
     name: Build ROM
     runs-on: ubuntu-latest
-    needs: run-tests-job
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
