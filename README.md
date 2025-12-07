@@ -47,7 +47,7 @@ This **tech-demo/proof of concept** is strictly limited in content to a minimal 
 
 (D-Pad: Navigation) 
 
-(Hold A: Swap owned jokers in the shop)
+(Hold A: Swap Owned Jokers in the Shop)
 
 # **Build Instructions:**
 
