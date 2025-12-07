@@ -46,6 +46,9 @@ This **tech-demo/proof of concept** is strictly limited in content to a minimal 
 (R: Sort Suit/Rank)
 
 (D-Pad: Navigation) 
+
+(Hold A: Swap owned jokers in the shop)
+
 # **Build Instructions:**
 
 ## **-Docker-**
