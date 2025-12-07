@@ -193,8 +193,7 @@ INLINE int rect_height(const Rect* rect)
  * If you are doing this operation you are probably doing this in the main
  * background and you should use main_bg_se_copy_rect_1_tile_vert() instead.
  *
- * @param bg_sbb the SBB of the background in which to move the rect: the
- * direction must be either SE_UP or SE_DOWN.
+ * @param bg_sbb the SBB of the background in which to move the rect.
  *
  * @param se_rect dimensions are in number of tiles.
  *

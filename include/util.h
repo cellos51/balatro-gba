@@ -112,15 +112,14 @@ void truncate_uint_to_suffixed_str(
 );
 
 /**
- * @brief Get the number of digits in a number
+ * @brief Get the number of digits in a 32-bit unsigned number
  * https://stackoverflow.com/questions/1068849/how-do-i-determine-the-number-of-digits-of-an-integer-in-c
  *
- * @param n value to find the number of decimal digits of
+ * @param n 32-bit unsigned value to find the number of decimal digits of
  *
  * @return the number of digits in a number
  */
-static inline int u32_get_digits(uint32_t n
-) // https://stackoverflow.com/questions/1068849/how-do-i-determine-the-number-of-digits-of-an-integer-in-c
+static inline int u32_get_digits(uint32_t n) 
 {
     if (n < 10)
         return 1;
