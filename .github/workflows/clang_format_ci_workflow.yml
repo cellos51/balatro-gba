@@ -18,8 +18,12 @@ jobs:
 
       - name: Run clang-format
         run: >
-          clang-format --dry-run -Werror
-          include/bitset.h source/bitset.c
+          clang-format --dry-run -Werror 
+          include/bitset.h source/bitset.c 
+          include/affine_background.h source/affine_background.c 
+          include/audio_utils.h source/audio_utils.c 
+          include/graphic_utils.h source/graphic_utils.c 
+          include/util.h source/util.c
           include/pool.h source/pool.c
           include/card.h source/card.c 
           include/game.h source/game.c 
