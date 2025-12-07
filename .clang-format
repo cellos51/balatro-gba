@@ -52,3 +52,5 @@ SpacesInLineCommentPrefix:
 
 PenaltyReturnTypeOnItsOwnLine: 99999999
 AlignEscapedNewlines: Left
+
+BracedInitializerIndentWidth: 0
