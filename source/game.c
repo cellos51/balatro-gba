@@ -1090,7 +1090,7 @@ static void rearrange_card_sprites()
     for (int i = 0; i <= hand_top; i++)
     {
         // a NULL card will only happen if we rearrange the sprites without having sorted them
-        // before Any NULL CardObject will be replaced by shifting all elements forward
+        // before. Any NULL CardObject will be replaced by shifting all elements forward
         if (hand[i] == NULL)
         {
             int non_null_card_idx = i; // don't start at i+1 to avoid potential illegal array access
