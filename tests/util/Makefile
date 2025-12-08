@@ -1,7 +1,7 @@
 
 CC := gcc
 CFLAGS := -I../../include -I. \
-          -g -O3 -Wall -Werror -Wno-format
+          -g -O3 -std=gnu23 -Wall -Werror -Wno-format
 
 SRC            := util_test.c ../../source/util.c
 OUT            := build/util_test 
