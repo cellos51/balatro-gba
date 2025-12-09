@@ -1,22 +1,22 @@
-#include <tonc.h>
-
 #include "joker.h"
-#include "joker_gfx.h"
-#include "graphic_utils.h"
+
 #include "card.h"
+#include "graphic_utils.h"
+#include "joker_gfx.h"
+#include "pool.h"
 #include "soundbank.h"
 #include "util.h"
 
 #include <maxmod.h>
 #include <stdlib.h>
 #include <string.h>
+#include <tonc.h>
 
-#include "pool.h"
-
-#define JOKER_SCORE_TEXT_Y 48
+#define JOKER_SCORE_TEXT_Y     48
 #define HELD_CARD_SCORE_TEXT_Y 108
 #define MAX_CARD_SCORE_STR_LEN 2
-#define NUM_JOKERS_PER_SPRITESHEET 2
+#define MAX_NUM_JOKERS_SPRITESHEETS \
+    75 // what it was before (MAX_DEFINEABLE_JOKERS / JOKERS_PER_SPRITESHEET)
 
 static const unsigned int *joker_gfxTiles[] =
 {
@@ -31,8 +31,7 @@ static const unsigned short *joker_gfxPal[] =
 #undef DEF_JOKER_GFX
 };
 
-const static u8 edition_price_lut[MAX_EDITIONS] =
-{
+const static u8 edition_price_lut[MAX_EDITIONS] = {
     0, // BASE_EDITION
     2, // FOIL_EDITION
     3, // HOLO_EDITION
@@ -42,28 +41,77 @@ const static u8 edition_price_lut[MAX_EDITIONS] =
 
 /* So for the card objects, I needed them to be properly sorted
    which is why they let you specify the layer index when creating a new card object.
-   Since the cards would overlap a lot in your hand, If they weren't sorted properly, it would look like a mess.
-   The joker objects are functionally identical to card objects, so they use the same logic.
-   But I'm going to use a simpler approach for the joker objects
-   since I'm lazy and sorting them wouldn't look good enough to warrant the effort.
+   Since the cards would overlap a lot in your hand, If they weren't sorted properly, it would look
+   like a mess. The joker objects are functionally identical to card objects, so they use the same
+   logic. But I'm going to use a simpler approach for the joker objects since I'm lazy and sorting
+   them wouldn't look good enough to warrant the effort.
 */
 static bool used_layers[MAX_JOKER_OBJECTS] = {false}; // Track used layers for joker sprites
 // TODO: Refactor sorting into SpriteObject?
 
 // Maps the spritesheet index to the palette bank index allocated to it.
 // Spritesheets that were not allocated are
-static int joker_spritesheet_pb_map[(MAX_DEFINABLE_JOKERS + 1) / NUM_JOKERS_PER_SPRITESHEET];
-static int joker_pb_num_sprite_users[JOKER_LAST_PB - JOKER_BASE_PB + 1] = { 0 };
+static int joker_spritesheet_pb_map[MAX_NUM_JOKERS_SPRITESHEETS];
+static int joker_pb_num_sprite_users[JOKER_LAST_PB - JOKER_BASE_PB + 1] = {0};
+
+// Map of Joker ID -> Spritesheet idx
+// clang-format off
+static int joker_id_to_sprite_map[] = {
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 1,
+    2, 2,
+    3, 3, 3, 3, 3,
+    4, 4, 4, 4, 4,
+    5, 5, 5, 5,
+    6, 6, 6, 6,
+    7, 7,
+    8, 8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+};
+// Map of Joker ID -> Sprite idx in sheet
+static int joker_id_to_sprite_position_map[] = {
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
+    0, 1,
+    0, 1,
+    0, 1, 2, 3, 4,
+    0, 1, 2, 3, 4,
+    0, 1, 2, 3,
+    0, 1, 2, 3,
+    0, 1,
+    0, 1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+};
+// clang-format on
 
 static int get_num_spritesheets()
 {
-    return (get_joker_registry_size() + NUM_JOKERS_PER_SPRITESHEET - 1) / NUM_JOKERS_PER_SPRITESHEET;
+    return MAX_NUM_JOKERS_SPRITESHEETS;
 }
 
 static int joker_get_spritesheet_idx(u8 joker_id)
-
 {
-    return joker_id / NUM_JOKERS_PER_SPRITESHEET;
+    return joker_id_to_sprite_map[joker_id];
+}
+
+static int joker_get_sprite_idx_in_sheet(u8 joker_id)
+{
+    return joker_id_to_sprite_position_map[joker_id];
 }
 
 // TODO: This should be generalized so any sprite can have dynamic swapping
@@ -105,7 +153,7 @@ static int allocate_pb_if_needed(u8 joker_id)
         // Already allocated
         return joker_pb;
     }
-    
+
     // Allocate a new palette
     joker_pb = get_unused_joker_pb();
 
@@ -117,9 +165,13 @@ static int allocate_pb_if_needed(u8 joker_id)
     else
     {
         joker_spritesheet_pb_map[joker_spritesheet_idx] = joker_pb;
-        memcpy16(&pal_obj_mem[PAL_ROW_LEN * joker_pb], joker_gfxPal[joker_spritesheet_idx], NUM_ELEM_IN_ARR(joker_gfx0Pal));
+        memcpy16(
+            &pal_obj_mem[PAL_ROW_LEN * joker_pb],
+            joker_gfxPal[joker_spritesheet_idx],
+            NUM_ELEM_IN_ARR(joker_gfx0Pal)
+        );
     }
-    
+
     return joker_pb;
 }
 
@@ -134,12 +186,13 @@ void joker_init()
     }
 }
 
-Joker *joker_new(u8 id)
+Joker* joker_new(u8 id)
 {
-    if (id >= get_joker_registry_size()) return NULL;
+    if (id >= get_joker_registry_size())
+        return NULL;
 
-    Joker *joker = POOL_GET(Joker);
-    const JokerInfo *jinfo = get_joker_registry_entry(id);
+    Joker* joker = POOL_GET(Joker);
+    const JokerInfo* jinfo = get_joker_registry_entry(id);
 
     joker->id = id;
     joker->modifier = BASE_EDITION; // TODO: Make this a parameter
@@ -149,22 +202,28 @@ Joker *joker_new(u8 id)
     joker->persistent_state = 0;
 
     // initialize persistent Joker data if needed
-    JokerEffect *joker_effect = NULL;
+    JokerEffect* joker_effect = NULL;
     jinfo->joker_effect_func(joker, NULL, JOKER_EVENT_ON_JOKER_CREATED, &joker_effect);
 
     return joker;
 }
 
-void joker_destroy(Joker **joker)
+void joker_destroy(Joker** joker)
 {
     POOL_FREE(Joker, *joker);
     *joker = NULL;
 }
 
-u32 joker_get_score_effect(Joker *joker, Card *scored_card, enum JokerEvent joker_event, JokerEffect **joker_effect)
+u32 joker_get_score_effect(
+    Joker* joker,
+    Card* scored_card,
+    enum JokerEvent joker_event,
+    JokerEffect** joker_effect
+)
 {
-    const JokerInfo *jinfo = get_joker_registry_entry(joker->id);
-    if (!jinfo) return JOKER_EFFECT_FLAG_NONE;
+    const JokerInfo* jinfo = get_joker_registry_entry(joker->id);
+    if (!jinfo)
+        return JOKER_EFFECT_FLAG_NONE;
 
     return jinfo->joker_effect_func(joker, scored_card, joker_event, joker_effect);
 }
@@ -176,13 +235,13 @@ int joker_get_sell_value(const Joker* joker)
         return UNDEFINED;
     }
 
-    return joker->value/2;
+    return joker->value / 2;
 }
 
 // JokerObject methods
-JokerObject *joker_object_new(Joker *joker)
+JokerObject* joker_object_new(Joker* joker)
 {
-    JokerObject *joker_object = POOL_GET(JokerObject);
+    JokerObject* joker_object = POOL_GET(JokerObject);
 
     int layer = 0;
     for (int i = 0; i < MAX_JOKER_OBJECTS; i++)
@@ -199,35 +258,36 @@ JokerObject *joker_object_new(Joker *joker)
     joker_object->sprite_object = sprite_object_new();
 
     int tile_index = JOKER_TID + (layer * JOKER_SPRITE_OFFSET);
-    
+
     int joker_spritesheet_idx = joker_get_spritesheet_idx(joker->id);
-    int joker_idx = joker->id % NUM_JOKERS_PER_SPRITESHEET;
+    int joker_idx = joker_get_sprite_idx_in_sheet(joker->id);
     int joker_pb = allocate_pb_if_needed(joker->id);
     joker_pb_add_sprite_user(joker_pb);
 
-    memcpy32(&tile_mem[4][tile_index], &joker_gfxTiles[joker_spritesheet_idx][joker_idx * TILE_SIZE * JOKER_SPRITE_OFFSET], TILE_SIZE * JOKER_SPRITE_OFFSET);
+    memcpy32(
+        &tile_mem[4][tile_index],
+        &joker_gfxTiles[joker_spritesheet_idx][joker_idx * TILE_SIZE * JOKER_SPRITE_OFFSET],
+        TILE_SIZE * JOKER_SPRITE_OFFSET
+    );
 
-    sprite_object_set_sprite
-    (
-        joker_object->sprite_object, 
-        sprite_new
-        (
-            ATTR0_SQUARE | ATTR0_4BPP | ATTR0_AFF, 
-            ATTR1_SIZE_32, 
-            tile_index, 
+    sprite_object_set_sprite(
+        joker_object->sprite_object,
+        sprite_new(
+            ATTR0_SQUARE | ATTR0_4BPP | ATTR0_AFF,
+            ATTR1_SIZE_32,
+            tile_index,
             joker_pb,
             JOKER_STARTING_LAYER + layer
         )
     );
 
-    
-
     return joker_object;
 }
 
-void joker_object_destroy(JokerObject **joker_object)
+void joker_object_destroy(JokerObject** joker_object)
 {
-    if (joker_object == NULL || *joker_object == NULL) return;
+    if (joker_object == NULL || *joker_object == NULL)
+        return;
 
     int layer = sprite_get_layer(joker_object_get_sprite(*joker_object)) - JOKER_STARTING_LAYER;
     used_layers[layer] = false;
@@ -238,18 +298,18 @@ void joker_object_destroy(JokerObject **joker_object)
     }
 
     sprite_object_destroy(&(*joker_object)->sprite_object); // Destroy the sprite
-    joker_destroy(&(*joker_object)->joker); // Destroy the joker
+    joker_destroy(&(*joker_object)->joker);                 // Destroy the joker
     POOL_FREE(JokerObject, *joker_object);
     *joker_object = NULL;
 }
 
-void joker_object_update(JokerObject *joker_object)
+void joker_object_update(JokerObject* joker_object)
 {
-    CardObject *card_object = (CardObject *)joker_object;
+    CardObject* card_object = (CardObject*)joker_object;
     card_object_update(card_object);
 }
 
-void joker_object_shake(JokerObject *joker_object, mm_word sound_id)
+void joker_object_shake(JokerObject* joker_object, mm_word sound_id)
 {
     sprite_object_shake(joker_object->sprite_object, sound_id);
 }
@@ -265,7 +325,11 @@ void set_and_shift_text(char* str, int* cursor_pos_x, int* cursor_pos_y, int col
     *cursor_pos_x += joker_score_display_offset_px;
 }
 
-bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum JokerEvent joker_event)
+bool joker_object_score(
+    JokerObject* joker_object,
+    CardObject* card_object,
+    enum JokerEvent joker_event
+)
 {
     if (joker_object == NULL)
     {
@@ -273,16 +337,17 @@ bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum
     }
 
     JokerEffect* joker_effect = NULL;
-    u32 effect_flags_ret = joker_get_score_effect(joker_object->joker, card_object->card, joker_event, &joker_effect);
+    u32 effect_flags_ret =
+        joker_get_score_effect(joker_object->joker, card_object->card, joker_event, &joker_effect);
 
     if (effect_flags_ret == JOKER_EFFECT_FLAG_NONE)
     {
         return false;
     }
 
-    u32  chips = get_chips();
-    u32  mult  = get_mult();
-    int  money = get_money();
+    u32 chips = get_chips();
+    u32 mult = get_mult();
+    int money = get_money();
 
     if (effect_flags_ret & JOKER_EFFECT_FLAG_RETRIGGER)
     {
@@ -317,7 +382,7 @@ bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum
     }
     if (effect_flags_ret & JOKER_EFFECT_FLAG_MULT)
     {
-        mult = u32_protected_add(mult,  joker_effect->mult);
+        mult = u32_protected_add(mult, joker_effect->mult);
         char score_buffer[INT_MAX_DIGITS + 2];
         snprintf(score_buffer, sizeof(score_buffer), "+%lu", joker_effect->mult);
         set_and_shift_text(score_buffer, &cursorPosX, &cursorPosY, TTE_RED_PB);
@@ -326,7 +391,7 @@ bool joker_object_score(JokerObject *joker_object, CardObject* card_object, enum
     // if xmult is zero, DO NOT multiply by it
     if (effect_flags_ret & JOKER_EFFECT_FLAG_XMULT && joker_effect->xmult > 0)
     {
-        mult = u32_protected_mult(mult,  joker_effect->xmult);
+        mult = u32_protected_mult(mult, joker_effect->xmult);
         char score_buffer[INT_MAX_DIGITS + 2];
         snprintf(score_buffer, sizeof(score_buffer), "X%lu", joker_effect->xmult);
         set_and_shift_text(score_buffer, &cursorPosX, &cursorPosY, TTE_RED_PB);
@@ -392,12 +457,12 @@ Sprite* joker_object_get_sprite(JokerObject* joker_object)
 int joker_get_random_rarity()
 {
     int joker_rarity = 0;
-    int rarity_roll = random() % 100; 
-    if (rarity_roll < COMMON_JOKER_CHANCE)  
+    int rarity_roll = random() % 100;
+    if (rarity_roll < COMMON_JOKER_CHANCE)
     {
         joker_rarity = COMMON_JOKER;
     }
-    else if (rarity_roll < COMMON_JOKER_CHANCE + UNCOMMON_JOKER_CHANCE) 
+    else if (rarity_roll < COMMON_JOKER_CHANCE + UNCOMMON_JOKER_CHANCE)
     {
         joker_rarity = UNCOMMON_JOKER;
     }
@@ -405,7 +470,8 @@ int joker_get_random_rarity()
     {
         joker_rarity = RARE_JOKER;
     }
-    else if (rarity_roll < COMMON_JOKER_CHANCE + UNCOMMON_JOKER_CHANCE + RARE_JOKER_CHANCE + LEGENDARY_JOKER_CHANCE)
+    else if (rarity_roll < COMMON_JOKER_CHANCE + UNCOMMON_JOKER_CHANCE + RARE_JOKER_CHANCE +
+                               LEGENDARY_JOKER_CHANCE)
     {
         joker_rarity = LEGENDARY_JOKER;
     }
