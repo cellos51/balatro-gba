@@ -8,7 +8,14 @@ jobs:
   run-unit-tests:
     name: Run Unit Tests
     runs-on: ubuntu-latest
+
     steps:
+        steps:
+      - name: Install latest GCC
+        run: |
+          sudo apt-get install -y gcc-14
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14 100
+
       - name: Checkout repository
         uses: actions/checkout@v5
 
