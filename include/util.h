@@ -10,10 +10,10 @@
 #include <stdint.h>
 
 /**
- * @def GBLA_UNUSED
+ * @def GBAL_UNUSED
  * @brief A friendly wrapper around the not so friendly looking __attribute__ syntax for ((unused))
  */
-#define GBLA_UNUSED __attribute__((unused))
+#define GBAL_UNUSED __attribute__((unused))
 
 #define UNDEFINED -1
 

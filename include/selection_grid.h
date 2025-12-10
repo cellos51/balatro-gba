@@ -19,9 +19,10 @@ typedef void (*RowOnSelectionChangedFunc)(
     const Selection* new_selection
 );
 typedef int (*RowGetSizeFunc)();
-// Called for any non-directional key hit
-// The key will not be passed, the function will have to check key_hit() etc. for the key it wants
-// to check
+
+// Called for any non-directional key transit (either hit down or release up)
+// The key itself and hit/release event will not be passed,
+// the function will have to check key_hit(), key_released() etc. for the key it wants to check
 typedef void (*RowOnKeyTransitFunc)(SelectionGrid* selection_grid, Selection* selection);
 
 struct SelectionGridRow
