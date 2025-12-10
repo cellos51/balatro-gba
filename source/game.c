@@ -1085,6 +1085,39 @@ static inline void sort_hand_by_rank(void)
     }
 }
 
+static inline bool shift_null_card_to_end(int null_card_idx)
+{
+    // Start by searching any non NULL cards after the NULL one
+    // don't start at null_card_idx+1 to avoid potential illegal array access
+    int non_null_card_idx = null_card_idx;
+    for (; non_null_card_idx <= hand_top; non_null_card_idx++)
+    {
+        if (hand[non_null_card_idx] != NULL)
+        {
+            break;
+        }
+    }
+
+    // return false if there are no non-NULL cards left/there are no more sprites to destroy
+    if (non_null_card_idx > hand_top)
+    {
+        return false;
+    }
+
+    // If there is one, shift it and all the cards that follow forward
+    // This way we close the gap and ensure the next card is not NULL
+
+    // Iterating up to `hand_top - non_null_card_idx + 1` should end up out of bounds
+    // but for some reason it doesn't pose any issue, and taking out the +1 breaks
+    // the code, so I'll be elaving it here until someone figures it out ^^'
+    for (int j = 0; j <= hand_top - non_null_card_idx + 1; j++)
+    {
+        hand[null_card_idx + j] = hand[non_null_card_idx + j];
+    }
+
+    return true;
+}
+
 static void reorder_card_sprites_layers(void)
 {
     // Update the sprites in the hand by destroying them and creating new ones in the correct order
@@ -1092,32 +1125,12 @@ static void reorder_card_sprites_layers(void)
     for (int i = 0; i <= hand_top; i++)
     {
         // a NULL card will only happen if we rearrange the sprites without having sorted them
-        // before. Any NULL CardObject will be replaced by shifting all elements forward
+        // before. Any NULL CardObject will be sent to the end by shifting all elements forward
         if (hand[i] == NULL)
         {
-            int non_null_card_idx = i; // don't start at i+1 to avoid potential illegal array access
-            for (; non_null_card_idx <= hand_top; non_null_card_idx++)
-            {
-                if (hand[non_null_card_idx] != NULL)
-                {
-                    break;
-                }
-            }
-
-            // exit loop if there are no non-NULL cards left/there are no more sprites to destroy
-            if (non_null_card_idx > hand_top)
+            if (!shift_null_card_to_end(i))
             {
                 break;
-            }
-
-            // If there is one, shift it and all the cards that follow
-
-            // Iterating up to `hand_top - non_null_card_idx + 1` should end up out of bounds
-            // but for some reason it doesn't pose any issue, and taking out the +1 breaks
-            // the code, so I'll be elaving it here until someone figures it out ^^'
-            for (int j = 0; j <= hand_top - non_null_card_idx + 1; j++)
-            {
-                hand[i + j] = hand[non_null_card_idx + j];
             }
         }
 
@@ -1125,13 +1138,13 @@ static void reorder_card_sprites_layers(void)
         sprite_destroy(&(hand[i]->sprite_object->sprite));
     }
 
+    // Recreate the sprites for the remaining non NULL cards, in order
     for (int i = 0; i <= hand_top; i++)
     {
         if (hand[i] != NULL)
         {
-            // hand[i]->sprite = sprite_new(ATTR0_SQUARE | ATTR0_4BPP | ATTR0_AFF, ATTR1_SIZE_32,
-            // card_sprite_lut[hand[i]->card->suit][hand[i]->card->rank], 0, i);
-            card_object_set_sprite(hand[i], i); // Set the sprite for the card object
+            // Set the sprite for the card object
+            card_object_set_sprite(hand[i], i);
             sprite_position(
                 card_object_get_sprite(hand[i]),
                 fx2int(hand[i]->sprite_object->x),
