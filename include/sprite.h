@@ -41,6 +41,9 @@ Sprite* sprite_new(u16 a0, u16 a1, u32 tid, u32 pb, int sprite_index);
 Sprite* affine_sprite_new(u16 a0, u16 a1, u32 tid, u32 pb);
 void sprite_destroy(Sprite** sprite);
 int sprite_get_layer(Sprite* sprite);
+bool sprite_get_dimensions(Sprite* sprite, int* width, int* height);
+bool sprite_get_height(Sprite* sprite, int* height);
+bool sprite_get_width(Sprite* sprite, int* width);
 
 // Sprite functions
 void sprite_init();

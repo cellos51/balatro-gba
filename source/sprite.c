@@ -99,6 +99,41 @@ int sprite_get_layer(Sprite* sprite)
     return sprite->obj - obj_buffer;
 }
 
+bool sprite_get_width(Sprite* sprite, int* width)
+{
+    if (sprite == NULL || sprite->obj == NULL || width == NULL)
+    {
+        return false;
+    }
+
+    *width = obj_get_width(sprite->obj);
+    return true;
+}
+
+bool sprite_get_height(Sprite* sprite, int* height)
+{
+    if (sprite == NULL || sprite->obj == NULL || height == NULL)
+    {
+        return false;
+    }
+
+    *height = obj_get_height(sprite->obj);
+    return true;
+}
+
+bool sprite_get_dimensions(Sprite* sprite, int* width, int* height)
+{
+    if (sprite == NULL || sprite->obj == NULL || width == NULL || height == NULL)
+    {
+        return false;
+    }
+
+    const u8* size = obj_get_size(sprite->obj);
+    *width = size[0];
+    *height = size[1];
+    return true;
+}
+
 // Sprite functions
 void sprite_init()
 {
@@ -277,40 +312,32 @@ void sprite_object_set_focus(SpriteObject* sprite_object, bool focus)
 
 bool sprite_object_get_width(SpriteObject* sprite_object, int* width)
 {
-    if (sprite_object == NULL || sprite_object->sprite == NULL ||
-        sprite_object->sprite->obj == NULL || width == NULL)
+    if (sprite_object == NULL)
     {
         return false;
     }
 
-    *width = obj_get_width(sprite_object->sprite->obj);
-    return true;
+    return sprite_get_width(sprite_object->sprite, width);
 }
 
 bool sprite_object_get_height(SpriteObject* sprite_object, int* height)
 {
-    if (sprite_object == NULL || sprite_object->sprite == NULL ||
-        sprite_object->sprite->obj == NULL || height == NULL)
+    if (sprite_object == NULL)
     {
         return false;
     }
 
-    *height = obj_get_height(sprite_object->sprite->obj);
-    return true;
+    return sprite_get_height(sprite_object->sprite, height);
 }
 
 bool sprite_object_get_dimensions(SpriteObject* sprite_object, int* width, int* height)
 {
-    if (sprite_object == NULL || sprite_object->sprite == NULL ||
-        sprite_object->sprite->obj == NULL || width == NULL || height == NULL)
+    if (sprite_object == NULL)
     {
         return false;
     }
 
-    const u8* size = obj_get_size(sprite_object->sprite->obj);
-    *width = size[0];
-    *height = size[1];
-    return true;
+    return sprite_get_dimensions(sprite_object->sprite, width, height);
 }
 
 bool sprite_object_is_focused(SpriteObject* sprite_object)
