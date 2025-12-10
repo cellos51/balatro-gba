@@ -1110,7 +1110,11 @@ static void reorder_card_sprites_layers(void)
                 break;
             }
 
-            // if there is one, shift it and all the cards that follow
+            // If there is one, shift it and all the cards that follow
+
+            // Iterating up to `hand_top - non_null_card_idx + 1` should end up out of bounds
+            // but for some reason it doesn't pose any issue, and taking out the +1 breaks
+            // the code, so I'll be elaving it here until someone figures it out ^^'
             for (int j = 0; j <= hand_top - non_null_card_idx + 1; j++)
             {
                 hand[i + j] = hand[non_null_card_idx + j];
@@ -1949,14 +1953,14 @@ static inline void game_playing_process_hand_select_input(void)
     // This should fix inputs sometimes not registering when quickly selecting cards
     static const int card_swap_time_threshold = 5;
     static bool card_moved_too_fast = false;
-    static uint move_timer = TM_ZERO;
+    static uint selection_hit_timer = TM_ZERO;
 
     // Register timer when we hit A to pick a card
     // If we try to move the picked card before card_swap_time_threshold frames,
     // We will select it instead of moving it
     if (key_hit(SELECT_CARD))
     {
-        move_timer = timer;
+        selection_hit_timer = timer;
     }
 
     if (key_hit(KEY_LEFT))
@@ -1964,7 +1968,7 @@ static inline void game_playing_process_hand_select_input(void)
         if (selection_y == 0)
         {
             // Do not use FRAMES(x) here as we are counting real frames ignoring game speed
-            card_moved_too_fast = (timer - move_timer) < card_swap_time_threshold;
+            card_moved_too_fast = (timer - selection_hit_timer) < card_swap_time_threshold;
 
             // The reason why this adds 1 is because the hand is drawn from right to left.
             // There is no particular reason for this, it's just how I did it.
@@ -2004,7 +2008,7 @@ static inline void game_playing_process_hand_select_input(void)
     {
         if (selection_y == 0)
         {
-            card_moved_too_fast = (timer - move_timer) < card_swap_time_threshold;
+            card_moved_too_fast = (timer - selection_hit_timer) < card_swap_time_threshold;
 
             int right_card = selection_x - 1;
 
@@ -2109,7 +2113,7 @@ static inline void game_playing_process_hand_select_input(void)
             }
             moving_card = false;
             can_move_card = true;
-            move_timer = TM_ZERO;
+            selection_hit_timer = TM_ZERO;
         }
 
         if (key_hit(DESELECT_CARDS))
