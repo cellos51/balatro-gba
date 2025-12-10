@@ -107,8 +107,12 @@ static void s_blind_gfx_init(enum BlindType type)
 {
     // TODO: Re-add grit copy. You need to decouple the blind graphics first.
     // This will allow this function to change the boss graphics info
-    // GRIT_CPY(&tile_mem[4][_blind_type_map[type].pal_info.tid], tiles);
+    // GRIT_CPY(&tile_mem[TILE_MEM_OBJ_CHARBLOCK0_IDX][_blind_type_map[type].pal_info.tid], tiles);
     BlindGfxInfo* p_gfx = &_blind_type_map[type].gfx_info;
-    memcpy32(&tile_mem[4][p_gfx->tid], p_gfx->tiles, BLIND_SPRITE_COPY_SIZE);
+    memcpy32(
+        &tile_mem[TILE_MEM_OBJ_CHARBLOCK0_IDX][p_gfx->tid],
+        p_gfx->tiles,
+        BLIND_SPRITE_COPY_SIZE
+    );
     memcpy16(&pal_obj_bank[p_gfx->pb], p_gfx->palette, PAL_ROW_LEN);
 }

@@ -58,6 +58,12 @@
  */
 #define TILE_SIZE 8
 
+/**
+ * @def TILE_MEM_OBJ_CHARBLOCK0_IDX
+ * @brief The index for the first charblock of the object memory in tonc's tile_mem
+ */
+#define TILE_MEM_OBJ_CHARBLOCK0_IDX 4
+
 /** @} */
 
 /**
