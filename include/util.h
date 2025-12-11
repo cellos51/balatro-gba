@@ -142,26 +142,4 @@ static inline int u32_get_digits(uint32_t n)
     return 10;
 }
 
-/**
- * @brief Get the number of digits closest to it's "even" value, i.e. ceil(digits/2)
- *
- * Useful for centering text on tiles
- *
- * @param n value to find the number of even decimal digits of
- *
- * @return The value of ceil(get_digits(n)/2)
- */
-static inline int get_digits_even(int n)
-{
-    if (n < 100)
-        return 1;
-    if (n < 10000)
-        return 2;
-    if (n < 1000000)
-        return 3;
-    if (n < 100000000)
-        return 4;
-    return 5;
-}
-
 #endif // UTIL_H
