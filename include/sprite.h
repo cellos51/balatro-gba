@@ -4,9 +4,11 @@
 #include <maxmod.h>
 #include <tonc.h>
 
-#define CARD_SPRITE_SIZE   32
-#define MAX_SPRITES        128
-#define MAX_SPRITE_OBJECTS 16
+#define CARD_SPRITE_SIZE      32
+#define MAX_AFFINES           32
+#define MAX_SPRITES           128
+#define MAX_SPRITE_OBJECTS    16
+#define SPRITE_FOCUS_RAISE_PX 10
 
 typedef struct
 {
@@ -39,6 +41,9 @@ Sprite* sprite_new(u16 a0, u16 a1, u32 tid, u32 pb, int sprite_index);
 Sprite* affine_sprite_new(u16 a0, u16 a1, u32 tid, u32 pb);
 void sprite_destroy(Sprite** sprite);
 int sprite_get_layer(Sprite* sprite);
+bool sprite_get_dimensions(Sprite* sprite, int* width, int* height);
+bool sprite_get_height(Sprite* sprite, int* height);
+bool sprite_get_width(Sprite* sprite, int* width);
 
 // Sprite functions
 void sprite_init();
@@ -57,6 +62,9 @@ void sprite_object_set_selected(SpriteObject* sprite_object, bool selected);
 bool sprite_object_is_selected(SpriteObject* sprite_object);
 Sprite* sprite_object_get_sprite(SpriteObject* sprite_object);
 void sprite_object_set_focus(SpriteObject* sprite_object, bool focus);
+bool sprite_object_get_dimensions(SpriteObject* sprite_object, int* width, int* height);
+bool sprite_object_get_height(SpriteObject* sprite_object, int* height);
+bool sprite_object_get_width(SpriteObject* sprite_object, int* width);
 bool sprite_object_is_focused(SpriteObject* sprite_object);
 
 INLINE void sprite_position(Sprite* sprite, int x, int y)

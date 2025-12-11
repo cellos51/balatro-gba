@@ -9,10 +9,7 @@
 #include <maxmod.h>
 #include <stdlib.h>
 #include <tonc.h>
-
-#define MAX_SPRITES           128
-#define MAX_AFFINES           32
-#define SPRITE_FOCUS_RAISE_PX 10
+#include <tonc_oam.h>
 
 OBJ_ATTR obj_buffer[MAX_SPRITES];
 OBJ_AFFINE* obj_aff_buffer = (OBJ_AFFINE*)obj_buffer;
@@ -100,6 +97,41 @@ int sprite_get_layer(Sprite* sprite)
     if (sprite == NULL || sprite->obj == NULL)
         return UNDEFINED;
     return sprite->obj - obj_buffer;
+}
+
+bool sprite_get_width(Sprite* sprite, int* width)
+{
+    if (sprite == NULL || sprite->obj == NULL || width == NULL)
+    {
+        return false;
+    }
+
+    *width = obj_get_width(sprite->obj);
+    return true;
+}
+
+bool sprite_get_height(Sprite* sprite, int* height)
+{
+    if (sprite == NULL || sprite->obj == NULL || height == NULL)
+    {
+        return false;
+    }
+
+    *height = obj_get_height(sprite->obj);
+    return true;
+}
+
+bool sprite_get_dimensions(Sprite* sprite, int* width, int* height)
+{
+    if (sprite == NULL || sprite->obj == NULL || width == NULL || height == NULL)
+    {
+        return false;
+    }
+
+    const u8* size = obj_get_size(sprite->obj);
+    *width = size[0];
+    *height = size[1];
+    return true;
 }
 
 // Sprite functions
@@ -276,6 +308,36 @@ void sprite_object_set_focus(SpriteObject* sprite_object, bool focus)
 
     play_sfx(SFX_CARD_FOCUS, MM_BASE_PITCH_RATE + rand() % 512);
     sprite_object->ty = sprite_object->ty + int2fx((focus ? -1 : 1) * SPRITE_FOCUS_RAISE_PX);
+}
+
+bool sprite_object_get_width(SpriteObject* sprite_object, int* width)
+{
+    if (sprite_object == NULL)
+    {
+        return false;
+    }
+
+    return sprite_get_width(sprite_object->sprite, width);
+}
+
+bool sprite_object_get_height(SpriteObject* sprite_object, int* height)
+{
+    if (sprite_object == NULL)
+    {
+        return false;
+    }
+
+    return sprite_get_height(sprite_object->sprite, height);
+}
+
+bool sprite_object_get_dimensions(SpriteObject* sprite_object, int* width, int* height)
+{
+    if (sprite_object == NULL)
+    {
+        return false;
+    }
+
+    return sprite_get_dimensions(sprite_object->sprite, width, height);
 }
 
 bool sprite_object_is_focused(SpriteObject* sprite_object)

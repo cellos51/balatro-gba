@@ -3517,22 +3517,38 @@ static void game_round_end_dismiss_round_end_panel()
 
 static void print_price_under_sprite_object(SpriteObject* sprite_object, int price)
 {
+    int height = 0;
+
+    if (sprite_object_get_height(sprite_object, &height) == false)
+    {
+        // fallback
+        height = CARD_SPRITE_SIZE;
+    }
+
     int x = fx2int(sprite_object->tx) + TILE_SIZE - (get_digits_even(price) - 1) * TILE_SIZE;
-    // TODO: Should probably extract the sprite size
-    int y = fx2int(sprite_object->ty) + CARD_SPRITE_SIZE + TILE_SIZE;
+    int y = fx2int(sprite_object->ty) + height + TILE_SIZE;
+
     tte_printf("#{P:%d,%d; cx:0x%X000}$%d", x, y, TTE_YELLOW_PB, price);
 }
 
 static void erase_price_under_sprite_object(SpriteObject* sprite_object)
 {
+    int width = 0;
+    int height = 0;
+
+    if (sprite_object_get_dimensions(sprite_object, &width, &height) == false)
+    {
+        // fallback
+        height = CARD_SPRITE_SIZE;
+        width = CARD_SPRITE_SIZE;
+    }
+
     Rect price_rect;
     price_rect.left = fx2int(sprite_object->tx);
-    price_rect.top = fx2int(sprite_object->ty) + CARD_SPRITE_SIZE + TILE_SIZE;
-    // TODO: Should probably extract the size from the sprite
+    price_rect.top = fx2int(sprite_object->ty) + height + TILE_SIZE;
+    price_rect.right = price_rect.left + width;
+    price_rect.bottom = price_rect.top + TILE_SIZE + SPRITE_FOCUS_RAISE_PX;
 
-    price_rect.right = price_rect.left + TILE_SIZE * 3;
-    // Taking 2 tiles down so the highlighted case is also covered
-    price_rect.bottom = price_rect.top + 2 * TILE_SIZE;
     tte_erase_rect_wrapper(price_rect);
 }
 
