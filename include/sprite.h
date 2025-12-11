@@ -16,7 +16,7 @@ typedef struct
     int idx;
 } Sprite;
 
-// A sprite object is a sprite that is selectable and movable in animation
+// A sprite object is a sprite that is focusable and movable in animation
 typedef struct
 {
     Sprite* sprite;
@@ -29,7 +29,6 @@ typedef struct
     FIXED trotation; // this never gets used so i might remove it later
     FIXED rotation;
     FIXED vrotation;
-    bool selected;
     bool focused;
 
 } SpriteObject;
@@ -53,8 +52,6 @@ void sprite_object_reset_transform(SpriteObject* sprite_object);
 void sprite_object_update(SpriteObject* sprite_object);
 void sprite_object_shake(SpriteObject* sprite_object, mm_word sound_id);
 
-void sprite_object_set_selected(SpriteObject* sprite_object, bool selected);
-bool sprite_object_is_selected(SpriteObject* sprite_object);
 Sprite* sprite_object_get_sprite(SpriteObject* sprite_object);
 void sprite_object_set_focus(SpriteObject* sprite_object, bool focus);
 bool sprite_object_is_focused(SpriteObject* sprite_object);
