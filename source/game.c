@@ -3540,7 +3540,7 @@ static void erase_price_under_sprite_object(SpriteObject* sprite_object)
     {
         // fallback
         height = CARD_SPRITE_SIZE;
-        width = CARD_SPRITE_SIZE / 2;
+        width = CARD_SPRITE_SIZE;
     }
 
     Rect price_rect;
