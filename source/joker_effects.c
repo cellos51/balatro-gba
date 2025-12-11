@@ -1459,10 +1459,10 @@ static u32 bootstraps_joker_effect(
     return effect_flags_ret;
 }
 
-// Using GBLA_UNUSED, aka __attribute__((unused)), for jokers with no sprites yet to avoid warning
+// Using GBAL_UNUSED, aka __attribute__((unused)), for jokers with no sprites yet to avoid warning
 // Remove the attribute once they have sprites
 // no graphics available but ready to be used if wanted when graphics available
-GBLA_UNUSED
+GBAL_UNUSED
 static u32 shoot_the_moon_joker_effect(
     Joker* joker,
     Card* scored_card,
@@ -1485,7 +1485,7 @@ static u32 shoot_the_moon_joker_effect(
     return effect_flags_ret;
 }
 
-GBLA_UNUSED
+GBAL_UNUSED
 static u32 photograph_joker_effect(
     Joker* joker,
     Card* scored_card,

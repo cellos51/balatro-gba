@@ -551,7 +551,7 @@ static int shortcut_joker_count = 0;
 static int four_fingers_joker_count = 0;
 static int straight_and_flush_size = STRAIGHT_AND_FLUSH_SIZE_DEFAULT;
 
-GBLA_UNUSED
+GBAL_UNUSED
 static inline bool is_shop_joker_avail(int joker_id)
 {
     return bitset_get_idx(&_avail_jokers_bitset, joker_id);
