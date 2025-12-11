@@ -1975,9 +1975,8 @@ static inline void process_user_card_movement(enum ScreenHorzDir move_dir)
     // swap cards around if A is held down when pressing D-pad keys
     if (key_is_down(SELECT_CARD) && can_move_card && !card_moved_too_fast)
     {
-        bool selection_not_at_border = (move_dir == SCREEN_LEFT)
-            ? selection_x < hand_top
-            : selection_x > 0;
+        bool selection_not_at_border =
+            (move_dir == SCREEN_LEFT) ? selection_x < hand_top : selection_x > 0;
 
         if (selection_not_at_border)
         {
