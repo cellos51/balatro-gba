@@ -1,0 +1,5 @@
+These are tests that run on the repository's CI or can be run locally 
+to make sure none of the base modules are broken.
+
+The project uses the gnu23 C standard which is stably supported from GCC 14 and onwards 
+so this project should be compiled with GCC 14 or later.

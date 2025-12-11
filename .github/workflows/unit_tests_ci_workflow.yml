@@ -14,5 +14,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
+      - name: Check and install GCC version
+        run: ./ci_scripts/check_gcc_version.sh
+
       - name: Run Unit Tests
         run: cd tests && ./run_tests.sh
