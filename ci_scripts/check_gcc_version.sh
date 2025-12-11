@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Check GCC version and install GCC 14 if needed
 check_gcc_version() {
     if command -v gcc &> /dev/null; then
