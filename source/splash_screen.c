@@ -19,7 +19,7 @@ void splash_screen_on_init()
         "#{P:8,24; cx:0xF000}This project is NOT endorsed \n by or affiliated with \n Playstack or "
         "LocalThunk.\n\n If you have paid for this, \n you have been scammed \n and should request "
         "a refund \n IMMEDIATELY. \n\n The only official place \n to obtain this is from: \n\n "
-        "'github.com/\n  cellos51/balatro-gba'"
+        "'github.com/\n  GBALATRO/balatro-gba'"
     );
     tte_printf("#{P:8,144; cx:0xF000}(Press any key to skip)");
 }
