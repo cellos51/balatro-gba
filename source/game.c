@@ -39,6 +39,7 @@
 
 #define MAIN_MENU_BUTTONS             2
 #define MAIN_MENU_IMPLEMENTED_BUTTONS 1 // Remove this once all buttons are implemented
+#define MAIN_MENU_PLAY_BTN_IDX        0
 
 // TODO: Properly define and use
 #define MENU_POP_OUT_ANIM_FRAMES 20
@@ -199,6 +200,7 @@ static void game_blind_select_on_update(void);
 static void game_blind_select_on_exit(void);
 static void game_lose_on_init(void);
 static void game_lose_on_update(void);
+static void game_over_process_user_input();
 static void game_over_on_exit(void);
 static void game_win_on_init(void);
 static void game_win_on_update(void);
@@ -1937,6 +1939,8 @@ static inline void game_playing_process_hand_select_input(void)
 
             if (key_hit(SELECT_CARD) && hands > 0 && hand_play())
             {
+                play_sfx(SFX_BUTTON, MM_BASE_PITCH_RATE);
+
                 hand_state = HAND_PLAY;
                 selection_x = 0;
                 selection_y = 0;
@@ -1950,6 +1954,8 @@ static inline void game_playing_process_hand_select_input(void)
 
             if (key_hit(SELECT_CARD) && discards > 0 && hand_discard())
             {
+                play_sfx(SFX_BUTTON, MM_BASE_PITCH_RATE);
+
                 hand_state = HAND_DISCARD;
                 selection_x = 0;
                 selection_y = 0;
@@ -2761,9 +2767,11 @@ static inline int hand_get_max_size(void)
     return hand_size;
 }
 
+// TODO: Help this comment find its way back to its variable
 /* This needs to stay a power of 2 and small enough
  * for the lerping to be done before the next hand is drawn.
  */
+
 static inline void game_playing_process_input_and_state(void)
 {
     if (hand_state == HAND_SELECT)
@@ -3820,6 +3828,8 @@ static void shop_top_row_on_key_transit(SelectionGrid* selection_grid, Selection
 
     if (selection->x == NEXT_ROUND_BTN_SEL_X)
     {
+        play_sfx(SFX_BUTTON, MM_BASE_PITCH_RATE);
+
         // Go to next blind selection game state
         state_info[game_state].substate = GAME_SHOP_EXIT; // Go to the outro sequence state
         timer = TM_ZERO;                                  // Reset the timer
@@ -4177,12 +4187,14 @@ static void game_blind_select_handle_input()
     {
         if (selection_y == 0) // Blind selected
         {
+            play_sfx(SFX_BUTTON, MM_BASE_PITCH_RATE);
             state_info[game_state].substate = BLIND_SELECTED_ANIM_SEQ;
             timer = TM_ZERO;
             display_round(++round);
         }
         else if (current_blind != BLIND_TYPE_BOSS)
         {
+            play_sfx(SFX_BUTTON, MM_BASE_PITCH_RATE);
             increment_blind(BLIND_STATE_SKIPPED);
 
             background = UNDEFINED; // Force refresh of the background
@@ -4399,20 +4411,18 @@ static void game_main_menu_on_update()
         }
     }
 
-    if (selection_x == 0) // Play button
+    if (selection_x == MAIN_MENU_PLAY_BTN_IDX)
     {
-        // Select button PID is 5 and the outline is 3
         memset16(&pal_bg_mem[MAIN_MENU_PLAY_BUTTON_OUTLINE_PID], HIGHLIGHT_COLOR, 1);
 
-        if (key_hit(KEY_A))
+        if (key_hit(SELECT_CARD))
         {
-            // Start the game
+            play_sfx(SFX_BUTTON, MM_BASE_PITCH_RATE);
             game_start();
         }
     }
     else
     {
-        // Select button PID is 5 and the outline is 3
         memcpy16(
             &pal_bg_mem[MAIN_MENU_PLAY_BUTTON_OUTLINE_PID],
             &pal_bg_mem[MAIN_MENU_PLAY_BUTTON_MAIN_COLOR_PID],
@@ -4424,6 +4434,15 @@ static void game_main_menu_on_update()
 static void game_over_anim_frame(void)
 {
     main_bg_se_move_rect_1_tile_vert(GAME_OVER_ANIM_RECT, SCREEN_UP);
+}
+
+static void game_over_process_user_input()
+{
+    if (key_hit(SELECT_CARD))
+    {
+        play_sfx(SFX_BUTTON, MM_BASE_PITCH_RATE);
+        game_change_state(GAME_STATE_BLIND_SELECT);
+    }
 }
 
 static void game_lose_on_update()
@@ -4442,8 +4461,7 @@ static void game_lose_on_update()
         );
     }
 
-    if (key_hit(KEY_A))
-        game_change_state(GAME_STATE_BLIND_SELECT);
+    game_over_process_user_input();
 }
 
 // This function isn't set in stone. This is just a placeholder
@@ -4514,6 +4532,5 @@ static void game_win_on_update()
         );
     }
 
-    if (key_hit(KEY_A))
-        game_change_state(GAME_STATE_BLIND_SELECT);
+    game_over_process_user_input();
 }
