@@ -2649,7 +2649,7 @@ static inline void play_ending_played_cards_update(int played_idx)
 
         if (scored_card_index == 0)
         {
-            play_sfx(SFX_CHIPS_ACCUM, MM_BASE_PITCH_RATE);
+            play_sfx(SFX_CHIPS_ACCUM, 2*MM_BASE_PITCH_RATE);
             timer = TM_ZERO;
             play_state = PLAY_ENDED;
         }
