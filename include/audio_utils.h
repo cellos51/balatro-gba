@@ -45,7 +45,8 @@
  *
  * @param id the sound id to play, from maxmod compiled soundbank.h header
  * @param rate the pitch rate, the default value is @ref MM_BASE_PTCH_RATE
+ * @param volume the volume
  */
-void play_sfx(mm_word id, mm_word rate);
+void play_sfx(mm_word id, mm_word rate, mm_byte volume);
 
 #endif
