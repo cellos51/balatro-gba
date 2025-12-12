@@ -2673,7 +2673,7 @@ static inline void play_ending_played_cards_update(int played_idx)
         {
             play_sfx(
                 SFX_CHIPS_ACCUM,
-                CHIPS_ACCUM_SFX_PITCH_RATIO*MM_BASE_PITCH_RATE,
+                CHIPS_ACCUM_SFX_PITCH_RATIO * MM_BASE_PITCH_RATE,
                 SFX_DEFAULT_VOLUME
             );
             timer = TM_ZERO;
@@ -2820,8 +2820,8 @@ static inline void game_playing_process_input_and_state(void)
 
             // The chips calculation SFX is the same as button
             play_sfx(
-                SFX_BUTTON, 
-                MM_BASE_PITCH_RATE + SCORE_CALC_SFX_PITCH_SHIFT, 
+                SFX_BUTTON,
+                MM_BASE_PITCH_RATE + SCORE_CALC_SFX_PITCH_SHIFT,
                 SCORE_CALC_SFX_VOLUME
             );
         }
