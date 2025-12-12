@@ -2664,13 +2664,16 @@ static inline void play_ending_played_cards_update(int played_idx)
     {
         scored_card_index--;
 
+        /* SFX_CHIPS_ACCUM has been pitch shifted to perserve high frequencies in downsampling.
+         * Now it needs to be pitch shifted back to the original frequency.
+         */
         int static const CHIPS_ACCUM_SFX_PITCH_RATIO = 2;
 
         if (scored_card_index == 0)
         {
             play_sfx(
-                SFX_CHIPS_ACCUM, 
-                CHIPS_ACCUM_SFX_PITCH_RATIO*MM_BASE_PITCH_RATE, 
+                SFX_CHIPS_ACCUM,
+                CHIPS_ACCUM_SFX_PITCH_RATIO*MM_BASE_PITCH_RATE,
                 SFX_DEFAULT_VOLUME
             );
             timer = TM_ZERO;
