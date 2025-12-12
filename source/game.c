@@ -2015,8 +2015,8 @@ static inline void card_draw(void)
     sort_cards();
 
     play_sfx(
-        SFX_CARD_DRAW, 
-        MM_BASE_PITCH_RATE + cards_drawn * PITCH_STEP_DRAW_SFX, 
+        SFX_CARD_DRAW,
+        MM_BASE_PITCH_RATE + cards_drawn * PITCH_STEP_DRAW_SFX,
         SFX_DEFAULT_VOLUME
     );
 }
@@ -2082,7 +2082,7 @@ static inline void card_in_hand_loop_handle_discard_and_shuffling(
             if (!sound_played)
             {
                 play_sfx(
-                    SFX_CARD_DRAW, 
+                    SFX_CARD_DRAW,
                     MM_BASE_PITCH_RATE + cards_drawn * PITCH_STEP_DISCARD_SFX,
                     SFX_DEFAULT_VOLUME
                 );
@@ -2374,7 +2374,7 @@ static bool play_ended_played_cards_update(int played_idx)
         if (!sound_played)
         {
             play_sfx(
-                SFX_CARD_DRAW, 
+                SFX_CARD_DRAW,
                 MM_BASE_PITCH_RATE + cards_drawn * PITCH_STEP_DISCARD_SFX,
                 SFX_DEFAULT_VOLUME
             );
@@ -2895,7 +2895,7 @@ static inline void game_playing_discarded_cards_loop(void)
                 card_object_destroy(&discarded_card_object);
 
                 play_sfx(
-                    SFX_CARD_DRAW, 
+                    SFX_CARD_DRAW,
                     MM_BASE_PITCH_RATE + PITCH_STEP_UNDISCARD_SFX,
                     SFX_DEFAULT_VOLUME
                 );
