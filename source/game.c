@@ -195,6 +195,7 @@ static void game_round_end_on_update(void);
 static void game_round_end_on_exit(void);
 static void game_shop_on_update(void);
 static void game_shop_on_exit(void);
+static void game_blind_select_on_init(void);
 static void game_blind_select_on_update(void);
 static void game_blind_select_on_exit(void);
 static void game_lose_on_init(void);
@@ -4172,6 +4173,14 @@ static void game_shop_on_exit()
     increment_blind(BLIND_STATE_DEFEATED); // TODO: Move to game_round_end()?
 }
 
+static void game_blind_select_on_init()
+{
+    change_background(BG_BLIND_SELECT);
+
+    // Blind pop-up sound effect is "cancel"
+    play_sfx(SFX_CANCEL, MM_BASE_PITCH_RATE, SFX_DEFAULT_VOLUME);
+}
+
 static void game_blind_select_on_update()
 {
     if (state_info[game_state].substate == BLIND_SELECT_MAX)
@@ -4186,7 +4195,6 @@ static void game_blind_select_on_update()
 
 static void game_blind_select_start_anim_seq()
 {
-    change_background(BG_BLIND_SELECT);
     main_bg_se_copy_rect_1_tile_vert(POP_MENU_ANIM_RECT, SCREEN_UP);
 
     for (int i = 0; i < BLIND_TYPE_MAX; i++)
