@@ -2649,6 +2649,7 @@ static inline void play_ending_played_cards_update(int played_idx)
 
         if (scored_card_index == 0)
         {
+            play_sfx(SFX_CHIPS_ACCUM, MM_BASE_PITCH_RATE);
             timer = TM_ZERO;
             play_state = PLAY_ENDED;
         }
@@ -2785,6 +2786,11 @@ static inline void game_playing_process_input_and_state(void)
             mult = 0;
             display_mult();
             display_chips();
+
+            static const int SCORE_CALC_SFX_PITCH_SHIFT = -102; // -10% OF MM_BASE_PITCH_RATE
+
+            // The chips calculation SFX is the same as button
+            play_sfx(SFX_BUTTON, MM_BASE_PITCH_RATE + SCORE_CALC_SFX_PITCH_SHIFT);
         }
     }
     else if (play_state == PLAY_ENDED)
