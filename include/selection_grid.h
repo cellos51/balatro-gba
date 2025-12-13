@@ -117,6 +117,7 @@ void selection_grid_process_input(SelectionGrid* selection_grid);
  * should update the selection grid.
  *
  * @param selection_grid Pointer to the SelectionGrid structure to operate on.
+ *                       Must not be NULL. NULL-checks are in place and will return early.
  * @param direction_tribool Direction indicator for horizontal movement behaving like tonc's
  *                          tribools:
  *                          - Negative value: move left
@@ -133,6 +134,7 @@ void selection_grid_move_selection_horz(SelectionGrid* selection_grid, int direc
  * should update the selection grid.
  *
  * @param selection_grid Pointer to the SelectionGrid structure to operate on.
+ *                       Must not be NULL. NULL-checks are in place and will return early.
  * @param direction_tribool Direction indicator for vertical movement behaving like tonc's tribools:
  *                          - Negative value: move up
  *                          - Zero: no movement
