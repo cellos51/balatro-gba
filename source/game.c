@@ -200,7 +200,6 @@ static void game_blind_select_on_update(void);
 static void game_blind_select_on_exit(void);
 static void game_lose_on_init(void);
 static void game_lose_on_update(void);
-static void game_over_process_user_input();
 static void game_over_on_exit(void);
 static void game_win_on_init(void);
 static void game_win_on_update(void);
