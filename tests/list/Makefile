@@ -1,7 +1,7 @@
 
 CC := gcc
 CFLAGS := -I../../include -I. \
-          -g -O3 -Wall -Werror -DPOOLS_TEST_ENV=yes
+          -g -O3 -std=gnu23 -Wall -Werror -DPOOLS_TEST_ENV=yes
 
 SRC            := list_test.c          \
                   ../../source/list.c  \
