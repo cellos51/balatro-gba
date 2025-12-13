@@ -85,6 +85,17 @@
 /** @} */
 
 /**
+ * @brief Get the decimal point string equivalent of 0-9 from integer param.
+ *
+ * @param val Value between 0-9 to get ".0" to ".9" equivalents. Note that
+ *            if a value outside of range is passed it will perform '% 9'
+ *            on that value.
+ *
+ * @return A char* to the string values of '.0' to '.9'
+ */
+const char* get_font_point_str(int val);
+
+/**
  * @brief Avoid overflow when adding two u32 integers
  *
  * @param a left operator **a + b**
