@@ -39,6 +39,7 @@
 
 #define MAIN_MENU_BUTTONS             2
 #define MAIN_MENU_IMPLEMENTED_BUTTONS 1 // Remove this once all buttons are implemented
+#define MAIN_MENU_PLAY_BTN_IDX        0
 
 // TODO: Properly define and use
 #define MENU_POP_OUT_ANIM_FRAMES 20
@@ -54,13 +55,12 @@
 #define PITCH_STEP_DRAW_SFX      24
 #define PITCH_STEP_UNDISCARD_SFX 2 * PITCH_STEP_DRAW_SFX
 
+#define BUTTON_SFX_VOLUME 154 // 60% of MM_FULL_VOLUME
+
 #define STARTING_ROUND 0
 #define STARTING_ANTE  1
 #define STARTING_MONEY 4
 #define STARTING_SCORE 0
-
-#define TEN_K 10000
-#define ONE_K 1000
 
 #define CARD_FOCUSED_UNSEL_Y 10
 #define CARD_UNFOCUSED_SEL_Y 15
@@ -1677,7 +1677,11 @@ static void hand_set_focus(int index)
         selection_x = index;
     }
 
-    play_sfx(SFX_CARD_FOCUS, MM_BASE_PITCH_RATE + rand() % 512);
+    play_sfx(
+        SFX_CARD_FOCUS,
+        MM_BASE_PITCH_RATE + rand() % CARD_FOCUS_SFX_PITCH_OFFSET_RANGE,
+        SFX_DEFAULT_VOLUME
+    );
 }
 
 static bool hand_discard(void)
@@ -1840,13 +1844,13 @@ static inline void hand_toggle_card_selection(void)
     {
         card_object_set_selected(hand[selection_x], false);
         hand_selections--;
-        play_sfx(SFX_CARD_DESELECT, MM_BASE_PITCH_RATE);
+        play_sfx(SFX_CARD_DESELECT, MM_BASE_PITCH_RATE, SFX_DEFAULT_VOLUME);
     }
     else if (hand_selections < MAX_SELECTION_SIZE)
     {
         card_object_set_selected(hand[selection_x], true);
         hand_selections++;
-        play_sfx(SFX_CARD_SELECT, MM_BASE_PITCH_RATE);
+        play_sfx(SFX_CARD_SELECT, MM_BASE_PITCH_RATE, SFX_DEFAULT_VOLUME);
     }
 }
 
@@ -1865,7 +1869,7 @@ static void hand_deselect_all_cards(void)
 
     if (any_cards_deselected)
     {
-        play_sfx(SFX_CARD_DESELECT, MM_BASE_PITCH_RATE);
+        play_sfx(SFX_CARD_DESELECT, MM_BASE_PITCH_RATE, SFX_DEFAULT_VOLUME);
     }
 }
 
@@ -1937,6 +1941,8 @@ static inline void game_playing_process_hand_select_input(void)
 
             if (key_hit(SELECT_CARD) && hands > 0 && hand_play())
             {
+                play_sfx(SFX_BUTTON, MM_BASE_PITCH_RATE, BUTTON_SFX_VOLUME);
+
                 hand_state = HAND_PLAY;
                 selection_x = 0;
                 selection_y = 0;
@@ -1950,6 +1956,8 @@ static inline void game_playing_process_hand_select_input(void)
 
             if (key_hit(SELECT_CARD) && discards > 0 && hand_discard())
             {
+                play_sfx(SFX_BUTTON, MM_BASE_PITCH_RATE, BUTTON_SFX_VOLUME);
+
                 hand_state = HAND_DISCARD;
                 selection_x = 0;
                 selection_y = 0;
@@ -2009,7 +2017,11 @@ static inline void card_draw(void)
     // Sort the hand after drawing a card
     sort_cards();
 
-    play_sfx(SFX_CARD_DRAW, MM_BASE_PITCH_RATE + cards_drawn * PITCH_STEP_DRAW_SFX);
+    play_sfx(
+        SFX_CARD_DRAW,
+        MM_BASE_PITCH_RATE + cards_drawn * PITCH_STEP_DRAW_SFX,
+        SFX_DEFAULT_VOLUME
+    );
 }
 
 static inline void display_ante(int value)
@@ -2072,7 +2084,11 @@ static inline void card_in_hand_loop_handle_discard_and_shuffling(
 
             if (!sound_played)
             {
-                play_sfx(SFX_CARD_DRAW, MM_BASE_PITCH_RATE + cards_drawn * PITCH_STEP_DISCARD_SFX);
+                play_sfx(
+                    SFX_CARD_DRAW,
+                    MM_BASE_PITCH_RATE + cards_drawn * PITCH_STEP_DISCARD_SFX,
+                    SFX_DEFAULT_VOLUME
+                );
                 sound_played = true;
             }
 
@@ -2360,7 +2376,11 @@ static bool play_ended_played_cards_update(int played_idx)
         // play the sound only once per card, when it is pushed off-screen to the right
         if (!sound_played)
         {
-            play_sfx(SFX_CARD_DRAW, MM_BASE_PITCH_RATE + cards_drawn * PITCH_STEP_DISCARD_SFX);
+            play_sfx(
+                SFX_CARD_DRAW,
+                MM_BASE_PITCH_RATE + cards_drawn * PITCH_STEP_DISCARD_SFX,
+                SFX_DEFAULT_VOLUME
+            );
             sound_played = true;
         }
 
@@ -2761,9 +2781,11 @@ static inline int hand_get_max_size(void)
     return hand_size;
 }
 
+// TODO: Help this comment find its way back to its variable
 /* This needs to stay a power of 2 and small enough
  * for the lerping to be done before the next hand is drawn.
  */
+
 static inline void game_playing_process_input_and_state(void)
 {
     if (hand_state == HAND_SELECT)
@@ -2875,7 +2897,11 @@ static inline void game_playing_discarded_cards_loop(void)
                 deck_push(discarded_card_object->card); // Put the card back into the deck
                 card_object_destroy(&discarded_card_object);
 
-                play_sfx(SFX_CARD_DRAW, MM_BASE_PITCH_RATE + PITCH_STEP_UNDISCARD_SFX);
+                play_sfx(
+                    SFX_CARD_DRAW,
+                    MM_BASE_PITCH_RATE + PITCH_STEP_UNDISCARD_SFX,
+                    SFX_DEFAULT_VOLUME
+                );
             }
         }
 
@@ -2962,7 +2988,8 @@ static inline void cards_in_hand_update_loop(void)
 
                         play_sfx(
                             SFX_CARD_DRAW,
-                            MM_BASE_PITCH_RATE + cards_drawn * PITCH_STEP_DISCARD_SFX
+                            MM_BASE_PITCH_RATE + cards_drawn * PITCH_STEP_DISCARD_SFX,
+                            SFX_DEFAULT_VOLUME
                         );
 
                         hand_top--;
@@ -3828,6 +3855,8 @@ static void shop_top_row_on_key_transit(SelectionGrid* selection_grid, Selection
 
     if (selection->x == NEXT_ROUND_BTN_SEL_X)
     {
+        play_sfx(SFX_BUTTON, MM_BASE_PITCH_RATE, BUTTON_SFX_VOLUME);
+
         // Go to next blind selection game state
         state_info[game_state].substate = GAME_SHOP_EXIT; // Go to the outro sequence state
         timer = TM_ZERO;                                  // Reset the timer
@@ -3986,6 +4015,8 @@ static void shop_reroll_row_on_key_transit(SelectionGrid* selection_grid, Select
 
     if (money >= reroll_cost)
     {
+        // TODO: Add money sound effect
+        play_sfx(SFX_BUTTON, MM_BASE_PITCH_RATE, BUTTON_SFX_VOLUME);
         game_shop_reroll(&reroll_cost);
     }
 }
@@ -4185,12 +4216,14 @@ static void game_blind_select_handle_input()
     {
         if (selection_y == 0) // Blind selected
         {
+            play_sfx(SFX_BUTTON, MM_BASE_PITCH_RATE, BUTTON_SFX_VOLUME);
             state_info[game_state].substate = BLIND_SELECTED_ANIM_SEQ;
             timer = TM_ZERO;
             display_round(++round);
         }
         else if (current_blind != BLIND_TYPE_BOSS)
         {
+            play_sfx(SFX_BUTTON, MM_BASE_PITCH_RATE, BUTTON_SFX_VOLUME);
             increment_blind(BLIND_STATE_SKIPPED);
 
             background = UNDEFINED; // Force refresh of the background
@@ -4407,20 +4440,18 @@ static void game_main_menu_on_update()
         }
     }
 
-    if (selection_x == 0) // Play button
+    if (selection_x == MAIN_MENU_PLAY_BTN_IDX)
     {
-        // Select button PID is 5 and the outline is 3
         memset16(&pal_bg_mem[MAIN_MENU_PLAY_BUTTON_OUTLINE_PID], HIGHLIGHT_COLOR, 1);
 
-        if (key_hit(KEY_A))
+        if (key_hit(SELECT_CARD))
         {
-            // Start the game
+            play_sfx(SFX_BUTTON, MM_BASE_PITCH_RATE, BUTTON_SFX_VOLUME);
             game_start();
         }
     }
     else
     {
-        // Select button PID is 5 and the outline is 3
         memcpy16(
             &pal_bg_mem[MAIN_MENU_PLAY_BUTTON_OUTLINE_PID],
             &pal_bg_mem[MAIN_MENU_PLAY_BUTTON_MAIN_COLOR_PID],
@@ -4432,6 +4463,15 @@ static void game_main_menu_on_update()
 static void game_over_anim_frame(void)
 {
     main_bg_se_move_rect_1_tile_vert(GAME_OVER_ANIM_RECT, SCREEN_UP);
+}
+
+static inline void game_over_process_user_input()
+{
+    if (key_hit(SELECT_CARD))
+    {
+        play_sfx(SFX_BUTTON, MM_BASE_PITCH_RATE, BUTTON_SFX_VOLUME);
+        game_change_state(GAME_STATE_BLIND_SELECT);
+    }
 }
 
 static void game_lose_on_update()
@@ -4450,8 +4490,7 @@ static void game_lose_on_update()
         );
     }
 
-    if (key_hit(KEY_A))
-        game_change_state(GAME_STATE_BLIND_SELECT);
+    game_over_process_user_input();
 }
 
 // This function isn't set in stone. This is just a placeholder
@@ -4522,6 +4561,5 @@ static void game_win_on_update()
         );
     }
 
-    if (key_hit(KEY_A))
-        game_change_state(GAME_STATE_BLIND_SELECT);
+    game_over_process_user_input();
 }
