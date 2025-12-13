@@ -66,6 +66,7 @@ CardObject* card_object_new(Card* card)
 
     card_object->card = card;
     card_object->sprite_object = sprite_object_new();
+    card_object->selected = false;
 
     return card_object;
 }
@@ -114,14 +115,14 @@ void card_object_set_selected(CardObject* card_object, bool selected)
 {
     if (card_object == NULL)
         return;
-    sprite_object_set_selected(card_object->sprite_object, selected);
+    card_object->selected = selected;
 }
 
 bool card_object_is_selected(CardObject* card_object)
 {
     if (card_object == NULL)
         return false;
-    return sprite_object_is_selected(card_object->sprite_object);
+    return card_object->selected;
 }
 
 Sprite* card_object_get_sprite(CardObject* card_object)

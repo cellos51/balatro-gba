@@ -176,9 +176,6 @@ bool joker_object_score(
     enum JokerEvent joker_event
 );
 
-void joker_object_set_selected(JokerObject* joker_object, bool selected);
-bool joker_object_is_selected(JokerObject* joker_object);
-
 Sprite* joker_object_get_sprite(JokerObject* joker_object);
 int joker_get_random_rarity();
 

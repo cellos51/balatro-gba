@@ -320,20 +320,6 @@ bool joker_object_score(
     return true;
 }
 
-void joker_object_set_selected(JokerObject* joker_object, bool selected)
-{
-    if (joker_object == NULL)
-        return;
-    sprite_object_set_selected(joker_object->sprite_object, selected);
-}
-
-bool joker_object_is_selected(JokerObject* joker_object)
-{
-    if (joker_object == NULL)
-        return false;
-    return sprite_object_is_selected(joker_object->sprite_object);
-}
-
 Sprite* joker_object_get_sprite(JokerObject* joker_object)
 {
     if (joker_object == NULL)
