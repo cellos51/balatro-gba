@@ -46,7 +46,7 @@ void selection_grid_move_selection_vert(SelectionGrid* selection_grid, int direc
 {
     if (selection_grid == NULL)
         return;
-        
+
     Selection selection = selection_grid->selection;
     Selection new_selection = selection;
     new_selection.y += direction_tribool;
