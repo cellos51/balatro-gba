@@ -1,7 +1,7 @@
 
 CC := gcc
 CFLAGS := -I../../include -I. \
-          -g -O3 -Wall -Werror
+          -g -O3 -std=gnu23 -Wall -Werror
 SRC            := bitset_test.c         \
                   ../../source/bitset.c
 OUT            := build/bitset_test 
