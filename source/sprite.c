@@ -161,7 +161,6 @@ SpriteObject* sprite_object_new()
     SpriteObject* sprite_object = POOL_GET(SpriteObject);
     sprite_object->sprite = NULL;
     sprite_object_reset_transform(sprite_object);
-    sprite_object->selected = false;
     sprite_object->focused = false;
 
     return sprite_object;
@@ -277,20 +276,6 @@ void sprite_object_shake(SpriteObject* sprite_object, mm_word sound_id)
     play_sfx(sound_id, MM_BASE_PITCH_RATE, SFX_DEFAULT_VOLUME);
 }
 
-void sprite_object_set_selected(SpriteObject* sprite_object, bool selected)
-{
-    if (sprite_object == NULL)
-        return;
-    sprite_object->selected = selected;
-}
-
-bool sprite_object_is_selected(SpriteObject* sprite_object)
-{
-    if (sprite_object == NULL)
-        return false;
-    return sprite_object->selected;
-}
-
 Sprite* sprite_object_get_sprite(SpriteObject* sprite_object)
 {
     if (sprite_object == NULL)
@@ -306,7 +291,11 @@ void sprite_object_set_focus(SpriteObject* sprite_object, bool focus)
     }
     sprite_object->focused = focus;
 
-    play_sfx(SFX_CARD_FOCUS, MM_BASE_PITCH_RATE + rand() % 512, SFX_DEFAULT_VOLUME);
+    play_sfx(
+        SFX_CARD_FOCUS,
+        MM_BASE_PITCH_RATE + rand() % CARD_FOCUS_SFX_PITCH_OFFSET_RANGE,
+        SFX_DEFAULT_VOLUME
+    );
     sprite_object->ty = sprite_object->ty + int2fx((focus ? -1 : 1) * SPRITE_FOCUS_RAISE_PX);
 }
 

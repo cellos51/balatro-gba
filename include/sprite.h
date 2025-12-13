@@ -4,11 +4,12 @@
 #include <maxmod.h>
 #include <tonc.h>
 
-#define CARD_SPRITE_SIZE      32
-#define MAX_AFFINES           32
-#define MAX_SPRITES           128
-#define MAX_SPRITE_OBJECTS    16
-#define SPRITE_FOCUS_RAISE_PX 10
+#define CARD_SPRITE_SIZE                  32
+#define MAX_AFFINES                       32
+#define MAX_SPRITES                       128
+#define MAX_SPRITE_OBJECTS                16
+#define SPRITE_FOCUS_RAISE_PX             10
+#define CARD_FOCUS_SFX_PITCH_OFFSET_RANGE 512
 
 typedef struct
 {
@@ -18,7 +19,7 @@ typedef struct
     int idx;
 } Sprite;
 
-// A sprite object is a sprite that is selectable and movable in animation
+// A sprite object is a sprite that is focusable and movable in animation
 typedef struct
 {
     Sprite* sprite;
@@ -31,7 +32,6 @@ typedef struct
     FIXED trotation; // this never gets used so i might remove it later
     FIXED rotation;
     FIXED vrotation;
-    bool selected;
     bool focused;
 
 } SpriteObject;
@@ -58,8 +58,6 @@ void sprite_object_reset_transform(SpriteObject* sprite_object);
 void sprite_object_update(SpriteObject* sprite_object);
 void sprite_object_shake(SpriteObject* sprite_object, mm_word sound_id);
 
-void sprite_object_set_selected(SpriteObject* sprite_object, bool selected);
-bool sprite_object_is_selected(SpriteObject* sprite_object);
 Sprite* sprite_object_get_sprite(SpriteObject* sprite_object);
 void sprite_object_set_focus(SpriteObject* sprite_object, bool focus);
 bool sprite_object_get_dimensions(SpriteObject* sprite_object, int* width, int* height);

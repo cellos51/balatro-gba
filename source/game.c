@@ -1679,7 +1679,11 @@ static void hand_set_focus(int index)
         selection_x = index;
     }
 
-    play_sfx(SFX_CARD_FOCUS, MM_BASE_PITCH_RATE + rand() % 512, SFX_DEFAULT_VOLUME);
+    play_sfx(
+        SFX_CARD_FOCUS,
+        MM_BASE_PITCH_RATE + rand() % CARD_FOCUS_SFX_PITCH_OFFSET_RANGE,
+        SFX_DEFAULT_VOLUME
+    );
 }
 
 static bool hand_discard(void)
@@ -3560,26 +3564,10 @@ static void game_round_end_dismiss_round_end_panel()
     }
 }
 
-static void print_price_under_sprite_object(SpriteObject* sprite_object, int price)
+static Rect get_text_rect_under_sprite_object(SpriteObject* sprite_object)
 {
     int height = 0;
-
-    if (sprite_object_get_height(sprite_object, &height) == false)
-    {
-        // fallback
-        height = CARD_SPRITE_SIZE;
-    }
-
-    int x = fx2int(sprite_object->tx) + TILE_SIZE - (get_digits_even(price) - 1) * TILE_SIZE;
-    int y = fx2int(sprite_object->ty) + height + TILE_SIZE;
-
-    tte_printf("#{P:%d,%d; cx:0x%X000}$%d", x, y, TTE_YELLOW_PB, price);
-}
-
-static void erase_price_under_sprite_object(SpriteObject* sprite_object)
-{
     int width = 0;
-    int height = 0;
 
     if (sprite_object_get_dimensions(sprite_object, &width, &height) == false)
     {
@@ -3588,11 +3576,35 @@ static void erase_price_under_sprite_object(SpriteObject* sprite_object)
         width = CARD_SPRITE_SIZE;
     }
 
-    Rect price_rect;
-    price_rect.left = fx2int(sprite_object->tx);
-    price_rect.top = fx2int(sprite_object->ty) + height + TILE_SIZE;
-    price_rect.right = price_rect.left + width;
-    price_rect.bottom = price_rect.top + TILE_SIZE + SPRITE_FOCUS_RAISE_PX;
+    Rect ret_rect = {0};
+
+    ret_rect.left = fx2int(sprite_object->tx);
+    ret_rect.top = fx2int(sprite_object->ty) + height + TILE_SIZE;
+    ret_rect.right = ret_rect.left + width;
+    ret_rect.bottom = ret_rect.top + TTE_CHAR_SIZE;
+
+    return ret_rect;
+}
+
+static void print_price_under_sprite_object(SpriteObject* sprite_object, int price)
+{
+    Rect price_rect = get_text_rect_under_sprite_object(sprite_object);
+
+    char price_str_buff[INT_MAX_DIGITS + 2]; // + 2 for null-terminator and "$"
+
+    snprintf(price_str_buff, sizeof(price_str_buff), "$%d", price);
+
+    update_text_rect_to_center_str(&price_rect, price_str_buff, SCREEN_LEFT);
+
+    tte_printf("#{P:%d,%d; cx:0x%X000}$%d", price_rect.left, price_rect.top, TTE_YELLOW_PB, price);
+}
+
+static void erase_price_under_sprite_object(SpriteObject* sprite_object)
+{
+    Rect price_rect = get_text_rect_under_sprite_object(sprite_object);
+
+    // Add SPRITE_FOCUS_RAISE_PX to cover the focused case
+    price_rect.bottom = price_rect.bottom + SPRITE_FOCUS_RAISE_PX;
 
     tte_erase_rect_wrapper(price_rect);
 }
@@ -4482,7 +4494,7 @@ static void game_over_anim_frame(void)
     main_bg_se_move_rect_1_tile_vert(GAME_OVER_ANIM_RECT, SCREEN_UP);
 }
 
-static void game_over_process_user_input()
+static inline void game_over_process_user_input()
 {
     if (key_hit(SELECT_CARD))
     {
