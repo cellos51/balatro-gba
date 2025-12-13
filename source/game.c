@@ -199,7 +199,6 @@ static void game_blind_select_on_update(void);
 static void game_blind_select_on_exit(void);
 static void game_lose_on_init(void);
 static void game_lose_on_update(void);
-static void game_over_process_user_input();
 static void game_over_on_exit(void);
 static void game_win_on_init(void);
 static void game_win_on_update(void);
@@ -4454,7 +4453,7 @@ static void game_over_anim_frame(void)
     main_bg_se_move_rect_1_tile_vert(GAME_OVER_ANIM_RECT, SCREEN_UP);
 }
 
-static void game_over_process_user_input()
+static inline void game_over_process_user_input()
 {
     if (key_hit(SELECT_CARD))
     {
