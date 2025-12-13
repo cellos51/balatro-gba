@@ -161,7 +161,6 @@ SpriteObject* sprite_object_new()
     SpriteObject* sprite_object = POOL_GET(SpriteObject);
     sprite_object->sprite = NULL;
     sprite_object_reset_transform(sprite_object);
-    sprite_object->selected = false;
     sprite_object->focused = false;
 
     return sprite_object;
@@ -275,20 +274,6 @@ void sprite_object_shake(SpriteObject* sprite_object, mm_word sound_id)
         return; // If no sound ID is provided, do nothing
 
     play_sfx(sound_id, MM_BASE_PITCH_RATE);
-}
-
-void sprite_object_set_selected(SpriteObject* sprite_object, bool selected)
-{
-    if (sprite_object == NULL)
-        return;
-    sprite_object->selected = selected;
-}
-
-bool sprite_object_is_selected(SpriteObject* sprite_object)
-{
-    if (sprite_object == NULL)
-        return false;
-    return sprite_object->selected;
 }
 
 Sprite* sprite_object_get_sprite(SpriteObject* sprite_object)
