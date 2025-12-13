@@ -5,7 +5,7 @@
  */
 #ifndef FONT_H
 #define FONT_H
- 
+
 /** @name Decimal Point Fonts
  *  @brief A set of macros to map the fonts decimal-point values (e.g. ".1")
  *  to their replaced characters.

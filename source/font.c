@@ -1,4 +1,5 @@
 #include "font.h"
+
 #include "tonc.h"
 
 static const char* s_font_point_lookup[] = {
