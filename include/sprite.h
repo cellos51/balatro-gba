@@ -4,11 +4,12 @@
 #include <maxmod.h>
 #include <tonc.h>
 
-#define CARD_SPRITE_SIZE      32
-#define MAX_AFFINES           32
-#define MAX_SPRITES           128
-#define MAX_SPRITE_OBJECTS    16
-#define SPRITE_FOCUS_RAISE_PX 10
+#define CARD_SPRITE_SIZE                    32
+#define MAX_AFFINES                         32
+#define MAX_SPRITES                         128
+#define MAX_SPRITE_OBJECTS                  16
+#define SPRITE_FOCUS_RAISE_PX               10
+#define CARD_FOCUS_SFX_PITCH_OFFSET_RANGE   512
 
 typedef struct
 {

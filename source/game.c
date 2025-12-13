@@ -1677,7 +1677,11 @@ static void hand_set_focus(int index)
         selection_x = index;
     }
 
-    play_sfx(SFX_CARD_FOCUS, MM_BASE_PITCH_RATE + rand() % 512, SFX_DEFAULT_VOLUME);
+    play_sfx(
+        SFX_CARD_FOCUS, 
+        MM_BASE_PITCH_RATE + rand() % CARD_FOCUS_SFX_PITCH_OFFSET_RANGE, 
+        SFX_DEFAULT_VOLUME
+    );
 }
 
 static bool hand_discard(void)
