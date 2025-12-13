@@ -105,7 +105,7 @@ struct SelectionGrid
  * to respond to user interactions with the grid.
  *
  * @param selection_grid Pointer to the SelectionGrid structure to process input for.
- *                       Must not be NULL. NULL-checks are in place and will fail silently.
+ *                       Must not be NULL. NULL-checks are in place and will return early.
  */
 void selection_grid_process_input(SelectionGrid* selection_grid);
 
