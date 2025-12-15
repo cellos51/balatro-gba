@@ -1022,16 +1022,24 @@ void display_chips(void)
     check_flaming_score();
 }
 
-void display_mult(void)
+void display_mult()
 {
-    tte_erase_rect_wrapper(MULT_TEXT_RECT);
+    Rect mult_text_overflow_rect = MULT_TEXT_RECT;
+    // In case of overflow the rect will overflow right by 1 char
+    mult_text_overflow_rect.right += TTE_CHAR_SIZE;
+    tte_erase_rect_wrapper(mult_text_overflow_rect);
+
+    char mult_str_buff[UINT_MAX_DIGITS + 1];
+    truncate_uint_to_suffixed_str(mult, rect_width(&MULT_TEXT_RECT)/TTE_CHAR_SIZE, mult_str_buff);
+
     tte_printf(
-        "#{P:%d,%d; cx:0x%X000;}%lu",
+        "#{P:%d,%d; cx:0x%X000;}%s",
         MULT_TEXT_RECT.left,
         MULT_TEXT_RECT.top,
         TTE_WHITE_PB,
-        mult
+        mult_str_buff
     );
+
     check_flaming_score();
 }
 
