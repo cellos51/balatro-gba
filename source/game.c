@@ -1030,7 +1030,7 @@ void display_mult()
     tte_erase_rect_wrapper(mult_text_overflow_rect);
 
     char mult_str_buff[UINT_MAX_DIGITS + 1];
-    truncate_uint_to_suffixed_str(mult, rect_width(&MULT_TEXT_RECT)/TTE_CHAR_SIZE, mult_str_buff);
+    truncate_uint_to_suffixed_str(mult, rect_width(&MULT_TEXT_RECT) / TTE_CHAR_SIZE, mult_str_buff);
 
     tte_printf(
         "#{P:%d,%d; cx:0x%X000;}%s",
