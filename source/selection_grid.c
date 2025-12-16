@@ -23,6 +23,9 @@ static void selection_grid_process_directional_input(SelectionGrid* selection_gr
 
 void selection_grid_move_selection_horz(SelectionGrid* selection_grid, int direction_tribool)
 {
+    if (selection_grid == NULL)
+        return;
+
     Selection new_selection = selection_grid->selection;
     new_selection.x += direction_tribool;
     if (selection_grid->selection.y >= 0 &&
@@ -41,6 +44,9 @@ void selection_grid_move_selection_horz(SelectionGrid* selection_grid, int direc
 
 void selection_grid_move_selection_vert(SelectionGrid* selection_grid, int direction_tribool)
 {
+    if (selection_grid == NULL)
+        return;
+
     Selection selection = selection_grid->selection;
     Selection new_selection = selection;
     new_selection.y += direction_tribool;
