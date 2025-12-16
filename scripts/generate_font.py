@@ -46,6 +46,7 @@ out_path = args.output
 # The font file is organized to go character-by-character and left-to-right
 
 img = Image.open(in_path)
+img = img.convert("P")
 img = img.convert('1')
 img = ImageOps.invert(img)
 
@@ -114,4 +115,4 @@ gbalatro_sys8Glyphs:
 
     out.write("\n")
     out.write("\n")
-    out.write('@}}BLOCK(my_sys8)\n')
+    out.write('@}}BLOCK(gbalatro_sys8)\n')
