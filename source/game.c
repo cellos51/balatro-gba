@@ -1022,7 +1022,7 @@ void display_chips(void)
     check_flaming_score();
 }
 
-void display_mult()
+void display_mult(void)
 {
     Rect mult_text_overflow_rect = MULT_TEXT_RECT;
     // In case of overflow the rect will overflow right by 1 char
