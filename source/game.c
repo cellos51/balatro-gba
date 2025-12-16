@@ -4188,8 +4188,7 @@ static void game_blind_select_on_init()
 {
     change_background(BG_BLIND_SELECT);
 
-    // Blind pop-up sound effect is "cancel"
-    play_sfx(SFX_CANCEL, MM_BASE_PITCH_RATE, SFX_DEFAULT_VOLUME);
+    play_sfx(SFX_POP, MM_BASE_PITCH_RATE, SFX_DEFAULT_VOLUME);
 }
 
 static void game_blind_select_on_update()
