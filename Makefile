@@ -127,10 +127,10 @@ export INCLUDE	:=	$(foreach dir,$(INCLUDES),-iquote $(CURDIR)/$(dir)) \
 
 export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 
-.PHONY: $(BUILD) clean
+.PHONY: $(BUILD) clean font/gbalatro_sys8.s
 
 #---------------------------------------------------------------------------------
-$(BUILD): 
+$(BUILD): font/gbalatro_sys8.s
 	@[ -d $@ ] || mkdir -p $@
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
 	@echo "$(GIT_HASH)$(GIT_DIRTY)" > $@/githash.txt
@@ -138,8 +138,12 @@ $(BUILD):
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).gba
+	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).gba font/*.s
 
+#---------------------------------------------------------------------------------
+font/gbalatro_sys8.s:
+	@echo Building font
+	@python scripts/generate_font.py -i font/gbalatro_sys8.png -o font/gbalatro_sys8.s
 
 #---------------------------------------------------------------------------------
 all: $(BUILD)

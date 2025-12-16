@@ -17,6 +17,6 @@ static const char* s_font_point_lookup[] = {
 
 const char* get_font_point_str(int val)
 {
-    val = val & 9;
+    val = ABS(val) % 10;
     return s_font_point_lookup[val];
 }

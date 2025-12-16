@@ -5,6 +5,7 @@
 #include "graphic_utils.h"
 #include "joker.h"
 #include "sprite.h"
+#include "font.h"
 
 #include <maxmod.h>
 #include <string.h>
@@ -17,9 +18,6 @@
 // Audio
 #include "soundbank.h"
 #include "soundbank_bin.h"
-
-extern const TFont sys8_customFont;
-extern const unsigned int sys8_customGlyphs[192];
 
 void init()
 {
@@ -34,7 +32,7 @@ void init()
         0,
         CLR_WHITE,
         TTE_BIT_UNPACK_OFFSET,
-        &sys8_customFont,
+        &gbalatro_sys8Font,
         NULL
     );
     tte_erase_screen();
