@@ -1,10 +1,6 @@
 from PIL import Image, ImageOps
 import argparse
 
-img = Image.open('/home/bigboi/projects/gba/libtonc/src/font/sys8.png')
-img = img.convert('1')
-img = ImageOps.invert(img)
-
 start_x = 0
 start_y = 0
 CHAR_WIDTH = 8
@@ -48,6 +44,11 @@ out_path = args.output
 # ___00___
 # 
 # The font file is organized to go character-by-character and left-to-right
+
+img = Image.open(in_path)
+img = img.convert('1')
+img = ImageOps.invert(img)
+
 glyphs = []
 for char_y in range(NUM_VERT_CHARS):
     for char_x in range(NUM_HORZ_CHARS):

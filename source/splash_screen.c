@@ -1,5 +1,6 @@
 #include "splash_screen.h"
 
+#include "font.h"
 #include "game.h"
 #include "graphic_utils.h"
 #include "maxmod.h"

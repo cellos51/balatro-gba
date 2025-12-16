@@ -1,11 +1,11 @@
 #include "affine_background.h"
 #include "blind.h"
 #include "card.h"
+#include "font.h"
 #include "game.h"
 #include "graphic_utils.h"
 #include "joker.h"
 #include "sprite.h"
-#include "font.h"
 
 #include <maxmod.h>
 #include <string.h>

@@ -66,4 +66,3 @@ extern const unsigned int gbalatro_sys8Glyphs[192];
 const char* get_font_point_str(int val);
 
 #endif // FONT_H
-
