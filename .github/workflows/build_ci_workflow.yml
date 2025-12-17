@@ -56,7 +56,7 @@ jobs:
             docker load -i /tmp/docker-cache/gbalatro.tar
           else
             echo "Pulling Image"
-            docker compose pull gbalatro
+            docker compose pull
             mkdir -p /tmp/docker-cache
             docker save $(docker compose config | grep image: | awk '{print $2}') -o /tmp/docker-cache/gbalatro.tar
           fi
@@ -67,7 +67,7 @@ jobs:
           echo "GID=$(id -g)" >> "$GITHUB_ENV"
 
       - name: Build the project
-        run: docker compose -f docker-compose.yml run --rm gbalatro sh -c "pip install pillow && make -j$(nproc) && ./scripts/get_memory_map.sh"
+        run: docker compose -f docker-compose.yml run --rm gbalatro sh -c "make -j$(nproc) && ./scripts/get_memory_map.sh"
 
       - name: 'Upload Artifact'
         if: ${{ inputs.upload-build-artifact }}
