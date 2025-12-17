@@ -1,10 +1,11 @@
 services:
-  balatro:
+  gbalatro:
+    image: gbalatro:dev
     build:
       context: .
       dockerfile: Dockerfile.gbalatro
-    working_dir: /balatro-gba
+    working_dir: /gbalatro
     volumes:
-      - ./:/balatro-gba
+      - ./:/gbalatro
     user: "${UID-1000}:${GID-1000}"
     command: ["sh", "-c", "make -j$(nproc)"]
