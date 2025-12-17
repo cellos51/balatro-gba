@@ -135,20 +135,21 @@ export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 .PHONY: $(BUILD) clean
 
 #---------------------------------------------------------------------------------
-$(BUILD): font/gbalatro_sys8.s
+$(BUILD): build/gbalatro_sys8.s
 	@[ -d $@ ] || mkdir -p $@
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
 	@echo "$(GIT_HASH)$(GIT_DIRTY)" > $@/githash.txt
 
 #---------------------------------------------------------------------------------
-font/%.s: $(FONTFILES)
+build/%.s: $(FONT)/%.png
 	@echo Building font
-	@python scripts/generate_font.py -i $< -o $@
+	@mkdir -p $(BUILD)
+	@python3 scripts/generate_font.py -i $< -o $@
 
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).gba font/*.s
+	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).gba
 
 #---------------------------------------------------------------------------------
 all: $(BUILD)

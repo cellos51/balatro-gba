@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from PIL import Image, ImageOps
 import argparse
 
@@ -17,13 +19,11 @@ in_path  = args.input
 out_path = args.output
 
 # The font is stored in a 4-bit colormap png and is made of a grid of
-# 16x8 characters:
+# 16x6 characters:
 #   |-------------16---------------|
 # | [][][][][][][][][][][][][][][][]
 # | [][][][][][][][][][][][][][][][]
-# | [][][][][][][][][][][][][][][][]
-# 8 [][][][][][][][][][][][][][][][]
-# | [][][][][][][][][][][][][][][][]
+# 6 [][][][][][][][][][][][][][][][]
 # | [][][][][][][][][][][][][][][][]
 # | [][][][][][][][][][][][][][][][]
 # | [][][][][][][][][][][][][][][][]
@@ -90,7 +90,7 @@ gbalatro_sys8Font:
 
     .section .rodata
     .align	2
-    .global gbalatro_sys8Glyphs		@ 768 unsigned chars
+    .global gbalatro_sys8Glyphs		@ 768 bytes (192 unsigned ints)
 gbalatro_sys8Glyphs:
 """)
     
@@ -101,12 +101,12 @@ gbalatro_sys8Glyphs:
 
         out.write(f"0x{glyph[0]:08X},0x{glyph[1]:08X}")
 
-        # This checks to see if we have reached NUM_WORD_IN_ROW words, (divided by
+        # This checks to see if we have reached NUM_WORDS_IN_ROW words, (divided by
         # 2 because that's the number of entries in each char[])
-        if (((i + 1) % (NUM_WORDS_IN_ROW/2)) == 0):
+        if (((i + 1) % (NUM_WORDS_IN_ROW // 2)) == 0):
             out.write("\n")
             if i != (len(glyphs) - 1):
-                out.write("   .word ")
+                out.write("    .word ")
         else:
             out.write(",")
             

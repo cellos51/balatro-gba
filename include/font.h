@@ -18,6 +18,8 @@ extern const unsigned int gbalatro_sys8Glyphs[192];
  *  "FP#" -> Font "Point" "number"
  *
  *  This is used at compile time directly with the help of libtonc's XSTR() macro
+ *  **Note**: This should **ONLY** be used with the XSTR() macro, otherwise it
+ *  is undefined behavior.
  *
  *  For example:
  *  ```c
@@ -42,16 +44,16 @@ extern const unsigned int gbalatro_sys8Glyphs[192];
  *
  * @{
  */
-#define FP0 & // .0
-#define FP1 ^ // .1
-#define FP2 { // .2
-#define FP3 } // .3
-#define FP4 | // .4
-#define FP5 ` // .5
-#define FP6 < // .6
-#define FP7 > // .7
-#define FP8 _ // .8
-#define FP9 ; // .9
+#define FP0_CHAR & // .0
+#define FP1_CHAR ^ // .1
+#define FP2_CHAR { // .2
+#define FP3_CHAR } // .3
+#define FP4_CHAR | // .4
+#define FP5_CHAR ` // .5
+#define FP6_CHAR < // .6
+#define FP7_CHAR > // .7
+#define FP8_CHAR _ // .8
+#define FP9_CHAR ; // .9
 /** @} */
 
 /**
@@ -59,7 +61,7 @@ extern const unsigned int gbalatro_sys8Glyphs[192];
  *
  * @param val Value between 0-9 to get ".0" to ".9" equivalents. Note that
  *            if a value outside of range is passed it will perform '% 10'
- *            on that value.
+ *            on that value and the last decimal digit will be used.
  *
  * @return A char* to the string values of '.0' to '.9'
  */

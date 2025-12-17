@@ -12,4 +12,4 @@ _codeql_detected_source_root
 doc
 tests/util/.vscode
 tests/util/build
-/font/*.s
+audio/*.bak
