@@ -56,7 +56,7 @@ jobs:
             docker load -i /tmp/docker-cache/gbalatro.tar
           else
             echo "Pulling Image"
-            docker compose pull
+            docker compose build gbalatro
             mkdir -p /tmp/docker-cache
             docker save $(docker compose config | grep image: | awk '{print $2}') -o /tmp/docker-cache/gbalatro.tar
           fi
