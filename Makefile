@@ -27,11 +27,12 @@ LIBTONC := $(DEVKITPRO)/libtonc
 #---------------------------------------------------------------------------------
 TARGET         := $(notdir $(CURDIR))
 BUILD          := build
-SOURCES	       := source font
+SOURCES	       := source
 INCLUDES       := include
 DATA           :=
 MUSIC          := audio
 GRAPHICS       := graphics
+FONT           := font
 
 #---------------------------------------------------------------------------------
 # options for code generation
@@ -82,7 +83,8 @@ export OUTPUT	:=	$(CURDIR)/$(BUILD)/$(TARGET)
 
 export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
 			$(foreach dir,$(DATA),$(CURDIR)/$(dir)) \
-			$(foreach dir,$(GRAPHICS),$(CURDIR)/$(dir))
+			$(foreach dir,$(GRAPHICS),$(CURDIR)/$(dir)) \
+			$(foreach dir,$(FONT),$(CURDIR)/$(dir)) \
 
 export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 
@@ -90,6 +92,7 @@ CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
 CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
 SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
 PNGFILES	:=	$(foreach dir,$(GRAPHICS),$(notdir $(wildcard $(dir)/*.png)))
+FONTFILES	:=	$(foreach dir,$(FONT),$(notdir $(wildcard $(dir)/*.png)))
 BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
 
 ifneq ($(strip $(MUSIC)),)
@@ -117,7 +120,9 @@ export OFILES_SOURCES := $(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
 
 export OFILES_GRAPHICS := $(PNGFILES:.png=.o)
 
-export OFILES := $(OFILES_BIN) $(OFILES_SOURCES) $(OFILES_GRAPHICS)
+export OFILES_FONT := $(FONTFILES:.png=.o)
+
+export OFILES := $(OFILES_BIN) $(OFILES_SOURCES) $(OFILES_GRAPHICS) $(OFILES_FONT)
 
 export HFILES := $(addsuffix .h,$(subst .,_,$(BINFILES))) $(PNGFILES:.png=.h)
 
@@ -127,7 +132,7 @@ export INCLUDE	:=	$(foreach dir,$(INCLUDES),-iquote $(CURDIR)/$(dir)) \
 
 export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 
-.PHONY: $(BUILD) clean font/gbalatro_sys8.s
+.PHONY: $(BUILD) clean
 
 #---------------------------------------------------------------------------------
 $(BUILD): font/gbalatro_sys8.s
@@ -136,14 +141,14 @@ $(BUILD): font/gbalatro_sys8.s
 	@echo "$(GIT_HASH)$(GIT_DIRTY)" > $@/githash.txt
 
 #---------------------------------------------------------------------------------
+font/%.s: $(FONTFILES)
+	@echo Building font
+	@python scripts/generate_font.py -i $< -o $@
+
+#---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
 	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).gba font/*.s
-
-#---------------------------------------------------------------------------------
-font/gbalatro_sys8.s:
-	@echo Building font
-	@python scripts/generate_font.py -i font/gbalatro_sys8.png -o font/gbalatro_sys8.s
 
 #---------------------------------------------------------------------------------
 all: $(BUILD)

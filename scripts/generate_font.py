@@ -1,8 +1,6 @@
 from PIL import Image, ImageOps
 import argparse
 
-start_x = 0
-start_y = 0
 CHAR_WIDTH = 8
 CHAR_HEIGHT = 8
 NUM_VERT_CHARS = 6
