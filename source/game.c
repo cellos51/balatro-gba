@@ -1961,12 +1961,13 @@ static inline void select_current_card(void)
 
 // card moving logic
 
+// true if and only if we are currently moving a card around
+static bool moving_card = false;
+
 // This will prevent us from moving cards around if we selected one
 // by moving too fast after pressing the A button
 static bool card_moved_too_fast = false;
-
-// true if and only if we are currently moving a card around
-static bool moving_card = false;
+static bool card_selected_instead_of_moved = false;
 
 // After pressing A, if we press Left/Right too fast, we should select the card
 // and change focus to the next one, instead of swapping them
@@ -1984,7 +1985,7 @@ static inline void game_playing_apply_card_movement_input(enum ScreenHorzDir mov
     card_moved_too_fast = (timer - selection_hit_timer) < card_swap_time_threshold;
 
     // swap cards around if A is held down when pressing D-pad keys
-    if (key_is_down(SELECT_CARD) && !card_moved_too_fast)
+    if (key_is_down(SELECT_CARD) && !card_moved_too_fast && !card_selected_instead_of_moved)
     {
         bool selection_not_at_border =
             (move_dir == SCREEN_LEFT) ? selection_x < hand_top : selection_x > 0;
@@ -2000,13 +2001,10 @@ static inline void game_playing_apply_card_movement_input(enum ScreenHorzDir mov
     else
     {
         // select current card if we tried moving it too fast
-        if (card_moved_too_fast && !moving_card)
+        if (key_released(SELECT_CARD) || (card_moved_too_fast && !moving_card))
         {
             select_current_card();
-            // raise this flag to prevent selecting the next card when releasing A
-            moving_card = true;
-            // and also this one so we don't drag the next card along if we don't release A
-            card_moved_too_fast = false;
+            card_selected_instead_of_moved = true;
         }
         hand_set_focus(next_card);
     }
@@ -2091,6 +2089,10 @@ static inline void game_playing_process_hand_select_input(void)
 
         if (selection_x > hand_top / 2)
         {
+            discard_button_highlighted = false; // Play button
+        }
+        else
+        {
             discard_button_highlighted = true; // Discard button
         }
     }
@@ -2127,12 +2129,13 @@ static inline void game_playing_process_hand_select_input(void)
         // select card if we were not moving it around
         else if (key_released(SELECT_CARD))
         {
-            if (!moving_card)
+            if (!moving_card && !card_selected_instead_of_moved)
             {
                 select_current_card();
             }
             moving_card = false;
             card_moved_too_fast = false;
+            card_selected_instead_of_moved = false;
             selection_hit_timer = TM_ZERO;
         }
 
