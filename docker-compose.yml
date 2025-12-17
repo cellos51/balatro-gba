@@ -4,7 +4,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.gbalatro
-    working_dir: /gbalatro
+    working_dir: /balatro-gba
     volumes:
       - ./:/gbalatro
     user: "${UID-1000}:${GID-1000}"
