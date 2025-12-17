@@ -2111,7 +2111,7 @@ static inline void game_playing_process_hand_select_input(void)
             }
         }
         else
-        {   
+        {
             game_playing_highlight_discard_btn();
             if (key_hit(SELECT_CARD) && discards > 0 && hand_can_discard())
             {
