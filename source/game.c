@@ -76,8 +76,8 @@
 #define TM_REWARDS_ELLIPSIS_PRINT_START 2
 #define TM_REWARDS_ELLIPSIS_PRINT_END   16
 #define TM_REWARD_DISPLAY_INTERVAL      15
-#define TM_DISPLAY_REWARDS_CONT_WAIT    TM_REWARDS_ELLIPSIS_PRINT_END + TM_REWARD_DISPLAY_INTERVAL
-#define TM_HAND_REWARD_INCR_WAIT        TM_DISPLAY_REWARDS_CONT_WAIT + TM_REWARD_DISPLAY_INTERVAL
+#define TM_DISPLAY_REWARDS_CONT_WAIT    (TM_REWARDS_ELLIPSIS_PRINT_END + TM_REWARD_DISPLAY_INTERVAL)
+#define TM_HAND_REWARD_INCR_WAIT        (TM_DISPLAY_REWARDS_CONT_WAIT + TM_REWARD_DISPLAY_INTERVAL)
 #define TM_REWARD_INCREMENT_INTERVAL    20
 #define TM_DISMISS_ROUND_END_TM         20
 #define TM_CREATE_SHOP_ITEMS_WAIT       1
@@ -195,6 +195,7 @@ static void game_round_end_on_update(void);
 static void game_round_end_on_exit(void);
 static void game_shop_on_update(void);
 static void game_shop_on_exit(void);
+static void game_blind_select_on_init(void);
 static void game_blind_select_on_update(void);
 static void game_blind_select_on_exit(void);
 static void game_lose_on_init(void);
@@ -1024,14 +1025,22 @@ void display_chips(void)
 
 void display_mult(void)
 {
-    tte_erase_rect_wrapper(MULT_TEXT_RECT);
+    Rect mult_text_overflow_rect = MULT_TEXT_RECT;
+    // In case of overflow the rect will overflow right by 1 char
+    mult_text_overflow_rect.right += TTE_CHAR_SIZE;
+    tte_erase_rect_wrapper(mult_text_overflow_rect);
+
+    char mult_str_buff[UINT_MAX_DIGITS + 1];
+    truncate_uint_to_suffixed_str(mult, rect_width(&MULT_TEXT_RECT) / TTE_CHAR_SIZE, mult_str_buff);
+
     tte_printf(
-        "#{P:%d,%d; cx:0x%X000;}%lu",
+        "#{P:%d,%d; cx:0x%X000;}%s",
         MULT_TEXT_RECT.left,
         MULT_TEXT_RECT.top,
         TTE_WHITE_PB,
-        mult
+        mult_str_buff
     );
+
     check_flaming_score();
 }
 
@@ -2667,8 +2676,18 @@ static inline void play_ending_played_cards_update(int played_idx)
     {
         scored_card_index--;
 
+        /* SFX_CHIPS_ACCUM has been pitch shifted to perserve high frequencies in downsampling.
+         * Now it needs to be pitch shifted back to the original frequency.
+         */
+        int static const CHIPS_ACCUM_SFX_PITCH_RATIO = 2;
+
         if (scored_card_index == 0)
         {
+            play_sfx(
+                SFX_CHIPS_ACCUM,
+                CHIPS_ACCUM_SFX_PITCH_RATIO * MM_BASE_PITCH_RATE,
+                SFX_DEFAULT_VOLUME
+            );
             timer = TM_ZERO;
             play_state = PLAY_ENDED;
         }
@@ -2807,6 +2826,16 @@ static inline void game_playing_process_input_and_state(void)
             mult = 0;
             display_mult();
             display_chips();
+
+            static const int SCORE_CALC_SFX_PITCH_SHIFT = -102; // -10% OF MM_BASE_PITCH_RATE
+            static const int SCORE_CALC_SFX_VOLUME = 204;       // 80% MM_FULL_VOLUME
+
+            // The chips calculation SFX is the same as button
+            play_sfx(
+                SFX_BUTTON,
+                MM_BASE_PITCH_RATE + SCORE_CALC_SFX_PITCH_SHIFT,
+                SCORE_CALC_SFX_VOLUME
+            );
         }
     }
     else if (play_state == PLAY_ENDED)
@@ -4163,6 +4192,13 @@ static void game_shop_on_exit()
     increment_blind(BLIND_STATE_DEFEATED); // TODO: Move to game_round_end()?
 }
 
+static void game_blind_select_on_init()
+{
+    change_background(BG_BLIND_SELECT);
+
+    play_sfx(SFX_POP, MM_BASE_PITCH_RATE, SFX_DEFAULT_VOLUME);
+}
+
 static void game_blind_select_on_update()
 {
     if (state_info[game_state].substate == BLIND_SELECT_MAX)
@@ -4177,7 +4213,6 @@ static void game_blind_select_on_update()
 
 static void game_blind_select_start_anim_seq()
 {
-    change_background(BG_BLIND_SELECT);
     main_bg_se_copy_rect_1_tile_vert(POP_MENU_ANIM_RECT, SCREEN_UP);
 
     for (int i = 0; i < BLIND_TYPE_MAX; i++)
