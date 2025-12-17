@@ -1972,7 +1972,7 @@ static bool card_selected_instead_of_moved = false;
 // After pressing A, if we press Left/Right too fast, we should select the card
 // and change focus to the next one, instead of swapping them
 // This should fix inputs sometimes not registering when quickly selecting cards
-static const int card_swap_time_threshold = 5;
+static const int card_swap_time_threshold = 6;
 static uint selection_hit_timer = TM_ZERO;
 
 static inline void game_playing_apply_card_movement_input(enum ScreenHorzDir move_dir)
@@ -2030,6 +2030,8 @@ static inline void game_playing_unhighlight_buttons(void)
 
 static inline void game_playing_execute_hand_discard(void)
 {
+    play_sfx(SFX_BUTTON, MM_BASE_PITCH_RATE, BUTTON_SFX_VOLUME);
+
     hand_state = HAND_DISCARD;
     selection_x = 0;
     selection_y = 0;
@@ -2046,6 +2048,8 @@ static inline void game_playing_execute_hand_discard(void)
 
 static inline void game_playing_execute_hand_play(void)
 {
+    play_sfx(SFX_BUTTON, MM_BASE_PITCH_RATE, BUTTON_SFX_VOLUME);
+
     hand_state = HAND_PLAY;
     selection_x = 0;
     selection_y = 0;
