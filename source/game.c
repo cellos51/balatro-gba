@@ -3994,9 +3994,13 @@ static void jokers_sel_row_on_key_transit(SelectionGrid* selection_grid, Selecti
 
     if (key_hit(SELL_KEY))
     {
-        game_sell_joker(selection->x);
+        int sold_joker_idx = selection->x;
+
         // Move the selection away from the jokers so it doesn't point to an invalid place
+        // Do this before selling the joker so valid row sizes are used
         selection_grid_move_selection_vert(selection_grid, SCREEN_DOWN);
+
+        game_sell_joker(sold_joker_idx);
     }
 }
 
