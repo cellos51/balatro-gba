@@ -114,7 +114,7 @@ typedef struct ContainedHandTypes
     u16 : 3;
 } ContainedHandTypes;
 
-typedef struct 
+typedef struct
 {
     int substate;
     void (*on_init)();
