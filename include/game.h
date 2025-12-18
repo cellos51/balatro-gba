@@ -95,6 +95,7 @@ enum HandType
     FLUSH_FIVE
 };
 
+// clang-format off
 // Store all contained hands to optimize "whole hand condition" Jokers
 typedef struct ContainedHandTypes
 {
@@ -113,6 +114,7 @@ typedef struct ContainedHandTypes
     u16 FLUSH_FIVE      : 1;
     u16                 : 3;
 } ContainedHandTypes;
+// clang-format on
 
 typedef struct 
 {
