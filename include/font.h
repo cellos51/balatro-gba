@@ -23,7 +23,7 @@ extern const unsigned int gbalatro_sys8Glyphs[192];
  *
  *  For example:
  *  ```c
- *  tte_printf("Testing " XSTR(FP0) " Something!");
+ *  tte_printf("Testing " XSTR(FP0_CHAR) " Something!");
  *  ```
  *  prints "Testing .0 Something!"
  *
