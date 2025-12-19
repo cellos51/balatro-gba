@@ -60,10 +60,14 @@ void truncate_uint_to_suffixed_str(
     if (suffix[0] != '\0' && remainder != 0)
     {
         // TODO: Extract to function
-        int remainder_digits = u32_get_digits(remainder);
         snprintf(remainder_str, sizeof(remainder_str), "%lu", remainder);
 
-        int truncated_remainder_digits = remainder_digits;
+        int remaining_chars = num_req_chars - u32_get_digits(truncated_num) - 1; // - 1 for suffix
+
+        // Truncate overflow
+        remainder_str[remaining_chars] = '\0';
+
+        int truncated_remainder_digits = remaining_chars;
 
         while(
             truncated_remainder_digits > 0 && 
@@ -73,12 +77,8 @@ void truncate_uint_to_suffixed_str(
             truncated_remainder_digits--;
         }
 
+        // Truncate 0s
         remainder_str[truncated_remainder_digits] = '\0';
-
-        int remaining_chars = num_req_chars - u32_get_digits(truncated_num) - 1; // - 1 for suffix
-
-        // Truncate both 0s and overflow
-        remainder_str[remaining_chars] = '\0';
 
         if (remainder_str[0] != '\0')
         {
