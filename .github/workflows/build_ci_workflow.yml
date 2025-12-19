@@ -51,14 +51,14 @@ jobs:
 
       - name: Load or pull images
         run: |
-          if [ -f /tmp/docker-cache/balatro.tar ]; then
+          if [ -f /tmp/docker-cache/gbalatro.tar ]; then
             echo "Loading Image"
-            docker load -i /tmp/docker-cache/balatro.tar
+            docker load -i /tmp/docker-cache/gbalatro.tar
           else
             echo "Pulling Image"
-            docker compose pull balatro
+            docker compose build gbalatro
             mkdir -p /tmp/docker-cache
-            docker save $(docker compose config | grep image: | awk '{print $2}') -o /tmp/docker-cache/balatro.tar
+            docker save $(docker compose config | grep image: | awk '{print $2}') -o /tmp/docker-cache/gbalatro.tar
           fi
 
       - name: Export UID/GID for Compose
@@ -67,7 +67,7 @@ jobs:
           echo "GID=$(id -g)" >> "$GITHUB_ENV"
 
       - name: Build the project
-        run: docker compose -f docker-compose.yml run --rm balatro sh -c "make -j$(nproc) && ./scripts/get_memory_map.sh"
+        run: docker compose -f docker-compose.yml run --rm gbalatro sh -c "make -j$(nproc) && ./scripts/get_memory_map.sh"
 
       - name: 'Upload Artifact'
         if: ${{ inputs.upload-build-artifact }}

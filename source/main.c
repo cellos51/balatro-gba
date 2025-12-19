@@ -1,6 +1,7 @@
 #include "affine_background.h"
 #include "blind.h"
 #include "card.h"
+#include "font.h"
 #include "game.h"
 #include "graphic_utils.h"
 #include "joker.h"
@@ -31,7 +32,7 @@ void init()
         0,
         CLR_WHITE,
         TTE_BIT_UNPACK_OFFSET,
-        NULL,
+        &gbalatro_sys8Font,
         NULL
     );
     tte_erase_screen();

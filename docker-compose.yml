@@ -1,6 +1,9 @@
 services:
-  balatro:
-    image: devkitpro/devkitarm:latest
+  gbalatro:
+    image: gbalatro:dev
+    build:
+      context: .
+      dockerfile: Dockerfile.gbalatro
     working_dir: /balatro-gba
     volumes:
       - ./:/balatro-gba
