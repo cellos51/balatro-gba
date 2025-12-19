@@ -45,35 +45,44 @@ void truncate_uint_to_suffixed_str(
      */
     if (overflow_size >= ONE_M_ZEROS)
     {
-        num /= ONE_B;
         decimal_pnt_remainder = num % ONE_B; 
+        num /= ONE_B;
         suffix = "B";
     }
     else if (overflow_size >= ONE_K_ZEROS)
     {
-        num /= ONE_M;
         decimal_pnt_remainder = num % ONE_M;
+        num /= ONE_M;
         suffix = "M";
     }
     else if (overflow_size > 0 || (inevitable_overflow && num_digits == SUFFIXED_NUM_MIN_REQ_CHARS))
+    
+    {
+        decimal_pnt_remainder = num % ONE_K;
+        num /= ONE_K;
+        suffix = "K";
+    }
+    else if (inevitable_overflow && num_digits == SUFFIXED_NUM_MIN_REQ_CHARS)
     // Special case - alleviate inevitable overflow for 1000s and truncate them to "1K"s
     {
+        // TODO: Clean up...
+        decimal_pnt_remainder = num % 100;
         num /= ONE_K;
-        decimal_pnt_remainder = num % ONE_K;
         suffix = "K";
     }
 
-    if (suffix[0] != '\0')
+    if (suffix[0] != '\0' && decimal_pnt_remainder != 0)
     {
-        int remainder_digits = u32_get_digits(decimal_pnt_remainder);
-        int remaining_chars = num_req_chars - u32_get_digits(num) - 1; // - 1 for suffix
-        int remainder_overflow = remaining_chars - remainder_digits;
-        for (int i = 0; i < remainder_overflow; i++)
+        // Truncate trailing 0s
+        while (decimal_pnt_remainder % 10 == 0)
         {
             decimal_pnt_remainder /= 10;
         }
 
-        while (decimal_pnt_remainder % 10 == 0)
+        int remainder_digits = u32_get_digits(decimal_pnt_remainder);
+        int remaining_chars = num_req_chars - u32_get_digits(num) - 1; // - 1 for suffix
+        int remainder_overflow = remainder_digits - remaining_chars;
+        for (int i = 0; i < remainder_overflow; i++)
         {
             decimal_pnt_remainder /= 10;
         }
@@ -86,7 +95,8 @@ void truncate_uint_to_suffixed_str(
         }
     }
 
-    snprintf(out_str_buff, UINT_MAX_DIGITS + 1, "%lu%s%s", num, decimal_point_str, suffix);
+    // TODO: fix snprintf buffer size...
+    snprintf(out_str_buff, 2*UINT_MAX_DIGITS + 1, "%lu%s%s", num, decimal_point_str, suffix);
 }
 
 // Avoid uint overflow when add/multiplying score

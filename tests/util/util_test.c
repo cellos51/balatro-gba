@@ -1,3 +1,4 @@
+#include <font.h>
 #include <util.h>
 #include <assert.h>
 #include <string.h>
@@ -35,7 +36,7 @@ void test_truncate_uint_to_suffixed_str()
 
     suffixed_str_buff[0] = '\0';
     truncate_uint_to_suffixed_str(12123, 4, suffixed_str_buff);
-    assert(strcmp(suffixed_str_buff, "12" __XSTRING(FP1_CHAR) "K") == 0);   // "12.1K"
+    assert(strcmp(suffixed_str_buff, "12" XSTR(FP1_CHAR) "K") == 0);   // "12.1K"
 
     suffixed_str_buff[0] = '\0';
     truncate_uint_to_suffixed_str(123123, 4, suffixed_str_buff);
@@ -43,7 +44,7 @@ void test_truncate_uint_to_suffixed_str()
 
     suffixed_str_buff[0] = '\0';
     truncate_uint_to_suffixed_str(123123, 5, suffixed_str_buff);
-    assert(strcmp(suffixed_str_buff, "123" __XSTRING(FP1_CHAR) "K") == 0);  // "123.1K"
+    assert(strcmp(suffixed_str_buff, "123" XSTR(FP1_CHAR) "K") == 0);  // "123.1K"
 
     suffixed_str_buff[0] = '\0';
     truncate_uint_to_suffixed_str(123123, 6, suffixed_str_buff);
@@ -59,15 +60,15 @@ void test_truncate_uint_to_suffixed_str()
 
     suffixed_str_buff[0] = '\0';
     truncate_uint_to_suffixed_str(12123123, 5, suffixed_str_buff);
-    assert(strcmp(suffixed_str_buff, "12" __XSTRING(FP1_CHAR) "2M") == 0); // "12.12M"
+    assert(strcmp(suffixed_str_buff, "12" XSTR(FP1_CHAR) "2M") == 0); // "12.12M"
 
     suffixed_str_buff[0] = '\0';
     truncate_uint_to_suffixed_str(12123123, 4, suffixed_str_buff);
-    assert(strcmp(suffixed_str_buff, "12" __XSTRING(FP1_CHAR) "M") == 0); // "12.1M"
+    assert(strcmp(suffixed_str_buff, "12" XSTR(FP1_CHAR) "M") == 0); // "12.1M"
 
     suffixed_str_buff[0] = '\0';
     truncate_uint_to_suffixed_str(54123123, 4, suffixed_str_buff);
-    assert(strcmp(suffixed_str_buff, "54" __XSTRING(FP1_CHAR) "M") == 0); // "54.1M"
+    assert(strcmp(suffixed_str_buff, "54" XSTR(FP1_CHAR) "M") == 0); // "54.1M"
 
     suffixed_str_buff[0] = '\0';
     truncate_uint_to_suffixed_str(123123123, 4, suffixed_str_buff);
@@ -75,11 +76,11 @@ void test_truncate_uint_to_suffixed_str()
 
     suffixed_str_buff[0] = '\0';
     truncate_uint_to_suffixed_str(123123123, 6, suffixed_str_buff);
-    assert(strcmp(suffixed_str_buff, "123M") == 0);
+    assert(strcmp(suffixed_str_buff, "123" XSTR(FP1_CHAR) "2M") == 0);  // "123.12M"
 
     suffixed_str_buff[0] = '\0';
     truncate_uint_to_suffixed_str(987123123, 6, suffixed_str_buff);
-    assert(strcmp(suffixed_str_buff, "987M") == 0);
+    assert(strcmp(suffixed_str_buff, "987" XSTR(FP1_CHAR) "2M") == 0);  // "987.12M"
 
     suffixed_str_buff[0] = '\0';
     truncate_uint_to_suffixed_str(123123123, 7, suffixed_str_buff);
@@ -87,11 +88,11 @@ void test_truncate_uint_to_suffixed_str()
 
     suffixed_str_buff[0] = '\0';
     truncate_uint_to_suffixed_str(1123123123, 4, suffixed_str_buff);
-    assert(strcmp(suffixed_str_buff, "1" __XSTRING(FP1_CHAR) "2B") == 0); // "1.12B"
+    assert(strcmp(suffixed_str_buff, "1" XSTR(FP1_CHAR) "2B") == 0); // "1.12B"
 
     suffixed_str_buff[0] = '\0';
     truncate_uint_to_suffixed_str((uint32_t)3123123123, 4, suffixed_str_buff);
-    assert(strcmp(suffixed_str_buff, "3" __XSTRING(FP1_CHAR) "2B") == 0); // "3.12B"
+    assert(strcmp(suffixed_str_buff, "3" XSTR(FP1_CHAR) "2B") == 0); // "3.12B"
 
     suffixed_str_buff[0] = '\0';
     truncate_uint_to_suffixed_str(1234123123, 5, suffixed_str_buff);
@@ -111,7 +112,7 @@ void test_truncate_uint_to_suffixed_str()
 
     suffixed_str_buff[0] = '\0';
     truncate_uint_to_suffixed_str(UINT32_MAX, 4, suffixed_str_buff);
-    assert(strcmp(suffixed_str_buff, "4B") == 0);
+    assert(strcmp(suffixed_str_buff, "4" XSTR(FP2_CHAR) "9B") == 0);
 
     // This is the only test that checks rounding down, don't add any more
     suffixed_str_buff[0] = '\0';
