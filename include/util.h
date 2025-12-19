@@ -16,11 +16,10 @@
 #define GBAL_UNUSED __attribute__((unused))
 
 #ifndef XSTR
-#define STR(x)		#x
+#define STR(x) #x
 // Expand and then stringify
-#define XSTR(x)		STR(x)
+#define XSTR(x) STR(x)
 #endif // XSTR
-
 
 #define UNDEFINED -1
 
