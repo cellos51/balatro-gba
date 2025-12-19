@@ -1,5 +1,7 @@
 #include "font.h"
+
 #include "util.h"
+
 #include <stdlib.h>
 
 static const char* s_font_point_lookup[] = {
