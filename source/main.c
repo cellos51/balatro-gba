@@ -2,6 +2,7 @@
 #include "blind.h"
 #include "card.h"
 #include "font.h"
+#include "gbalatro_sys8.h"
 #include "game.h"
 #include "graphic_utils.h"
 #include "joker.h"
