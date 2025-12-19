@@ -56,7 +56,7 @@ void test_truncate_uint_to_suffixed_str()
 
     suffixed_str_buff[0] = '\0';
     truncate_uint_to_suffixed_str(12345123, 6, suffixed_str_buff);
-    assert(strcmp(suffixed_str_buff, "12345K") == 0); // Or "12.345M" ?
+    assert(strcmp(suffixed_str_buff, "12" XSTR(FP3_CHAR) "45M") == 0); // Or "12.345M" ?
 
     suffixed_str_buff[0] = '\0';
     truncate_uint_to_suffixed_str(12123123, 5, suffixed_str_buff);
@@ -84,7 +84,15 @@ void test_truncate_uint_to_suffixed_str()
 
     suffixed_str_buff[0] = '\0';
     truncate_uint_to_suffixed_str(123123123, 7, suffixed_str_buff);
-    assert(strcmp(suffixed_str_buff, "123123K") == 0);
+    assert(strcmp(suffixed_str_buff, "123" XSTR(FP1_CHAR) "23M") == 0); // 123.123M
+
+    suffixed_str_buff[0] = '\0';
+    truncate_uint_to_suffixed_str(123123123, 8, suffixed_str_buff);
+    assert(strcmp(suffixed_str_buff, "123" XSTR(FP1_CHAR) "231M") == 0); // 123.1231M
+
+    suffixed_str_buff[0] = '\0';
+    truncate_uint_to_suffixed_str(123123123, 9, suffixed_str_buff);
+    assert(strcmp(suffixed_str_buff, "123123123") == 0);
 
     suffixed_str_buff[0] = '\0';
     truncate_uint_to_suffixed_str(1123123123, 4, suffixed_str_buff);
@@ -96,7 +104,7 @@ void test_truncate_uint_to_suffixed_str()
 
     suffixed_str_buff[0] = '\0';
     truncate_uint_to_suffixed_str(1234123123, 5, suffixed_str_buff);
-    assert(strcmp(suffixed_str_buff, "1234M") == 0); // "1234M" or "1.234B" ?
+    assert(strcmp(suffixed_str_buff, "1" XSTR(FP2_CHAR) "34B") == 0); // "1.234B"
     
     suffixed_str_buff[0] = '\0';
     truncate_uint_to_suffixed_str(1123123123, 10, suffixed_str_buff);
@@ -117,7 +125,7 @@ void test_truncate_uint_to_suffixed_str()
     // This is the only test that checks rounding down, don't add any more
     suffixed_str_buff[0] = '\0';
     truncate_uint_to_suffixed_str(UINT32_MAX, 5, suffixed_str_buff);
-    assert(strcmp(suffixed_str_buff, "4294M") == 0); // "4294M" or "4.294B" ?
+    assert(strcmp(suffixed_str_buff, "4" XSTR(FP2_CHAR) "94B") == 0); // "4.294B"
 
     char max_uint_str_buff[UINT_MAX_DIGITS + 1] = {'\0'};
     snprintf(max_uint_str_buff, sizeof(max_uint_str_buff), "%lu", UINT32_MAX);

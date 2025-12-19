@@ -25,15 +25,10 @@ void truncate_uint_to_suffixed_str(
     char out_str_buff[UINT_MAX_DIGITS + 1]
 )
 {
-    bool inevitable_overflow = num_req_chars < SUFFIXED_NUM_MIN_REQ_CHARS;
-    if (inevitable_overflow)
-    {
-        num_req_chars = SUFFIXED_NUM_MIN_REQ_CHARS;
-    }
-
+    uint32_t truncated_num = num;
     int num_digits = u32_get_digits(num);
     uint32_t decimal_pnt_remainder = 0;
-    int overflow_size = num_digits - num_req_chars;
+    bool overflow = num_digits > num_req_chars;
     char* suffix = "";
     char decimal_point_str[INT_MAX_DIGITS + 1];
     decimal_point_str[0] = '\0';
@@ -43,31 +38,22 @@ void truncate_uint_to_suffixed_str(
      * UINT32_MAX is in the billions so no need to check larger numbers
      * or perform complex mathematical operations.
      */
-    if (overflow_size >= ONE_M_ZEROS)
+    if (num >= ONE_B && overflow)
     {
         decimal_pnt_remainder = num % ONE_B; 
-        num /= ONE_B;
+        truncated_num /= ONE_B;
         suffix = "B";
     }
-    else if (overflow_size >= ONE_K_ZEROS)
+    else if (num >= ONE_M && overflow)
     {
         decimal_pnt_remainder = num % ONE_M;
-        num /= ONE_M;
+        truncated_num /= ONE_M;
         suffix = "M";
     }
-    else if (overflow_size > 0 || (inevitable_overflow && num_digits == SUFFIXED_NUM_MIN_REQ_CHARS))
-    
+    else if (num >= ONE_K && overflow)
     {
         decimal_pnt_remainder = num % ONE_K;
-        num /= ONE_K;
-        suffix = "K";
-    }
-    else if (inevitable_overflow && num_digits == SUFFIXED_NUM_MIN_REQ_CHARS)
-    // Special case - alleviate inevitable overflow for 1000s and truncate them to "1K"s
-    {
-        // TODO: Clean up...
-        decimal_pnt_remainder = num % 100;
-        num /= ONE_K;
+        truncated_num /= ONE_K;
         suffix = "K";
     }
 
@@ -80,7 +66,7 @@ void truncate_uint_to_suffixed_str(
         }
 
         int remainder_digits = u32_get_digits(decimal_pnt_remainder);
-        int remaining_chars = num_req_chars - u32_get_digits(num) - 1; // - 1 for suffix
+        int remaining_chars = num_req_chars - u32_get_digits(truncated_num) - 1; // - 1 for suffix
         int remainder_overflow = remainder_digits - remaining_chars;
         for (int i = 0; i < remainder_overflow; i++)
         {
@@ -96,7 +82,7 @@ void truncate_uint_to_suffixed_str(
     }
 
     // TODO: fix snprintf buffer size...
-    snprintf(out_str_buff, 2*UINT_MAX_DIGITS + 1, "%lu%s%s", num, decimal_point_str, suffix);
+    snprintf(out_str_buff, 2*UINT_MAX_DIGITS + 1, "%lu%s%s", truncated_num, decimal_point_str, suffix);
 }
 
 // Avoid uint overflow when add/multiplying score
