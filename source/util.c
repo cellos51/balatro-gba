@@ -27,11 +27,11 @@ void truncate_uint_to_suffixed_str(
 {
     uint32_t truncated_num = num;
     int num_digits = u32_get_digits(num);
-    uint32_t decimal_pnt_remainder = 0;
+    uint32_t remainder = 0; // The decimal point remainder
     bool overflow = num_digits > num_req_chars;
     char* suffix = "";
-    char decimal_point_str[INT_MAX_DIGITS + 1];
-    decimal_point_str[0] = '\0';
+    char remainder_str[INT_MAX_DIGITS + 1];
+    remainder_str[0] = '\0';
 
     /* If there is overflow, divide by the next suffixed power of 10
      * to truncate the number back within num_req_chars.
@@ -40,49 +40,55 @@ void truncate_uint_to_suffixed_str(
      */
     if (num >= ONE_B && overflow)
     {
-        decimal_pnt_remainder = num % ONE_B; 
+        remainder = num % ONE_B; 
         truncated_num /= ONE_B;
         suffix = "B";
     }
     else if (num >= ONE_M && overflow)
     {
-        decimal_pnt_remainder = num % ONE_M;
+        remainder = num % ONE_M;
         truncated_num /= ONE_M;
         suffix = "M";
     }
     else if (num >= ONE_K && overflow)
     {
-        decimal_pnt_remainder = num % ONE_K;
+        remainder = num % ONE_K;
         truncated_num /= ONE_K;
         suffix = "K";
     }
 
-    if (suffix[0] != '\0' && decimal_pnt_remainder != 0)
+    if (suffix[0] != '\0' && remainder != 0)
     {
-        // Truncate trailing 0s
-        while (decimal_pnt_remainder % 10 == 0)
+        // TODO: Extract to function
+        int remainder_digits = u32_get_digits(remainder);
+        snprintf(remainder_str, sizeof(remainder_str), "%lu", remainder);
+
+        int truncated_remainder_digits = remainder_digits;
+
+        while(
+            truncated_remainder_digits > 0 && 
+            remainder_str[truncated_remainder_digits - 1] == '0'
+        )
         {
-            decimal_pnt_remainder /= 10;
+            truncated_remainder_digits--;
         }
 
-        int remainder_digits = u32_get_digits(decimal_pnt_remainder);
+        remainder_str[truncated_remainder_digits] = '\0';
+
         int remaining_chars = num_req_chars - u32_get_digits(truncated_num) - 1; // - 1 for suffix
-        int remainder_overflow = remainder_digits - remaining_chars;
-        for (int i = 0; i < remainder_overflow; i++)
-        {
-            decimal_pnt_remainder /= 10;
-        }
 
-        if (decimal_pnt_remainder != 0)
+        // Truncate both 0s and overflow
+        remainder_str[remaining_chars] = '\0';
+
+        if (remainder_str[0] != '\0')
         {
             // TODO: Fix hacky code
-            snprintf(decimal_point_str, sizeof(decimal_point_str), "%lu", decimal_pnt_remainder);
-            decimal_point_str[0] = get_font_point_str(decimal_point_str[0] - '0')[0];
+            remainder_str[0] = get_font_point_str(remainder_str[0] - '0')[0];
         }
     }
 
     // TODO: fix snprintf buffer size...
-    snprintf(out_str_buff, 2*UINT_MAX_DIGITS + 1, "%lu%s%s", truncated_num, decimal_point_str, suffix);
+    snprintf(out_str_buff, 2*UINT_MAX_DIGITS + 1, "%lu%s%s", truncated_num, remainder_str, suffix);
 }
 
 // Avoid uint overflow when add/multiplying score
