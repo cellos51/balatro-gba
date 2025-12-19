@@ -32,8 +32,8 @@ extern const unsigned int gbalatro_sys8Glyphs[192];
  *  ```c
  *  '&' == '.0'
  *  '^' == '.1'
- *  '{' == '.2'
- *  '}' == '.3'
+ *  '}' == '.2'
+ *  '{' == '.3'
  *  '|' == '.4'
  *  '`' == '.5'
  *  '<' == '.6'
@@ -46,8 +46,8 @@ extern const unsigned int gbalatro_sys8Glyphs[192];
  */
 #define FP0_CHAR & // .0
 #define FP1_CHAR ^ // .1
-#define FP2_CHAR { // .2
-#define FP3_CHAR } // .3
+#define FP2_CHAR } // .2
+#define FP3_CHAR { // .3
 #define FP4_CHAR | // .4
 #define FP5_CHAR ` // .5
 #define FP6_CHAR < // .6
