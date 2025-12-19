@@ -58,8 +58,13 @@ void selection_grid_move_selection_vert(SelectionGrid* selection_grid, int direc
             return;
 
         int old_row_size = selection_grid->rows[selection.y].get_size();
-        // TODO: Maybe some of the fixed conversions here are unnecessary
-        new_selection.x = fx2int(fxmul(int2fx(selection.x), (int2fx(new_row_size) / old_row_size)));
+
+        // Branchless set to 1 if 0 to avoid division by 0
+        old_row_size += (old_row_size == 0);
+
+        // Maintain relative horizontal position
+        // The operations are equivalent to fixed point if all the numbers were converted
+        new_selection.x = fx2int(selection.x * ((int2fx(new_row_size) / old_row_size)));
 
         if (selection.y >= 0 && selection.y < selection_grid->num_rows)
         {
