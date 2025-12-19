@@ -1,4 +1,5 @@
 #include "util.h"
+
 #include "font.h"
 
 #include <limits.h>
@@ -32,7 +33,7 @@ void truncate_uint_to_suffixed_str(
     char* suffix = "";
     char remainder_str[INT_MAX_DIGITS + 1];
     remainder_str[0] = '\0';
-    
+
     /* If there is overflow, divide by the next suffixed power of 10
      * to truncate the number back within num_req_chars.
      * UINT32_MAX is in the billions so no need to check larger numbers
@@ -41,7 +42,7 @@ void truncate_uint_to_suffixed_str(
     if (num >= ONE_B && overflow)
     {
         // TODO: Optimize division and remainder
-        remainder = num % ONE_B; 
+        remainder = num % ONE_B;
         truncated_num /= ONE_B;
         suffix = "B";
     }
@@ -70,10 +71,8 @@ void truncate_uint_to_suffixed_str(
 
         int truncated_remainder_digits = remaining_chars;
 
-        while(
-            truncated_remainder_digits > 0 && 
-            remainder_str[truncated_remainder_digits - 1] == '0'
-        )
+        while (truncated_remainder_digits > 0 &&
+               remainder_str[truncated_remainder_digits - 1] == '0')
         {
             truncated_remainder_digits--;
         }
@@ -89,7 +88,14 @@ void truncate_uint_to_suffixed_str(
     }
 
     // TODO: fix snprintf buffer size...
-    snprintf(out_str_buff, 2*UINT_MAX_DIGITS + 1, "%lu%s%s", truncated_num, remainder_str, suffix);
+    snprintf(
+        out_str_buff,
+        2 * UINT_MAX_DIGITS + 1,
+        "%lu%s%s",
+        truncated_num,
+        remainder_str,
+        suffix
+    );
 }
 
 // Avoid uint overflow when add/multiplying score
