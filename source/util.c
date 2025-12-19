@@ -32,7 +32,7 @@ void truncate_uint_to_suffixed_str(
     char* suffix = "";
     char remainder_str[INT_MAX_DIGITS + 1];
     remainder_str[0] = '\0';
-
+    
     /* If there is overflow, divide by the next suffixed power of 10
      * to truncate the number back within num_req_chars.
      * UINT32_MAX is in the billions so no need to check larger numbers
@@ -40,6 +40,7 @@ void truncate_uint_to_suffixed_str(
      */
     if (num >= ONE_B && overflow)
     {
+        // TODO: Optimize division and remainder
         remainder = num % ONE_B; 
         truncated_num /= ONE_B;
         suffix = "B";
