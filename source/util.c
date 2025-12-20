@@ -21,6 +21,56 @@ int int_arr_max(int int_arr[], int size)
     return max;
 }
 
+// Can be unstaticed if needed
+static inline void num_str_truncate_trailing_0s(int size, char* num_str)
+{
+    while (size > 0 && num_str[size - 1] == '0')
+    {
+        size--;
+    }
+    num_str[size] = '\0';
+}
+
+// TODO: Document
+static inline void truncate_num_get_remainder_string(
+    char* suffix_char,
+    char remainder_str[UINT_MAX_DIGITS + 1],
+    uint32_t remainder,
+    int num_req_chars,
+    uint32_t truncated_num
+)
+{
+    char* remainder_str_format;
+
+    switch (suffix_char[0])
+    {
+        // Pad with 0s to not lose leading zeros after decimal point
+        case 'B':
+            remainder_str_format = "%09lu";
+            break;
+        case 'M':
+            remainder_str_format = "%06lu";
+            break;
+        case 'K':
+            remainder_str_format = "%03lu";
+            break;
+    }
+
+    snprintf(remainder_str, sizeof(remainder_str), remainder_str_format, remainder);
+
+    // Truncate overflow
+    int remaining_chars = num_req_chars - u32_get_digits(truncated_num) - 1; // - 1 for suffix
+    remainder_str[remaining_chars] = '\0';
+
+    num_str_truncate_trailing_0s(remaining_chars, remainder_str);
+
+    if (remainder_str[0] != '\0')
+    {
+        // TODO: Fix hacky code
+        remainder_str[0] = get_font_point_str(remainder_str[0] - '0')[0];
+    }
+}
+
 void truncate_uint_to_suffixed_str(
     uint32_t num,
     int num_req_chars,
@@ -59,50 +109,21 @@ void truncate_uint_to_suffixed_str(
             suffix = "K";
         }
 
+        // The compiler optimizes these into a single operation
         truncated_num = num / divisor;
         remainder = num % divisor;
     }
 
     if (suffix[0] != '\0' && remainder != 0)
     {
-        char* remainder_str_format;
-
-        switch (suffix[0])
-        {
-            // Pad with 0s to not lose leading zeros after decimal point
-            case 'B':
-                remainder_str_format = "%09lu";
-                break;
-            case 'M':
-                remainder_str_format = "%06lu";
-                break;
-            case 'K':
-                remainder_str_format = "%03lu";
-                break;
-        }
-
-        // Truncating strings in order to 
-        // TODO: Extract to function
-        snprintf(remainder_str, sizeof(remainder_str), remainder_str_format, remainder);
-
-        // Truncate overflow
-        int remaining_chars = num_req_chars - u32_get_digits(truncated_num) - 1; // - 1 for suffix
-        remainder_str[remaining_chars] = '\0';
-
-        // Truncate trailing 0s
-        int truncated_remainder_digits = remaining_chars;
-        while (truncated_remainder_digits > 0 &&
-               remainder_str[truncated_remainder_digits - 1] == '0')
-        {
-            truncated_remainder_digits--;
-        }
-        remainder_str[truncated_remainder_digits] = '\0';
-
-        if (remainder_str[0] != '\0')
-        {
-            // TODO: Fix hacky code
-            remainder_str[0] = get_font_point_str(remainder_str[0] - '0')[0];
-        }
+        // Truncating the remainder in string form rather than number to avoid divisions
+        truncate_num_get_remainder_string(
+            suffix[0],
+            remainder_str,
+            remainder,
+            num_req_chars,
+            truncated_num
+        );
     }
 
     // TODO: fix snprintf buffer size...
