@@ -81,6 +81,7 @@ void truncate_uint_to_suffixed_str(
                 break;
         }
 
+        // Truncating strings in order to 
         // TODO: Extract to function
         snprintf(remainder_str, sizeof(remainder_str), remainder_str_format, remainder);
 

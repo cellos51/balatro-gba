@@ -105,8 +105,8 @@ void test_truncate_uint_to_suffixed_str()
     assert(strcmp(suffixed_str_buff, "3" XSTR(FP0_CHAR) "29M") == 0); // "3.029M"
 
     suffixed_str_buff[0] = '\0';
-    truncate_uint_to_suffixed_str(10007000, 6, suffixed_str_buff);
-    assert(strcmp(suffixed_str_buff, "10" XSTR(FP0_CHAR) "07M") == 0); // "10.007M"
+    truncate_uint_to_suffixed_str(10007000, 5, suffixed_str_buff);
+    assert(strcmp(suffixed_str_buff, "10M") == 0); // Decimal point fully truncated
 
     suffixed_str_buff[0] = '\0';
     truncate_uint_to_suffixed_str(10005123, 6, suffixed_str_buff);
