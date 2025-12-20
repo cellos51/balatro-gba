@@ -198,7 +198,7 @@ void test_truncate_uint_to_suffixed_str()
 
     suffixed_str_buff[0] = '\0';
     truncate_uint_to_suffixed_str(UINT32_MAX, 4, suffixed_str_buff);
-    assert(strcmp(suffixed_str_buff, "4" XSTR(FP2_CHAR) "9B") == 0);
+    assert(strcmp(suffixed_str_buff, "4" XSTR(FP2_CHAR) "9B") == 0); // "4.29B"
 
     // This is one of the few tests that checks rounding down, try not to add many more
     suffixed_str_buff[0] = '\0';
