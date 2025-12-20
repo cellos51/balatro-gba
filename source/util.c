@@ -33,7 +33,7 @@ static inline void num_str_truncate_trailing_0s(int size, char* num_str)
 
 // TODO: Document
 static inline void truncate_num_get_remainder_string(
-    char* suffix_char,
+    char suffix_char,
     char remainder_str[UINT_MAX_DIGITS + 1],
     uint32_t remainder,
     int num_req_chars,
@@ -42,7 +42,7 @@ static inline void truncate_num_get_remainder_string(
 {
     char* remainder_str_format;
 
-    switch (suffix_char[0])
+    switch (suffix_char)
     {
         // Pad with 0s to not lose leading zeros after decimal point
         case 'B':
@@ -56,7 +56,7 @@ static inline void truncate_num_get_remainder_string(
             break;
     }
 
-    snprintf(remainder_str, sizeof(remainder_str), remainder_str_format, remainder);
+    snprintf(remainder_str, UINT_MAX_DIGITS + 1, remainder_str_format, remainder);
 
     // Truncate overflow
     int remaining_chars = num_req_chars - u32_get_digits(truncated_num) - 1; // - 1 for suffix
