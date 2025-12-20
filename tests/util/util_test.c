@@ -15,8 +15,6 @@ void test_truncate_uint_to_suffixed_str()
 
     char suffixed_str_buff[UINT_MAX_DIGITS + 1] = {'\0'};
 
-    // TODO: Edge cases 1.01 etc.
-
     truncate_uint_to_suffixed_str(100, 3, suffixed_str_buff);
     assert(strcmp(suffixed_str_buff, "100") == 0);
 
@@ -27,6 +25,39 @@ void test_truncate_uint_to_suffixed_str()
     suffixed_str_buff[0] = '\0';
     truncate_uint_to_suffixed_str(1000, 2, suffixed_str_buff);
     assert(strcmp(suffixed_str_buff, "1K") == 0);
+
+    suffixed_str_buff[0] = '\0';
+    truncate_uint_to_suffixed_str(1000, 1, suffixed_str_buff);
+    assert(strcmp(suffixed_str_buff, "1K") == 0);
+
+    suffixed_str_buff[0] = '\0';
+    truncate_uint_to_suffixed_str(1000, 0, suffixed_str_buff);
+    assert(strcmp(suffixed_str_buff, "1K") == 0);
+
+    suffixed_str_buff[0] = '\0';
+    truncate_uint_to_suffixed_str(0, 0, suffixed_str_buff);
+    assert(strcmp(suffixed_str_buff, "0") == 0);
+
+    suffixed_str_buff[0] = '\0';
+    truncate_uint_to_suffixed_str(100, 2, suffixed_str_buff);
+    assert(strcmp(suffixed_str_buff, "100") == 0);
+
+    suffixed_str_buff[0] = '\0';
+    truncate_uint_to_suffixed_str(100, 1, suffixed_str_buff);
+    assert(strcmp(suffixed_str_buff, "100") == 0);
+
+    suffixed_str_buff[0] = '\0';
+    truncate_uint_to_suffixed_str(123, 1, suffixed_str_buff);
+    assert(strcmp(suffixed_str_buff, "123") == 0);
+
+    suffixed_str_buff[0] = '\0';
+    truncate_uint_to_suffixed_str(1234, 3, suffixed_str_buff);
+    assert(strcmp(suffixed_str_buff, "1" XSTR(FP2_CHAR) "K") == 0); // "1.2K"
+
+    suffixed_str_buff[0] = '\0';
+    truncate_uint_to_suffixed_str(1600, 3, suffixed_str_buff);
+    assert(strcmp(suffixed_str_buff, "1" XSTR(FP6_CHAR) "K") == 0); // "1.6K"
+
 
     suffixed_str_buff[0] = '\0';
     truncate_uint_to_suffixed_str(1000, 4, suffixed_str_buff);
@@ -58,11 +89,32 @@ void test_truncate_uint_to_suffixed_str()
 
     suffixed_str_buff[0] = '\0';
     truncate_uint_to_suffixed_str(12345123, 6, suffixed_str_buff);
-    assert(strcmp(suffixed_str_buff, "12" XSTR(FP3_CHAR) "45M") == 0); // Or "12.345M" ?
+    assert(strcmp(suffixed_str_buff, "12" XSTR(FP3_CHAR) "45M") == 0); // "12.345M"
 
     suffixed_str_buff[0] = '\0';
     truncate_uint_to_suffixed_str(12123123, 5, suffixed_str_buff);
     assert(strcmp(suffixed_str_buff, "12" XSTR(FP1_CHAR) "2M") == 0); // "12.12M"
+
+    suffixed_str_buff[0] = '\0';
+    truncate_uint_to_suffixed_str(1008000, 5, suffixed_str_buff);
+    printf("%s\n", suffixed_str_buff);
+    assert(strcmp(suffixed_str_buff, "1" XSTR(FP0_CHAR) "08M") == 0); // "1.008M"
+
+    suffixed_str_buff[0] = '\0';
+    truncate_uint_to_suffixed_str(3029000, 5, suffixed_str_buff);
+    assert(strcmp(suffixed_str_buff, "3" XSTR(FP2_CHAR) "9M") == 0); // "3.029M"
+
+    suffixed_str_buff[0] = '\0';
+    truncate_uint_to_suffixed_str(10007000, 6, suffixed_str_buff);
+    assert(strcmp(suffixed_str_buff, "10" XSTR(FP0_CHAR) "07M") == 0); // "10.007M"
+
+    suffixed_str_buff[0] = '\0';
+    truncate_uint_to_suffixed_str(10005123, 6, suffixed_str_buff);
+    assert(strcmp(suffixed_str_buff, "10" XSTR(FP0_CHAR) "05M") == 0); // "10.005M"    
+
+    suffixed_str_buff[0] = '\0';
+    truncate_uint_to_suffixed_str(3029123, 5, suffixed_str_buff);
+    assert(strcmp(suffixed_str_buff, "3" XSTR(FP2_CHAR) "9M") == 0); // "3.029M"
 
     suffixed_str_buff[0] = '\0';
     truncate_uint_to_suffixed_str(12123123, 4, suffixed_str_buff);
@@ -101,8 +153,8 @@ void test_truncate_uint_to_suffixed_str()
     assert(strcmp(suffixed_str_buff, "1" XSTR(FP1_CHAR) "2B") == 0); // "1.12B"
 
     suffixed_str_buff[0] = '\0';
-    truncate_uint_to_suffixed_str((uint32_t)3123123123, 4, suffixed_str_buff);
-    assert(strcmp(suffixed_str_buff, "3" XSTR(FP1_CHAR) "2B") == 0); // "3.12B"
+    truncate_uint_to_suffixed_str((uint32_t)3012012012, 4, suffixed_str_buff);
+    assert(strcmp(suffixed_str_buff, "3" XSTR(FP0_CHAR) "1B") == 0); // "3.01B"
 
     suffixed_str_buff[0] = '\0';
     truncate_uint_to_suffixed_str(1234123123, 5, suffixed_str_buff);
