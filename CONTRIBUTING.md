@@ -4,7 +4,7 @@ Thank you for reading this. Below is a quick summary of expectations and tips to
 
 ## CI Checks
 On pull-requests, various checks will be performed:
-1. **Formatting**: `clang-format` will be ran on every `.c/.h` file with [this configuration](https://github.com/GBALATRO/balatro-gba/blob/main/.clang-format). Failures will cause the CI to fail
+1. **Formatting**: `clang-format` will be ran on every `.c/.h` file with [this configuration](https://github.com/GBALATRO/balatro-gba/blob/main/.clang-format). Failures will cause the CI to fail.
 2. **Unit Tests**: Unit tests are required to pass and are located in the repo [here](https://github.com/GBALATRO/balatro-gba/tree/main/tests).
 3. **Rom Build**: The ROM must successfully build with the `make -j$(nproc)` command.
 
@@ -41,7 +41,7 @@ clang-format -i include/blind.h
 ```
 
 ### Custom Scripts
-In the repo we use custom scripts located in the [`scrips`](https://github.com/GBALATRO/balatro-gba/tree/main/scripts) directory.
+In the repo we use custom scripts located in the [`scripts`](https://github.com/GBALATRO/balatro-gba/tree/main/scripts) directory.
 
 🟡 **Note**: `python3` and `bash` are required for these scripts.
 
