@@ -97,12 +97,12 @@ void test_truncate_uint_to_suffixed_str()
 
     suffixed_str_buff[0] = '\0';
     truncate_uint_to_suffixed_str(1008000, 5, suffixed_str_buff);
-    printf("%s\n", suffixed_str_buff);
+
     assert(strcmp(suffixed_str_buff, "1" XSTR(FP0_CHAR) "08M") == 0); // "1.008M"
 
     suffixed_str_buff[0] = '\0';
     truncate_uint_to_suffixed_str(3029000, 5, suffixed_str_buff);
-    assert(strcmp(suffixed_str_buff, "3" XSTR(FP2_CHAR) "9M") == 0); // "3.029M"
+    assert(strcmp(suffixed_str_buff, "3" XSTR(FP0_CHAR) "29M") == 0); // "3.029M"
 
     suffixed_str_buff[0] = '\0';
     truncate_uint_to_suffixed_str(10007000, 6, suffixed_str_buff);
@@ -110,11 +110,7 @@ void test_truncate_uint_to_suffixed_str()
 
     suffixed_str_buff[0] = '\0';
     truncate_uint_to_suffixed_str(10005123, 6, suffixed_str_buff);
-    assert(strcmp(suffixed_str_buff, "10" XSTR(FP0_CHAR) "05M") == 0); // "10.005M"    
-
-    suffixed_str_buff[0] = '\0';
-    truncate_uint_to_suffixed_str(3029123, 5, suffixed_str_buff);
-    assert(strcmp(suffixed_str_buff, "3" XSTR(FP2_CHAR) "9M") == 0); // "3.029M"
+    assert(strcmp(suffixed_str_buff, "10" XSTR(FP0_CHAR) "05M") == 0); // "10.005M"
 
     suffixed_str_buff[0] = '\0';
     truncate_uint_to_suffixed_str(12123123, 4, suffixed_str_buff);
@@ -159,7 +155,35 @@ void test_truncate_uint_to_suffixed_str()
     suffixed_str_buff[0] = '\0';
     truncate_uint_to_suffixed_str(1234123123, 5, suffixed_str_buff);
     assert(strcmp(suffixed_str_buff, "1" XSTR(FP2_CHAR) "34B") == 0); // "1.234B"
+
+    suffixed_str_buff[0] = '\0';
+    truncate_uint_to_suffixed_str(1000512345, 6, suffixed_str_buff);
+    assert(strcmp(suffixed_str_buff, "1" XSTR(FP0_CHAR) "005B") == 0); // "1.0005B"
+
+    suffixed_str_buff[0] = '\0';
+    truncate_uint_to_suffixed_str(1234561234, 7, suffixed_str_buff);
+    assert(strcmp(suffixed_str_buff, "1" XSTR(FP2_CHAR) "3456B") == 0); // "1.23456B"
+
+    suffixed_str_buff[0] = '\0';
+    truncate_uint_to_suffixed_str(1000061234, 7, suffixed_str_buff);
+    assert(strcmp(suffixed_str_buff, "1" XSTR(FP0_CHAR) "0006B") == 0); // "1.00006B"
     
+    suffixed_str_buff[0] = '\0';
+    truncate_uint_to_suffixed_str(1234567123, 8, suffixed_str_buff);
+    assert(strcmp(suffixed_str_buff, "1" XSTR(FP2_CHAR) "34567B") == 0); // "1.234567B"
+
+    suffixed_str_buff[0] = '\0';
+    truncate_uint_to_suffixed_str(1000007123, 8, suffixed_str_buff);
+    assert(strcmp(suffixed_str_buff, "1" XSTR(FP0_CHAR) "00007B") == 0); // "1.000007B"
+
+    suffixed_str_buff[0] = '\0';
+    truncate_uint_to_suffixed_str(1234567812, 9, suffixed_str_buff);
+    assert(strcmp(suffixed_str_buff, "1" XSTR(FP2_CHAR) "345678B") == 0); // "1.2345678B"
+
+    suffixed_str_buff[0] = '\0';
+    truncate_uint_to_suffixed_str(1000000812, 9, suffixed_str_buff);
+    assert(strcmp(suffixed_str_buff, "1" XSTR(FP0_CHAR) "000008B") == 0); // "1.0000008B"
+
     suffixed_str_buff[0] = '\0';
     truncate_uint_to_suffixed_str(1123123123, 10, suffixed_str_buff);
     assert(strcmp(suffixed_str_buff, "1123123123") == 0);
@@ -176,7 +200,7 @@ void test_truncate_uint_to_suffixed_str()
     truncate_uint_to_suffixed_str(UINT32_MAX, 4, suffixed_str_buff);
     assert(strcmp(suffixed_str_buff, "4" XSTR(FP2_CHAR) "9B") == 0);
 
-    // This is the only test that checks rounding down, don't add any more
+    // This is one of the few tests that checks rounding down, try not to add many more
     suffixed_str_buff[0] = '\0';
     truncate_uint_to_suffixed_str(UINT32_MAX, 5, suffixed_str_buff);
     assert(strcmp(suffixed_str_buff, "4" XSTR(FP2_CHAR) "94B") == 0); // "4.294B"

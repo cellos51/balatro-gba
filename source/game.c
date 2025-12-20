@@ -420,9 +420,9 @@ static const int HAND_SPACING_LUT[MAX_HAND_SIZE] =
 
 static const HandValues hand_base_values[] = {
     {.chips = 0,   .mult = 0,  .display_name = NULL     }, // NONE
-    {.chips = 4096,   .mult = 4096,  .display_name = "HIGH C" }, // HIGH_CARD
-    {.chips = (1 << 14),  .mult = (1 << 14),  .display_name = "PAIR"   }, // PAIR
-    {.chips = 512,  .mult = 512,  .display_name = "2 PAIR" }, // TWO_PAIR
+    {.chips = 5,   .mult = 1,  .display_name = "HIGH C" }, // HIGH_CARD
+    {.chips = 10,  .mult = 2,  .display_name = "PAIR"   }, // PAIR
+    {.chips = 20,  .mult = 2,  .display_name = "2 PAIR" }, // TWO_PAIR
     {.chips = 30,  .mult = 3,  .display_name = "3 OAK"  }, // THREE_OF_A_KIND
     {.chips = 60,  .mult = 7,  .display_name = "4 OAK"  }, // FOUR_OF_A_KIND
     {.chips = 30,  .mult = 4,  .display_name = "STRT"   }, // STRAIGHT

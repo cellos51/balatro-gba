@@ -5,6 +5,7 @@
 #include <limits.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 
 int int_arr_max(int int_arr[], int size)
 {
@@ -64,10 +65,25 @@ void truncate_uint_to_suffixed_str(
 
     if (suffix[0] != '\0' && remainder != 0)
     {
+        char* remainder_str_format;
+
+        switch (suffix[0])
+        {
+            // Pad with 0s to not lose leading zeros after decimal point
+            case 'B':
+                remainder_str_format = "%09lu";
+                break;
+            case 'M':
+                remainder_str_format = "%06lu";
+                break;
+            case 'K':
+                remainder_str_format = "%03lu";
+                break;
+        }
+
         // TODO: Extract to function
-        // Pad with 0s to use at least 3 digits to not lose leading zeros after decimal point
-        snprintf(remainder_str, sizeof(remainder_str), "%03lu", remainder);
-        
+        snprintf(remainder_str, sizeof(remainder_str), remainder_str_format, remainder);
+
         // Truncate overflow
         int remaining_chars = num_req_chars - u32_get_digits(truncated_num) - 1; // - 1 for suffix
         remainder_str[remaining_chars] = '\0';
