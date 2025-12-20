@@ -34,50 +34,51 @@ void truncate_uint_to_suffixed_str(
     char remainder_str[INT_MAX_DIGITS + 1];
     remainder_str[0] = '\0';
 
-    /* If there is overflow, divide by the next suffixed power of 10
-     * to truncate the number back within num_req_chars.
-     * UINT32_MAX is in the billions so no need to check larger numbers
-     * or perform complex mathematical operations.
-     */
-    if (num >= ONE_B && overflow)
+    if (overflow)
     {
-        // TODO: Optimize division and remainder
-        remainder = num % ONE_B;
-        truncated_num /= ONE_B;
-        suffix = "B";
-    }
-    else if (num >= ONE_M && overflow)
-    {
-        remainder = num % ONE_M;
-        truncated_num /= ONE_M;
-        suffix = "M";
-    }
-    else if (num >= ONE_K && overflow)
-    {
-        remainder = num % ONE_K;
-        truncated_num /= ONE_K;
-        suffix = "K";
+        /* If there is overflow, divide by the next suffixed power of 10
+         * to truncate the number back within num_req_chars.
+         * UINT32_MAX is in the billions so no need to check larger numbers
+         * or perform complex mathematical operations.
+         */
+        uint32_t divisor = 1;
+        if (num >= ONE_B)
+        {
+            divisor = ONE_B;
+            suffix = "B";
+        }
+        else if (num >= ONE_M)
+        {
+            divisor = ONE_M;
+            suffix = "M";
+        }
+        else if (num >= ONE_K)
+        {
+            divisor = ONE_K;
+            suffix = "K";
+        }
+
+        truncated_num = num / divisor;
+        remainder = num % divisor;
     }
 
     if (suffix[0] != '\0' && remainder != 0)
     {
         // TODO: Extract to function
-        snprintf(remainder_str, sizeof(remainder_str), "%lu", remainder);
-
-        int remaining_chars = num_req_chars - u32_get_digits(truncated_num) - 1; // - 1 for suffix
-
+        // Pad with 0s to use at least 3 digits to not lose leading zeros after decimal point
+        snprintf(remainder_str, sizeof(remainder_str), "%03lu", remainder);
+        
         // Truncate overflow
+        int remaining_chars = num_req_chars - u32_get_digits(truncated_num) - 1; // - 1 for suffix
         remainder_str[remaining_chars] = '\0';
 
+        // Truncate trailing 0s
         int truncated_remainder_digits = remaining_chars;
-
         while (truncated_remainder_digits > 0 &&
                remainder_str[truncated_remainder_digits - 1] == '0')
         {
             truncated_remainder_digits--;
         }
-
-        // Truncate 0s
         remainder_str[truncated_remainder_digits] = '\0';
 
         if (remainder_str[0] != '\0')

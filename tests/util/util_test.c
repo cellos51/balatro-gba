@@ -15,6 +15,8 @@ void test_truncate_uint_to_suffixed_str()
 
     char suffixed_str_buff[UINT_MAX_DIGITS + 1] = {'\0'};
 
+    // TODO: Edge cases 1.01 etc.
+
     truncate_uint_to_suffixed_str(100, 3, suffixed_str_buff);
     assert(strcmp(suffixed_str_buff, "100") == 0);
 

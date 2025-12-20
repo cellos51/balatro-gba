@@ -118,7 +118,11 @@
 #define SHOP_BOTTOM_PANEL_BORDER_PID         26
 // Naming the stage where cards return from the discard pile to the deck "undiscard"
 
-#define NUM_SCORE_LERP_STEPS 16
+/* This needs to stay a power of 2 and small enough
+ * for the lerping to be done before the next hand is drawn.
+ */
+#define NUM_SCORE_LERP_STEPS      16
+#define TM_SCORE_LERP_INTERVAL    2
 
 // Shop
 #define REROLL_BASE_COST 5 // Base cost for rerolling the shop items
@@ -416,9 +420,9 @@ static const int HAND_SPACING_LUT[MAX_HAND_SIZE] =
 
 static const HandValues hand_base_values[] = {
     {.chips = 0,   .mult = 0,  .display_name = NULL     }, // NONE
-    {.chips = 5,   .mult = 1,  .display_name = "HIGH C" }, // HIGH_CARD
-    {.chips = 10,  .mult = 2,  .display_name = "PAIR"   }, // PAIR
-    {.chips = 20,  .mult = 2,  .display_name = "2 PAIR" }, // TWO_PAIR
+    {.chips = 4096,   .mult = 4096,  .display_name = "HIGH C" }, // HIGH_CARD
+    {.chips = (1 << 14),  .mult = (1 << 14),  .display_name = "PAIR"   }, // PAIR
+    {.chips = 512,  .mult = 512,  .display_name = "2 PAIR" }, // TWO_PAIR
     {.chips = 30,  .mult = 3,  .display_name = "3 OAK"  }, // THREE_OF_A_KIND
     {.chips = 60,  .mult = 7,  .display_name = "4 OAK"  }, // FOUR_OF_A_KIND
     {.chips = 30,  .mult = 4,  .display_name = "STRT"   }, // STRAIGHT
@@ -1038,7 +1042,11 @@ void display_mult(void)
     tte_erase_rect_wrapper(mult_text_overflow_rect);
 
     char mult_str_buff[UINT_MAX_DIGITS + 1];
-    truncate_uint_to_suffixed_str(mult, rect_width(&MULT_TEXT_RECT) / TTE_CHAR_SIZE, mult_str_buff);
+    truncate_uint_to_suffixed_str(
+        mult,
+        rect_width(&MULT_TEXT_RECT) / TTE_CHAR_SIZE,
+        mult_str_buff
+    );
 
     tte_printf(
         "#{P:%d,%d; cx:0x%X000;}%s",
@@ -1539,7 +1547,11 @@ static void display_score(u32 value)
 
     char score_str_buff[UINT_MAX_DIGITS + 1];
 
-    truncate_uint_to_suffixed_str(value, rect_width(&score_rect) / TTE_CHAR_SIZE, score_str_buff);
+    truncate_uint_to_suffixed_str(
+        value,
+        rect_width(&score_rect) / TTE_CHAR_SIZE,
+        score_str_buff
+    );
     update_text_rect_to_center_str(&score_rect, score_str_buff, SCREEN_RIGHT);
 
     tte_printf(
@@ -2948,11 +2960,6 @@ static inline int hand_get_max_size(void)
     return hand_size;
 }
 
-// TODO: Help this comment find its way back to its variable
-/* This needs to stay a power of 2 and small enough
- * for the lerping to be done before the next hand is drawn.
- */
-
 static inline void game_playing_process_input_and_state(void)
 {
     if (hand_state == HAND_SELECT)
@@ -2986,7 +2993,8 @@ static inline void game_playing_process_input_and_state(void)
             );
         }
     }
-    else if (play_state == PLAY_ENDED && timer % FRAMES(3) == 0)
+    // TODO: Remove magic number
+    else if (play_state == PLAY_ENDED && timer % FRAMES(TM_SCORE_LERP_INTERVAL) == 0)
     {
         /* Using fixed point in case the score is lower than NUM_SCORE_LERP_STEPS and then
          * then the division rounds it down to 0 and it's never added to the total.
@@ -2998,10 +3006,11 @@ static inline void game_playing_process_input_and_state(void)
 
         if (lerped_temp_score > 0)
         {
-            display_temp_score(fx2uint(lerped_temp_score));
+            // Set the score display first because it's more important
+            // in case there isn't enough time within the frame to display both
+            display_score(fx2uint(lerped_score)); 
 
-            // We actually don't need to erase this because the score only increases
-            display_score(fx2uint(lerped_score)); // Set the score display
+            display_temp_score(fx2uint(lerped_temp_score));
         }
         else
         {
@@ -4568,7 +4577,7 @@ static inline void game_start(void)
         deck_get_max_size()
     );
 
-    display_round(round); // Set the round display
+    display_round(round);       // Set the round display
     display_score(score); // Set the score display
 
     display_chips(); // Set the chips display
