@@ -62,4 +62,6 @@
  */
 const char* get_font_point_str(int val);
 
+char digit_char_to_font_point(char digit_char);
+
 #endif // FONT_H

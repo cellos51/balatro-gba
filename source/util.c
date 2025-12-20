@@ -66,8 +66,7 @@ static inline void truncate_num_get_remainder_string(
 
     if (remainder_str[0] != '\0')
     {
-        // TODO: Fix hacky code
-        remainder_str[0] = get_font_point_str(remainder_str[0] - '0')[0];
+        remainder_str[0] = digit_char_to_font_point(remainder_str[0]);
     }
 }
 
