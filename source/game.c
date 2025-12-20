@@ -121,8 +121,8 @@
 /* This needs to stay a power of 2 and small enough
  * for the lerping to be done before the next hand is drawn.
  */
-#define NUM_SCORE_LERP_STEPS      16
-#define TM_SCORE_LERP_INTERVAL    2
+#define NUM_SCORE_LERP_STEPS   16
+#define TM_SCORE_LERP_INTERVAL 2
 
 // Shop
 #define REROLL_BASE_COST 5 // Base cost for rerolling the shop items
@@ -1042,11 +1042,7 @@ void display_mult(void)
     tte_erase_rect_wrapper(mult_text_overflow_rect);
 
     char mult_str_buff[UINT_MAX_DIGITS + 1];
-    truncate_uint_to_suffixed_str(
-        mult,
-        rect_width(&MULT_TEXT_RECT) / TTE_CHAR_SIZE,
-        mult_str_buff
-    );
+    truncate_uint_to_suffixed_str(mult, rect_width(&MULT_TEXT_RECT) / TTE_CHAR_SIZE, mult_str_buff);
 
     tte_printf(
         "#{P:%d,%d; cx:0x%X000;}%s",
@@ -1547,11 +1543,7 @@ static void display_score(u32 value)
 
     char score_str_buff[UINT_MAX_DIGITS + 1];
 
-    truncate_uint_to_suffixed_str(
-        value,
-        rect_width(&score_rect) / TTE_CHAR_SIZE,
-        score_str_buff
-    );
+    truncate_uint_to_suffixed_str(value, rect_width(&score_rect) / TTE_CHAR_SIZE, score_str_buff);
     update_text_rect_to_center_str(&score_rect, score_str_buff, SCREEN_RIGHT);
 
     tte_printf(
@@ -3008,7 +3000,7 @@ static inline void game_playing_process_input_and_state(void)
         {
             // Set the score display first because it's more important
             // in case there isn't enough time within the frame to display both
-            display_score(fx2uint(lerped_score)); 
+            display_score(fx2uint(lerped_score));
 
             display_temp_score(fx2uint(lerped_temp_score));
         }
@@ -4577,7 +4569,7 @@ static inline void game_start(void)
         deck_get_max_size()
     );
 
-    display_round(round);       // Set the round display
+    display_round(round); // Set the round display
     display_score(score); // Set the score display
 
     display_chips(); // Set the chips display
