@@ -22,13 +22,17 @@ Doxygen is used to build documentation that can be opened in browser.
 
 ### clang-format
 
-Running `clang-format` locally is recommended before submitting a PR as it will fail the **CI Checks** if not properly formatted. It is recommended run `.clang-format` periodically and only add formatted code. If applying on multiple commits and larger changes, it's recommended to apply the format in a separate commit to review. 
+Running `clang-format` locally is recommended before submitting a PR as it will fail the **CI Checks** if not properly formatted. It is recommended either: 
+1. Run `clang-format` periodically and only commit formatted code. 
+2. Run `clang-format` as a separate commit on larger changes, and review each modified hunk. 
+
+Either way, just ensure you manually review automatic changes.
 
 #### VSCode
 
 The recommended setup for VSCode is to install the [**clangd**](https://marketplace.visualstudio.com/items?itemName=llvm-vs-code-extensions.vscode-clangd) extension. It will provide helpful information in VSCode and can be used to format the code automatically according to the `.clang-format` file with **`Ctrl+Shift+I`**
 
-There is an option to enable `"editor.formatOnSave"` in the VSCode `settings.json` file. You can also do this by opening the settings menu (`File->Preferences->Settings`) and searching `format on save`. 
+There is an option to enable `"editor.formatOnSave"` in the VSCode `settings.json` file. You can also do this by opening the settings menu (`File->Preferences->Settings`) and searching `format on save`.
 
 #### Manually
 
