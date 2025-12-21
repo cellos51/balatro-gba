@@ -121,7 +121,7 @@
 /* This needs to stay a power of 2 and small enough
  * for the lerping to be done before the next hand is drawn.
  */
-#define NUM_SCORE_LERP_STEPS   32
+#define NUM_SCORE_LERP_STEPS 32
 
 // Shop
 #define REROLL_BASE_COST 5 // Base cost for rerolling the shop items
