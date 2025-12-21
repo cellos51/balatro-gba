@@ -34,10 +34,7 @@ void init()
         CLR_WHITE,
         TTE_BIT_UNPACK_OFFSET,
         &gbalatro_sys8Font,
-
-        // Explicitly use 8x8 tile text drawing function to improve performance
-        // See https://gbadev.net/tonc/tte.html#ssec-map-reg
-        se_drawg_w8h8
+        NULL
     );
     tte_erase_screen();
     tte_init_con();
