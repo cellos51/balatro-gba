@@ -21,7 +21,27 @@ Doxygen is used to build documentation that can be opened in browser.
 ## Tools
 
 ### clang-format
-Running `clang-format` locally is recommended before submitting a PR as it will fail the **CI Checks** if not properly formatted.
+
+Running `clang-format` locally is recommended before submitting a PR as it will fail the **CI Checks** if not properly formatted. It is recommended run `.clang-format` periodically and only add formatted code. If applying on multiple commits and larger changes, it's recommended to apply the format in a separate commit to review. 
+
+#### VSCode
+
+The recommended setup for VSCode is to install the [**clangd**](https://marketplace.visualstudio.com/items?itemName=llvm-vs-code-extensions.vscode-clangd) extension. It will provide helpful information in VSCode and can be used to format the code automatically according to the `.clang-format` file with **`Ctrl+Shift+I`**
+
+#### Manually
+
+If installed locally and you'd prefer to use it in your shell. You can do the following
+
+```sh
+# List warnings
+clang-format --dry-run -Werror include/*.h source/*.c
+# Modify all files inplace
+clang-format -i include/*.h source/*.c
+# Or just one
+clang-format -i include/blind.h
+```
+
+#### Disabling Formatting
 
 Sometimes `clang-format` rules need to be broken, like in the case of the [joker registry](https://github.com/GBALATRO/balatro-gba/blob/8fb0813cf5f7235b6450dc9a76252dda4d9b4a27/source/joker_effects.c#L333) and other tables or maps. If it makes sense, you can wrap code in `// clang-format off` and `// clang-format on`:
 
@@ -48,25 +68,6 @@ const table_of_tables =
         {TABLE_D, 4, tableDMap}, {TABLE_E, 5, tableEMap}, {TABLE_F, 6, tableFMap},
         {TABLE_G, 7, tableGMap},
 }
-```
-
-:yellow_circle: ***Note***: It is recommended run `.clang-format` periodically and only add formatted code. If applying on multiple commits and larger changes, it's recommended to apply the format in a separate commit to review. 
-
-#### VSCode
-
-The recommended setup for VSCode is to install the [**clangd**](https://marketplace.visualstudio.com/items?itemName=llvm-vs-code-extensions.vscode-clangd) extension. It will provide helpful information in VSCode and can be used to format the code automatically according to the `.clang-format` file with **`Ctrl+Shift+I`**
-
-#### Manually
-
-If installed locally and you'd prefer to use it in your shell. You can do the following
-
-```sh
-# List warnings
-clang-format --dry-run -Werror include/*.h source/*.c
-# Modify all files inplace
-clang-format -i include/*.h source/*.c
-# Or just one
-clang-format -i include/blind.h
 ```
 
 ### Custom Scripts
