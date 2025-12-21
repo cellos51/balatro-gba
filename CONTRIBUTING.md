@@ -23,9 +23,38 @@ Doxygen is used to build documentation that can be opened in browser.
 ### clang-format
 Running `clang-format` locally is recommended before submitting a PR as it will fail the **CI Checks** if not properly formatted.
 
+Sometimes `clang-format` rules need to be broken, like in the case of the [joker registry](https://github.com/GBALATRO/balatro-gba/blob/8fb0813cf5f7235b6450dc9a76252dda4d9b4a27/source/joker_effects.c#L333) and other tables or maps. If it makes sense, you can wrap code in `// clang-format off` and `// clang-format on`:
+
+- **Without clang-format**:
+```c
+// clang-format off
+const table_of_tables = 
+{
+    { TABLE_A,   1,   tableAMap },
+    { TABLE_B,   2,   tableBMap },
+    { TABLE_C,   3,   tableCMap },
+    { TABLE_D,   4,   tableDMap },
+    { TABLE_E,   5,   tableEMap },
+    { TABLE_F,   6,   tableFMap },
+    { TABLE_G,   7,   tableGMap },
+}
+// clang-format on
+```
+- **With clang-format**:
+```c
+const table_of_tables = 
+{
+    {TABLE_A, 1, tableAMap}, {TABLE_B, 2, tableBMap}, {TABLE_C, 3, tableCMap},
+        {TABLE_D, 4, tableDMap}, {TABLE_E, 5, tableEMap}, {TABLE_F, 6, tableFMap},
+        {TABLE_G, 7, tableGMap},
+}
+```
+
+:yellow_circle: ***Note***: It is recommended run `.clang-format` periodically and only add formatted code. If applying on multiple commits and larger changes, it's recommended to apply the format in a separate commit to review. 
+
 #### VSCode
 
-[Recommended plugin](https://marketplace.visualstudio.com/items?itemName=xaver.clang-format) from the [documentation](https://clang.llvm.org/docs/ClangFormat.html#visual-studio-code-integration). Use `Alt-Shift-F` or `Ctrl-Shift-I` to format your file. It is recommended to do this in a separate commit without and review the automatic changes before committing.
+The recommended setup for VSCode is to install the [**clangd**](https://marketplace.visualstudio.com/items?itemName=llvm-vs-code-extensions.vscode-clangd) extension. It will provide helpful information in VSCode and can be used to format the code automatically according to the `.clang-format` file with **`Ctrl+Shift+I`**
 
 #### Manually
 
