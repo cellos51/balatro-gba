@@ -102,7 +102,7 @@ void truncate_uint_to_suffixed_str(
     uint32_t decimal_remainder = 0;
     bool overflow = num_digits > num_req_chars;
     char* suffix = "";
-    char remainder_str[INT_MAX_DIGITS + 1];
+    char remainder_str[UINT_MAX_DIGITS + 1];
     remainder_str[0] = '\0';
 
     if (overflow)
