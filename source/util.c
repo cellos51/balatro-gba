@@ -46,7 +46,7 @@ static inline void num_str_truncate_trailing_zeros(char* num_str, int size)
  * @param suffix_char One of 'K', 'M', or 'B' used for selecting the suffix scale and
  *        padding width. If not one of the expected, the string may be incorrectly formatted.
  * @param remainder_str Output buffer (size >= UINT_MAX_DIGITS + 1) where the
- *        formatted fractional digits (inlcuding leading '.<digit>' special character) are written
+ *        formatted fractional digits (including leading '.<digit>' special character) are written
  *        as a NULL-terminated string; may be empty if nothing remains.
  */
 static inline void truncate_num_get_remainder_string(

@@ -134,11 +134,11 @@ void test_truncate_uint_to_suffixed_str()
 
     suffixed_str_buff[0] = '\0';
     truncate_uint_to_suffixed_str(123123123, 7, suffixed_str_buff);
-    assert(strcmp(suffixed_str_buff, "123" XSTR(FP1_CHAR) "23M") == 0); // 123.123M
+    assert(strcmp(suffixed_str_buff, "123" XSTR(FP1_CHAR) "23M") == 0); // "123.123M"
 
     suffixed_str_buff[0] = '\0';
     truncate_uint_to_suffixed_str(123123123, 8, suffixed_str_buff);
-    assert(strcmp(suffixed_str_buff, "123" XSTR(FP1_CHAR) "231M") == 0); // 123.1231M
+    assert(strcmp(suffixed_str_buff, "123" XSTR(FP1_CHAR) "231M") == 0); // "123.1231M"
 
     suffixed_str_buff[0] = '\0';
     truncate_uint_to_suffixed_str(123123123, 9, suffixed_str_buff);
