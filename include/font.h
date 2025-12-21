@@ -69,7 +69,7 @@ const char* get_font_point_str(int val);
  *                   if a char outside of range is passed it the return value will be within limits
  *                   but is not defined with any relationship to the input.
  *
- * @return A char representing a value in font within the range of '.0' to '.9'
+ * @return A char representing a value in the font within the range of '.0' to '.9'
  */
 char digit_char_to_font_point(char digit_char);
 
