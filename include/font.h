@@ -62,6 +62,15 @@
  */
 const char* get_font_point_str(int val);
 
+/**
+ * @brief Get the decimal point char equivalent of 0-9 from char param.
+ *
+ * @param digit_char A char of a digit between '0'-'9' to get '.0' to '.9' equivalents. Note that
+ *                   if a char outside of range is passed it the return value will be within limits
+ *                   but is not defined with any relationship to the input.
+ *
+ * @return A char representing a value in font within the range of '.0' to '.9'
+ */
 char digit_char_to_font_point(char digit_char);
 
 #endif // FONT_H
