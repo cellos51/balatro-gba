@@ -81,6 +81,19 @@ static inline void truncate_num_get_remainder_string(
 
     // Truncate overflow
     int remaining_chars = num_req_chars - u32_get_digits(truncated_num) - 1; // - 1 for suffix
+
+    // If there is no room for any fractional characters, leave the remainder string empty.
+    if (remaining_chars <= 0)
+    {
+        remainder_str[0] = '\0';
+        return;
+    }
+
+    // Ensure we never write past the end of the buffer.
+    if (remaining_chars > UINT_MAX_DIGITS)
+    {
+        remaining_chars = UINT_MAX_DIGITS;
+    }
     remainder_str[remaining_chars] = '\0';
 
     num_str_truncate_trailing_zeros(remainder_str, remaining_chars);
