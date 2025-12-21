@@ -22,7 +22,7 @@ int int_arr_max(int int_arr[], int size)
 }
 
 // Can be unstaticed if needed
-static inline void num_str_truncate_trailing_0s(int size, char* num_str)
+static inline void num_str_truncate_trailing_zeros(char* num_str, int size)
 {
     while (size > 0 && num_str[size - 1] == '0')
     {
@@ -33,11 +33,11 @@ static inline void num_str_truncate_trailing_0s(int size, char* num_str)
 
 // TODO: Document
 static inline void truncate_num_get_remainder_string(
-    char suffix_char,
-    char remainder_str[UINT_MAX_DIGITS + 1],
     uint32_t remainder,
+    uint32_t truncated_num,
     int num_req_chars,
-    uint32_t truncated_num
+    char suffix_char,
+    char remainder_str[UINT_MAX_DIGITS + 1]
 )
 {
     char* remainder_str_format;
@@ -62,7 +62,7 @@ static inline void truncate_num_get_remainder_string(
     int remaining_chars = num_req_chars - u32_get_digits(truncated_num) - 1; // - 1 for suffix
     remainder_str[remaining_chars] = '\0';
 
-    num_str_truncate_trailing_0s(remaining_chars, remainder_str);
+    num_str_truncate_trailing_zeros(remainder_str, remaining_chars);
 
     if (remainder_str[0] != '\0')
     {
@@ -117,11 +117,11 @@ void truncate_uint_to_suffixed_str(
     {
         // Truncating the remainder in string form rather than number to avoid divisions
         truncate_num_get_remainder_string(
-            suffix[0],
-            remainder_str,
             remainder,
+            truncated_num,
             num_req_chars,
-            truncated_num
+            suffix[0],
+            remainder_str
         );
     }
 
