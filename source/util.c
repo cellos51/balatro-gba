@@ -32,7 +32,7 @@ static inline void num_str_truncate_trailing_zeros(char* num_str, int size)
 }
 
 /**
- * @brief Build a truncated decimal remainder string. 
+ * @brief Build a truncated decimal remainder string.
  *        Helper function for truncate_uint_to_suffixed_str()
  *
  * @param decimal_remainder Integer remainder (the `num % divisor`) used to
@@ -41,12 +41,12 @@ static inline void num_str_truncate_trailing_zeros(char* num_str, int size)
  * @param truncated_num Integer part reduced by the divisor (`num / divisor`);
  *        Used to compute how many fractional characters may be kept.
  * @param num_req_chars Total character budget for the final string (truncated
- *        number, fractional digits, and suffix). 
+ *        number, fractional digits, and suffix).
  *        Used to compute how many fractional characters may be kept.
  * @param suffix_char One of 'K', 'M', or 'B' used for selecting the suffix scale and
  *        padding width. If not one of the expected, the string may be incorrectly formatted.
  * @param remainder_str Output buffer (size >= UINT_MAX_DIGITS + 1) where the
- *        formatted fractional digits (inlcuding leading '.<digit>' special character) are written 
+ *        formatted fractional digits (inlcuding leading '.<digit>' special character) are written
  *        as a NULL-terminated string; may be empty if nothing remains.
  */
 static inline void truncate_num_get_remainder_string(
@@ -144,15 +144,8 @@ void truncate_uint_to_suffixed_str(
             remainder_str
         );
     }
-    
-    snprintf(
-        out_str_buff,
-        UINT_MAX_DIGITS + 1,
-        "%lu%s%s",
-        truncated_num,
-        remainder_str,
-        suffix
-    );
+
+    snprintf(out_str_buff, UINT_MAX_DIGITS + 1, "%lu%s%s", truncated_num, remainder_str, suffix);
 }
 
 // Avoid uint overflow when add/multiplying score
