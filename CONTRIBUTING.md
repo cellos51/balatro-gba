@@ -25,7 +25,7 @@ Running `clang-format` locally is recommended before submitting a PR as it will 
 
 #### VSCode
 
-[Recommended plugin](https://marketplace.visualstudio.com/items?itemName=xaver.clang-format) from the [documentation](https://clang.llvm.org/docs/ClangFormat.html#visual-studio-code-integration). Use `Alt-Shift-F` or `Ctrl-Shift-I` to format your file.
+[Recommended plugin](https://marketplace.visualstudio.com/items?itemName=xaver.clang-format) from the [documentation](https://clang.llvm.org/docs/ClangFormat.html#visual-studio-code-integration). Use `Alt-Shift-F` or `Ctrl-Shift-I` to format your file. It is recommended to do this in a separate commit without and review the automatic changes before committing.
 
 #### Manually
 
