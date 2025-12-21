@@ -33,13 +33,14 @@ static inline void num_str_truncate_trailing_zeros(char* num_str, int size)
 
 // TODO: Document
 static inline void truncate_num_get_remainder_string(
-    uint32_t remainder,
+    uint32_t decimal_remainder,
     uint32_t truncated_num,
     int num_req_chars,
     char suffix_char,
     char remainder_str[UINT_MAX_DIGITS + 1]
 )
 {
+    // Truncating the remainder in string form rather than number to avoid divisions
     char* remainder_str_format;
 
     switch (suffix_char)
@@ -56,7 +57,7 @@ static inline void truncate_num_get_remainder_string(
             break;
     }
 
-    snprintf(remainder_str, UINT_MAX_DIGITS + 1, remainder_str_format, remainder);
+    snprintf(remainder_str, UINT_MAX_DIGITS + 1, remainder_str_format, decimal_remainder);
 
     // Truncate overflow
     int remaining_chars = num_req_chars - u32_get_digits(truncated_num) - 1; // - 1 for suffix
@@ -78,7 +79,7 @@ void truncate_uint_to_suffixed_str(
 {
     uint32_t truncated_num = num;
     int num_digits = u32_get_digits(num);
-    uint32_t remainder = 0; // The decimal point remainder
+    uint32_t decimal_remainder = 0;
     bool overflow = num_digits > num_req_chars;
     char* suffix = "";
     char remainder_str[INT_MAX_DIGITS + 1];
@@ -110,14 +111,13 @@ void truncate_uint_to_suffixed_str(
 
         // The compiler optimizes these into a single operation
         truncated_num = num / divisor;
-        remainder = num % divisor;
+        decimal_remainder = num % divisor;
     }
 
-    if (suffix[0] != '\0' && remainder != 0)
+    if (suffix[0] != '\0' && decimal_remainder != 0)
     {
-        // Truncating the remainder in string form rather than number to avoid divisions
         truncate_num_get_remainder_string(
-            remainder,
+            decimal_remainder,
             truncated_num,
             num_req_chars,
             suffix[0],
