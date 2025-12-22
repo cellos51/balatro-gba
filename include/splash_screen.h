@@ -8,6 +8,7 @@
 #define SPLASH_SCREEN_H
 
 #include "game.h"
+
 #include <tonc.h>
 
 /** @name Splash screen timing variables
