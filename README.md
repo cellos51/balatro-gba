@@ -49,6 +49,10 @@ This **tech-demo/proof of concept** is strictly limited in content to a minimal 
 
 (Hold A: Swap Owned Jokers in the Shop)
 
+# Contributing
+
+If you would like to contribute, please read CONTRIBUTING.md.
+
 # **Build Instructions:**
 
 ## **-Docker-**

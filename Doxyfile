@@ -3017,4 +3017,4 @@ MSCFILE_DIRS           =
 
 EXCLUDE = build tests graphics audio doc scripts
 
-USE_MDFILE_AS_MAINPAGE = README.md
+USE_MDFILE_AS_MAINPAGE = CONTRIBUTING.md

@@ -16,7 +16,7 @@ def grep_binary_offsets(path, pattern):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python script.py <file>")
+        print("Usage: python get_hash.py <file>")
         sys.exit(1)
 
     file_path = sys.argv[1]
