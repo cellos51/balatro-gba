@@ -10,7 +10,7 @@ On pull-requests, various checks will be performed:
 
 ## Code Style
 Besides the automatic formatting checks from `clang-format`, there is a looser set of code style rules. These are not strictly required, but is encouraged to be followed.  
-
+The following details the code style rules including the enforced clang-format style.
 [Link in wiki](https://github.com/GBALATRO/balatro-gba/wiki/Code-Style-Guide)
 
 ## Building Documentation 
