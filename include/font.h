@@ -12,13 +12,10 @@
  *
  *  "FP#" -> Font "Point" "number"
  *
- *  This is used at compile time directly with the help of libtonc's XSTR() macro
- *  **Note**: This should **ONLY** be used with the XSTR() macro, otherwise it
- *  is undefined behavior.
  *
  *  For example:
  *  ```c
- *  tte_printf("Testing " XSTR(FP0_CHAR) " Something!");
+ *  tte_printf("Testing " FP0_STR " Something!");
  *  ```
  *  prints "Testing .0 Something!"
  *
@@ -39,16 +36,16 @@
  *
  * @{
  */
-#define FP0_CHAR & // .0
-#define FP1_CHAR ^ // .1
-#define FP2_CHAR } // .2
-#define FP3_CHAR { // .3
-#define FP4_CHAR | // .4
-#define FP5_CHAR ` // .5
-#define FP6_CHAR < // .6
-#define FP7_CHAR > // .7
-#define FP8_CHAR _ // .8
-#define FP9_CHAR ; // .9
+#define FP0_STR "&" // .0
+#define FP1_STR "^" // .1
+#define FP2_STR "}" // .2
+#define FP3_STR "{" // .3
+#define FP4_STR "|" // .4
+#define FP5_STR "`" // .5
+#define FP6_STR "<" // .6
+#define FP7_STR ">" // .7
+#define FP8_STR "_" // .8
+#define FP9_STR ";" // .9
 /** @} */
 
 /**
