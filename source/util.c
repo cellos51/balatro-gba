@@ -21,7 +21,16 @@ int int_arr_max(int int_arr[], int size)
     return max;
 }
 
-// Can be unstaticed if needed
+/**
+ * @brief Remove trailing zeros from a string.
+ *        Currently static single use, may be unstaticed if needed but use with caution.
+ *
+ * @param num_str The string to remove trailing zeros from, modified in-place.
+ * @param size The size of the string - strlen is not used and no checks are performed, 
+ *             the function relies on the caller to provide the correct size,
+ *             if it's larger than the actual string length or negative it will result in
+ *             an invalid write.
+ */
 static inline void num_str_truncate_trailing_zeros(char* num_str, int size)
 {
     while (size > 0 && num_str[size - 1] == '0')
