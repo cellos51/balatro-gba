@@ -118,6 +118,9 @@
 #define SHOP_BOTTOM_PANEL_BORDER_PID         26
 // Naming the stage where cards return from the discard pile to the deck "undiscard"
 
+/* This needs to stay a power of 2 and small enough
+ * for the lerping to be done before the next hand is drawn.
+ */
 #define NUM_SCORE_LERP_STEPS 32
 
 // Shop
@@ -2948,11 +2951,6 @@ static inline int hand_get_max_size(void)
     return hand_size;
 }
 
-// TODO: Help this comment find its way back to its variable
-/* This needs to stay a power of 2 and small enough
- * for the lerping to be done before the next hand is drawn.
- */
-
 static inline void game_playing_process_input_and_state(void)
 {
     if (hand_state == HAND_SELECT)
@@ -2998,10 +2996,11 @@ static inline void game_playing_process_input_and_state(void)
 
         if (lerped_temp_score > 0)
         {
-            display_temp_score(fx2uint(lerped_temp_score));
+            // Set the score display first because it's more important
+            // in case there isn't enough time within the frame to display both
+            display_score(fx2uint(lerped_score));
 
-            // We actually don't need to erase this because the score only increases
-            display_score(fx2uint(lerped_score)); // Set the score display
+            display_temp_score(fx2uint(lerped_temp_score));
         }
         else
         {
