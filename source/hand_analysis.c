@@ -33,7 +33,7 @@ void get_played_distribution(u8* ranks_out, u8* suits_out)
     int top = get_played_top();
     for (int i = 0; i <= top; i++)
     {
-        if (!played[i])
+        if (!played[i] || !card_object_is_selected(played[i]))
             continue;
         ranks_out[played[i]->card->rank]++;
         suits_out[played[i]->card->suit]++;
