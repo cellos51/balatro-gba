@@ -33,6 +33,10 @@ void get_played_distribution(u8 ranks_out[NUM_RANKS], u8 suits_out[NUM_SUITS])
     int top = get_played_top();
     for (int i = 0; i <= top; i++)
     {
+        /* The difference from get_hand_distribution() (not checking if card is selected)
+         * is in line Balatro behavior,
+         * see https://github.com/GBALATRO/balatro-gba/issues/341#issuecomment-3691363488
+         */
         if (!played[i])
             continue;
         ranks_out[played[i]->card->rank]++;
