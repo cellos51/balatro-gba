@@ -3,18 +3,39 @@
 #include "card.h"
 #include "game.h"
 
-void get_hand_distribution(u8* ranks_out, u8* suits_out)
+
+/**
+ * @brief Outputs the distribution of ranks and suits in an input card array.
+ *        Can be unstaticed if needed (and then this comment moved to hand_analysis.h)
+ *        Can also be refactored to use list but then both the hand and played stack would
+ *        need to use list as well.
+ * @param cards     An array of CardObject pointers
+ * @param num_cards The number of elements in \p cards.
+ * @param ranks_out output - updated such as ranks_out[rank] is the number of cards of rank in
+ *                  \p cards. Must be of size NUM_RANKS.
+ * @param suits_out output - updated such as suits_out[suit] is the number of cards if suit in the
+ *                  \p cards. Must be of size NUM_SUITS.
+ */
+static inline void get_card_distribution(
+    CardObject** cards,
+    int num_cards,
+    u8 ranks_out[NUM_RANKS],
+    u8 suits_out[NUM_SUITS]
+)
 {
+    if (cards == NULL || ranks_out == NULL || suits_out == NULL)
+    {
+        return;
+    }
+
     for (int i = 0; i < NUM_RANKS; i++)
         ranks_out[i] = 0;
     for (int i = 0; i < NUM_SUITS; i++)
         suits_out[i] = 0;
 
-    CardObject** cards = get_hand_array();
-    int top = get_hand_top();
-    for (int i = 0; i <= top; i++)
+    for (int i = 0; i < num_cards; i++)
     {
-        if (cards[i] && card_object_is_selected(cards[i]))
+        if (cards[i] != NULL && card_object_is_selected(cards[i]))
         {
             ranks_out[cards[i]->card->rank]++;
             suits_out[cards[i]->card->suit]++;
@@ -22,22 +43,14 @@ void get_hand_distribution(u8* ranks_out, u8* suits_out)
     }
 }
 
-void get_played_distribution(u8* ranks_out, u8* suits_out)
+void get_hand_distribution(u8 ranks_out[NUM_RANKS], u8 suits_out[NUM_SUITS])
 {
-    for (int i = 0; i < NUM_RANKS; i++)
-        ranks_out[i] = 0;
-    for (int i = 0; i < NUM_SUITS; i++)
-        suits_out[i] = 0;
+    get_card_distribution(get_hand_array(), hand_get_size(), ranks_out, suits_out);
+}
 
-    CardObject** played = get_played_array();
-    int top = get_played_top();
-    for (int i = 0; i <= top; i++)
-    {
-        if (!played[i] || !card_object_is_selected(played[i]))
-            continue;
-        ranks_out[played[i]->card->rank]++;
-        suits_out[played[i]->card->suit]++;
-    }
+void get_played_distribution(u8 ranks_out[NUM_RANKS], u8 suits_out[NUM_SUITS])
+{
+    get_card_distribution(get_played_array(), get_played_top() + 1, ranks_out, suits_out);
 }
 
 // Returns the highest N of a kind. So a full-house would return 3.
