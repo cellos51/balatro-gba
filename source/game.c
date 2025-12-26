@@ -129,9 +129,14 @@
 #define NEXT_ROUND_BTN_SEL_X 0
 
 #define GAME_PLAYING_HAND_SEL_Y        0
+
+
 #define GAME_PLAYING_BUTTONS_SEL_Y     1
+
+// TODO: Remove defines?
 #define GAME_PLAYING_PLAY_BTN_SEL_X    0
 #define GAME_PLAYING_DISCARD_BTN_SEL_X 1
+
 #define GAME_PLAYING_NUM_SEL_ROWS      2
 #define GAME_PLAYING_NUM_BOTTOM_BTNS   2
 
@@ -2031,7 +2036,7 @@ static inline void game_playing_unhighlight_buttons(void)
     memcpy16(&pal_bg_mem[DISCARD_BTN_BORDER_PID], &pal_bg_mem[DISCARD_BTN_PID], 1);
 }
 
-static inline void game_playing_execute_hand_discard(void)
+static void game_playing_execute_hand_discard(void)
 {
     play_sfx(SFX_BUTTON, MM_BASE_PITCH_RATE, BUTTON_SFX_VOLUME);
 
@@ -2049,7 +2054,7 @@ static inline void game_playing_execute_hand_discard(void)
     );
 }
 
-static inline void game_playing_execute_hand_play(void)
+static void game_playing_execute_hand_play(void)
 {
     play_sfx(SFX_BUTTON, MM_BASE_PITCH_RATE, BUTTON_SFX_VOLUME);
 
@@ -2058,6 +2063,100 @@ static inline void game_playing_execute_hand_play(void)
     selection_y = 0;
     display_hands(--hands);
 }
+
+static int game_playing_hand_row_get_size(void)
+{
+    return hand_get_size();
+}
+
+static void game_playing_hand_row_on_selection_changed(
+    SelectionGrid* selection_grid,
+    int row_idx,
+    const Selection* prev_selection,
+    const Selection* new_selection
+)
+{
+    // TODO: Implement
+}
+
+static void game_playing_hand_row_on_key_transit(
+    SelectionGrid* selection_grid, 
+    Selection* selection
+)
+{
+    // TODO: Implement
+}
+
+static int game_playing_button_row_get_size(void)
+{
+    // TODO: Magic number...
+    return 2;
+}
+
+// TODO: Move to header or top of file...
+typedef struct 
+{
+    int border_pal_idx;
+    int button_pal_idx;
+    void (*key_hit_func)(void);
+} ButtonInfo;
+
+// Mapping of the button index to the border and palette index and the inner palette index
+ButtonInfo game_playing_buttons[] = {
+    {PLAY_HAND_BTN_BORDER_PID,  PLAY_HAND_BTN_PID,  game_playing_execute_hand_play},    // GAME_PLAYING_PLAY_BTN_SEL_X
+    {DISCARD_BTN_BORDER_PID,    DISCARD_BTN_PID,    game_playing_execute_hand_discard}, // GAME_PLAYING_DISCARD_BTN_SEL_X
+};
+
+static inline void game_playing_button_set_highlight(int btn_idx, bool highlight)
+{
+    u16 set_color = HIGHLIGHT_COLOR;
+
+    if (!highlight)
+    {
+        set_color = pal_bg_mem[game_playing_buttons[btn_idx].button_pal_idx];
+    }
+
+    memset16(&pal_bg_mem[game_playing_buttons[btn_idx].border_pal_idx], set_color, 1);
+}
+
+static void game_playing_button_row_on_selection_changed(
+    SelectionGrid* selection_grid,
+    int row_idx,
+    const Selection* prev_selection,
+    const Selection* new_selection
+)
+{
+    // The selection grid system only guarantees that the new selection is within bounds
+    // but not the previous one...
+    if (prev_selection->y == row_idx && prev_selection->x >= 0 &&
+        prev_selection->x < game_playing_button_row_get_size())
+    {
+        game_playing_button_set_highlight(prev_selection->x, false);
+    }
+
+    if (new_selection->y == row_idx)
+    {
+       game_playing_button_set_highlight(new_selection->x, true);
+    }
+}
+
+static void game_playing_button_row_on_key_hit(
+    SelectionGrid* selection_grid, 
+    Selection* selection
+)
+{
+    if (key_hit(SELECT_CARD))
+    {
+        play_sfx(SFX_BUTTON, MM_BASE_PITCH_RATE, BUTTON_SFX_VOLUME);
+        game_playing_buttons[selection->x].key_hit_func();
+    }
+}
+
+SelectionGridRow game_playing_selection_rows[] = {
+    {0, jokers_sel_row_get_size,  jokers_sel_row_on_selection_changed,  jokers_sel_row_on_key_transit },
+    {1, game_playing_hand_row_get_size,    game_playing_hand_row_on_selection_changed,    game_playing_hand_row_on_key_transit   },
+    {2, game_playing_button_row_get_size,   game_playing_button_row_on_selection_changed, game_playing_button_row_on_key_hit}
+};
 
 static inline void game_playing_process_hand_select_input(void)
 {
@@ -4080,6 +4179,7 @@ static void shop_top_row_on_selection_changed(
 )
 {
     // The selection grid system only guarantees that the new selection is within bounds
+    // but not the previous one...
     if (prev_selection->y == row_idx && prev_selection->x >= 0 &&
         prev_selection->x < shop_top_row_get_size())
     {
