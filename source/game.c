@@ -287,6 +287,15 @@ static void print_price_under_sprite_object(SpriteObject* sprite_object, int pri
 static void game_round_end_extend_black_panel_down(int black_panel_bottom);
 
 static void remove_owned_joker(int owned_joker_idx);
+
+static void select_current_card(void);
+static void hand_change_sort(void);
+static void select_current_card(void);
+static void hand_deselect_all_cards(void);
+static void hand_toggle_card_selection(void);
+static bool hand_can_play(void);
+static bool hand_can_discard(void);
+
 // Consts
 
 // clang-format off
@@ -1805,6 +1814,229 @@ static inline void deck_shuffle(void)
     }
 }
 
+// card moving logic
+
+// true if and only if we are currently moving a card around
+static bool moving_card = false;
+
+// This will prevent us from moving cards around if we selected one
+// by moving too fast after pressing the A button
+static bool card_moved_too_fast = false;
+static bool card_selected_instead_of_moved = false;
+
+// After pressing A, if we press Left/Right too fast, we should select the card
+// and change focus to the next one, instead of swapping them
+// This should fix inputs sometimes not registering when quickly selecting cards
+static const int card_swap_time_threshold = 6;
+static uint selection_hit_timer = TM_ZERO;
+
+static void game_playing_execute_hand_discard(void)
+{
+    if (!hand_can_discard())
+        return;
+    play_sfx(SFX_BUTTON, MM_BASE_PITCH_RATE, BUTTON_SFX_VOLUME);
+
+    hand_state = HAND_DISCARD;
+    selection_x = 0;
+    selection_y = 0;
+    display_hands(--discards);
+    set_hand();
+    tte_printf(
+        "#{P:%d,%d; cx:0x%X000}%d",
+        DISCARDS_TEXT_RECT.left,
+        DISCARDS_TEXT_RECT.top,
+        TTE_RED_PB,
+        discards
+    );
+}
+
+static void game_playing_execute_hand_play(void)
+{
+    if (!hand_can_play())
+        return;
+
+    play_sfx(SFX_BUTTON, MM_BASE_PITCH_RATE, BUTTON_SFX_VOLUME);
+
+    hand_state = HAND_PLAY;
+    selection_x = 0;
+    selection_y = 0;
+    display_hands(--hands);
+}
+
+static int game_playing_hand_row_get_size(void)
+{
+    return hand_get_size();
+}
+
+static void game_playing_hand_row_on_selection_changed(
+    SelectionGrid* selection_grid,
+    int row_idx,
+    const Selection* prev_selection,
+    const Selection* new_selection
+)
+{
+    int prev_card_idx = UNDEFINED; 
+    int next_card_idx = UNDEFINED;
+
+    // Do not use FRAMES(x) here as we are counting real frames ignoring game speed
+    card_moved_too_fast = (timer - selection_hit_timer) < card_swap_time_threshold;
+
+    if (prev_selection->y == GAME_PLAYING_HAND_SEL_Y)
+    {
+        // This is because the hand is drawn from right to left.
+        // There is no particular reason for this, it's just how I did it.
+        prev_card_idx = hand_get_size() - prev_selection->x - 1;
+    }
+
+    if (new_selection->y == GAME_PLAYING_HAND_SEL_Y)
+    {
+        next_card_idx = hand_get_size() - new_selection->x - 1;
+    }
+
+    bool on_the_same_row = next_card_idx != UNDEFINED && prev_card_idx != UNDEFINED;
+
+    if (on_the_same_row && key_is_down(SELECT_CARD) && 
+        !card_moved_too_fast && !card_selected_instead_of_moved)
+    {
+        // TODO: Check this bool
+        bool moved_left = next_card_idx - prev_card_idx < 0;
+        // TODO: Check this bool
+        
+        bool selection_not_at_border = moved_left ? new_selection->x < hand_top : new_selection->x > 0;
+
+        if (selection_not_at_border)
+        {
+            swap_cards_in_hand(prev_card_idx, next_card_idx);
+            moving_card = true;
+            reorder_card_sprites_layers();
+            hand_set_focus(next_card_idx);
+        }
+    }
+    else
+    {
+        // select current card if we tried moving it too fast
+        if (key_released(SELECT_CARD) || (card_moved_too_fast && !moving_card))
+        {
+            select_current_card();
+            card_selected_instead_of_moved = true;
+        }
+        if (next_card_idx != UNDEFINED)
+        {
+            hand_set_focus(next_card_idx);
+        }
+    }
+}
+
+static void game_playing_hand_row_on_key_transit(
+    SelectionGrid* selection_grid, 
+    Selection* selection
+)
+{
+    if (key_hit(SELECT_CARD))
+    {
+        selection_hit_timer = timer;
+    }
+    else if (key_released(SELECT_CARD))
+    {
+        if (!moving_card && !card_selected_instead_of_moved)
+        {
+            select_current_card();
+        }
+        moving_card = false;
+        card_moved_too_fast = false;
+        card_selected_instead_of_moved = false;
+        selection_hit_timer = TM_ZERO;
+    }
+    else if (key_hit(DESELECT_CARDS))
+    {
+        hand_deselect_all_cards();
+        set_hand();
+    }
+    else if (key_hit(SORT_HAND))
+    {
+        hand_change_sort();
+    }
+        
+}
+
+// TODO: Move to header or top of file...
+typedef struct 
+{
+    int border_pal_idx;
+    int button_pal_idx;
+    void (*button_pressed_func)(void);
+} ButtonInfo;
+
+// Mapping of the button index to the border and palette index and the inner palette index
+ButtonInfo game_playing_buttons[] = {
+    {PLAY_HAND_BTN_BORDER_PID,  PLAY_HAND_BTN_PID,  game_playing_execute_hand_play},    // GAME_PLAYING_PLAY_BTN_SEL_X
+    {DISCARD_BTN_BORDER_PID,    DISCARD_BTN_PID,    game_playing_execute_hand_discard}, // GAME_PLAYING_DISCARD_BTN_SEL_X
+};
+
+static int game_playing_button_row_get_size(void)
+{
+    return NUM_ELEM_IN_ARR(game_playing_buttons);
+}
+
+static inline void game_playing_button_set_highlight(int btn_idx, bool highlight)
+{
+    u16 set_color = HIGHLIGHT_COLOR;
+
+    if (!highlight)
+    {
+        set_color = pal_bg_mem[game_playing_buttons[btn_idx].button_pal_idx];
+    }
+
+    memset16(&pal_bg_mem[game_playing_buttons[btn_idx].border_pal_idx], set_color, 1);
+}
+
+static void game_playing_button_row_on_selection_changed(
+    SelectionGrid* selection_grid,
+    int row_idx,
+    const Selection* prev_selection,
+    const Selection* new_selection
+)
+{
+    // The selection grid system only guarantees that the new selection is within bounds
+    // but not the previous one...
+    if (prev_selection->y == row_idx && prev_selection->x >= 0 &&
+        prev_selection->x < game_playing_button_row_get_size())
+    {
+        game_playing_button_set_highlight(prev_selection->x, false);
+    }
+
+    if (new_selection->y == row_idx)
+    {
+       game_playing_button_set_highlight(new_selection->x, true);
+    }
+}
+
+static void game_playing_button_row_on_key_hit(
+    SelectionGrid* selection_grid, 
+    Selection* selection
+)
+{
+    if (key_hit(SELECT_CARD))
+    {
+        play_sfx(SFX_BUTTON, MM_BASE_PITCH_RATE, BUTTON_SFX_VOLUME);
+        game_playing_buttons[selection->x].button_pressed_func();
+    }
+}
+
+SelectionGridRow game_playing_selection_rows[] = {
+    {0, jokers_sel_row_get_size,  jokers_sel_row_on_selection_changed,  jokers_sel_row_on_key_transit },
+    {1, game_playing_hand_row_get_size,    game_playing_hand_row_on_selection_changed,    game_playing_hand_row_on_key_transit   },
+    {2, game_playing_button_row_get_size,   game_playing_button_row_on_selection_changed, game_playing_button_row_on_key_hit}
+};
+
+static const  Selection GAME_PLAYING_INIT_SEL = {-1, 1};
+
+SelectionGrid game_playing_selection_grid = {
+    game_playing_selection_rows,
+    NUM_ELEM_IN_ARR(shop_selection_rows),
+    GAME_PLAYING_INIT_SEL
+};
+
 static void game_round_on_init()
 {
     hand_state = HAND_DRAW;
@@ -1864,6 +2096,9 @@ static void game_round_on_init()
     ); // Blind reward
 
     deck_shuffle(); // Shuffle the deck at the start of the round
+
+    game_playing_selection_grid.selection = GAME_PLAYING_INIT_SEL;
+    selection_grid_move_selection_horz(&game_playing_selection_grid, 1);
 }
 
 static void game_main_menu_on_init()
@@ -1948,40 +2183,24 @@ static void hand_deselect_all_cards(void)
     }
 }
 
-static inline void hand_change_sort(void)
+static void hand_change_sort(void)
 {
     sort_by_suit = !sort_by_suit;
     sort_cards();
 }
 
-static inline bool hand_can_play(void)
+static bool hand_can_play(void)
 {
     if (hand_state != HAND_SELECT || hand_selections == 0)
         return false;
     return true;
 }
 
-static inline void select_current_card(void)
+static void select_current_card(void)
 {
     hand_toggle_card_selection();
     set_hand();
 }
-
-// card moving logic
-
-// true if and only if we are currently moving a card around
-static bool moving_card = false;
-
-// This will prevent us from moving cards around if we selected one
-// by moving too fast after pressing the A button
-static bool card_moved_too_fast = false;
-static bool card_selected_instead_of_moved = false;
-
-// After pressing A, if we press Left/Right too fast, we should select the card
-// and change focus to the next one, instead of swapping them
-// This should fix inputs sometimes not registering when quickly selecting cards
-static const int card_swap_time_threshold = 6;
-static uint selection_hit_timer = TM_ZERO;
 
 static inline void game_playing_apply_card_movement_input(enum ScreenHorzDir move_dir)
 {
@@ -2036,130 +2255,13 @@ static inline void game_playing_unhighlight_buttons(void)
     memcpy16(&pal_bg_mem[DISCARD_BTN_BORDER_PID], &pal_bg_mem[DISCARD_BTN_PID], 1);
 }
 
-static void game_playing_execute_hand_discard(void)
-{
-    play_sfx(SFX_BUTTON, MM_BASE_PITCH_RATE, BUTTON_SFX_VOLUME);
 
-    hand_state = HAND_DISCARD;
-    selection_x = 0;
-    selection_y = 0;
-    display_hands(--discards);
-    set_hand();
-    tte_printf(
-        "#{P:%d,%d; cx:0x%X000}%d",
-        DISCARDS_TEXT_RECT.left,
-        DISCARDS_TEXT_RECT.top,
-        TTE_RED_PB,
-        discards
-    );
-}
-
-static void game_playing_execute_hand_play(void)
-{
-    play_sfx(SFX_BUTTON, MM_BASE_PITCH_RATE, BUTTON_SFX_VOLUME);
-
-    hand_state = HAND_PLAY;
-    selection_x = 0;
-    selection_y = 0;
-    display_hands(--hands);
-}
-
-static int game_playing_hand_row_get_size(void)
-{
-    return hand_get_size();
-}
-
-static void game_playing_hand_row_on_selection_changed(
-    SelectionGrid* selection_grid,
-    int row_idx,
-    const Selection* prev_selection,
-    const Selection* new_selection
-)
-{
-    // TODO: Implement
-}
-
-static void game_playing_hand_row_on_key_transit(
-    SelectionGrid* selection_grid, 
-    Selection* selection
-)
-{
-    // TODO: Implement
-}
-
-static int game_playing_button_row_get_size(void)
-{
-    // TODO: Magic number...
-    return 2;
-}
-
-// TODO: Move to header or top of file...
-typedef struct 
-{
-    int border_pal_idx;
-    int button_pal_idx;
-    void (*key_hit_func)(void);
-} ButtonInfo;
-
-// Mapping of the button index to the border and palette index and the inner palette index
-ButtonInfo game_playing_buttons[] = {
-    {PLAY_HAND_BTN_BORDER_PID,  PLAY_HAND_BTN_PID,  game_playing_execute_hand_play},    // GAME_PLAYING_PLAY_BTN_SEL_X
-    {DISCARD_BTN_BORDER_PID,    DISCARD_BTN_PID,    game_playing_execute_hand_discard}, // GAME_PLAYING_DISCARD_BTN_SEL_X
-};
-
-static inline void game_playing_button_set_highlight(int btn_idx, bool highlight)
-{
-    u16 set_color = HIGHLIGHT_COLOR;
-
-    if (!highlight)
-    {
-        set_color = pal_bg_mem[game_playing_buttons[btn_idx].button_pal_idx];
-    }
-
-    memset16(&pal_bg_mem[game_playing_buttons[btn_idx].border_pal_idx], set_color, 1);
-}
-
-static void game_playing_button_row_on_selection_changed(
-    SelectionGrid* selection_grid,
-    int row_idx,
-    const Selection* prev_selection,
-    const Selection* new_selection
-)
-{
-    // The selection grid system only guarantees that the new selection is within bounds
-    // but not the previous one...
-    if (prev_selection->y == row_idx && prev_selection->x >= 0 &&
-        prev_selection->x < game_playing_button_row_get_size())
-    {
-        game_playing_button_set_highlight(prev_selection->x, false);
-    }
-
-    if (new_selection->y == row_idx)
-    {
-       game_playing_button_set_highlight(new_selection->x, true);
-    }
-}
-
-static void game_playing_button_row_on_key_hit(
-    SelectionGrid* selection_grid, 
-    Selection* selection
-)
-{
-    if (key_hit(SELECT_CARD))
-    {
-        play_sfx(SFX_BUTTON, MM_BASE_PITCH_RATE, BUTTON_SFX_VOLUME);
-        game_playing_buttons[selection->x].key_hit_func();
-    }
-}
-
-SelectionGridRow game_playing_selection_rows[] = {
-    {0, jokers_sel_row_get_size,  jokers_sel_row_on_selection_changed,  jokers_sel_row_on_key_transit },
-    {1, game_playing_hand_row_get_size,    game_playing_hand_row_on_selection_changed,    game_playing_hand_row_on_key_transit   },
-    {2, game_playing_button_row_get_size,   game_playing_button_row_on_selection_changed, game_playing_button_row_on_key_hit}
-};
 
 static inline void game_playing_process_hand_select_input(void)
 {
+    selection_grid_process_input(&game_playing_selection_grid);
+
+#if 0
     // true = play button highlighted, false = discard button highlighted
     static bool discard_button_highlighted = false;
 
@@ -2256,6 +2358,7 @@ static inline void game_playing_process_hand_select_input(void)
     {
         hand_change_sort();
     }
+#endif
 }
 
 static inline void card_draw(void)
@@ -4306,6 +4409,7 @@ static void game_shop_process_user_input()
 {
     if (timer == TM_SHOP_PRC_INPUT_START)
     {
+        // TODO: Move to on_init?
         // The selection grid is initialized outside of bounds and moved
         // to trigger the selection change so the initial selection is visible
         shop_selection_grid.selection = SHOP_INIT_SEL;
