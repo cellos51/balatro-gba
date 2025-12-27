@@ -258,7 +258,7 @@ static int calculate_interest_reward(void);
 static void game_over_anim_frame(void);
 
 static int game_playing_button_row_get_size(void);
-static void game_playing_button_row_on_selection_changed(
+static bool game_playing_button_row_on_selection_changed(
     SelectionGrid* selection_grid,
     int row_idx,
     const Selection* prev_selection,
@@ -274,7 +274,7 @@ static void game_playing_hand_row_on_key_transit(
     Selection* selection
 );
 
-static void game_playing_hand_row_on_selection_changed(
+static bool game_playing_hand_row_on_selection_changed(
     SelectionGrid* selection_grid,
     int row_idx,
     const Selection* prev_selection,
@@ -284,14 +284,14 @@ static void game_playing_hand_row_on_selection_changed(
 static int game_playing_hand_row_get_size(void);
 
 static void shop_reroll_row_on_key_transit(SelectionGrid* selection_grid, Selection* selection);
-static void shop_reroll_row_on_selection_changed(
+static bool shop_reroll_row_on_selection_changed(
     SelectionGrid* selection_grid,
     int row_idx,
     const Selection* prev_selection,
     const Selection* new_selection
 );
 static int shop_reroll_row_get_size(void);
-static void shop_top_row_on_selection_changed(
+static bool shop_top_row_on_selection_changed(
     SelectionGrid* selection_grid,
     int row_idx,
     const Selection* prev_selection,
@@ -300,7 +300,7 @@ static void shop_top_row_on_selection_changed(
 static void shop_top_row_on_key_transit(SelectionGrid* selection_grid, Selection* selection);
 static int shop_top_row_get_size(void);
 static void jokers_sel_row_on_key_transit(SelectionGrid* selection_grid, Selection* selection);
-static void jokers_sel_row_on_selection_changed(
+static bool jokers_sel_row_on_selection_changed(
     SelectionGrid* selection_grid,
     int row_idx,
     const Selection* prev_selection,
@@ -1894,7 +1894,7 @@ static int game_playing_hand_row_get_size(void)
     return hand_get_size();
 }
 
-static void game_playing_hand_row_on_selection_changed(
+static bool game_playing_hand_row_on_selection_changed(
     SelectionGrid* selection_grid,
     int row_idx,
     const Selection* prev_selection,
@@ -1926,7 +1926,12 @@ static void game_playing_hand_row_on_selection_changed(
         bool moved_by_one_tile = abs(new_selection->x - prev_selection->x) == 1;
 
         // Avoid swapping when selection wraps
-        if (moved_by_one_tile)
+        if (!moved_by_one_tile)
+        {
+            // Abort the selection if swapping so it doesn't wrap
+            return false;
+        }
+        else
         {
             swap_cards_in_hand(prev_card_idx, next_card_idx);
             moving_card = true;
@@ -1962,6 +1967,8 @@ static void game_playing_hand_row_on_selection_changed(
             );
         }
     }
+
+    return true;
 }
 
 static void game_playing_hand_row_on_key_transit(
@@ -2027,7 +2034,7 @@ static inline void game_playing_button_set_highlight(int btn_idx, bool highlight
     memset16(&pal_bg_mem[game_playing_buttons[btn_idx].border_pal_idx], set_color, 1);
 }
 
-static void game_playing_button_row_on_selection_changed(
+static bool game_playing_button_row_on_selection_changed(
     SelectionGrid* selection_grid,
     int row_idx,
     const Selection* prev_selection,
@@ -2046,6 +2053,8 @@ static void game_playing_button_row_on_selection_changed(
     {
        game_playing_button_set_highlight(new_selection->x, true);
     }
+
+    return true;
 }
 
 static void game_playing_button_row_on_key_hit(
@@ -3978,7 +3987,7 @@ static int jokers_sel_row_get_size(void)
     return list_get_len(&_owned_jokers_list);
 }
 
-static void jokers_sel_row_on_selection_changed(
+static bool jokers_sel_row_on_selection_changed(
     SelectionGrid* selection_grid,
     int row_idx,
     const Selection* prev_selection,
@@ -4032,6 +4041,8 @@ static void jokers_sel_row_on_selection_changed(
             (unsigned int)new_selection->x
         );
     }
+
+    return true;
 }
 
 static inline void joker_start_discard_animation(JokerObject* joker_object)
@@ -4155,7 +4166,7 @@ static void shop_top_row_on_key_transit(SelectionGrid* selection_grid, Selection
     }
 }
 
-static void shop_top_row_on_selection_changed(
+static bool shop_top_row_on_selection_changed(
     SelectionGrid* selection_grid,
     int row_idx,
     const Selection* prev_selection,
@@ -4199,6 +4210,8 @@ static void shop_top_row_on_selection_changed(
             sprite_object_set_focus(joker_object->sprite_object, true);
         }
     }
+
+    return true;
 }
 
 static int shop_reroll_row_get_size()
@@ -4206,7 +4219,7 @@ static int shop_reroll_row_get_size()
     return 1; // Only the reroll button
 }
 
-static void shop_reroll_row_on_selection_changed(
+static bool shop_reroll_row_on_selection_changed(
     SelectionGrid* selection_grid,
     int row_idx,
     const Selection* prev_selection,
@@ -4222,6 +4235,8 @@ static void shop_reroll_row_on_selection_changed(
     {
         memset16(&pal_bg_mem[REROLL_BTN_SELECTED_BORDER_PID], HIGHLIGHT_COLOR, 1);
     }
+
+    return true;
 }
 
 static inline void game_shop_reroll(int* reroll_cost)

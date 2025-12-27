@@ -40,13 +40,17 @@ void selection_grid_move_selection_horz(SelectionGrid* selection_grid, int direc
         selection_grid->selection.y < selection_grid->num_rows && new_selection.x >= 0 &&
         new_selection.x < selection_grid->rows[new_selection.y].get_size())
     {
-        selection_grid->rows[new_selection.y].on_selection_changed(
+        bool proceed_selection = selection_grid->rows[new_selection.y].on_selection_changed(
             selection_grid,
             new_selection.y,
             &selection_grid->selection,
             &new_selection
         );
-        selection_grid->selection = new_selection;
+
+        if (proceed_selection)
+        {
+            selection_grid->selection = new_selection;
+        }
     }
 }
 
@@ -74,14 +78,24 @@ void selection_grid_move_selection_vert(SelectionGrid* selection_grid, int direc
         // The operations are equivalent to fixed point if all the numbers were converted
         new_selection.x = fx2int(selection.x * ((int2fx(new_row_size) / old_row_size)));
 
+        bool proceed_selection = true;
+
         if (selection.y >= 0 && selection.y < selection_grid->num_rows)
         {
-            selection_grid->rows[selection.y]
+            proceed_selection = selection_grid->rows[selection.y]
                 .on_selection_changed(selection_grid, selection.y, &selection, &new_selection);
         }
-        selection_grid->rows[new_selection.y]
-            .on_selection_changed(selection_grid, new_selection.y, &selection, &new_selection);
-        selection_grid->selection = new_selection;
+        
+        if (proceed_selection)
+        {
+            proceed_selection = selection_grid->rows[new_selection.y]
+                .on_selection_changed(selection_grid, new_selection.y, &selection, &new_selection);
+        }
+        
+        if (proceed_selection)
+        {
+            selection_grid->selection = new_selection;
+        }
     }
 }
 
