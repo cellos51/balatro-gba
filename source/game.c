@@ -1897,9 +1897,6 @@ static void game_playing_hand_row_on_selection_changed(
     // Do not use FRAMES(x) here as we are counting real frames ignoring game speed
     card_moved_too_fast = (timer - selection_hit_timer) < card_swap_time_threshold;
 
-    // TODO: Explain
-    selection_y = new_selection->y;
-
     if (prev_selection->y == GAME_PLAYING_HAND_SEL_Y)
     {
         prev_card_idx = hand_sel_idx_to_card_idx(prev_selection->x);
@@ -1907,7 +1904,7 @@ static void game_playing_hand_row_on_selection_changed(
 
     if (new_selection->y == GAME_PLAYING_HAND_SEL_Y)
     {
-        next_card_idx = hand_get_size() - new_selection->x - 1;
+        next_card_idx = hand_sel_idx_to_card_idx(new_selection->x);
     }
 
     bool on_the_same_row = new_selection->y == prev_selection->y; // == GAME_PLAYING_HAND_SEL_Y
@@ -1916,12 +1913,10 @@ static void game_playing_hand_row_on_selection_changed(
         !card_moved_too_fast && !card_selected_instead_of_moved)
     {
         // TODO: Check this bool
-        bool moved_left = next_card_idx - prev_card_idx < 0;
-        // TODO: Check this bool
-        
-        bool selection_at_border = moved_left ? new_selection->x >= hand_top : new_selection->x <= 0;
+        bool moved_by_one_tile = abs(new_selection->x - prev_selection->x) == 1;
 
-        if (!selection_at_border)
+        // Avoid swapping when selection wraps
+        if (moved_by_one_tile)
         {
             swap_cards_in_hand(prev_card_idx, next_card_idx);
             moving_card = true;
@@ -1942,7 +1937,7 @@ static void game_playing_hand_row_on_selection_changed(
         // select current card if we tried moving it too fast
         if (key_released(SELECT_CARD) || (card_moved_too_fast && !moving_card))
         {
-            hand_select_card(next_card_idx);
+            hand_select_card(prev_card_idx);
             card_selected_instead_of_moved = true;
         }
         if (next_card_idx != UNDEFINED)
