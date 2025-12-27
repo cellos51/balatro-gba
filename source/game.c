@@ -1784,9 +1784,7 @@ static void set_hand(void)
 
 static bool hand_can_discard(void)
 {
-    if (hand_state != HAND_SELECT || hand_selections == 0)
-        return false;
-    return true;
+    return (discards > 0 && hand_state == HAND_SELECT && hand_selections > 0);
 }
 
 static int deck_get_size(void)
