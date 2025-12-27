@@ -244,7 +244,6 @@ static void display_round(int value);
 static void display_hands(int value);
 static void display_discards(int value);
 static void set_hand(void);
-static void hand_set_focus(int index);
 static bool hand_can_discard(void);
 static int deck_get_size(void);
 static int deck_get_max_size(void);
@@ -316,11 +315,10 @@ static void game_round_end_extend_black_panel_down(int black_panel_bottom);
 
 static void remove_owned_joker(int owned_joker_idx);
 
-static void select_current_card(void);
+static int hand_sel_idx_to_card_idx(int selection_index);
+static void hand_select_card(int index);
 static void hand_change_sort(void);
-static void select_current_card(void);
 static void hand_deselect_all_cards(void);
-static void hand_toggle_card_selection(void);
 static bool hand_can_play(void);
 static bool hand_can_discard(void);
 
@@ -1784,33 +1782,6 @@ static void set_hand(void)
     display_mult();
 }
 
-static void hand_set_focus(int index)
-{
-    // TODO: Decide what to do with use of selection_x here...
-    if (hand_state != HAND_SELECT)
-        return;
-
-    // Wrap around to the other side of the hand when going out of bounds on either side
-    if (index < 0)
-    {
-        selection_x = hand_top;
-    }
-    else if (index > hand_top)
-    {
-        selection_x = 0;
-    }
-    else
-    {
-        selection_x = index;
-    }
-
-    play_sfx(
-        SFX_CARD_FOCUS,
-        MM_BASE_PITCH_RATE + rand() % CARD_FOCUS_SFX_PITCH_OFFSET_RANGE,
-        SFX_DEFAULT_VOLUME
-    );
-}
-
 static bool hand_can_discard(void)
 {
     if (hand_state != HAND_SELECT || hand_selections == 0)
@@ -1931,9 +1902,7 @@ static void game_playing_hand_row_on_selection_changed(
 
     if (prev_selection->y == GAME_PLAYING_HAND_SEL_Y)
     {
-        // This is because the hand is drawn from right to left.
-        // There is no particular reason for this, it's just how I did it.
-        prev_card_idx = hand_get_size() - prev_selection->x - 1;
+        prev_card_idx = hand_sel_idx_to_card_idx(prev_selection->x);
     }
 
     if (new_selection->y == GAME_PLAYING_HAND_SEL_Y)
@@ -1957,7 +1926,15 @@ static void game_playing_hand_row_on_selection_changed(
             swap_cards_in_hand(prev_card_idx, next_card_idx);
             moving_card = true;
             reorder_card_sprites_layers();
-            hand_set_focus(next_card_idx);
+
+            /* Not calling sprite_object_set_focus() because focus is handled by 
+             * cards_in_hand_update_loop() based on the selection grid value...
+             */
+            play_sfx(
+                SFX_CARD_FOCUS,
+                MM_BASE_PITCH_RATE + rand() % CARD_FOCUS_SFX_PITCH_OFFSET_RANGE,
+                SFX_DEFAULT_VOLUME
+            );
         }
     }
     else
@@ -1965,12 +1942,19 @@ static void game_playing_hand_row_on_selection_changed(
         // select current card if we tried moving it too fast
         if (key_released(SELECT_CARD) || (card_moved_too_fast && !moving_card))
         {
-            select_current_card();
+            hand_select_card(next_card_idx);
             card_selected_instead_of_moved = true;
         }
         if (next_card_idx != UNDEFINED)
         {
-            hand_set_focus(next_card_idx);
+            /* Not calling sprite_object_set_focus() because focus is handled by 
+             * cards_in_hand_update_loop() based on the selection grid value...
+             */
+            play_sfx(
+                SFX_CARD_FOCUS,
+                MM_BASE_PITCH_RATE + rand() % CARD_FOCUS_SFX_PITCH_OFFSET_RANGE,
+                SFX_DEFAULT_VOLUME
+            );
         }
     }
 }
@@ -1988,7 +1972,7 @@ static void game_playing_hand_row_on_key_transit(
     {
         if (!moving_card && !card_selected_instead_of_moved)
         {
-            select_current_card();
+            hand_select_card(hand_sel_idx_to_card_idx(selection->x));
         }
         moving_card = false;
         card_moved_too_fast = false;
@@ -2178,26 +2162,7 @@ static inline void set_seed(int seed)
     srand(rng_seed);
 }
 
-// Playing state
-static inline void hand_toggle_card_selection(void)
-{
-    // TODO: Decide what to do with this use of selection_x
-    if (hand_state != HAND_SELECT || hand[selection_x] == NULL)
-        return;
-
-    if (card_object_is_selected(hand[selection_x]))
-    {
-        card_object_set_selected(hand[selection_x], false);
-        hand_selections--;
-        play_sfx(SFX_CARD_DESELECT, MM_BASE_PITCH_RATE, SFX_DEFAULT_VOLUME);
-    }
-    else if (hand_selections < MAX_SELECTION_SIZE)
-    {
-        card_object_set_selected(hand[selection_x], true);
-        hand_selections++;
-        play_sfx(SFX_CARD_SELECT, MM_BASE_PITCH_RATE, SFX_DEFAULT_VOLUME);
-    }
-}
+// Playing state functions
 
 static void hand_deselect_all_cards(void)
 {
@@ -2231,9 +2196,37 @@ static bool hand_can_play(void)
     return true;
 }
 
-static void select_current_card(void)
+/**
+ * @brief Converts a selection index from the selection grid into a card index within the hand array
+ * @param selection_index The selection index from the selection grid.
+ * @return The index within the hand stack array. 
+ * Note that the result is not valid if hand size is 0.
+ */
+static inline int hand_sel_idx_to_card_idx(int selection_index)
 {
-    hand_toggle_card_selection();
+    // This is because the hand is drawn from right to left.
+    // There is no particular reason for why that was done, it's just how it was done.
+    // Maybe one day it can be reverted and made consistent so this conversion is not needed.
+    return hand_get_size() - selection_index - 1;
+}
+
+static void hand_select_card(int index)
+{
+    if (index < 0 || index > hand_get_size() || hand_state != HAND_SELECT || hand[index] == NULL)
+        return;
+
+    if (card_object_is_selected(hand[index]))
+    {
+        card_object_set_selected(hand[index], false);
+        hand_selections--;
+        play_sfx(SFX_CARD_DESELECT, MM_BASE_PITCH_RATE, SFX_DEFAULT_VOLUME);
+    }
+    else if (hand_selections < MAX_SELECTION_SIZE)
+    {
+        card_object_set_selected(hand[index], true);
+        hand_selections++;
+        play_sfx(SFX_CARD_SELECT, MM_BASE_PITCH_RATE, SFX_DEFAULT_VOLUME);
+    }
     set_hand();
 }
 
@@ -3234,9 +3227,8 @@ static inline void cards_in_hand_update_loop(void)
                         hand_x + (int2fx(i) - int2fx(hand_top) / 2) * -HAND_SPACING_LUT[hand_top];
                     break;
                 case HAND_SELECT:
-                    // TODO: Move to a function
-                    int selected_card_idx 
-                        = hand_get_size() - game_playing_selection_grid.selection.x - 1;                    
+                    int selected_card_idx =
+                        hand_sel_idx_to_card_idx(game_playing_selection_grid.selection.x);                    
                     
                     bool is_focused = 
                         (i == selected_card_idx && 
