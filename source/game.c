@@ -1881,6 +1881,9 @@ static void game_playing_hand_row_on_selection_changed(
     // Do not use FRAMES(x) here as we are counting real frames ignoring game speed
     card_moved_too_fast = (timer - selection_hit_timer) < card_swap_time_threshold;
 
+    // TODO: Explain
+    selection_y = new_selection->y;
+
     if (prev_selection->y == GAME_PLAYING_HAND_SEL_Y)
     {
         // This is because the hand is drawn from right to left.
@@ -1893,7 +1896,7 @@ static void game_playing_hand_row_on_selection_changed(
         next_card_idx = hand_get_size() - new_selection->x - 1;
     }
 
-    bool on_the_same_row = next_card_idx != UNDEFINED && prev_card_idx != UNDEFINED;
+    bool on_the_same_row = new_selection->y == prev_selection->y; // == GAME_PLAYING_HAND_SEL_Y
 
     if (on_the_same_row && key_is_down(SELECT_CARD) && 
         !card_moved_too_fast && !card_selected_instead_of_moved)
@@ -1902,9 +1905,9 @@ static void game_playing_hand_row_on_selection_changed(
         bool moved_left = next_card_idx - prev_card_idx < 0;
         // TODO: Check this bool
         
-        bool selection_not_at_border = moved_left ? new_selection->x < hand_top : new_selection->x > 0;
+        bool selection_at_border = moved_left ? new_selection->x >= hand_top : new_selection->x <= 0;
 
-        if (selection_not_at_border)
+        if (!selection_at_border)
         {
             swap_cards_in_hand(prev_card_idx, next_card_idx);
             moving_card = true;
@@ -2029,7 +2032,7 @@ SelectionGridRow game_playing_selection_rows[] = {
     {2, game_playing_button_row_get_size,   game_playing_button_row_on_selection_changed, game_playing_button_row_on_key_hit}
 };
 
-static const  Selection GAME_PLAYING_INIT_SEL = {-1, 1};
+static const  Selection GAME_PLAYING_INIT_SEL = {0, 1};
 
 SelectionGrid game_playing_selection_grid = {
     game_playing_selection_rows,
@@ -2097,8 +2100,8 @@ static void game_round_on_init()
 
     deck_shuffle(); // Shuffle the deck at the start of the round
 
-    game_playing_selection_grid.selection = GAME_PLAYING_INIT_SEL;
-    selection_grid_move_selection_horz(&game_playing_selection_grid, 1);
+    // TODO: Explain
+    selection_y = GAME_PLAYING_HAND_SEL_Y;
 }
 
 static void game_main_menu_on_init()
@@ -3290,6 +3293,49 @@ static inline void game_playing_discarded_cards_loop(void)
     }
 }
 
+static inline void select_cards_in_played_hand()
+{
+    switch (hand_type) // select the cards that apply to the hand type
+    {
+        case NONE:
+            break;
+        case HIGH_CARD:
+            select_highcard_cards_in_played_hand();
+            break;
+        case PAIR:
+            select_pair_cards_in_played_hand();
+            break;
+        case TWO_PAIR:
+            select_two_pair_cards_in_played_hand();
+            break;
+        case THREE_OF_A_KIND:
+            select_three_of_a_kind_cards_in_played_hand();
+            break;
+        case FOUR_OF_A_KIND:
+            select_four_of_a_kind_cards_in_played_hand();
+            break;
+        case STRAIGHT:
+            /* FALL THROUGH */
+        case FLUSH:
+            /* FALL THROUGH */
+        case STRAIGHT_FLUSH:
+            /* FALL THROUGH */
+        case ROYAL_FLUSH:
+            select_flush_and_straight_cards_in_played_hand();
+            break;
+            // ELSE FALL THROUGH
+        case FULL_HOUSE:
+            /* FALL THROUGH */
+        case FIVE_OF_A_KIND:
+            /* FALL THROUGH */
+        case FLUSH_HOUSE:
+            /* FALL THROUGH */
+        case FLUSH_FIVE: // Select all played cards in the hand
+            select_all_five_cards_in_played_hand();
+            break;
+    }
+}
+
 static inline void cards_in_hand_update_loop(void)
 {
     // TODO: Break this function up into smaller ones, Gods be good
@@ -3308,7 +3354,7 @@ static inline void cards_in_hand_update_loop(void)
                         hand_x + (int2fx(i) - int2fx(hand_top) / 2) * -HAND_SPACING_LUT[hand_top];
                     break;
                 case HAND_SELECT:
-                    bool is_focused = (i == selection_x && selection_y == 0);
+                    bool is_focused = (i == selection_x && selection_y == GAME_PLAYING_HAND_SEL_Y);
 
                     if (is_focused && !card_object_is_selected(hand[i]))
                     {
@@ -3383,45 +3429,7 @@ static inline void cards_in_hand_update_loop(void)
                         timer = TM_ZERO;
                         scored_card_index = played_top + 1;
 
-                        switch (hand_type) // select the cards that apply to the hand type
-                        {
-                            case NONE:
-                                break;
-                            case HIGH_CARD:
-                                select_highcard_cards_in_played_hand();
-                                break;
-                            case PAIR:
-                                select_pair_cards_in_played_hand();
-                                break;
-                            case TWO_PAIR:
-                                select_two_pair_cards_in_played_hand();
-                                break;
-                            case THREE_OF_A_KIND:
-                                select_three_of_a_kind_cards_in_played_hand();
-                                break;
-                            case FOUR_OF_A_KIND:
-                                select_four_of_a_kind_cards_in_played_hand();
-                                break;
-                            case STRAIGHT:
-                                /* FALL THROUGH */
-                            case FLUSH:
-                                /* FALL THROUGH */
-                            case STRAIGHT_FLUSH:
-                                /* FALL THROUGH */
-                            case ROYAL_FLUSH:
-                                select_flush_and_straight_cards_in_played_hand();
-                                break;
-                                // ELSE FALL THROUGH
-                            case FULL_HOUSE:
-                                /* FALL THROUGH */
-                            case FIVE_OF_A_KIND:
-                                /* FALL THROUGH */
-                            case FLUSH_HOUSE:
-                                /* FALL THROUGH */
-                            case FLUSH_FIVE: // Select all played cards in the hand
-                                select_all_five_cards_in_played_hand();
-                                break;
-                        }
+                        select_cards_in_played_hand();
                     }
 
                     break;
