@@ -1744,6 +1744,7 @@ static void set_hand(void)
 
 static void hand_set_focus(int index)
 {
+    // TODO: Decide what to do with use of selection_x here...
     if (hand_state != HAND_SELECT)
         return;
 
@@ -1837,8 +1838,6 @@ static void game_playing_execute_hand_discard(void)
     play_sfx(SFX_BUTTON, MM_BASE_PITCH_RATE, BUTTON_SFX_VOLUME);
 
     hand_state = HAND_DISCARD;
-    selection_x = 0;
-    selection_y = 0;
     display_hands(--discards);
     set_hand();
     tte_printf(
@@ -1858,8 +1857,6 @@ static void game_playing_execute_hand_play(void)
     play_sfx(SFX_BUTTON, MM_BASE_PITCH_RATE, BUTTON_SFX_VOLUME);
 
     hand_state = HAND_PLAY;
-    selection_x = 0;
-    selection_y = 0;
     display_hands(--hands);
 }
 
@@ -2100,8 +2097,7 @@ static void game_round_on_init()
 
     deck_shuffle(); // Shuffle the deck at the start of the round
 
-    // TODO: Explain
-    selection_y = GAME_PLAYING_HAND_SEL_Y;
+    game_playing_selection_grid.selection = GAME_PLAYING_INIT_SEL;
 }
 
 static void game_main_menu_on_init()
@@ -2150,6 +2146,7 @@ static inline void set_seed(int seed)
 
 static inline void hand_toggle_card_selection(void)
 {
+    // TODO: Decide what to do with this use of selection_x
     if (hand_state != HAND_SELECT || hand[selection_x] == NULL)
         return;
 
@@ -3354,7 +3351,13 @@ static inline void cards_in_hand_update_loop(void)
                         hand_x + (int2fx(i) - int2fx(hand_top) / 2) * -HAND_SPACING_LUT[hand_top];
                     break;
                 case HAND_SELECT:
-                    bool is_focused = (i == selection_x && selection_y == GAME_PLAYING_HAND_SEL_Y);
+                    // TODO: Move to a function
+                    int selected_card_idx 
+                        = hand_get_size() - game_playing_selection_grid.selection.x - 1;                    
+                    
+                    bool is_focused = 
+                        (i == selected_card_idx && 
+                            game_playing_selection_grid.selection.y == GAME_PLAYING_HAND_SEL_Y);
 
                     if (is_focused && !card_object_is_selected(hand[i]))
                     {
@@ -3369,7 +3372,7 @@ static inline void cards_in_hand_update_loop(void)
                         hand_y -= int2fx(CARD_FOCUSED_SEL_Y);
                     }
 
-                    if (i != selection_x && hand[i]->sprite_object->y > hand_y)
+                    if (i != selected_card_idx && hand[i]->sprite_object->y > hand_y)
                     {
                         hand[i]->sprite_object->y = hand_y;
                         hand[i]->sprite_object->vy = 0;
@@ -4556,6 +4559,8 @@ static void game_shop_on_exit()
 static void game_blind_select_on_init()
 {
     change_background(BG_BLIND_SELECT);
+    selection_x = 0;
+    selection_y = 0;
 
     play_sfx(SFX_POP, MM_BASE_PITCH_RATE, SFX_DEFAULT_VOLUME);
 }
