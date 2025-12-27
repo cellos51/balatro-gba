@@ -257,6 +257,33 @@ static bool check_and_score_joker_for_event(
 );
 static int calculate_interest_reward(void);
 static void game_over_anim_frame(void);
+
+static int game_playing_button_row_get_size(void);
+static void game_playing_button_row_on_selection_changed(
+    SelectionGrid* selection_grid,
+    int row_idx,
+    const Selection* prev_selection,
+    const Selection* new_selection
+);
+static void game_playing_button_row_on_key_hit(
+    SelectionGrid* selection_grid, 
+    Selection* selection
+);
+
+static void game_playing_hand_row_on_key_transit(
+    SelectionGrid* selection_grid, 
+    Selection* selection
+);
+
+static void game_playing_hand_row_on_selection_changed(
+    SelectionGrid* selection_grid,
+    int row_idx,
+    const Selection* prev_selection,
+    const Selection* new_selection
+);
+
+static int game_playing_hand_row_get_size(void);
+
 static void shop_reroll_row_on_key_transit(SelectionGrid* selection_grid, Selection* selection);
 static void shop_reroll_row_on_selection_changed(
     SelectionGrid* selection_grid,
@@ -282,6 +309,7 @@ static void jokers_sel_row_on_selection_changed(
 );
 static int jokers_sel_row_get_size(void);
 static void game_shop_create_items(void);
+
 static void erase_price_under_sprite_object(SpriteObject* sprite_object);
 static void print_price_under_sprite_object(SpriteObject* sprite_object, int price);
 static void game_round_end_extend_black_panel_down(int black_panel_bottom);
@@ -411,6 +439,20 @@ static StateInfo state_info[] = {
     {.on_init = init_fn, .on_update = update_fn, .on_exit = exit_fn, .substate = 0},
 #include "../include/def_state_info_table.h"
 #undef DEF_STATE_INFO
+};
+
+SelectionGridRow game_playing_selection_rows[] = {
+    {0, jokers_sel_row_get_size,  jokers_sel_row_on_selection_changed,  jokers_sel_row_on_key_transit },
+    {1, game_playing_hand_row_get_size,    game_playing_hand_row_on_selection_changed,    game_playing_hand_row_on_key_transit   },
+    {2, game_playing_button_row_get_size,   game_playing_button_row_on_selection_changed, game_playing_button_row_on_key_hit}
+};
+
+static const  Selection GAME_PLAYING_INIT_SEL = {0, 1};
+
+SelectionGrid game_playing_selection_grid = {
+    game_playing_selection_rows,
+    NUM_ELEM_IN_ARR(game_playing_selection_rows),
+    GAME_PLAYING_INIT_SEL
 };
 
 SelectionGridRow shop_selection_rows[] = {
@@ -1847,6 +1889,9 @@ static void game_playing_execute_hand_discard(void)
         TTE_RED_PB,
         discards
     );
+
+    // Move back to hand selection
+    selection_grid_move_selection_vert(&game_playing_selection_grid, -1);
 }
 
 static void game_playing_execute_hand_play(void)
@@ -1858,6 +1903,9 @@ static void game_playing_execute_hand_play(void)
 
     hand_state = HAND_PLAY;
     display_hands(--hands);
+
+    // Move back to hand selection
+    selection_grid_move_selection_vert(&game_playing_selection_grid, -1);
 }
 
 static int game_playing_hand_row_get_size(void)
@@ -2023,20 +2071,6 @@ static void game_playing_button_row_on_key_hit(
     }
 }
 
-SelectionGridRow game_playing_selection_rows[] = {
-    {0, jokers_sel_row_get_size,  jokers_sel_row_on_selection_changed,  jokers_sel_row_on_key_transit },
-    {1, game_playing_hand_row_get_size,    game_playing_hand_row_on_selection_changed,    game_playing_hand_row_on_key_transit   },
-    {2, game_playing_button_row_get_size,   game_playing_button_row_on_selection_changed, game_playing_button_row_on_key_hit}
-};
-
-static const  Selection GAME_PLAYING_INIT_SEL = {0, 1};
-
-SelectionGrid game_playing_selection_grid = {
-    game_playing_selection_rows,
-    NUM_ELEM_IN_ARR(shop_selection_rows),
-    GAME_PLAYING_INIT_SEL
-};
-
 static void game_round_on_init()
 {
     hand_state = HAND_DRAW;
@@ -2144,6 +2178,7 @@ static inline void set_seed(int seed)
     srand(rng_seed);
 }
 
+// Playing state
 static inline void hand_toggle_card_selection(void)
 {
     // TODO: Decide what to do with this use of selection_x
@@ -2202,161 +2237,9 @@ static void select_current_card(void)
     set_hand();
 }
 
-static inline void game_playing_apply_card_movement_input(enum ScreenHorzDir move_dir)
-{
-    // The reason why this adds +1 (-SCREEN_LEFT) is because the hand is drawn from right to left.
-    // There is no particular reason for this, it's just how I did it.
-    int next_card = selection_x - move_dir;
-
-    // Do not use FRAMES(x) here as we are counting real frames ignoring game speed
-    card_moved_too_fast = (timer - selection_hit_timer) < card_swap_time_threshold;
-
-    // swap cards around if A is held down when pressing D-pad keys
-    if (key_is_down(SELECT_CARD) && !card_moved_too_fast && !card_selected_instead_of_moved)
-    {
-        bool selection_not_at_border =
-            (move_dir == SCREEN_LEFT) ? selection_x < hand_top : selection_x > 0;
-
-        if (selection_not_at_border)
-        {
-            swap_cards_in_hand(selection_x, next_card);
-            moving_card = true;
-            reorder_card_sprites_layers();
-            hand_set_focus(next_card);
-        }
-    }
-    else
-    {
-        // select current card if we tried moving it too fast
-        if (key_released(SELECT_CARD) || (card_moved_too_fast && !moving_card))
-        {
-            select_current_card();
-            card_selected_instead_of_moved = true;
-        }
-        hand_set_focus(next_card);
-    }
-}
-
-static inline void game_playing_highlight_play_btn(void)
-{
-    memset16(&pal_bg_mem[PLAY_HAND_BTN_BORDER_PID], HIGHLIGHT_COLOR, 1);
-    memcpy16(&pal_bg_mem[DISCARD_BTN_BORDER_PID], &pal_bg_mem[DISCARD_BTN_PID], 1);
-}
-
-static inline void game_playing_highlight_discard_btn(void)
-{
-    memcpy16(&pal_bg_mem[PLAY_HAND_BTN_BORDER_PID], &pal_bg_mem[PLAY_HAND_BTN_PID], 1);
-    memset16(&pal_bg_mem[DISCARD_BTN_BORDER_PID], HIGHLIGHT_COLOR, 1);
-}
-
-static inline void game_playing_unhighlight_buttons(void)
-{
-    memcpy16(&pal_bg_mem[PLAY_HAND_BTN_BORDER_PID], &pal_bg_mem[PLAY_HAND_BTN_PID], 1);
-    memcpy16(&pal_bg_mem[DISCARD_BTN_BORDER_PID], &pal_bg_mem[DISCARD_BTN_PID], 1);
-}
-
 static inline void game_playing_process_hand_select_input(void)
 {
     selection_grid_process_input(&game_playing_selection_grid);
-
-#if 0
-    // true = play button highlighted, false = discard button highlighted
-    static bool discard_button_highlighted = false;
-
-    if (key_hit(KEY_LEFT))
-    {
-        if (selection_y == GAME_PLAYING_HAND_SEL_Y)
-        {
-            game_playing_apply_card_movement_input(SCREEN_LEFT);
-        }
-        else if (selection_y == GAME_PLAYING_BUTTONS_SEL_Y)
-        {
-            discard_button_highlighted = false;
-        }
-    }
-    else if (key_hit(KEY_RIGHT))
-    {
-        if (selection_y == GAME_PLAYING_HAND_SEL_Y)
-        {
-            game_playing_apply_card_movement_input(SCREEN_RIGHT);
-        }
-        else if (selection_y == GAME_PLAYING_BUTTONS_SEL_Y)
-        {
-            discard_button_highlighted = true;
-        }
-    }
-    else if (key_hit(KEY_UP) && selection_y == GAME_PLAYING_BUTTONS_SEL_Y)
-    {
-        selection_y = GAME_PLAYING_HAND_SEL_Y;
-    }
-    else if (key_hit(KEY_DOWN) && selection_y == GAME_PLAYING_HAND_SEL_Y)
-    {
-        selection_y = GAME_PLAYING_BUTTONS_SEL_Y;
-
-        if (selection_x > hand_top / 2)
-        {
-            discard_button_highlighted = false; // Play button
-        }
-        else
-        {
-            discard_button_highlighted = true; // Discard button
-        }
-    }
-    else if (selection_y == GAME_PLAYING_BUTTONS_SEL_Y)
-    {
-        if (discard_button_highlighted == false) // Play button logic
-        {
-            game_playing_highlight_play_btn();
-            if (key_hit(SELECT_CARD) && hands > 0 && hand_can_play())
-            {
-                game_playing_execute_hand_play();
-            }
-        }
-        else
-        {
-            game_playing_highlight_discard_btn();
-            if (key_hit(SELECT_CARD) && discards > 0 && hand_can_discard())
-            {
-                game_playing_execute_hand_discard();
-            }
-        }
-    }
-    else if (selection_y == GAME_PLAYING_HAND_SEL_Y)
-    {
-        game_playing_unhighlight_buttons();
-
-        // Register timer when we hit A to pick a card
-        // If we try to move the picked card before card_swap_time_threshold frames,
-        // We will select it instead of moving it
-        if (key_hit(SELECT_CARD))
-        {
-            selection_hit_timer = timer;
-        }
-        // select card if we were not moving it around
-        else if (key_released(SELECT_CARD))
-        {
-            if (!moving_card && !card_selected_instead_of_moved)
-            {
-                select_current_card();
-            }
-            moving_card = false;
-            card_moved_too_fast = false;
-            card_selected_instead_of_moved = false;
-            selection_hit_timer = TM_ZERO;
-        }
-
-        if (key_hit(DESELECT_CARDS))
-        {
-            hand_deselect_all_cards();
-            set_hand();
-        }
-    }
-
-    if (key_hit(SORT_HAND))
-    {
-        hand_change_sort();
-    }
-#endif
 }
 
 static inline void card_draw(void)
@@ -4651,7 +4534,6 @@ static void game_blind_select_handle_input()
 
     if (selection_y == 0)
     {
-        // 5 is the multiplier palette color and the skip button color
         memset16(&pal_bg_mem[BLIND_SELECT_BTN_SELECTED_BORDER_PID], 0xFFFF, 1);
         memcpy16(
             &pal_bg_mem[BLIND_SKIP_BTN_SELECTED_BORDER_PID],
@@ -4661,7 +4543,6 @@ static void game_blind_select_handle_input()
     }
     else
     {
-        // 15 is the select button color
         memcpy16(
             &pal_bg_mem[BLIND_SELECT_BTN_SELECTED_BORDER_PID],
             &pal_bg_mem[BLIND_SELECT_BTN_PID],

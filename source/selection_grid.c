@@ -26,6 +26,7 @@ void selection_grid_move_selection_horz(SelectionGrid* selection_grid, int direc
     if (selection_grid == NULL)
         return;
 
+    // TODO: Allow wrapping
     Selection new_selection = selection_grid->selection;
     new_selection.x += direction_tribool;
     if (selection_grid->selection.y >= 0 &&
