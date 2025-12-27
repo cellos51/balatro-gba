@@ -439,10 +439,11 @@ static StateInfo state_info[] = {
 #undef DEF_STATE_INFO
 };
 
+// TODO: Format for line length
 SelectionGridRow game_playing_selection_rows[] = {
-    {0, jokers_sel_row_get_size,  jokers_sel_row_on_selection_changed,  jokers_sel_row_on_key_transit },
-    {1, game_playing_hand_row_get_size,    game_playing_hand_row_on_selection_changed,    game_playing_hand_row_on_key_transit   },
-    {2, game_playing_button_row_get_size,   game_playing_button_row_on_selection_changed, game_playing_button_row_on_key_hit}
+    {0, jokers_sel_row_get_size,            jokers_sel_row_on_selection_changed,           jokers_sel_row_on_key_transit,           {.wrap = false}},
+    {1, game_playing_hand_row_get_size,     game_playing_hand_row_on_selection_changed,    game_playing_hand_row_on_key_transit,    {.wrap = true}},
+    {2, game_playing_button_row_get_size,   game_playing_button_row_on_selection_changed,  game_playing_button_row_on_key_hit,      {.wrap = true}}
 };
 
 static const  Selection GAME_PLAYING_INIT_SEL = {0, 1};
@@ -454,9 +455,9 @@ SelectionGrid game_playing_selection_grid = {
 };
 
 SelectionGridRow shop_selection_rows[] = {
-    {0, jokers_sel_row_get_size,  jokers_sel_row_on_selection_changed,  jokers_sel_row_on_key_transit },
-    {1, shop_top_row_get_size,    shop_top_row_on_selection_changed,    shop_top_row_on_key_transit   },
-    {2, shop_reroll_row_get_size, shop_reroll_row_on_selection_changed, shop_reroll_row_on_key_transit}
+    {0, jokers_sel_row_get_size,  jokers_sel_row_on_selection_changed,  jokers_sel_row_on_key_transit,  {.wrap = false}},
+    {1, shop_top_row_get_size,    shop_top_row_on_selection_changed,    shop_top_row_on_key_transit,    {.wrap = false}},
+    {2, shop_reroll_row_get_size, shop_reroll_row_on_selection_changed, shop_reroll_row_on_key_transit, {.wrap = false}}
 };
 
 static const Selection SHOP_INIT_SEL = {-1, 1};
@@ -3209,7 +3210,7 @@ static inline void select_cards_in_played_hand()
 static inline void cards_in_hand_update_loop(void)
 {
     int selected_card_idx = hand_sel_idx_to_card_idx(game_playing_selection_grid.selection.x);
-    
+
     // TODO: Break this function up into smaller ones, Gods be good
     // Start from the end of the hand and work backwards because that's how Balatro does it
     for (int i = hand_top + 1; i >= 0; i--)
