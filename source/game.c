@@ -128,10 +128,10 @@
 
 #define NEXT_ROUND_BTN_SEL_X 0
 
-#define GAME_PLAYING_HAND_SEL_Y        0
+#define GAME_PLAYING_HAND_SEL_Y        1
 
 
-#define GAME_PLAYING_BUTTONS_SEL_Y     1
+#define GAME_PLAYING_BUTTONS_SEL_Y     2
 
 // TODO: Remove defines?
 #define GAME_PLAYING_PLAY_BTN_SEL_X    0
@@ -2254,8 +2254,6 @@ static inline void game_playing_unhighlight_buttons(void)
     memcpy16(&pal_bg_mem[PLAY_HAND_BTN_BORDER_PID], &pal_bg_mem[PLAY_HAND_BTN_PID], 1);
     memcpy16(&pal_bg_mem[DISCARD_BTN_BORDER_PID], &pal_bg_mem[DISCARD_BTN_PID], 1);
 }
-
-
 
 static inline void game_playing_process_hand_select_input(void)
 {
