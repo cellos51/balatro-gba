@@ -3208,6 +3208,8 @@ static inline void select_cards_in_played_hand()
 
 static inline void cards_in_hand_update_loop(void)
 {
+    int selected_card_idx = hand_sel_idx_to_card_idx(game_playing_selection_grid.selection.x);
+    
     // TODO: Break this function up into smaller ones, Gods be good
     // Start from the end of the hand and work backwards because that's how Balatro does it
     for (int i = hand_top + 1; i >= 0; i--)
@@ -3223,10 +3225,7 @@ static inline void cards_in_hand_update_loop(void)
                     hand_x =
                         hand_x + (int2fx(i) - int2fx(hand_top) / 2) * -HAND_SPACING_LUT[hand_top];
                     break;
-                case HAND_SELECT:
-                    int selected_card_idx =
-                        hand_sel_idx_to_card_idx(game_playing_selection_grid.selection.x);                    
-                    
+                case HAND_SELECT:                    
                     bool is_focused = 
                         (i == selected_card_idx && 
                             game_playing_selection_grid.selection.y == GAME_PLAYING_HAND_SEL_Y);
