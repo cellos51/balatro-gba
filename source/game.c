@@ -1108,6 +1108,17 @@ void display_mult(void)
     check_flaming_score();
 }
 
+static inline void display_ante(int value)
+{
+    tte_printf(
+        "#{P:%d,%d; cx:0xC000}%d#{cx:0xF000}/%d",
+        ANTE_TEXT_RECT.left,
+        ANTE_TEXT_RECT.top,
+        value,
+        MAX_ANTE
+    );
+}
+
 // idx_a and idx_b are assumed to be valid indexes within the hand array
 // no checks will be performed here for performance's sake
 static inline void swap_cards_in_hand(int idx_a, int idx_b)
@@ -1984,7 +1995,7 @@ static void game_playing_hand_row_on_key_transit(
         
 }
 
-// TODO: Move to header or top of file...
+// TODO: Move to header file...
 typedef struct 
 {
     int border_pal_idx;
@@ -1992,7 +2003,7 @@ typedef struct
     void (*button_pressed_func)(void);
 } ButtonInfo;
 
-// Mapping of the button index to the border and palette index and the inner palette index
+// Array of buttons by horizontal (x) selection index
 ButtonInfo game_playing_buttons[] = {
     {PLAY_HAND_BTN_BORDER_PID,  PLAY_HAND_BTN_PID,  game_playing_execute_hand_play},    // GAME_PLAYING_PLAY_BTN_SEL_X
     {DISCARD_BTN_BORDER_PID,    DISCARD_BTN_PID,    game_playing_execute_hand_discard}, // GAME_PLAYING_DISCARD_BTN_SEL_X
@@ -2108,6 +2119,10 @@ static void game_round_on_init()
 
     deck_shuffle(); // Shuffle the deck at the start of the round
 
+    /* Note that since cards_in_hand_update_loop() handles card highlight there's no need
+     * to call a selection changed callback to highlight the initial card, this wouldn't work
+     * otherwise or for the buttons.
+     */
     game_playing_selection_grid.selection = GAME_PLAYING_INIT_SEL;
 }
 
@@ -2250,17 +2265,6 @@ static inline void card_draw(void)
         SFX_CARD_DRAW,
         MM_BASE_PITCH_RATE + cards_drawn * PITCH_STEP_DRAW_SFX,
         SFX_DEFAULT_VOLUME
-    );
-}
-
-static inline void display_ante(int value)
-{
-    tte_printf(
-        "#{P:%d,%d; cx:0xC000}%d#{cx:0xF000}/%d",
-        ANTE_TEXT_RECT.left,
-        ANTE_TEXT_RECT.top,
-        value,
-        MAX_ANTE
     );
 }
 
