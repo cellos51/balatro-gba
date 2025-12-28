@@ -72,9 +72,16 @@ typedef int (*RowGetSizeFunc)();
  */
 typedef void (*RowOnKeyTransitFunc)(SelectionGrid* selection_grid, Selection* selection);
 
-// TODO: Document
+
+/**
+ * @brief A set of attributes to the selection grid row affecting selection grid behavior.
+ */
 typedef struct
 {
+
+    /**
+     * @brief Whether to wrap selection when it passes the end of the row.
+     */
     bool wrap;
 } SelGridRowAttributes;
 
