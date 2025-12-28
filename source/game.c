@@ -249,6 +249,8 @@ static bool check_and_score_joker_for_event(
 static int calculate_interest_reward(void);
 static void game_over_anim_frame(void);
 
+static void game_playing_discard_on_pressed(void);
+static void game_playing_play_hand_on_pressed(void);
 static int game_playing_button_row_get_size(void);
 static bool game_playing_button_row_on_selection_changed(
     SelectionGrid* selection_grid,
@@ -441,6 +443,12 @@ SelectionGrid game_playing_selection_grid = {
     game_playing_selection_rows,
     NUM_ELEM_IN_ARR(game_playing_selection_rows),
     GAME_PLAYING_INIT_SEL
+};
+
+// Array of buttons by horizontal selection index (x)
+Button game_playing_buttons[] = {
+    {PLAY_HAND_BTN_BORDER_PID, PLAY_HAND_BTN_PID, game_playing_play_hand_on_pressed, hand_can_play   },
+    {DISCARD_BTN_BORDER_PID,   DISCARD_BTN_PID,   game_playing_discard_on_pressed,   hand_can_discard},
 };
 
 SelectionGridRow shop_selection_rows[] = {
@@ -1314,9 +1322,10 @@ static void change_background(enum BackgroundId id)
                 1
             );
 
-            // Copy the Play Hand and Discard button colors to their selection highlights
-            memcpy16(&pal_bg_mem[PLAY_HAND_BTN_BORDER_PID], &pal_bg_mem[PLAY_HAND_BTN_PID], 1);
-            memcpy16(&pal_bg_mem[DISCARD_BTN_BORDER_PID], &pal_bg_mem[DISCARD_BTN_PID], 1);
+            for (int i = 0; i < NUM_ELEM_IN_ARR(game_playing_buttons); i++)
+            {
+                button_set_highlight(&game_playing_buttons[i], false);
+            }
         }
     }
     else if (id == BG_CARD_PLAYING)
@@ -1843,6 +1852,7 @@ static bool card_selected_instead_of_moved = false;
 static const int card_swap_time_threshold = 6;
 static uint selection_hit_timer = TM_ZERO;
 
+// TODO: Make sure the functions are sensibly ordered in the file
 static void game_playing_discard_on_pressed(void)
 {
     if (!hand_can_discard())
@@ -1986,12 +1996,6 @@ static void game_playing_hand_row_on_key_transit(
         hand_change_sort();
     }
 }
-
-// Array of buttons by horizontal selection index (x)
-Button game_playing_buttons[] = {
-    {PLAY_HAND_BTN_BORDER_PID, PLAY_HAND_BTN_PID, game_playing_play_hand_on_pressed, hand_can_play   },
-    {DISCARD_BTN_BORDER_PID,   DISCARD_BTN_PID,   game_playing_discard_on_pressed,   hand_can_discard},
-};
 
 static int game_playing_button_row_get_size(void)
 {

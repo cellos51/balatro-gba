@@ -7,6 +7,9 @@
 
 void button_set_highlight(Button* button, bool highlight)
 {
+    if (button == NULL)
+        return;
+
     u16 set_color = BTN_HIGHLIGHT_COLOR;
 
     if (!highlight)
@@ -19,8 +22,8 @@ void button_set_highlight(Button* button, bool highlight)
 
 void button_press(Button* button)
 {
-    if (button == NULL || button->on_pressed == NULL || button->can_be_pressed == NULL ||
-        !button->can_be_pressed())
+    if (button == NULL || button->on_pressed == NULL || 
+        (button->can_be_pressed != NULL && !button->can_be_pressed()))
     {
         return;
     }
