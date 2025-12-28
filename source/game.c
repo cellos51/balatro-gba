@@ -2148,7 +2148,6 @@ static void game_playing_button_row_on_key_hit(SelectionGrid* selection_grid, Se
     }
 }
 
-
 static void hand_deselect_all_cards(void)
 {
     bool any_cards_deselected = false;

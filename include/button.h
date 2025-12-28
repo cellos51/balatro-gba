@@ -22,7 +22,7 @@ typedef bool (*ButtonCanBePressedFunc)(void);
  */
 typedef struct
 {
-    // Using u8 for the palette indices to make sure they don't overflow pal_bg_mem 
+    // Using u8 for the palette indices to make sure they don't overflow pal_bg_mem
 
     /**
      * @brief Palette index of the button border whose color is updated depending on highlight.
@@ -30,7 +30,7 @@ typedef struct
     u8 border_pal_idx;
 
     /**
-     * @brief Palette index of the color of the button itself, used for the border when not 
+     * @brief Palette index of the color of the button itself, used for the border when not
      * highlighted.
      */
     u8 button_pal_idx;
@@ -60,9 +60,9 @@ void button_set_highlight(Button* button, bool highlight);
  * @brief Execute a button press, by calling the button's @ref on_pressed function.
  * This checks the button's @ref can_be_pressed function and will do nothing if
  * returns false.
- * 
+ *
  * Button presses should go through this function rather than directly call @ref on_pressed.
- * 
+ *
  * @param button The button being pressed. No-op on NULL.
  */
 void button_press(Button* button);
