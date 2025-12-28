@@ -2194,7 +2194,7 @@ static inline int hand_sel_idx_to_card_idx(int selection_index)
 
 static void hand_select_card(int index)
 {
-    if (index < 0 || index > hand_get_size() || hand_state != HAND_SELECT || hand[index] == NULL)
+    if (index < 0 || index >= hand_get_size() || hand_state != HAND_SELECT || hand[index] == NULL)
         return;
 
     if (card_object_is_selected(hand[index]))
