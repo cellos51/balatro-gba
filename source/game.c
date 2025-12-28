@@ -3167,7 +3167,6 @@ static inline void select_cards_in_played_hand()
         case ROYAL_FLUSH:
             select_flush_and_straight_cards_in_played_hand();
             break;
-            // ELSE FALL THROUGH
         case FULL_HOUSE:
             /* FALL THROUGH */
         case FIVE_OF_A_KIND:
