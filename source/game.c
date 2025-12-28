@@ -9,6 +9,7 @@
 #include "background_shop_gfx.h"
 #include "bitset.h"
 #include "blind.h"
+#include "button.h"
 #include "card.h"
 #include "graphic_utils.h"
 #include "hand_analysis.h"
@@ -45,7 +46,6 @@
 #define MENU_POP_OUT_ANIM_FRAMES 20
 #define GAME_OVER_ANIM_FRAMES    15
 
-#define HIGHLIGHT_COLOR   0xFFFF
 #define SHOP_LIGHTS_1_CLR 0xFFFF
 #define SHOP_LIGHTS_2_CLR 0x32BE
 #define SHOP_LIGHTS_3_CLR 0x4B5F
@@ -54,8 +54,6 @@
 #define PITCH_STEP_DISCARD_SFX   (-64)
 #define PITCH_STEP_DRAW_SFX      24
 #define PITCH_STEP_UNDISCARD_SFX 2 * PITCH_STEP_DRAW_SFX
-
-#define BUTTON_SFX_VOLUME 154 // 60% of MM_FULL_VOLUME
 
 #define STARTING_ROUND 0
 #define STARTING_ANTE  1
@@ -1845,11 +1843,10 @@ static bool card_selected_instead_of_moved = false;
 static const int card_swap_time_threshold = 6;
 static uint selection_hit_timer = TM_ZERO;
 
-static void game_playing_execute_hand_discard(void)
+static void game_playing_discard_on_pressed(void)
 {
     if (!hand_can_discard())
         return;
-    play_sfx(SFX_BUTTON, MM_BASE_PITCH_RATE, BUTTON_SFX_VOLUME);
 
     hand_state = HAND_DISCARD;
     display_hands(--discards);
@@ -1866,12 +1863,10 @@ static void game_playing_execute_hand_discard(void)
     selection_grid_move_selection_vert(&game_playing_selection_grid, -1);
 }
 
-static void game_playing_execute_hand_play(void)
+static void game_playing_play_hand_on_pressed(void)
 {
     if (!hand_can_play())
         return;
-
-    play_sfx(SFX_BUTTON, MM_BASE_PITCH_RATE, BUTTON_SFX_VOLUME);
 
     hand_state = HAND_PLAY;
     display_hands(--hands);
@@ -1992,18 +1987,10 @@ static void game_playing_hand_row_on_key_transit(
     }
 }
 
-// TODO: Move to header file...
-typedef struct
-{
-    int border_pal_idx;
-    int button_pal_idx;
-    void (*button_pressed_func)(void);
-} ButtonInfo;
-
-// Array of buttons by horizontal (x) selection index
-ButtonInfo game_playing_buttons[] = {
-    {PLAY_HAND_BTN_BORDER_PID, PLAY_HAND_BTN_PID, game_playing_execute_hand_play   },
-    {DISCARD_BTN_BORDER_PID,   DISCARD_BTN_PID,   game_playing_execute_hand_discard},
+// Array of buttons by horizontal selection index (x)
+Button game_playing_buttons[] = {
+    {PLAY_HAND_BTN_BORDER_PID, PLAY_HAND_BTN_PID, game_playing_play_hand_on_pressed, hand_can_play   },
+    {DISCARD_BTN_BORDER_PID,   DISCARD_BTN_PID,   game_playing_discard_on_pressed,   hand_can_discard},
 };
 
 static int game_playing_button_row_get_size(void)
@@ -2013,14 +2000,7 @@ static int game_playing_button_row_get_size(void)
 
 static inline void game_playing_button_set_highlight(int btn_idx, bool highlight)
 {
-    u16 set_color = HIGHLIGHT_COLOR;
-
-    if (!highlight)
-    {
-        set_color = pal_bg_mem[game_playing_buttons[btn_idx].button_pal_idx];
-    }
-
-    memset16(&pal_bg_mem[game_playing_buttons[btn_idx].border_pal_idx], set_color, 1);
+    button_set_highlight(&game_playing_buttons[btn_idx], highlight);
 }
 
 static bool game_playing_button_row_on_selection_changed(
@@ -2050,8 +2030,7 @@ static void game_playing_button_row_on_key_hit(SelectionGrid* selection_grid, Se
 {
     if (key_hit(SELECT_CARD))
     {
-        play_sfx(SFX_BUTTON, MM_BASE_PITCH_RATE, BUTTON_SFX_VOLUME);
-        game_playing_buttons[selection->x].button_pressed_func();
+        button_press(&game_playing_buttons[selection->x]);
     }
 }
 
@@ -4187,7 +4166,7 @@ static bool shop_top_row_on_selection_changed(
         if (new_selection->x == NEXT_ROUND_BTN_SEL_X)
         {
             // Highlight next round button
-            memset16(&pal_bg_mem[NEXT_ROUND_BTN_SELECTED_BORDER_PID], HIGHLIGHT_COLOR, 1);
+            memset16(&pal_bg_mem[NEXT_ROUND_BTN_SELECTED_BORDER_PID], BTN_HIGHLIGHT_COLOR, 1);
         }
         else
         {
@@ -4219,7 +4198,7 @@ static bool shop_reroll_row_on_selection_changed(
     }
     else if (row_idx == new_selection->y)
     {
-        memset16(&pal_bg_mem[REROLL_BTN_SELECTED_BORDER_PID], HIGHLIGHT_COLOR, 1);
+        memset16(&pal_bg_mem[REROLL_BTN_SELECTED_BORDER_PID], BTN_HIGHLIGHT_COLOR, 1);
     }
 
     return true;
@@ -4714,7 +4693,7 @@ static void game_main_menu_on_update()
 
     if (selection_x == MAIN_MENU_PLAY_BTN_IDX)
     {
-        memset16(&pal_bg_mem[MAIN_MENU_PLAY_BUTTON_OUTLINE_PID], HIGHLIGHT_COLOR, 1);
+        memset16(&pal_bg_mem[MAIN_MENU_PLAY_BUTTON_OUTLINE_PID], BTN_HIGHLIGHT_COLOR, 1);
 
         if (key_hit(SELECT_CARD))
         {
