@@ -73,11 +73,10 @@ typedef int (*RowGetSizeFunc)();
 typedef void (*RowOnKeyTransitFunc)(SelectionGrid* selection_grid, Selection* selection);
 
 // TODO: Document
-typedef struct 
+typedef struct
 {
     bool wrap;
 } SelGridRowAttributes;
-
 
 /**
  * @brief A single row in the selection grid, defined by its callback functions.
