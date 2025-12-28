@@ -128,17 +128,11 @@
 
 #define NEXT_ROUND_BTN_SEL_X 0
 
-#define GAME_PLAYING_HAND_SEL_Y        1
+#define GAME_PLAYING_HAND_SEL_Y    1
+#define GAME_PLAYING_BUTTONS_SEL_Y 2
 
-
-#define GAME_PLAYING_BUTTONS_SEL_Y     2
-
-// TODO: Remove defines?
-#define GAME_PLAYING_PLAY_BTN_SEL_X    0
-#define GAME_PLAYING_DISCARD_BTN_SEL_X 1
-
-#define GAME_PLAYING_NUM_SEL_ROWS      2
-#define GAME_PLAYING_NUM_BOTTOM_BTNS   2
+#define GAME_PLAYING_NUM_SEL_ROWS    2
+#define GAME_PLAYING_NUM_BOTTOM_BTNS 2
 
 #define REROLL_BTN_FRAME_PAL_IDX 7
 #define REROLL_BTN_PAL_IDX       3
@@ -264,13 +258,10 @@ static bool game_playing_button_row_on_selection_changed(
     const Selection* prev_selection,
     const Selection* new_selection
 );
-static void game_playing_button_row_on_key_hit(
-    SelectionGrid* selection_grid, 
-    Selection* selection
-);
+static void game_playing_button_row_on_key_hit(SelectionGrid* selection_grid, Selection* selection);
 
 static void game_playing_hand_row_on_key_transit(
-    SelectionGrid* selection_grid, 
+    SelectionGrid* selection_grid,
     Selection* selection
 );
 
@@ -441,12 +432,12 @@ static StateInfo state_info[] = {
 
 // TODO: Format for line length
 SelectionGridRow game_playing_selection_rows[] = {
-    {0, jokers_sel_row_get_size,            jokers_sel_row_on_selection_changed,           jokers_sel_row_on_key_transit,           {.wrap = false}},
-    {1, game_playing_hand_row_get_size,     game_playing_hand_row_on_selection_changed,    game_playing_hand_row_on_key_transit,    {.wrap = true}},
-    {2, game_playing_button_row_get_size,   game_playing_button_row_on_selection_changed,  game_playing_button_row_on_key_hit,      {.wrap = true}}
+    {0, jokers_sel_row_get_size,          jokers_sel_row_on_selection_changed,          jokers_sel_row_on_key_transit,        {.wrap = false}},
+    {1, game_playing_hand_row_get_size,   game_playing_hand_row_on_selection_changed,   game_playing_hand_row_on_key_transit, {.wrap = true} },
+    {2, game_playing_button_row_get_size, game_playing_button_row_on_selection_changed, game_playing_button_row_on_key_hit,   {.wrap = true} }
 };
 
-static const  Selection GAME_PLAYING_INIT_SEL = {0, 1};
+static const Selection GAME_PLAYING_INIT_SEL = {0, 1};
 
 SelectionGrid game_playing_selection_grid = {
     game_playing_selection_rows,
@@ -1901,7 +1892,7 @@ static bool game_playing_hand_row_on_selection_changed(
     const Selection* new_selection
 )
 {
-    int prev_card_idx = UNDEFINED; 
+    int prev_card_idx = UNDEFINED;
     int next_card_idx = UNDEFINED;
 
     // Do not use FRAMES(x) here as we are counting real frames ignoring game speed
@@ -1919,10 +1910,9 @@ static bool game_playing_hand_row_on_selection_changed(
 
     bool on_the_same_row = new_selection->y == prev_selection->y; // == GAME_PLAYING_HAND_SEL_Y
 
-    if (on_the_same_row && key_is_down(SELECT_CARD) && 
-        !card_moved_too_fast && !card_selected_instead_of_moved)
+    if (on_the_same_row && key_is_down(SELECT_CARD) && !card_moved_too_fast &&
+        !card_selected_instead_of_moved)
     {
-        // TODO: Check this bool
         bool moved_by_one_tile = abs(new_selection->x - prev_selection->x) == 1;
 
         // Avoid swapping when selection wraps
@@ -1937,7 +1927,7 @@ static bool game_playing_hand_row_on_selection_changed(
             moving_card = true;
             reorder_card_sprites_layers();
 
-            /* Not calling sprite_object_set_focus() because focus is handled by 
+            /* Not calling sprite_object_set_focus() because focus is handled by
              * cards_in_hand_update_loop() based on the selection grid value...
              */
             play_sfx(
@@ -1957,7 +1947,7 @@ static bool game_playing_hand_row_on_selection_changed(
         }
         if (next_card_idx != UNDEFINED)
         {
-            /* Not calling sprite_object_set_focus() because focus is handled by 
+            /* Not calling sprite_object_set_focus() because focus is handled by
              * cards_in_hand_update_loop() based on the selection grid value...
              */
             play_sfx(
@@ -1972,7 +1962,7 @@ static bool game_playing_hand_row_on_selection_changed(
 }
 
 static void game_playing_hand_row_on_key_transit(
-    SelectionGrid* selection_grid, 
+    SelectionGrid* selection_grid,
     Selection* selection
 )
 {
@@ -2000,11 +1990,10 @@ static void game_playing_hand_row_on_key_transit(
     {
         hand_change_sort();
     }
-        
 }
 
 // TODO: Move to header file...
-typedef struct 
+typedef struct
 {
     int border_pal_idx;
     int button_pal_idx;
@@ -2013,8 +2002,8 @@ typedef struct
 
 // Array of buttons by horizontal (x) selection index
 ButtonInfo game_playing_buttons[] = {
-    {PLAY_HAND_BTN_BORDER_PID,  PLAY_HAND_BTN_PID,  game_playing_execute_hand_play},    // GAME_PLAYING_PLAY_BTN_SEL_X
-    {DISCARD_BTN_BORDER_PID,    DISCARD_BTN_PID,    game_playing_execute_hand_discard}, // GAME_PLAYING_DISCARD_BTN_SEL_X
+    {PLAY_HAND_BTN_BORDER_PID, PLAY_HAND_BTN_PID, game_playing_execute_hand_play   },
+    {DISCARD_BTN_BORDER_PID,   DISCARD_BTN_PID,   game_playing_execute_hand_discard},
 };
 
 static int game_playing_button_row_get_size(void)
@@ -2051,16 +2040,13 @@ static bool game_playing_button_row_on_selection_changed(
 
     if (new_selection->y == row_idx)
     {
-       game_playing_button_set_highlight(new_selection->x, true);
+        game_playing_button_set_highlight(new_selection->x, true);
     }
 
     return true;
 }
 
-static void game_playing_button_row_on_key_hit(
-    SelectionGrid* selection_grid, 
-    Selection* selection
-)
+static void game_playing_button_row_on_key_hit(SelectionGrid* selection_grid, Selection* selection)
 {
     if (key_hit(SELECT_CARD))
     {
@@ -2217,7 +2203,7 @@ static bool hand_can_play(void)
 /**
  * @brief Converts a selection index from the selection grid into a card index within the hand array
  * @param selection_index The selection index from the selection grid.
- * @return The index within the hand stack array. 
+ * @return The index within the hand stack array.
  * Note that the result is not valid if hand size is 0.
  */
 static inline int hand_sel_idx_to_card_idx(int selection_index)
@@ -3235,10 +3221,10 @@ static inline void cards_in_hand_update_loop(void)
                     hand_x =
                         hand_x + (int2fx(i) - int2fx(hand_top) / 2) * -HAND_SPACING_LUT[hand_top];
                     break;
-                case HAND_SELECT:                    
-                    bool is_focused = 
-                        (i == selected_card_idx && 
-                            game_playing_selection_grid.selection.y == GAME_PLAYING_HAND_SEL_Y);
+                case HAND_SELECT:
+                    bool is_focused =
+                        (i == selected_card_idx &&
+                         game_playing_selection_grid.selection.y == GAME_PLAYING_HAND_SEL_Y);
 
                     if (is_focused && !card_object_is_selected(hand[i]))
                     {
