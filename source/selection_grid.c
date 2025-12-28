@@ -23,8 +23,8 @@ static void selection_grid_process_directional_input(SelectionGrid* selection_gr
 
 void selection_grid_move_selection_horz(SelectionGrid* selection_grid, int direction_tribool)
 {
-    if (selection_grid == NULL || 
-        selection_grid->selection.y < 0 || selection_grid->selection.y >= selection_grid->num_rows)
+    if (selection_grid == NULL || selection_grid->selection.y < 0 ||
+        selection_grid->selection.y >= selection_grid->num_rows)
     {
         return;
     }
