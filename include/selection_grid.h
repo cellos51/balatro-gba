@@ -72,7 +72,6 @@ typedef int (*RowGetSizeFunc)();
  */
 typedef void (*RowOnKeyTransitFunc)(SelectionGrid* selection_grid, Selection* selection);
 
-
 /**
  * @brief A set of attributes to the selection grid row affecting selection grid behavior.
  */
