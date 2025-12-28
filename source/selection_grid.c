@@ -23,22 +23,23 @@ static void selection_grid_process_directional_input(SelectionGrid* selection_gr
 
 void selection_grid_move_selection_horz(SelectionGrid* selection_grid, int direction_tribool)
 {
-    if (selection_grid == NULL)
+    if (selection_grid == NULL || 
+        selection_grid->selection.y < 0 || selection_grid->selection.y >= selection_grid->num_rows)
+    {
         return;
+    }
 
     Selection new_selection = selection_grid->selection;
     new_selection.x += direction_tribool;
+    int row_size = selection_grid->rows[new_selection.y].get_size();
+    bool wrap_enabled = selection_grid->rows[new_selection.y].attributes.wrap;
 
-    if (selection_grid->rows[new_selection.y].attributes.wrap)
+    if (wrap_enabled)
     {
-        int row_size = selection_grid->rows[new_selection.y].get_size();
-
         new_selection.x = wrap(new_selection.x, 0, row_size);
     }
 
-    if (selection_grid->selection.y >= 0 &&
-        selection_grid->selection.y < selection_grid->num_rows && new_selection.x >= 0 &&
-        new_selection.x < selection_grid->rows[new_selection.y].get_size())
+    if (wrap_enabled || (new_selection.x >= 0 && new_selection.x < row_size))
     {
         bool proceed_selection = selection_grid->rows[new_selection.y].on_selection_changed(
             selection_grid,
