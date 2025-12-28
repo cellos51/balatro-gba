@@ -13,7 +13,7 @@
 typedef void (*ButtonOnPressedFunc)(void);
 
 /**
- * @brief Returns true if the button should be ativated when pressed.
+ * @brief Returns true if the button should be activated when pressed.
  */
 typedef bool (*ButtonCanBePressedFunc)(void);
 
@@ -37,7 +37,7 @@ typedef struct
 
     /**
      * @brief Called when the button is pressed if @ref can_be_pressed, don't call this directly,
-     * call @ref call button_press() instead.
+     * call @ref button_press() instead.
      * Should not be set to NULL.
      */
     ButtonOnPressedFunc on_pressed;
