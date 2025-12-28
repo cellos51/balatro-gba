@@ -187,7 +187,7 @@ typedef struct
 // efficient. Well, this is the answer.
 // Thanks!
 // https://github.com/cellos51/balatro-gba/issues/137#issuecomment-3322485129
-static void noop(void)
+static void noop(GameVariables* vars)
 {
 }
 
@@ -197,22 +197,22 @@ static void noop(void)
 // This could be done, and maybe should be done,
 // with an X macro, but I'll leave that to the
 // reviewer(s).
-static void game_main_menu_on_init(void);
-static void game_main_menu_on_update(void);
-static void game_round_on_init(void);
-static void game_playing_on_update(void);
-static void game_round_end_on_update(void);
-static void game_round_end_on_exit(void);
-static void game_shop_on_update(void);
-static void game_shop_on_exit(void);
-static void game_blind_select_on_init(void);
-static void game_blind_select_on_update(void);
-static void game_blind_select_on_exit(void);
-static void game_lose_on_init(void);
-static void game_lose_on_update(void);
-static void game_over_on_exit(void);
-static void game_win_on_init(void);
-static void game_win_on_update(void);
+static void game_main_menu_on_init(GameVariables* vars);
+static void game_main_menu_on_update(GameVariables* vars);
+static void game_round_on_init(GameVariables* vars);
+static void game_playing_on_update(GameVariables* vars);
+static void game_round_end_on_update(GameVariables* vars);
+static void game_round_end_on_exit(GameVariables* vars);
+static void game_shop_on_update(GameVariables* vars);
+static void game_shop_on_exit(GameVariables* vars);
+static void game_blind_select_on_init(GameVariables* vars);
+static void game_blind_select_on_update(GameVariables* vars);
+static void game_blind_select_on_exit(GameVariables* vars);
+static void game_lose_on_init(GameVariables* vars);
+static void game_lose_on_update(GameVariables* vars);
+static void game_over_on_exit(GameVariables* vars);
+static void game_win_on_init(GameVariables* vars);
+static void game_win_on_update(GameVariables* vars);
 static void game_shop_intro(void);
 static void game_shop_process_user_input(void);
 static void game_shop_outro(void);
@@ -562,6 +562,8 @@ static int shortcut_joker_count = 0;
 static int four_fingers_joker_count = 0;
 static int straight_and_flush_size = STRAIGHT_AND_FLUSH_SIZE_DEFAULT;
 
+static GameVariables game_vars;
+
 GBAL_UNUSED
 static inline bool is_shop_joker_avail(int joker_id)
 {
@@ -783,7 +785,7 @@ void game_update()
 
     jokers_update_loop();
 
-    state_info[game_state].on_update();
+    state_info[game_state].on_update(&game_vars);
 }
 
 void game_change_state(enum GameState new_game_state)
@@ -793,12 +795,12 @@ void game_change_state(enum GameState new_game_state)
     if (game_state >= 0 && game_state < GAME_STATE_MAX)
     {
         state_info[game_state].substate = 0;
-        state_info[game_state].on_exit();
+        state_info[game_state].on_exit(&game_vars);
     }
 
     if (new_game_state >= 0 && new_game_state < GAME_STATE_MAX)
     {
-        state_info[new_game_state].on_init();
+        state_info[new_game_state].on_init(&game_vars);
 
         game_state = new_game_state;
     }
@@ -1800,7 +1802,7 @@ static inline void deck_shuffle(void)
     }
 }
 
-static void game_round_on_init()
+static void game_round_on_init(GameVariables* vars)
 {
     hand_state = HAND_DRAW;
     cards_drawn = 0;
@@ -1861,7 +1863,7 @@ static void game_round_on_init()
     deck_shuffle(); // Shuffle the deck at the start of the round
 }
 
-static void game_main_menu_on_init()
+static void game_main_menu_on_init(GameVariables* vars)
 {
     affine_background_change_background(AFFINE_BG_MAIN_MENU);
     change_background(BG_MAIN_MENU);
@@ -1884,14 +1886,14 @@ static void game_over_init(void)
     main_bg_se_copy_rect(NEW_RUN_BTN_SRC_RECT, NEW_RUN_BTN_DEST_POS);
 }
 
-static void game_lose_on_init()
+static void game_lose_on_init(GameVariables* vars)
 {
     game_over_init();
     // Using the text color to match the "Game Over" text
     affine_background_set_color(TEXT_CLR_RED);
 }
 
-static void game_win_on_init()
+static void game_win_on_init(GameVariables* vars)
 {
     game_over_init();
     // Using the text color to match the "You Win" text
@@ -3311,7 +3313,7 @@ static inline void game_playing_process_flaming_score(void)
     }
 }
 
-static void game_playing_on_update(void)
+static void game_playing_on_update(GameVariables* vars)
 {
     // Background logic (thissss might be moved to the card'ssss logic later. I'm a sssssnake)
     if (hand_state == HAND_DRAW || hand_state == HAND_DISCARD || hand_state == HAND_SELECT)
@@ -3350,7 +3352,7 @@ static int calculate_interest_reward(void)
     return reward;
 }
 
-static void game_round_end_on_exit()
+static void game_round_end_on_exit(GameVariables* vars)
 {
     // Cleanup blind tokens from this round to avoid accumulating
     // allocated blind sprites each round
@@ -3362,7 +3364,7 @@ static void game_round_end_on_exit()
     // TODO: Reuse sprites for blind selection?
 }
 
-static void game_round_end_on_update()
+static void game_round_end_on_update(GameVariables* vars)
 {
     if (state_info[game_state].substate == ROUND_END_EXIT)
     {
@@ -4290,7 +4292,7 @@ static inline void game_shop_lights_anim_frame(void)
     memcpy16(&pal_bg_mem[SHOP_LIGHTS_1_PID], &shifted_palette[3], 1);
 }
 
-static void game_shop_on_update()
+static void game_shop_on_update(GameVariables* vars)
 {
     change_background(BG_SHOP);
 
@@ -4323,7 +4325,7 @@ static void game_shop_on_update()
     shop_state_actions[substate]();
 }
 
-static void game_shop_on_exit()
+static void game_shop_on_exit(GameVariables* vars)
 {
     ListItr itr = list_itr_create(&_shop_jokers_list);
     JokerObject* joker_object;
@@ -4343,14 +4345,14 @@ static void game_shop_on_exit()
     increment_blind(BLIND_STATE_DEFEATED); // TODO: Move to game_round_end()?
 }
 
-static void game_blind_select_on_init()
+static void game_blind_select_on_init(GameVariables* vars)
 {
     change_background(BG_BLIND_SELECT);
 
     play_sfx(SFX_POP, MM_BASE_PITCH_RATE, SFX_DEFAULT_VOLUME);
 }
 
-static void game_blind_select_on_update()
+static void game_blind_select_on_update(GameVariables* vars)
 {
     if (state_info[game_state].substate == BLIND_SELECT_MAX)
     {
@@ -4527,7 +4529,7 @@ static void game_blind_select_display_blind_panel()
     }
 }
 
-static void game_blind_select_on_exit()
+static void game_blind_select_on_exit(GameVariables* vars)
 {
     selection_y = 0;
     background = UNDEFINED;
@@ -4595,7 +4597,7 @@ static inline void game_start(void)
     game_change_state(GAME_STATE_BLIND_SELECT);
 }
 
-static void game_main_menu_on_update()
+static void game_main_menu_on_update(GameVariables* vars)
 {
     change_background(BG_MAIN_MENU);
 
@@ -4660,7 +4662,7 @@ static inline void game_over_process_user_input()
     }
 }
 
-static void game_lose_on_update()
+static void game_lose_on_update(GameVariables* vars)
 {
     if (timer < GAME_OVER_ANIM_FRAMES)
     {
@@ -4682,7 +4684,7 @@ static void game_lose_on_update()
 // This function isn't set in stone. This is just a placeholder
 // allowing the player to restart the game. Thought it would be nice to have
 // util we decide what we want to do after a game over.
-static void game_over_on_exit()
+static void game_over_on_exit(GameVariables* vars)
 {
     ListItr itr = list_itr_create(&_owned_jokers_list);
     JokerObject* joker_object;
@@ -4731,7 +4733,7 @@ static void game_over_on_exit()
     affine_background_load_palette(affine_background_gfxPal);
 }
 
-static void game_win_on_update()
+static void game_win_on_update(GameVariables* vars)
 {
     if (timer < GAME_OVER_ANIM_FRAMES)
     {
