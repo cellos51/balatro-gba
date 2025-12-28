@@ -236,7 +236,6 @@ static void display_round(int value);
 static void display_hands(int value);
 static void display_discards(int value);
 static void set_hand(void);
-static bool hand_can_discard(void);
 static int deck_get_size(void);
 static int deck_get_max_size(void);
 static void increment_blind(enum BlindState increment_reason);
@@ -310,8 +309,8 @@ static int hand_sel_idx_to_card_idx(int selection_index);
 static void hand_select_card(int index);
 static void hand_change_sort(void);
 static void hand_deselect_all_cards(void);
-static bool hand_can_play(void);
-static bool hand_can_discard(void);
+static bool can_play_hand(void);
+static bool can_discard_hand(void);
 
 // Consts
 
@@ -447,8 +446,8 @@ SelectionGrid game_playing_selection_grid = {
 
 // Array of buttons by horizontal selection index (x)
 Button game_playing_buttons[] = {
-    {PLAY_HAND_BTN_BORDER_PID, PLAY_HAND_BTN_PID, game_playing_play_hand_on_pressed, hand_can_play   },
-    {DISCARD_BTN_BORDER_PID,   DISCARD_BTN_PID,   game_playing_discard_on_pressed,   hand_can_discard},
+    {PLAY_HAND_BTN_BORDER_PID, PLAY_HAND_BTN_PID, game_playing_play_hand_on_pressed, can_play_hand   },
+    {DISCARD_BTN_BORDER_PID,   DISCARD_BTN_PID,   game_playing_discard_on_pressed,   can_discard_hand},
 };
 
 SelectionGridRow shop_selection_rows[] = {
@@ -1792,7 +1791,7 @@ static void set_hand(void)
     display_mult();
 }
 
-static bool hand_can_discard(void)
+static bool can_discard_hand(void)
 {
     return (discards > 0 && hand_state == HAND_SELECT && hand_selections > 0);
 }
@@ -1836,26 +1835,121 @@ static inline void deck_shuffle(void)
     }
 }
 
-// card moving logic
+static void game_round_on_init()
+{
+    hand_state = HAND_DRAW;
+    cards_drawn = 0;
+    hand_selections = 0;
 
-// true if and only if we are currently moving a card around
-static bool moving_card = false;
+    playing_blind_token = blind_token_new(
+        current_blind,
+        CUR_BLIND_TOKEN_POS.x,
+        CUR_BLIND_TOKEN_POS.y,
+        MAX_SELECTION_SIZE + MAX_HAND_SIZE + 1
+    ); // Create the blind token sprite at the top left corner
+    // TODO: Hide blind token and display it after sliding blind rect animation
+    // if (playing_blind_token != NULL)
+    //{
+    //    obj_hide(playing_blind_token->obj); // Hide the blind token sprite for now
+    //}
+    round_end_blind_token = blind_token_new(
+        current_blind,
+        81,
+        86,
+        MAX_SELECTION_SIZE + MAX_HAND_SIZE + 2
+    ); // Create the blind token sprite for round end
 
-// This will prevent us from moving cards around if we selected one
-// by moving too fast after pressing the A button
-static bool card_moved_too_fast = false;
-static bool card_selected_instead_of_moved = false;
+    if (round_end_blind_token != NULL)
+    {
+        obj_hide(round_end_blind_token->obj); // Hide the blind token sprite for now
+    }
 
-// After pressing A, if we press Left/Right too fast, we should select the card
-// and change focus to the next one, instead of swapping them
-// This should fix inputs sometimes not registering when quickly selecting cards
-static const int card_swap_time_threshold = 6;
-static uint selection_hit_timer = TM_ZERO;
+    Rect blind_req_text_rect = BLIND_REQ_TEXT_RECT;
+    u32 blind_requirement = blind_get_requirement(current_blind, ante);
 
-// TODO: Make sure the functions are sensibly ordered in the file
+    char blind_req_str_buff[UINT_MAX_DIGITS + 1];
+
+    truncate_uint_to_suffixed_str(
+        blind_requirement,
+        rect_width(&BLIND_REQ_TEXT_RECT) / TTE_CHAR_SIZE,
+        blind_req_str_buff
+    );
+
+    // Update text rect for right alignment AFTER shortening the number
+    update_text_rect_to_right_align_str(&blind_req_text_rect, blind_req_str_buff, OVERFLOW_RIGHT);
+
+    tte_printf(
+        "#{P:%d,%d; cx:0x%X000}%s",
+        blind_req_text_rect.left,
+        blind_req_text_rect.top,
+        TTE_RED_PB,
+        blind_req_str_buff
+    );
+    tte_printf(
+        "#{P:%d,%d; cx:0x%X000}$%d",
+        BLIND_REWARD_RECT.left,
+        BLIND_REWARD_RECT.top,
+        TTE_YELLOW_PB,
+        blind_get_reward(current_blind)
+    ); // Blind reward
+
+    deck_shuffle(); // Shuffle the deck at the start of the round
+
+    /* Note that since cards_in_hand_update_loop() handles card highlight there's no need
+     * to call a selection changed callback to highlight the initial card, this wouldn't work
+     * otherwise or for the buttons.
+     */
+    game_playing_selection_grid.selection = GAME_PLAYING_INIT_SEL;
+}
+
+static void game_main_menu_on_init()
+{
+    affine_background_change_background(AFFINE_BG_MAIN_MENU);
+    change_background(BG_MAIN_MENU);
+    main_menu_ace = card_object_new(card_new(SPADES, ACE));
+    card_object_set_sprite(main_menu_ace, 0); // Set the sprite for the ace of spades
+    main_menu_ace->sprite_object->sprite->obj->attr0 |=
+        ATTR0_AFF_DBL; // Make the sprite double sized
+    main_menu_ace->sprite_object->tx = int2fx(MAIN_MENU_ACE_T.x);
+    main_menu_ace->sprite_object->x = main_menu_ace->sprite_object->tx;
+    main_menu_ace->sprite_object->ty = int2fx(MAIN_MENU_ACE_T.y);
+    main_menu_ace->sprite_object->y = main_menu_ace->sprite_object->ty;
+    main_menu_ace->sprite_object->tscale = float2fx(0.8f);
+}
+
+static void game_over_init(void)
+{
+    // Clears the round end menu
+    main_bg_se_clear_rect(POP_MENU_ANIM_RECT);
+    main_bg_se_copy_expand_3x3_rect(GAME_OVER_DIALOG_DEST_RECT, GAME_OVER_SRC_RECT_3X3_POS);
+    main_bg_se_copy_rect(NEW_RUN_BTN_SRC_RECT, NEW_RUN_BTN_DEST_POS);
+}
+
+static void game_lose_on_init()
+{
+    game_over_init();
+    // Using the text color to match the "Game Over" text
+    affine_background_set_color(TEXT_CLR_RED);
+}
+
+static void game_win_on_init()
+{
+    game_over_init();
+    // Using the text color to match the "You Win" text
+    affine_background_set_color(TEXT_CLR_BLUE);
+}
+
+// General functions
+static inline void set_seed(int seed)
+{
+    rng_seed = seed;
+    srand(rng_seed);
+}
+
+// Playing state functions
 static void game_playing_discard_on_pressed(void)
 {
-    if (!hand_can_discard())
+    if (!can_discard_hand())
         return;
 
     hand_state = HAND_DISCARD;
@@ -1875,7 +1969,7 @@ static void game_playing_discard_on_pressed(void)
 
 static void game_playing_play_hand_on_pressed(void)
 {
-    if (!hand_can_play())
+    if (!can_play_hand())
         return;
 
     hand_state = HAND_PLAY;
@@ -1889,6 +1983,22 @@ static int game_playing_hand_row_get_size(void)
 {
     return hand_get_size();
 }
+
+// card moving logic
+
+// true if and only if we are currently moving a card around
+static bool moving_card = false;
+
+// This will prevent us from moving cards around if we selected one
+// by moving too fast after pressing the A button
+static bool card_moved_too_fast = false;
+static bool card_selected_instead_of_moved = false;
+
+// After pressing A, if we press Left/Right too fast, we should select the card
+// and change focus to the next one, instead of swapping them
+// This should fix inputs sometimes not registering when quickly selecting cards
+static const int card_swap_time_threshold = 6;
+static uint selection_hit_timer = TM_ZERO;
 
 static bool game_playing_hand_row_on_selection_changed(
     SelectionGrid* selection_grid,
@@ -2038,118 +2148,6 @@ static void game_playing_button_row_on_key_hit(SelectionGrid* selection_grid, Se
     }
 }
 
-static void game_round_on_init()
-{
-    hand_state = HAND_DRAW;
-    cards_drawn = 0;
-    hand_selections = 0;
-
-    playing_blind_token = blind_token_new(
-        current_blind,
-        CUR_BLIND_TOKEN_POS.x,
-        CUR_BLIND_TOKEN_POS.y,
-        MAX_SELECTION_SIZE + MAX_HAND_SIZE + 1
-    ); // Create the blind token sprite at the top left corner
-    // TODO: Hide blind token and display it after sliding blind rect animation
-    // if (playing_blind_token != NULL)
-    //{
-    //    obj_hide(playing_blind_token->obj); // Hide the blind token sprite for now
-    //}
-    round_end_blind_token = blind_token_new(
-        current_blind,
-        81,
-        86,
-        MAX_SELECTION_SIZE + MAX_HAND_SIZE + 2
-    ); // Create the blind token sprite for round end
-
-    if (round_end_blind_token != NULL)
-    {
-        obj_hide(round_end_blind_token->obj); // Hide the blind token sprite for now
-    }
-
-    Rect blind_req_text_rect = BLIND_REQ_TEXT_RECT;
-    u32 blind_requirement = blind_get_requirement(current_blind, ante);
-
-    char blind_req_str_buff[UINT_MAX_DIGITS + 1];
-
-    truncate_uint_to_suffixed_str(
-        blind_requirement,
-        rect_width(&BLIND_REQ_TEXT_RECT) / TTE_CHAR_SIZE,
-        blind_req_str_buff
-    );
-
-    // Update text rect for right alignment AFTER shortening the number
-    update_text_rect_to_right_align_str(&blind_req_text_rect, blind_req_str_buff, OVERFLOW_RIGHT);
-
-    tte_printf(
-        "#{P:%d,%d; cx:0x%X000}%s",
-        blind_req_text_rect.left,
-        blind_req_text_rect.top,
-        TTE_RED_PB,
-        blind_req_str_buff
-    );
-    tte_printf(
-        "#{P:%d,%d; cx:0x%X000}$%d",
-        BLIND_REWARD_RECT.left,
-        BLIND_REWARD_RECT.top,
-        TTE_YELLOW_PB,
-        blind_get_reward(current_blind)
-    ); // Blind reward
-
-    deck_shuffle(); // Shuffle the deck at the start of the round
-
-    /* Note that since cards_in_hand_update_loop() handles card highlight there's no need
-     * to call a selection changed callback to highlight the initial card, this wouldn't work
-     * otherwise or for the buttons.
-     */
-    game_playing_selection_grid.selection = GAME_PLAYING_INIT_SEL;
-}
-
-static void game_main_menu_on_init()
-{
-    affine_background_change_background(AFFINE_BG_MAIN_MENU);
-    change_background(BG_MAIN_MENU);
-    main_menu_ace = card_object_new(card_new(SPADES, ACE));
-    card_object_set_sprite(main_menu_ace, 0); // Set the sprite for the ace of spades
-    main_menu_ace->sprite_object->sprite->obj->attr0 |=
-        ATTR0_AFF_DBL; // Make the sprite double sized
-    main_menu_ace->sprite_object->tx = int2fx(MAIN_MENU_ACE_T.x);
-    main_menu_ace->sprite_object->x = main_menu_ace->sprite_object->tx;
-    main_menu_ace->sprite_object->ty = int2fx(MAIN_MENU_ACE_T.y);
-    main_menu_ace->sprite_object->y = main_menu_ace->sprite_object->ty;
-    main_menu_ace->sprite_object->tscale = float2fx(0.8f);
-}
-
-static void game_over_init(void)
-{
-    // Clears the round end menu
-    main_bg_se_clear_rect(POP_MENU_ANIM_RECT);
-    main_bg_se_copy_expand_3x3_rect(GAME_OVER_DIALOG_DEST_RECT, GAME_OVER_SRC_RECT_3X3_POS);
-    main_bg_se_copy_rect(NEW_RUN_BTN_SRC_RECT, NEW_RUN_BTN_DEST_POS);
-}
-
-static void game_lose_on_init()
-{
-    game_over_init();
-    // Using the text color to match the "Game Over" text
-    affine_background_set_color(TEXT_CLR_RED);
-}
-
-static void game_win_on_init()
-{
-    game_over_init();
-    // Using the text color to match the "You Win" text
-    affine_background_set_color(TEXT_CLR_BLUE);
-}
-
-// General functions
-static inline void set_seed(int seed)
-{
-    rng_seed = seed;
-    srand(rng_seed);
-}
-
-// Playing state functions
 
 static void hand_deselect_all_cards(void)
 {
@@ -2176,7 +2174,7 @@ static void hand_change_sort(void)
     sort_cards();
 }
 
-static bool hand_can_play(void)
+static bool can_play_hand(void)
 {
     if (hand_state != HAND_SELECT || hand_selections == 0)
         return false;
