@@ -311,7 +311,7 @@ static void remove_owned_joker(int owned_joker_idx);
 
 static int hand_sel_idx_to_card_idx(int selection_index);
 static void hand_select_card(int index);
-static void hand_change_sort(void);
+static void hand_toggle_sort(void);
 static void hand_deselect_all_cards(void);
 static bool can_play_hand(void);
 static bool can_discard_hand(void);
@@ -2108,7 +2108,7 @@ static void game_playing_hand_row_on_key_transit(
     }
     else if (key_hit(SORT_HAND))
     {
-        hand_change_sort();
+        hand_toggle_sort();
     }
 }
 
@@ -2172,9 +2172,18 @@ static void hand_deselect_all_cards(void)
     }
 }
 
-static void hand_change_sort(void)
+static void hand_toggle_sort(void)
 {
     sort_by_suit = !sort_by_suit;
+    sort_cards();
+}
+
+static void hand_change_sort(bool to_sort_by_suit)
+{
+    if (sort_by_suit == to_sort_by_suit)
+        return;
+    
+    sort_by_suit = to_sort_by_suit;
     sort_cards();
 }
 
