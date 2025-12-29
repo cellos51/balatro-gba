@@ -89,6 +89,7 @@
 #define TM_BLIND_SELECT_START           1
 #define TM_END_ANIM_SEQ                 12
 
+// TODO: Rename "PID" to "PAL_IDX"
 // Palette IDs
 #define BOSS_BLIND_PRIMARY_PID               1
 #define MAIN_MENU_PLAY_BUTTON_OUTLINE_PID    2
@@ -98,14 +99,10 @@
 #define NEXT_ROUND_BTN_SELECTED_BORDER_PID   5
 #define BLIND_BG_SHADOW_PID                  5
 #define SHOP_PANEL_SHADOW_PID                6
-#define PLAY_HAND_BTN_PID                    6
 #define BOSS_BLIND_SHADOW_PID                7
-#define PLAY_HAND_BTN_BORDER_PID             7
 #define REROLL_BTN_SELECTED_BORDER_PID       7
 #define SHOP_LIGHTS_1_PID                    8
-#define DISCARD_BTN_BORDER_PID               8
 #define BLIND_SKIP_BTN_SELECTED_BORDER_PID   10
-#define DISCARD_BTN_PID                      13
 #define SHOP_LIGHTS_2_PID                    14
 #define BLIND_SELECT_BTN_PID                 15
 #define NEXT_ROUND_BTN_PID                   16
@@ -116,6 +113,15 @@
 #define REWARD_PANEL_BORDER_PID              19
 #define SHOP_LIGHTS_4_PID                    22
 #define SHOP_BOTTOM_PANEL_BORDER_PID         26
+
+#define PLAY_HAND_BTN_PID                    6
+#define PLAY_HAND_BTN_BORDER_PID             7
+#define DISCARD_BTN_PID                      13
+#define DISCARD_BTN_BORDER_PID               8
+#define SORT_BTN_PID                         9
+#define SORT_BY_RANK_BTN_BORDER_PID          22
+#define SORT_BY_SUIT_BTN_BORDER_PID          23
+
 // Naming the stage where cards return from the discard pile to the deck "undiscard"
 
 /* This needs to stay a power of 2 and small enough
@@ -1943,10 +1949,19 @@ static void hand_deselect_all_cards(void)
     }
 }
 
-static inline void hand_change_sort(void)
+static inline void hand_toggle_sort(void)
 {
     sort_by_suit = !sort_by_suit;
     sort_cards();
+}
+
+static inline void hand_change_sort(bool to_sort_by_suit)
+{
+    if (to_sort_by_suit != sort_by_suit)
+    {
+        sort_by_suit = to_sort_by_suit;
+        sort_cards();
+    }
 }
 
 static inline bool hand_can_play(void)
@@ -2155,7 +2170,7 @@ static inline void game_playing_process_hand_select_input(void)
 
     if (key_hit(SORT_HAND))
     {
-        hand_change_sort();
+        hand_toggle_sort();
     }
 }
 
