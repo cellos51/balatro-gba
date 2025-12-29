@@ -116,7 +116,7 @@
 #define PLAY_HAND_BTN_BORDER_PID             7
 #define DISCARD_BTN_PID                      13
 #define DISCARD_BTN_BORDER_PID               8
-#define SORT_BTN_PID                         9
+#define SORT_BTNS_PID                        9
 #define SORT_BY_RANK_BTN_BORDER_PID          22
 #define SORT_BY_SUIT_BTN_BORDER_PID          23
 
@@ -254,6 +254,9 @@ static void game_over_anim_frame(void);
 
 static void game_playing_discard_on_pressed(void);
 static void game_playing_play_hand_on_pressed(void);
+static void game_playing_sort_by_rank_on_pressed(void);
+static void game_playing_sort_by_suit_on_pressed(void);
+
 static int game_playing_button_row_get_size(void);
 static bool game_playing_button_row_on_selection_changed(
     SelectionGrid* selection_grid,
@@ -312,6 +315,7 @@ static void remove_owned_joker(int owned_joker_idx);
 static int hand_sel_idx_to_card_idx(int selection_index);
 static void hand_select_card(int index);
 static void hand_toggle_sort(void);
+static void hand_change_sort(bool to_sort_by_suit);
 static void hand_deselect_all_cards(void);
 static bool can_play_hand(void);
 static bool can_discard_hand(void);
@@ -451,6 +455,8 @@ SelectionGrid game_playing_selection_grid = {
 // Array of buttons by horizontal selection index (x)
 Button game_playing_buttons[] = {
     {PLAY_HAND_BTN_BORDER_PID, PLAY_HAND_BTN_PID, game_playing_play_hand_on_pressed, can_play_hand   },
+    {SORT_BY_RANK_BTN_BORDER_PID, SORT_BTNS_PID,  game_playing_sort_by_rank_on_pressed, NULL         },
+    {SORT_BY_SUIT_BTN_BORDER_PID, SORT_BTNS_PID,  game_playing_sort_by_suit_on_pressed, NULL         },
     {DISCARD_BTN_BORDER_PID,   DISCARD_BTN_PID,   game_playing_discard_on_pressed,   can_discard_hand},
 };
 
@@ -1983,6 +1989,15 @@ static void game_playing_play_hand_on_pressed(void)
     selection_grid_move_selection_vert(&game_playing_selection_grid, -1);
 }
 
+static void game_playing_sort_by_rank_on_pressed(void)
+{
+    hand_change_sort(false);
+}
+
+static void game_playing_sort_by_suit_on_pressed(void)
+{
+    hand_change_sort(true);
+}
 
 static int game_playing_hand_row_get_size(void)
 {
