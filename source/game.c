@@ -112,13 +112,13 @@
 #define SHOP_LIGHTS_4_PID                    22
 #define SHOP_BOTTOM_PANEL_BORDER_PID         26
 
-#define PLAY_HAND_BTN_PID                    6
-#define PLAY_HAND_BTN_BORDER_PID             7
-#define DISCARD_BTN_PID                      13
-#define DISCARD_BTN_BORDER_PID               8
-#define SORT_BTNS_PID                        9
-#define SORT_BY_RANK_BTN_BORDER_PID          22
-#define SORT_BY_SUIT_BTN_BORDER_PID          23
+#define PLAY_HAND_BTN_PID           6
+#define PLAY_HAND_BTN_BORDER_PID    7
+#define DISCARD_BTN_PID             13
+#define DISCARD_BTN_BORDER_PID      8
+#define SORT_BTNS_PID               9
+#define SORT_BY_RANK_BTN_BORDER_PID 22
+#define SORT_BY_SUIT_BTN_BORDER_PID 23
 
 // Naming the stage where cards return from the discard pile to the deck "undiscard"
 
@@ -454,10 +454,10 @@ SelectionGrid game_playing_selection_grid = {
 
 // Array of buttons by horizontal selection index (x)
 Button game_playing_buttons[] = {
-    {PLAY_HAND_BTN_BORDER_PID, PLAY_HAND_BTN_PID, game_playing_play_hand_on_pressed, can_play_hand   },
-    {SORT_BY_RANK_BTN_BORDER_PID, SORT_BTNS_PID,  game_playing_sort_by_rank_on_pressed, NULL         },
-    {SORT_BY_SUIT_BTN_BORDER_PID, SORT_BTNS_PID,  game_playing_sort_by_suit_on_pressed, NULL         },
-    {DISCARD_BTN_BORDER_PID,   DISCARD_BTN_PID,   game_playing_discard_on_pressed,   can_discard_hand},
+    {PLAY_HAND_BTN_BORDER_PID,    PLAY_HAND_BTN_PID, game_playing_play_hand_on_pressed,    can_play_hand   },
+    {SORT_BY_RANK_BTN_BORDER_PID, SORT_BTNS_PID,     game_playing_sort_by_rank_on_pressed, NULL            },
+    {SORT_BY_SUIT_BTN_BORDER_PID, SORT_BTNS_PID,     game_playing_sort_by_suit_on_pressed, NULL            },
+    {DISCARD_BTN_BORDER_PID,      DISCARD_BTN_PID,   game_playing_discard_on_pressed,      can_discard_hand},
 };
 
 SelectionGridRow shop_selection_rows[] = {
@@ -2197,7 +2197,7 @@ static void hand_change_sort(bool to_sort_by_suit)
 {
     if (sort_by_suit == to_sort_by_suit)
         return;
-    
+
     sort_by_suit = to_sort_by_suit;
     sort_cards();
 }
