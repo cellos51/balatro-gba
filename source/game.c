@@ -1288,13 +1288,11 @@ void hand_get_type(void)
 }
 
 // Returns true if the card is *considered* a face card
-bool card_is_face(Card *card)
+bool card_is_face(Card* card)
 {
     // Card is a face card, or Pareidolia is present
     return (
-        card->rank == JACK  ||
-        card->rank == QUEEN ||
-        card->rank == KING  ||
+        card->rank == JACK || card->rank == QUEEN || card->rank == KING ||
         is_joker_owned(PAREIDOLIA_JOKER_ID)
     );
 }

@@ -98,23 +98,23 @@ enum HandType
 // Store all contained hands to optimize "whole hand condition" Jokers
 typedef struct ContainedHandTypes
 {
-    u16 HIGH_CARD       : 1;
-    u16 PAIR            : 1;
-    u16 TWO_PAIR        : 1;
+    u16 HIGH_CARD : 1;
+    u16 PAIR : 1;
+    u16 TWO_PAIR : 1;
     u16 THREE_OF_A_KIND : 1;
-    u16 FOUR_OF_A_KIND  : 1;
-    u16 STRAIGHT        : 1;
-    u16 FLUSH           : 1;
-    u16 FULL_HOUSE      : 1;
-    u16 STRAIGHT_FLUSH  : 1;
-    u16 ROYAL_FLUSH     : 1;
-    u16 FIVE_OF_A_KIND  : 1;
-    u16 FLUSH_HOUSE     : 1;
-    u16 FLUSH_FIVE      : 1;
-    u16                 : 3;
+    u16 FOUR_OF_A_KIND : 1;
+    u16 STRAIGHT : 1;
+    u16 FLUSH : 1;
+    u16 FULL_HOUSE : 1;
+    u16 STRAIGHT_FLUSH : 1;
+    u16 ROYAL_FLUSH : 1;
+    u16 FIVE_OF_A_KIND : 1;
+    u16 FLUSH_HOUSE : 1;
+    u16 FLUSH_FIVE : 1;
+    u16 : 3;
 } ContainedHandTypes;
 
-typedef struct 
+typedef struct
 {
     int substate;
     void (*on_init)();
