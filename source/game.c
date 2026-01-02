@@ -705,6 +705,10 @@ void game_init()
     money = STARTING_MONEY;
     score = STARTING_SCORE;
 
+    // Initialize/reset unbeaten Boss/Showdown Blinds so they are all available
+    init_unbeaten_blinds_list(false);
+    init_unbeaten_blinds_list(true);
+
     blind_tokens_init();
 }
 
