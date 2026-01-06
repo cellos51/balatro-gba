@@ -220,6 +220,8 @@ static void game_blind_select_start_anim_seq(void);
 static void game_blind_select_handle_input(void);
 static void game_blind_select_selected_anim_seq(void);
 static void game_blind_select_display_blind_panel(void);
+static Rect game_blind_select_get_req_score_rect(enum BlindType blind);
+static void game_blind_select_print_blinds_reqs_and_rewards(void);
 static void game_round_end_start(void);
 static void game_round_end_start_expand_popup(void);
 static void game_round_end_display_finished_blind(void);
@@ -4364,7 +4366,7 @@ static void game_blind_select_on_update()
     blind_select_state_actions[substate]();
 }
 
-static void game_blind_select_erase_blind_reqs_and_rewards()
+static inline void game_blind_select_erase_blind_reqs_and_rewards()
 {
     for (enum BlindType curr_blind = 0; curr_blind < BLIND_TYPE_MAX; curr_blind++)
     {
@@ -4450,7 +4452,7 @@ static inline void game_blind_select_print_blind_reward(enum BlindType blind)
     );
 }
 
-static void game_blind_select_print_blinds_reqs_and_rewards()
+static void game_blind_select_print_blinds_reqs_and_rewards(void)
 {
     for (enum BlindType curr_blind = 0; curr_blind < BLIND_TYPE_MAX; curr_blind++)
     {
