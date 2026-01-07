@@ -427,12 +427,31 @@ static StateInfo state_info[] = {
 #undef DEF_STATE_INFO
 };
 
-// TODO: Format for line length
+// clang-format off
 SelectionGridRow game_playing_selection_rows[] = {
-    {0, jokers_sel_row_get_size,          jokers_sel_row_on_selection_changed,          jokers_sel_row_on_key_transit,        {.wrap = false}},
-    {1, game_playing_hand_row_get_size,   game_playing_hand_row_on_selection_changed,   game_playing_hand_row_on_key_transit, {.wrap = true} },
-    {2, game_playing_button_row_get_size, game_playing_button_row_on_selection_changed, game_playing_button_row_on_key_hit,   {.wrap = true} }
+    {
+        0,
+        jokers_sel_row_get_size,
+        jokers_sel_row_on_selection_changed,
+        jokers_sel_row_on_key_transit,
+        {.wrap = false}
+    },
+    {
+        1,
+        game_playing_hand_row_get_size,
+        game_playing_hand_row_on_selection_changed,
+        game_playing_hand_row_on_key_transit,
+        {.wrap = true}
+    },
+    {
+        2,
+        game_playing_button_row_get_size,
+        game_playing_button_row_on_selection_changed,
+        game_playing_button_row_on_key_hit,
+        {.wrap = false}
+    }
 };
+// clang-format on
 
 static const Selection GAME_PLAYING_INIT_SEL = {0, 1};
 
