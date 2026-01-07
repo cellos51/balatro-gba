@@ -10,12 +10,7 @@ void button_set_highlight(Button* button, bool highlight)
     if (button == NULL)
         return;
 
-    u16 set_color = BTN_HIGHLIGHT_COLOR;
-
-    if (!highlight)
-    {
-        set_color = pal_bg_mem[button->button_pal_idx];
-    }
+    u16 set_color = highlight ? BTN_HIGHLIGHT_COLOR : pal_bg_mem[button->button_pal_idx];
 
     memset16(&pal_bg_mem[button->border_pal_idx], set_color, 1);
 }
