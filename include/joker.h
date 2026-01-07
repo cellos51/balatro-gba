@@ -52,6 +52,7 @@ enum JokerEvent
 {
     JOKER_EVENT_ON_JOKER_CREATED, // Triggers only once when the Joker is created, mainly used for
                                   // data initialization
+    JOKER_EVENT_ON_JOKER_SOLD,    // Triggers once when selling the Joker
     JOKER_EVENT_ON_HAND_PLAYED,   // Triggers only once when the hand is played and before the cards
                                   // are scored
     JOKER_EVENT_ON_CARD_SCORED,   // Triggers when a played card scores (e.g. Walkie Talkie,

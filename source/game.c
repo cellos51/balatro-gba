@@ -774,11 +774,28 @@ static inline void expired_jokers_update_loop(void)
     }
 }
 
+// Number of frames a message from a Joker will stay on screen when appearing outside of scoring
+#define JOKER_MESSAGE_DURATION 20
+static uint joker_message_timer = 0;
+static bool joker_message_shown = false;
+
 static inline void jokers_update_loop(void)
 {
     held_jokers_update_loop();
     discarded_jokers_update_loop();
     expired_jokers_update_loop();
+
+    // This is done to erase the messages of Jokers triggered outside of normal scoring
+    // like Luchador or Egg, since they will not be erased automatically
+    if (joker_message_shown)
+    {
+        joker_message_timer++;
+        if (joker_message_timer > FRAMES(JOKER_MESSAGE_DURATION))
+        {
+            tte_erase_rect_wrapper(PLAYED_CARDS_SCORES_RECT);
+            joker_message_shown = false;
+        }
+    }
 }
 
 void game_update()
@@ -3972,8 +3989,16 @@ static inline void game_sell_joker(int joker_idx)
     display_money();
     erase_price_under_sprite_object(joker_object->sprite_object);
 
-    remove_owned_joker(joker_idx);
+    // Delete Joker by hand only if it doesn't score when sold because in this case,
+    // The Joker scoring function will make it expire with a little animation
+    if (joker_object_score(joker_object, NULL, JOKER_EVENT_ON_JOKER_SOLD))
+    {
+        joker_message_timer = TM_ZERO;
+        joker_message_shown = true;
+        return;
+    }
 
+    remove_owned_joker(joker_idx);
     joker_start_discard_animation(joker_object);
 }
 
