@@ -484,6 +484,7 @@ static Sprite* round_end_blind_token = NULL;
 static Sprite* blind_select_tokens[BLIND_TYPE_MAX] = {NULL};
 
 static int current_blind = BLIND_TYPE_SMALL;
+static bool blind_disabled = false;
 
 // The current state of the blinds, this is used to determine what the game is doing at any given
 // time
@@ -877,6 +878,18 @@ bool card_is_face(Card* card)
         card->rank == JACK || card->rank == QUEEN || card->rank == KING ||
         is_joker_owned(PAREIDOLIA_JOKER_ID)
     );
+}
+
+// Are we currently playing a boss blind?
+// Used by Luchador to determine if it has any effect
+bool is_blind_boss(void)
+{
+    return current_blind > BLIND_TYPE_BIG && game_state == GAME_STATE_PLAYING;
+}
+
+void disable_boss_blind(void)
+{
+    blind_disabled = true;
 }
 
 List* get_jokers_list(void)
@@ -3381,6 +3394,9 @@ static void game_round_end_on_exit()
     sprite_destroy(&playing_blind_token);
     sprite_destroy(&round_end_blind_token);
     // TODO: Reuse sprites for blind selection?
+
+    // re-enable blind if it had been disabled
+    blind_disabled = false;
 }
 
 static void game_round_end_on_update()

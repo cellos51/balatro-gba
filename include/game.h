@@ -116,6 +116,8 @@ int get_played_top(void);
 int get_scored_card_index(void);
 bool is_joker_owned(int joker_id);
 bool card_is_face(Card* card);
+bool is_blind_boss(void);
+void disable_boss_blind(void);
 List* get_jokers_list(void);
 List* get_expired_jokers_list(void);
 

@@ -1822,15 +1822,16 @@ static u32 luchador_joker_effect(
     u32 effect_flags_ret = JOKER_EFFECT_FLAG_NONE;
 
     SCORE_ON_EVENT_ONLY(JOKER_EVENT_ON_JOKER_SOLD, joker_event)
-    
-    // TODO: check if we are playing a Boss Blind round
-    // TODO: disable boss blind
-
     *joker_effect = &shared_joker_effect;
 
-    (*joker_effect)->message = "No Boss!";
-    (*joker_effect)->expire = true;
-    effect_flags_ret = JOKER_EFFECT_FLAG_EXPIRE | JOKER_EFFECT_FLAG_MESSAGE;
+    if (is_blind_boss())
+    {
+        disable_boss_blind();
+
+        (*joker_effect)->message = "No Boss!";
+        (*joker_effect)->expire = true;
+        effect_flags_ret = JOKER_EFFECT_FLAG_EXPIRE | JOKER_EFFECT_FLAG_MESSAGE;
+    }
 
     return effect_flags_ret;
 }
