@@ -4788,16 +4788,12 @@ static void game_lose_on_update()
 // util we decide what we want to do after a game over.
 static void game_over_on_exit()
 {
-    ListItr itr = list_itr_create(&_owned_jokers_list);
-    JokerObject* joker_object;
-
-    while ((joker_object = list_itr_next(&itr)))
+    while (list_get_len(&_owned_jokers_list) > 0)
     {
+        JokerObject* joker_object = list_get_at_idx(&_owned_jokers_list, 0);
         joker_object_destroy(&joker_object);
+        remove_owned_joker(0);
     }
-
-    // If Four Fingers was owned this run we have to set back the default size
-    straight_and_flush_size = STRAIGHT_AND_FLUSH_SIZE_DEFAULT;
 
     tte_erase_screen();
 
