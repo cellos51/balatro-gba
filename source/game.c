@@ -4157,6 +4157,7 @@ static bool shop_top_row_on_selection_changed(
 {
     // The selection grid system only guarantees that the new selection is within bounds
     // but not the previous one...
+    // This allows using INIT_SEL = {-1, 1} and move to set the initial selection in a hacky way...
     if (prev_selection->y == row_idx && prev_selection->x >= 0 &&
         prev_selection->x < shop_top_row_get_size())
     {
@@ -4174,7 +4175,6 @@ static bool shop_top_row_on_selection_changed(
             int idx = prev_selection->x - 1; // -1 to account for next round button
             JokerObject* joker_object = (JokerObject*)list_get_at_idx(&_shop_jokers_list, idx);
             sprite_object_set_focus(joker_object->sprite_object, false);
-            // -1 to account for next round button
         }
     }
 
