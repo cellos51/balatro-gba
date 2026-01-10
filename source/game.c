@@ -4796,7 +4796,7 @@ static void game_over_on_exit()
         joker_object_destroy(&joker_object);
     }
 
-    //If Four Fingers was owned this run we have to set back the default size
+    // If Four Fingers was owned this run we have to set back the default size
     straight_and_flush_size = STRAIGHT_AND_FLUSH_SIZE_DEFAULT;
 
     tte_erase_screen();
