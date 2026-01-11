@@ -564,7 +564,6 @@ static int discard_top = -1;
 static int shortcut_joker_count = 0;
 
 static int four_fingers_joker_count = 0;
-static int straight_and_flush_size = STRAIGHT_AND_FLUSH_SIZE_DEFAULT;
 
 GBAL_UNUSED
 static inline bool is_shop_joker_avail(int joker_id)
@@ -879,7 +878,8 @@ bool is_shortcut_joker_active(void)
 
 int get_straight_and_flush_size(void)
 {
-    return straight_and_flush_size;
+    return four_fingers_joker_count > 0 ? STRAIGHT_AND_FLUSH_SIZE_FOUR_FINGERS
+                                        : STRAIGHT_AND_FLUSH_SIZE_DEFAULT;
 }
 
 static void add_joker(JokerObject* joker_object)
@@ -891,10 +891,6 @@ static void add_joker(JokerObject* joker_object)
     // only change size when the first one is added
     if (joker_object->joker->id == FOUR_FINGERS_JOKER_ID)
     {
-        if (four_fingers_joker_count == 0)
-        {
-            straight_and_flush_size = STRAIGHT_AND_FLUSH_SIZE_FOUR_FINGERS;
-        }
         four_fingers_joker_count++;
     }
 
@@ -913,10 +909,6 @@ static void remove_owned_joker(int owned_joker_idx)
     if (joker_object->joker->id == FOUR_FINGERS_JOKER_ID)
     {
         four_fingers_joker_count--;
-        if (four_fingers_joker_count == 0)
-        {
-            straight_and_flush_size = STRAIGHT_AND_FLUSH_SIZE_DEFAULT;
-        }
     }
 
     if (joker_object->joker->id == SHORTCUT_JOKER_ID)
@@ -4788,11 +4780,10 @@ static void game_lose_on_update()
 // util we decide what we want to do after a game over.
 static void game_over_on_exit()
 {
-    ListItr itr = list_itr_create(&_owned_jokers_list);
-    JokerObject* joker_object;
-
-    while ((joker_object = list_itr_next(&itr)))
+    while (list_get_len(&_owned_jokers_list) > 0)
     {
+        JokerObject* joker_object = list_get_at_idx(&_owned_jokers_list, 0);
+        remove_owned_joker(0);
         joker_object_destroy(&joker_object);
     }
 
