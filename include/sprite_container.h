@@ -51,13 +51,16 @@ typedef struct SpriteContainer
     enum LayoutJustification justification;
 
     /**
-     * @brief A Rect representing the actual, local position/size of the art within their Sprite.
+     * @brief A Rect representing the actual, local position/size of the art within the Sprites.
      *
-     * For the Skip Tags, the sprite is 16x16 ps, but the actual object is only 10x10, which means
-     * that `real_pos_size` will be `{3, 3, 13, 13}`, or `{4, 0, 28, 32}` for Jokers, Cards, etc
+     * Examples:
+     *   - For the Skip Tags, the sprite is 16x16 px, but the actual art always fits within
+     *     a centered 10x10 px square, which gives `{3, 3, 13, 13}`
+     *   - For the Jokers, Cards, Planets etc, they are generally rectangles of 24x32 px centered
+     *     in a 32x32 px sprite, which gives `{4, 0, 28, 32}`
      *
-     * The Sprites should all be uniform within a single Container, hence why we'll save memory
-     * space by storing the information here instead of in each Sprite
+     * The Sprites should all be uniform within a single Container, so this is stored here instead
+     * of per-sprite.
      */
     Rect sprite_local_aabb;
 

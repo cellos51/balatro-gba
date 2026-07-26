@@ -311,7 +311,7 @@ static inline void expired_jokers_update_loop(void)
             // the other owned Jokers rearranging themselves to fill the newly
             // freed space, therefore obscuring the animation
             remove_owned_joker(expired_joker_idx);
-            container_itr_remove_current_node(&s_owned_jokers_container, &itr);
+            list_itr_remove_current_node(&itr);
             joker_object_destroy(&joker_object);
         }
     }
