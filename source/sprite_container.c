@@ -35,7 +35,17 @@ static inline void container_update(SpriteContainer* container)
     if (overrun > 0 && nb_sprites > 1)
     {
         // Ceil the reduction so the corrected layout does not still overflow.
-        spacing -= (overrun + (nb_sprites - 2)) / (nb_sprites - 1);
+        int reduce = (overrun + (nb_sprites - 2)) / (nb_sprites - 1);
+        spacing -= reduce;
+
+        // If the sprites need to be centered, and depending on the numer of them, the reduction to
+        // the spacing may cause an imbalance that can be solved by shifting the sprites slightly
+        // to the right
+        if (container->justification == LAYOUT_JUST_CENTER)
+        {
+            int new_length = nb_sprites * pos_size.y + (nb_sprites - 1) * spacing;
+            start_pos += (max_length - new_length) / 2;
+        }
     }
     // If they fit inside the container, correct the starting point if they need to be centered
     else if (overrun < 0 && container->justification == LAYOUT_JUST_CENTER)
