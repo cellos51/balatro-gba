@@ -36,6 +36,7 @@
 #define TM_HIDE_DECK_WAIT         5
 
 // Pixel sized
+#define ITEM_SHOP_SPACING         8
 #define ITEM_SHOP_Y               71
 #define OWNED_ITEMS_HIDE_Y_OFFSET 50
 
@@ -86,6 +87,7 @@ static const Rect     ITEM_NAME_TEXT_RECT           = { 10,  7, 27,  7};
 // Positions in pixels
 static const BG_POINT SHOP_JOKER_SPRITES_INIT_POS = {120, 160};
 static const BG_POINT ITEM_DESCRIPTION_SPRITE_POS = {135,   9};
+static const Rect     SHOP_ITEMS_CONTAINER_RECT   = {114,  71, 190, 103 };
 static const Rect     SHOP_PRICES_TEXT_RECT       = { 72,  56, 192, 160 };
 static const Rect     SHOP_REROLL_RECT            = { 88,  96, UNDEFINED, UNDEFINED };
 // clang-format on
@@ -96,8 +98,9 @@ static SpriteContainer s_shop_items_container = {
     .pos = SHOP_ITEMS_CONTAINER_RECT,
     .direction = LAYOUT_DIR_HORIZONTAL,
     .justification = LAYOUT_JUST_CENTER,
+    .justification_ortho = LAYOUT_JUST_BEGIN,
     .sprite_local_aabb = CARD_SPRITE_LOCAL_AABB,
-    .maximum_spacing = 8
+    .maximum_spacing = ITEM_SHOP_SPACING
 };
 
 enum GameShopStates
@@ -322,12 +325,18 @@ static void shop_create_top_row_items(void)
 
         item->x = int2fx(SHOP_JOKER_SPRITES_INIT_POS.x + i * CARD_SPRITE_SIZE_PX);
         item->y = int2fx(SHOP_JOKER_SPRITES_INIT_POS.y);
-        item->tx = item->x;
-        item->ty = int2fx(ITEM_SHOP_Y);
 
+        container_push_back(&s_shop_items_container, (SpriteObject*)item, false);
+    }
+
+    container_update(&s_shop_items_container);
+
+    // The following function uses the Sprite's target position which has just been updated
+    ListItr itr = list_itr_create(s_shop_items_container.contents);
+    Item* item;
+    while ((item = list_itr_next(&itr)))
+    {
         item_print_buy_price_under(item);
-
-        container_push_back(&s_shop_items_container, (SpriteObject*)item);
     }
 }
 
@@ -394,7 +403,7 @@ static inline void shop_buy_item(int shop_item_idx)
     sprite_object_set_focus((SpriteObject*)item, false);
 
     // Remove the joker from the shop and add it to our hand
-    container_remove_at_idx(&s_shop_items_container, shop_item_idx);
+    container_remove_at_idx(&s_shop_items_container, shop_item_idx, true);
     item_acquire(item);
 
     // Update prices position under remaining Items

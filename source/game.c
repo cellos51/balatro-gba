@@ -64,25 +64,26 @@ static int deck_get_max_size(void);
 // Consts
 
 // clang-format off
-// Rects                                       left     top     right   bottom
+// Rects                                        left     top     right   bottom
+const static Rect OWNED_JOKERS_CONTAINER_RECT = {72,     12,     176,    44};
 
 // Rects for TTE (in pixels)
 
 // Score displayed in the same place as the hand type
-static const Rect TEMP_SCORE_RECT           = {8,       64,     64,     72  }; 
-static const Rect SCORE_RECT                = {24,      48,     64,     56  };
+static const Rect TEMP_SCORE_RECT             = {8,       64,     64,     72  }; 
+static const Rect SCORE_RECT                  = {24,      48,     64,     56  };
 
-static const Rect MONEY_TEXT_RECT           = {8,       120,    64,     128 };
-static const Rect CHIPS_TEXT_RECT           = {8,       80,     32,     88  };
-static const Rect MULT_TEXT_RECT            = {40,      80,     64,     88  };
+static const Rect MONEY_TEXT_RECT             = {8,       120,    64,     128 };
+static const Rect CHIPS_TEXT_RECT             = {8,       80,     32,     88  };
+static const Rect MULT_TEXT_RECT              = {40,      80,     64,     88  };
 
 // Rects with UNDEFINED are only used in tte_printf, they need to be fully defined
 // to be used with tte_erase_rect_wrapper()
-static const Rect HANDS_TEXT_RECT           = {16,      104,    UNDEFINED, UNDEFINED };
-static const Rect DISCARDS_TEXT_RECT        = {48,      104,    UNDEFINED, UNDEFINED };
-static const Rect DECK_SIZE_RECT            = {200,     152,    240,       160       };
-static const Rect ROUND_TEXT_RECT           = {48,      144,    UNDEFINED, UNDEFINED };
-static const Rect ANTE_TEXT_RECT            = {8,       144,    UNDEFINED, UNDEFINED };
+static const Rect HANDS_TEXT_RECT             = {16,      104,    UNDEFINED, UNDEFINED };
+static const Rect DISCARDS_TEXT_RECT          = {48,      104,    UNDEFINED, UNDEFINED };
+static const Rect DECK_SIZE_RECT              = {200,     152,    240,       160       };
+static const Rect ROUND_TEXT_RECT             = {48,      144,    UNDEFINED, UNDEFINED };
+static const Rect ANTE_TEXT_RECT              = {8,       144,    UNDEFINED, UNDEFINED };
 // clang-format on
 
 static StateInfo state_info[] = {
@@ -136,6 +137,7 @@ static SpriteContainer s_owned_jokers_container = {
     .pos = OWNED_JOKERS_CONTAINER_RECT,
     .direction = LAYOUT_DIR_HORIZONTAL,
     .justification = LAYOUT_JUST_CENTER,
+    .justification_ortho = LAYOUT_JUST_CENTER,
     .sprite_local_aabb = CARD_SPRITE_LOCAL_AABB,
     .maximum_spacing = 8
 };
@@ -386,8 +388,7 @@ int get_straight_and_flush_size(void)
 
 void add_joker(JokerObject* joker_object)
 {
-    container_push_back(&s_owned_jokers_container, (SpriteObject*)joker_object);
-    joker_object->ty = int2fx(HELD_JOKERS_POS.y);
+    container_push_back(&s_owned_jokers_container, (SpriteObject*)joker_object, true);
 
     // TODO: Extract to on_joker_added() callback
     // In case the player gets multiple Four Fingers Jokers,
@@ -421,7 +422,7 @@ void remove_owned_joker(int owned_joker_idx)
 
     // TODO: Move to site of joker_destroy()?
     joker_set_rollable(joker_object->joker->id, true);
-    container_remove_at_idx(&s_owned_jokers_container, owned_joker_idx);
+    container_remove_at_idx(&s_owned_jokers_container, owned_joker_idx, true);
 }
 
 int get_deck_top(void)
