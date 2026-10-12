@@ -694,7 +694,7 @@ $(document).ready(function(){initNavTree('round_8c_source.html',''); initResizab
 <div class="line"><a id="l00572" name="l00572"></a><span class="lineno">  572</span> </div>
 <div class="line"><a id="l00573" name="l00573"></a><span class="lineno">  573</span>    <span class="keywordtype">bool</span> on_the_same_row = new_selection-&gt;y == prev_selection-&gt;y; <span class="comment">// == GAME_PLAYING_HAND_SEL_Y</span></div>
 <div class="line"><a id="l00574" name="l00574"></a><span class="lineno">  574</span> </div>
-<div class="line"><a id="l00575" name="l00575"></a><span class="lineno">  575</span>    <span class="keywordflow">if</span> (on_the_same_row &amp;&amp; key_is_down(SELECT_CARD) &amp;&amp; !s_card_moved_too_fast &amp;&amp;</div>
+<div class="line"><a id="l00575" name="l00575"></a><span class="lineno">  575</span>    <span class="keywordflow">if</span> (on_the_same_row &amp;&amp; key_is_down(KEY_CARD_SELECT) &amp;&amp; !s_card_moved_too_fast &amp;&amp;</div>
 <div class="line"><a id="l00576" name="l00576"></a><span class="lineno">  576</span>        !s_card_selected_instead_of_moved)</div>
 <div class="line"><a id="l00577" name="l00577"></a><span class="lineno">  577</span>    {</div>
 <div class="line"><a id="l00578" name="l00578"></a><span class="lineno">  578</span>        <span class="keywordtype">bool</span> moved_by_one_tile = abs(new_selection-&gt;x - prev_selection-&gt;x) == 1;</div>
@@ -724,7 +724,7 @@ $(document).ready(function(){initNavTree('round_8c_source.html',''); initResizab
 <div class="line"><a id="l00602" name="l00602"></a><span class="lineno">  602</span>    <span class="keywordflow">else</span></div>
 <div class="line"><a id="l00603" name="l00603"></a><span class="lineno">  603</span>    {</div>
 <div class="line"><a id="l00604" name="l00604"></a><span class="lineno">  604</span>        <span class="comment">// select current card if we tried moving it too fast</span></div>
-<div class="line"><a id="l00605" name="l00605"></a><span class="lineno">  605</span>        <span class="keywordflow">if</span> (key_released(SELECT_CARD) || (s_card_moved_too_fast &amp;&amp; !s_moving_card))</div>
+<div class="line"><a id="l00605" name="l00605"></a><span class="lineno">  605</span>        <span class="keywordflow">if</span> (key_released(KEY_CARD_SELECT) || (s_card_moved_too_fast &amp;&amp; !s_moving_card))</div>
 <div class="line"><a id="l00606" name="l00606"></a><span class="lineno">  606</span>        {</div>
 <div class="line"><a id="l00607" name="l00607"></a><span class="lineno">  607</span>            <a class="code hl_function" href="hand_8h.html#ad996a34130bd7cc8511f563a1969c690">hand_select_card</a>(prev_card_idx);</div>
 <div class="line"><a id="l00608" name="l00608"></a><span class="lineno">  608</span>            s_card_selected_instead_of_moved = <span class="keyword">true</span>;</div>
@@ -747,11 +747,11 @@ $(document).ready(function(){initNavTree('round_8c_source.html',''); initResizab
 <div class="line"><a id="l00625" name="l00625"></a><span class="lineno">  625</span> </div>
 <div class="line"><a id="l00626" name="l00626"></a><span class="lineno">  626</span><span class="keyword">static</span> <span class="keywordtype">void</span> round_hand_row_on_key_transit(<a class="code hl_struct" href="structSelectionGrid.html">SelectionGrid</a>* selection_grid, Selection* selection)</div>
 <div class="line"><a id="l00627" name="l00627"></a><span class="lineno">  627</span>{</div>
-<div class="line"><a id="l00628" name="l00628"></a><span class="lineno">  628</span>    <span class="keywordflow">if</span> (key_hit(SELECT_CARD))</div>
+<div class="line"><a id="l00628" name="l00628"></a><span class="lineno">  628</span>    <span class="keywordflow">if</span> (key_hit(KEY_CARD_SELECT))</div>
 <div class="line"><a id="l00629" name="l00629"></a><span class="lineno">  629</span>    {</div>
 <div class="line"><a id="l00630" name="l00630"></a><span class="lineno">  630</span>        s_selection_hit_timer = g_game_vars.timer;</div>
 <div class="line"><a id="l00631" name="l00631"></a><span class="lineno">  631</span>    }</div>
-<div class="line"><a id="l00632" name="l00632"></a><span class="lineno">  632</span>    <span class="keywordflow">else</span> <span class="keywordflow">if</span> (key_released(SELECT_CARD))</div>
+<div class="line"><a id="l00632" name="l00632"></a><span class="lineno">  632</span>    <span class="keywordflow">else</span> <span class="keywordflow">if</span> (key_released(KEY_CARD_SELECT))</div>
 <div class="line"><a id="l00633" name="l00633"></a><span class="lineno">  633</span>    {</div>
 <div class="line"><a id="l00634" name="l00634"></a><span class="lineno">  634</span>        <span class="keywordflow">if</span> (!s_moving_card &amp;&amp; !s_card_selected_instead_of_moved)</div>
 <div class="line"><a id="l00635" name="l00635"></a><span class="lineno">  635</span>        {</div>
@@ -762,16 +762,16 @@ $(document).ready(function(){initNavTree('round_8c_source.html',''); initResizab
 <div class="line"><a id="l00640" name="l00640"></a><span class="lineno">  640</span>        s_card_selected_instead_of_moved = <span class="keyword">false</span>;</div>
 <div class="line"><a id="l00641" name="l00641"></a><span class="lineno">  641</span>        s_selection_hit_timer = UNDEFINED;</div>
 <div class="line"><a id="l00642" name="l00642"></a><span class="lineno">  642</span>    }</div>
-<div class="line"><a id="l00643" name="l00643"></a><span class="lineno">  643</span>    <span class="keywordflow">else</span> <span class="keywordflow">if</span> (key_hit(DESELECT_CARDS))</div>
+<div class="line"><a id="l00643" name="l00643"></a><span class="lineno">  643</span>    <span class="keywordflow">else</span> <span class="keywordflow">if</span> (key_hit(KEY_CARDS_DESELECT))</div>
 <div class="line"><a id="l00644" name="l00644"></a><span class="lineno">  644</span>    {</div>
 <div class="line"><a id="l00645" name="l00645"></a><span class="lineno">  645</span>        <a class="code hl_function" href="hand_8h.html#ae964ed1f7566571c174a23be50819080">hand_deselect_all_cards</a>();</div>
 <div class="line"><a id="l00646" name="l00646"></a><span class="lineno">  646</span>        <a class="code hl_function" href="hand_8h.html#ae7bd4b295ad0106d523da0c57c798748">compute_hand_value_info</a>();</div>
 <div class="line"><a id="l00647" name="l00647"></a><span class="lineno">  647</span>    }</div>
-<div class="line"><a id="l00648" name="l00648"></a><span class="lineno">  648</span>    <span class="keywordflow">else</span> <span class="keywordflow">if</span> (key_hit(PLAY_HAND_KEY))</div>
+<div class="line"><a id="l00648" name="l00648"></a><span class="lineno">  648</span>    <span class="keywordflow">else</span> <span class="keywordflow">if</span> (key_hit(KEY_PLAY_HAND))</div>
 <div class="line"><a id="l00649" name="l00649"></a><span class="lineno">  649</span>    {</div>
 <div class="line"><a id="l00650" name="l00650"></a><span class="lineno">  650</span>        <a class="code hl_function" href="round_8c.html#a90fc589c9cebd37220a1b9d948c027a8">round_execute_play_hand</a>();</div>
 <div class="line"><a id="l00651" name="l00651"></a><span class="lineno">  651</span>    }</div>
-<div class="line"><a id="l00652" name="l00652"></a><span class="lineno">  652</span>    <span class="keywordflow">else</span> <span class="keywordflow">if</span> (key_hit(DISCARD_HAND_KEY))</div>
+<div class="line"><a id="l00652" name="l00652"></a><span class="lineno">  652</span>    <span class="keywordflow">else</span> <span class="keywordflow">if</span> (key_hit(KEY_DISCARD_HAND))</div>
 <div class="line"><a id="l00653" name="l00653"></a><span class="lineno">  653</span>    {</div>
 <div class="line"><a id="l00654" name="l00654"></a><span class="lineno">  654</span>        <a class="code hl_function" href="round_8c.html#a7c24c955f5803f64fe5436b375087055">round_execute_discard</a>();</div>
 <div class="line"><a id="l00655" name="l00655"></a><span class="lineno">  655</span>    }</div>
@@ -818,7 +818,7 @@ $(document).ready(function(){initNavTree('round_8c_source.html',''); initResizab
 <div class="line"><a id="l00696" name="l00696"></a><span class="lineno">  696</span> </div>
 <div class="line"><a id="l00697" name="l00697"></a><span class="lineno">  697</span><span class="keyword">static</span> <span class="keywordtype">void</span> round_button_row_on_key_hit(<a class="code hl_struct" href="structSelectionGrid.html">SelectionGrid</a>* selection_grid, Selection* selection)</div>
 <div class="line"><a id="l00698" name="l00698"></a><span class="lineno">  698</span>{</div>
-<div class="line"><a id="l00699" name="l00699"></a><span class="lineno">  699</span>    <span class="keywordflow">if</span> (key_hit(SELECT_CARD))</div>
+<div class="line"><a id="l00699" name="l00699"></a><span class="lineno">  699</span>    <span class="keywordflow">if</span> (key_hit(KEY_CONFIRM))</div>
 <div class="line"><a id="l00700" name="l00700"></a><span class="lineno">  700</span>    {</div>
 <div class="line"><a id="l00701" name="l00701"></a><span class="lineno">  701</span>        <a class="code hl_function" href="button_8h.html#a071a4d1bf72a16a7f4a4153722ce36db">button_press</a>(&amp;game_round_buttons[selection-&gt;x]);</div>
 <div class="line"><a id="l00702" name="l00702"></a><span class="lineno">  702</span>    }</div>

@@ -528,7 +528,7 @@ $(document).ready(function(){initNavTree('shop_8c_source.html',''); initResizabl
 <div class="foldopen" id="foldopen00392" data-start="{" data-end="}">
 <div class="line"><a id="l00392" name="l00392"></a><span class="lineno"><a class="line" href="shop_8c.html#a0dd08021dc2405d8c68d03060ad6b027">  392</a></span><span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code hl_function" href="shop_8c.html#a0dd08021dc2405d8c68d03060ad6b027">shop_top_row_on_key_transit</a>(<a class="code hl_struct" href="structSelectionGrid.html">SelectionGrid</a>* selection_grid, Selection* selection)</div>
 <div class="line"><a id="l00393" name="l00393"></a><span class="lineno">  393</span>{</div>
-<div class="line"><a id="l00394" name="l00394"></a><span class="lineno">  394</span>    <span class="keywordflow">if</span> (!key_hit(SELECT_CARD))</div>
+<div class="line"><a id="l00394" name="l00394"></a><span class="lineno">  394</span>    <span class="keywordflow">if</span> (!key_hit(KEY_CONFIRM))</div>
 <div class="line"><a id="l00395" name="l00395"></a><span class="lineno">  395</span>        <span class="keywordflow">return</span>;</div>
 <div class="line"><a id="l00396" name="l00396"></a><span class="lineno">  396</span> </div>
 <div class="line"><a id="l00397" name="l00397"></a><span class="lineno">  397</span>    <span class="keywordflow">if</span> (selection-&gt;x == NEXT_ROUND_BTN_SEL_X)</div>
@@ -684,7 +684,7 @@ $(document).ready(function(){initNavTree('shop_8c_source.html',''); initResizabl
 <div class="foldopen" id="foldopen00556" data-start="{" data-end="}">
 <div class="line"><a id="l00556" name="l00556"></a><span class="lineno"><a class="line" href="shop_8c.html#a853d7d426bf12e36958bd2b12d87236b">  556</a></span><span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code hl_function" href="shop_8c.html#a853d7d426bf12e36958bd2b12d87236b">shop_reroll_row_on_key_transit</a>(<a class="code hl_struct" href="structSelectionGrid.html">SelectionGrid</a>* selection_grid, Selection* selection)</div>
 <div class="line"><a id="l00557" name="l00557"></a><span class="lineno">  557</span>{</div>
-<div class="line"><a id="l00558" name="l00558"></a><span class="lineno">  558</span>    <span class="keywordflow">if</span> (!key_hit(SELECT_CARD))</div>
+<div class="line"><a id="l00558" name="l00558"></a><span class="lineno">  558</span>    <span class="keywordflow">if</span> (!key_hit(KEY_CONFIRM))</div>
 <div class="line"><a id="l00559" name="l00559"></a><span class="lineno">  559</span>    {</div>
 <div class="line"><a id="l00560" name="l00560"></a><span class="lineno">  560</span>        <span class="keywordflow">return</span>;</div>
 <div class="line"><a id="l00561" name="l00561"></a><span class="lineno">  561</span>    }</div>
@@ -752,7 +752,7 @@ $(document).ready(function(){initNavTree('shop_8c_source.html',''); initResizabl
 <div class="line"><a id="l00624" name="l00624"></a><span class="lineno">  624</span>    }</div>
 <div class="line"><a id="l00625" name="l00625"></a><span class="lineno">  625</span> </div>
 <div class="line"><a id="l00626" name="l00626"></a><span class="lineno">  626</span>    <span class="comment">// Show description of selected card when pressing B</span></div>
-<div class="line"><a id="l00627" name="l00627"></a><span class="lineno">  627</span>    <span class="keywordflow">if</span> (new_description_item != NULL &amp;&amp; key_held(DESELECT_CARDS))</div>
+<div class="line"><a id="l00627" name="l00627"></a><span class="lineno">  627</span>    <span class="keywordflow">if</span> (new_description_item != NULL &amp;&amp; key_held(KEY_SHOW_DESCRIPTION))</div>
 <div class="line"><a id="l00628" name="l00628"></a><span class="lineno">  628</span>    {</div>
 <div class="line"><a id="l00629" name="l00629"></a><span class="lineno">  629</span>        s_description_item = new_description_item;</div>
 <div class="line"><a id="l00630" name="l00630"></a><span class="lineno">  630</span>        s_description_item_original_x_pos = s_description_item-&gt;tx;</div>
@@ -857,7 +857,7 @@ $(document).ready(function(){initNavTree('shop_8c_source.html',''); initResizabl
 <div class="line"><a id="l00728" name="l00728"></a><span class="lineno">  728</span>    }</div>
 <div class="line"><a id="l00729" name="l00729"></a><span class="lineno">  729</span> </div>
 <div class="line"><a id="l00730" name="l00730"></a><span class="lineno">  730</span>    <span class="comment">// Actively wait for the B button to be released</span></div>
-<div class="line"><a id="l00731" name="l00731"></a><span class="lineno">  731</span>    <span class="keywordflow">if</span> (!key_held(DESELECT_CARDS))</div>
+<div class="line"><a id="l00731" name="l00731"></a><span class="lineno">  731</span>    <span class="keywordflow">if</span> (!key_held(KEY_SHOW_DESCRIPTION))</div>
 <div class="line"><a id="l00732" name="l00732"></a><span class="lineno">  732</span>    {</div>
 <div class="line"><a id="l00733" name="l00733"></a><span class="lineno">  733</span>        s_timer = TM_ZERO;</div>
 <div class="line"><a id="l00734" name="l00734"></a><span class="lineno">  734</span>        <a class="code hl_function" href="state__machine_8h.html#ac887ec8b325e136d801a6d1c30e55d15">state_machine_change_state</a>(&amp;shop_sm, GAME_SHOP_HIDE_ITEM_DESC);</div>
@@ -966,7 +966,7 @@ $(document).ready(function(){initNavTree('shop_8c_source.html',''); initResizabl
 <div class="line"><a id="l00837" name="l00837"></a><span class="lineno">  837</span>    display_deck_size_max();</div>
 <div class="line"><a id="l00838" name="l00838"></a><span class="lineno">  838</span> </div>
 <div class="line"><a id="l00839" name="l00839"></a><span class="lineno">  839</span>    <span class="comment">// if we are NOT pressing A, print the price under the description card if it&#39;s a card we own.</span></div>
-<div class="line"><a id="l00840" name="l00840"></a><span class="lineno">  840</span>    <span class="keywordflow">if</span> (!key_held(SELECT_CARD) &amp;&amp; <a class="code hl_function" href="item_8h.html#a09d58ea15ce410f12aacea23fb16e844">item_is_owned</a>(s_description_item))</div>
+<div class="line"><a id="l00840" name="l00840"></a><span class="lineno">  840</span>    <span class="keywordflow">if</span> (!key_held(KEY_CONFIRM) &amp;&amp; <a class="code hl_function" href="item_8h.html#a09d58ea15ce410f12aacea23fb16e844">item_is_owned</a>(s_description_item))</div>
 <div class="line"><a id="l00841" name="l00841"></a><span class="lineno">  841</span>    {</div>
 <div class="line"><a id="l00842" name="l00842"></a><span class="lineno">  842</span>        <a class="code hl_function" href="sprite_8h.html#a3d9b736910a0c0671e495dda62be7f91">sprite_object_print_price_under</a>(</div>
 <div class="line"><a id="l00843" name="l00843"></a><span class="lineno">  843</span>            (<a class="code hl_struct" href="structSpriteObject.html">SpriteObject</a>*)s_description_item,</div>

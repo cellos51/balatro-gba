@@ -167,7 +167,7 @@ $(document).ready(function(){initNavTree('joker__row_8c_source.html',''); initRe
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>    <span class="comment">// swap Jokers if the A button is held down and all Jokers are on the same row</span></div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    <span class="keywordtype">bool</span> swapping =</div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>        key_is_down(SELECT_CARD) &amp;&amp; new_selection-&gt;y == row_idx &amp;&amp; prev_selection-&gt;y == row_idx;</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>        key_is_down(KEY_CARD_SELECT) &amp;&amp; new_selection-&gt;y == row_idx &amp;&amp; prev_selection-&gt;y == row_idx;</div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    <span class="keywordflow">if</span> (prev_selection-&gt;y == row_idx)</div>
 <div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    {</div>
@@ -194,7 +194,7 @@ $(document).ready(function(){initNavTree('joker__row_8c_source.html',''); initRe
 <div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>            <span class="comment">// If we land on this row while the A button is being held, we are in swapping mode</span></div>
 <div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>            <span class="comment">// This means that we need to hide the price, whether we were already</span></div>
 <div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>            <span class="comment">// on this row or if we come from another</span></div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>            <span class="keywordflow">if</span> (!key_is_down(SELECT_CARD))</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>            <span class="keywordflow">if</span> (!key_is_down(KEY_CARD_SELECT))</div>
 <div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>            {</div>
 <div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>                <a class="code hl_function" href="sprite_8h.html#a3d9b736910a0c0671e495dda62be7f91">sprite_object_print_price_under</a>(</div>
 <div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>                    (<a class="code hl_struct" href="structSpriteObject.html">SpriteObject</a>*)joker_object,</div>
@@ -239,11 +239,11 @@ $(document).ready(function(){initNavTree('joker__row_8c_source.html',''); initRe
 <div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>    <a class="code hl_struct" href="structJokerObject.html">JokerObject</a>* joker_object = (<a class="code hl_struct" href="structJokerObject.html">JokerObject</a>*)<a class="code hl_function" href="list_8h.html#a3c604970a7f427ee628ab97749fde17c">list_get_at_idx</a>(get_jokers_list(), selection-&gt;x);</div>
 <div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>    <span class="keywordflow">if</span> (joker_object != NULL)</div>
 <div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>    {</div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>        <span class="keywordflow">if</span> (key_hit(SELECT_CARD))</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>        <span class="keywordflow">if</span> (key_hit(KEY_CARD_SELECT))</div>
 <div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>        {</div>
 <div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>            <a class="code hl_function" href="sprite_8h.html#aa1adb2bd898e4c580e1c522b6a158eba">sprite_object_erase_text_under</a>((<a class="code hl_struct" href="structSpriteObject.html">SpriteObject</a>*)joker_object);</div>
 <div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>        }</div>
-<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>        <span class="keywordflow">else</span> <span class="keywordflow">if</span> (key_released(SELECT_CARD))</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>        <span class="keywordflow">else</span> <span class="keywordflow">if</span> (key_released(KEY_CARD_SELECT))</div>
 <div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>        {</div>
 <div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>            <a class="code hl_function" href="sprite_8h.html#a3d9b736910a0c0671e495dda62be7f91">sprite_object_print_price_under</a>(</div>
 <div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>                (<a class="code hl_struct" href="structSpriteObject.html">SpriteObject</a>*)joker_object,</div>
@@ -252,7 +252,7 @@ $(document).ready(function(){initNavTree('joker__row_8c_source.html',''); initRe
 <div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>        }</div>
 <div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>    }</div>
 <div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span> </div>
-<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>    <span class="keywordflow">if</span> (key_hit(SELL_KEY))</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>    <span class="keywordflow">if</span> (key_hit(KEY_SELL))</div>
 <div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>    {</div>
 <div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>        <span class="keywordtype">int</span> sold_joker_idx = selection-&gt;x;</div>
 <div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span> </div>
