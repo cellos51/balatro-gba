@@ -10,7 +10,7 @@
 #include "list.h"
 #include "sprite.h"
 
-const static Rect CARD_SPRITE_LOCAL_AABB = {4, 0, 28, 32};
+const static Rect CARD_SPRITE_LOCAL_RECT = {4, 0, 28, 32};
 
 enum LayoutDirection
 {
@@ -24,8 +24,11 @@ enum LayoutJustification
     LAYOUT_JUST_BEGIN,
     LAYOUT_JUST_CENTER,
     LAYOUT_JUST_END,
-    LAYOUT_JUST_MAX
+    LAYOUT_JUST_OFF
 };
+
+typedef void (*ContainerCustomGlobalUpdate)(void);
+typedef void (*ContainerCustomUpdate)(SpriteObject* sprite_object);
 
 /**
  * @brief A structure organizing a List of SpriteObjects
@@ -38,6 +41,18 @@ typedef struct SpriteContainer
     List* contents;
 
     /**
+     * @brief Custom callback to invoke only once. Called after the @ref contents are updated, but
+     *         before @ref custom_update
+     */
+    ContainerCustomGlobalUpdate custom_global_update;
+
+    /**
+     * @brief Custom callback to invoke once per element in the @ref contents list. Called after the
+     *         @ref custom_global_update
+     */
+    ContainerCustomUpdate custom_update;
+
+    /**
      * @brief A Rect holding the position and size of the Container
      */
     Rect pos;
@@ -45,15 +60,17 @@ typedef struct SpriteContainer
     /**
      * @brief Whether the sprites are to be organized horizontally or vertically
      */
-    enum LayoutDirection direction;
+    enum LayoutDirection orientation;
 
     /**
-     * @brief Determines the alignment of the sprites along the main direction
+     * @brief Determines the alignment of the sprites along the main direction. Cannot be
+     *         **LAYOUT_JUST_OFF**
      */
     enum LayoutJustification justification;
 
     /**
-     * @brief Determines the alignment of the sprites in the direction orthogonal to the main one
+     * @brief Determines the alignment of the sprites in the direction orthogonal to the main one.
+     *         `LAYOUT_JUST_OFF` disables this justification.
      */
     enum LayoutJustification justification_ortho;
 
@@ -69,7 +86,7 @@ typedef struct SpriteContainer
      * The Sprites should all be uniform within a single Container, so this is stored here instead
      * of per-sprite.
      */
-    Rect sprite_local_aabb;
+    Rect sprite_local_rect;
 
     /**
      * @brief By how much do we need to space the Sprites, in case there are not enough to fill the
@@ -83,10 +100,10 @@ const static Rect DEFAULT_POS_SIZE_RECT = {0, 0, 1, 1};
 #define SPRITE_CONTAINER_DEFAULT {                \
     .contents            = NULL,                  \
     .pos                 = DEFAULT_POS_SIZE_RECT, \
-    .direction           = LAYOUT_DIR_HORIZONTAL, \
+    .orientation         = LAYOUT_DIR_HORIZONTAL, \
     .justification       = LAYOUT_JUST_CENTER,    \
     .justification_ortho = LAYOUT_JUST_CENTER,    \
-    .sprite_local_aabb   = DEFAULT_POS_SIZE_RECT, \
+    .sprite_local_rect   = DEFAULT_POS_SIZE_RECT, \
     .maximum_spacing     = 0                      \
 }
 // clang-format on
@@ -156,6 +173,16 @@ bool container_swap(
     unsigned int idx_b,
     bool do_update
 );
+
+/**
+ * Clear the contents of a Container.
+ *
+ * Go through the underlying list and free each node and set the `head` and `tail` to `NULL`.
+ * Note, it doesn't "free" the data at the node.
+ *
+ * @param container pointer to a @ref SpriteContainer to clear the contents of
+ */
+void container_clear_contents(SpriteContainer* container);
 
 /**
  * Remove a SpriteContainer's underlying List node at the specified index

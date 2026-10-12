@@ -92,14 +92,19 @@ static const Rect     SHOP_PRICES_TEXT_RECT       = { 72,  56, 192, 160 };
 static const Rect     SHOP_REROLL_RECT            = { 88,  96, UNDEFINED, UNDEFINED };
 // clang-format on
 
+static void shop_items_container_global_update(void);
+static void shop_items_container_update(SpriteObject* sprite_object);
+
 static List s_shop_items_list = LIST_DEFAULT;
 static SpriteContainer s_shop_items_container = {
     .contents = &s_shop_items_list,
+    .custom_global_update = shop_items_container_global_update,
+    .custom_update = shop_items_container_update,
     .pos = SHOP_ITEMS_CONTAINER_RECT,
-    .direction = LAYOUT_DIR_HORIZONTAL,
+    .orientation = LAYOUT_DIR_HORIZONTAL,
     .justification = LAYOUT_JUST_CENTER,
     .justification_ortho = LAYOUT_JUST_BEGIN,
-    .sprite_local_aabb = CARD_SPRITE_LOCAL_AABB,
+    .sprite_local_rect = CARD_SPRITE_LOCAL_RECT,
     .maximum_spacing = ITEM_SHOP_SPACING
 };
 
@@ -232,8 +237,7 @@ void shop_print_reroll_cost(void)
 
 void shop_reset(void)
 {
-    list_clear(s_shop_items_container.contents);
-    *(s_shop_items_container.contents) = list_init();
+    container_clear_contents(&s_shop_items_container);
     joker_reset_rollable_jokers();
 }
 
@@ -305,8 +309,7 @@ static void shop_create_top_row_items(void)
 {
     tte_erase_rect_wrapper(SHOP_PRICES_TEXT_RECT);
 
-    list_clear(s_shop_items_container.contents);
-    *(s_shop_items_container.contents) = list_init();
+    container_clear_contents(&s_shop_items_container);
 
     for (int i = 0; i < MAX_SHOP_ITEMS; i++)
     {
@@ -402,19 +405,21 @@ static inline void shop_buy_item(int shop_item_idx)
     sprite_object_erase_text_under((SpriteObject*)item);
     sprite_object_set_focus((SpriteObject*)item, false);
 
-    // Remove the joker from the shop and add it to our hand
+    // Remove the joker from the shop (container will update prices position under remaining Items)
     container_remove_at_idx(&s_shop_items_container, shop_item_idx, true);
+    // And add it to our hand
     item_acquire(item);
+}
 
-    // Update prices position under remaining Items
+static void shop_items_container_global_update(void)
+{
     tte_erase_rect_wrapper(SHOP_PRICES_TEXT_RECT);
     shop_print_reroll_cost();
-    item = NULL;
-    ListItr itr = list_itr_create(s_shop_items_container.contents);
-    while ((item = list_itr_next(&itr)))
-    {
-        item_print_buy_price_under(item);
-    }
+}
+
+static void shop_items_container_update(SpriteObject* sprite_object)
+{
+    item_print_buy_price_under((Item*)sprite_object);
 }
 
 /**
@@ -625,7 +630,7 @@ static void shop_process_user_input(void)
         case SHOP_GRID_OWNED_ROW:
         {
             new_description_item =
-                list_get_at_idx(get_jokers_container()->contents, shop_selection_grid.selection.x);
+                list_get_at_idx(get_jokers_list(), shop_selection_grid.selection.x);
             break;
         }
 
@@ -675,7 +680,7 @@ static void shop_show_item_desc_on_init(void)
     Item* tmp_item = NULL;
 
     // Owned Jokers
-    ListItr itr = list_itr_create(get_jokers_container()->contents);
+    ListItr itr = list_itr_create(get_jokers_list());
     while ((tmp_item = (Item*)list_itr_next(&itr)))
     {
         if (tmp_item != s_description_item)
@@ -785,7 +790,7 @@ static void shop_hide_item_desc_on_init(void)
     Item* tmp_item = NULL;
 
     // Owned Items
-    ListItr itr = list_itr_create(get_jokers_container()->contents);
+    ListItr itr = list_itr_create(get_jokers_list());
     while ((tmp_item = (Item*)list_itr_next(&itr)))
     {
         if (tmp_item != s_description_item)

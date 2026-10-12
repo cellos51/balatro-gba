@@ -4,6 +4,8 @@
 
 void container_update(SpriteContainer* container)
 {
+    GBAL_RETURN_IF_NULL(container, RET_NONE);
+
     // position and size of the sprite along the main `direction`
     POINT pos_size;
     // same, but with direction orthogonal to the main one
@@ -13,13 +15,13 @@ void container_update(SpriteContainer* container)
     // size of the container along the main and orthogonal directions respectively
     POINT max_length;
 
-    if (container->direction == LAYOUT_DIR_HORIZONTAL)
+    if (container->orientation == LAYOUT_DIR_HORIZONTAL)
     {
-        pos_size.x = container->sprite_local_aabb.left;
-        pos_size.y = rect_width(&(container->sprite_local_aabb)) - 1;
+        pos_size.x = container->sprite_local_rect.left;
+        pos_size.y = rect_width(&(container->sprite_local_rect)) - 1;
 
-        pos_size_ortho.x = container->sprite_local_aabb.top;
-        pos_size_ortho.y = rect_height(&(container->sprite_local_aabb)) - 1;
+        pos_size_ortho.x = container->sprite_local_rect.top;
+        pos_size_ortho.y = rect_height(&(container->sprite_local_rect)) - 1;
 
         start_pos.x = container->pos.left;
         start_pos.y = container->pos.top;
@@ -29,11 +31,11 @@ void container_update(SpriteContainer* container)
     }
     else
     {
-        pos_size.x = container->sprite_local_aabb.top;
-        pos_size.y = rect_height(&(container->sprite_local_aabb)) - 1;
+        pos_size.x = container->sprite_local_rect.top;
+        pos_size.y = rect_height(&(container->sprite_local_rect)) - 1;
 
-        pos_size_ortho.x = container->sprite_local_aabb.left;
-        pos_size_ortho.y = rect_width(&(container->sprite_local_aabb)) - 1;
+        pos_size_ortho.x = container->sprite_local_rect.left;
+        pos_size_ortho.y = rect_width(&(container->sprite_local_rect)) - 1;
 
         start_pos.x = container->pos.top;
         start_pos.y = container->pos.left;
@@ -85,25 +87,29 @@ void container_update(SpriteContainer* container)
     }
     // And don't do anything if the fit is perfect (overrun == 0)
 
-    // Always center along the direction orthogonal to the main one if Sprite takes too much space
-    if (overrun_ortho > 0)
-        start_pos.y -= overrun_ortho / 2;
-    // If there's enough room, align Sprite accoring to `container->justification_ortho`
-    else if (overrun_ortho < 0)
+    if (container->justification_ortho != LAYOUT_JUST_OFF)
     {
-        switch (container->justification_ortho)
+        // Always center along the direction orthogonal to the main one if Sprite takes too much
+        // space
+        if (overrun_ortho > 0)
+            start_pos.y -= overrun_ortho / 2;
+        // If there's enough room, align Sprite accoring to `container->justification_ortho`
+        else if (overrun_ortho < 0)
         {
-            case LAYOUT_JUST_CENTER:
-                start_pos.y -= overrun_ortho / 2;
-                break;
+            switch (container->justification_ortho)
+            {
+                case LAYOUT_JUST_CENTER:
+                    start_pos.y -= overrun_ortho / 2;
+                    break;
 
-            case LAYOUT_JUST_END:
-                start_pos.y -= overrun_ortho;
-                break;
+                case LAYOUT_JUST_END:
+                    start_pos.y -= overrun_ortho;
+                    break;
 
-            default:
-                // Still don't need to correct anything for the default alignment
-                break;
+                default:
+                    // Still don't need to correct anything for the default alignment
+                    break;
+            }
         }
     }
 
@@ -114,29 +120,40 @@ void container_update(SpriteContainer* container)
     while ((sprite_object = list_itr_next(&itr)))
     {
         FIXED* coord;
-        FIXED* coord_ortho;
-
-        if (container->direction == LAYOUT_DIR_HORIZONTAL)
-        {
+        if (container->orientation == LAYOUT_DIR_HORIZONTAL)
             coord = &sprite_object->tx;
-            coord_ortho = &sprite_object->ty;
-        }
         else
-        {
             coord = &sprite_object->ty;
-            coord_ortho = &sprite_object->tx;
-        }
-
         *coord = int2fx(start_pos.x - pos_size.x);
-        *coord_ortho = int2fx(start_pos.y);
+
+        if (container->justification_ortho != LAYOUT_JUST_OFF)
+        {
+            FIXED* coord_ortho;
+            if (container->orientation == LAYOUT_DIR_HORIZONTAL)
+                coord_ortho = &sprite_object->ty;
+            else
+                coord_ortho = &sprite_object->tx;
+            *coord_ortho = int2fx(start_pos.y);
+        }
 
         start_pos.x += pos_size.y + spacing;
+    }
+
+    // Invoke custom callbacks if any
+    if (container->custom_global_update)
+        container->custom_global_update();
+    if (container->custom_update)
+    {
+        itr = list_itr_create(container->contents);
+        while ((sprite_object = list_itr_next(&itr)))
+            container->custom_update(sprite_object);
     }
 }
 
 void container_push_front(SpriteContainer* container, SpriteObject* sprite_object, bool do_update)
 {
     GBAL_RETURN_IF_NULL(container, RET_NONE);
+    GBAL_RETURN_IF_NULL(sprite_object, RET_NONE);
     list_push_front(container->contents, (void*)sprite_object);
     if (do_update)
         container_update(container);
@@ -145,6 +162,7 @@ void container_push_front(SpriteContainer* container, SpriteObject* sprite_objec
 void container_push_back(SpriteContainer* container, SpriteObject* sprite_object, bool do_update)
 {
     GBAL_RETURN_IF_NULL(container, RET_NONE);
+    GBAL_RETURN_IF_NULL(sprite_object, RET_NONE);
     list_push_back(container->contents, (void*)sprite_object);
     if (do_update)
         container_update(container);
@@ -158,6 +176,7 @@ void container_insert(
 )
 {
     GBAL_RETURN_IF_NULL(container, RET_NONE);
+    GBAL_RETURN_IF_NULL(sprite_object, RET_NONE);
     list_insert(container->contents, (void*)sprite_object, idx);
     if (do_update)
         container_update(container);
@@ -177,6 +196,12 @@ bool container_swap(
     return res;
 }
 
+void container_clear_contents(SpriteContainer* container)
+{
+    GBAL_RETURN_IF_NULL(container, RET_NONE);
+    list_clear(container->contents);
+}
+
 bool container_remove_at_idx(SpriteContainer* container, unsigned int idx, bool do_update)
 {
     GBAL_RETURN_IF_NULL(container, false);
@@ -189,6 +214,7 @@ bool container_remove_at_idx(SpriteContainer* container, unsigned int idx, bool 
 bool container_remove_data(SpriteContainer* container, SpriteObject* sprite_object, bool do_update)
 {
     GBAL_RETURN_IF_NULL(container, false);
+    GBAL_RETURN_IF_NULL(sprite_object, false);
     bool res = list_remove_data(container->contents, (void*)sprite_object);
     if (do_update)
         container_update(container);

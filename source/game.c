@@ -134,11 +134,13 @@ GameVariables g_game_vars = {
 static List s_owned_jokers_list;
 static SpriteContainer s_owned_jokers_container = {
     .contents = &s_owned_jokers_list,
+    .custom_global_update = NULL,
+    .custom_update = NULL,
     .pos = OWNED_JOKERS_CONTAINER_RECT,
-    .direction = LAYOUT_DIR_HORIZONTAL,
+    .orientation = LAYOUT_DIR_HORIZONTAL,
     .justification = LAYOUT_JUST_CENTER,
-    .justification_ortho = LAYOUT_JUST_CENTER,
-    .sprite_local_aabb = CARD_SPRITE_LOCAL_AABB,
+    .justification_ortho = LAYOUT_JUST_OFF, // deactivated here, too many issues with joker_row.c
+    .sprite_local_rect = CARD_SPRITE_LOCAL_RECT,
     .maximum_spacing = 8
 };
 
@@ -231,7 +233,7 @@ void game_reset()
     sprite_destroy(&g_game_vars.playing_blind_token);
     sprite_destroy(&g_game_vars.round_end_blind_token);
 
-    list_clear(s_owned_jokers_container.contents);
+    container_clear_contents(&s_owned_jokers_container);
     list_clear(&s_discarded_items_list);
     list_clear(&s_expired_jokers_list);
 
@@ -365,7 +367,12 @@ bool is_joker_owned(int joker_id)
     return false;
 }
 
-SpriteContainer* get_jokers_container(void)
+List* get_jokers_list(void)
+{
+    return s_owned_jokers_container.contents;
+}
+
+SpriteContainer* get_jokers_sprite_container(void)
 {
     return &s_owned_jokers_container;
 }
@@ -389,6 +396,7 @@ int get_straight_and_flush_size(void)
 void add_joker(JokerObject* joker_object)
 {
     container_push_back(&s_owned_jokers_container, (SpriteObject*)joker_object, true);
+    joker_object->ty = int2fx(HELD_JOKERS_POS.y);
 
     // TODO: Extract to on_joker_added() callback
     // In case the player gets multiple Four Fingers Jokers,
