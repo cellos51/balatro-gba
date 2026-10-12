@@ -449,7 +449,7 @@ static void blind_tokens_init()
     }
 }
 
-void game_blind_select_on_init(void)
+void blind_select_on_init(void)
 {
     s_timer = TM_ZERO;
     state_machine_register(&blind_select_sm);
@@ -470,12 +470,12 @@ void game_blind_select_on_init(void)
     play_sfx(SFX_POP, MM_BASE_PITCH_RATE, SFX_DEFAULT_VOLUME);
 }
 
-void game_blind_select_on_update(void)
+void blind_select_on_update(void)
 {
     s_timer++;
 }
 
-void game_blind_select_on_exit(void)
+void blind_select_on_exit(void)
 {
     // For some reason that I haven't figured out yet,
     // if I don't destroy the blind tokens they won't
@@ -490,7 +490,7 @@ void game_blind_select_on_exit(void)
     state_machine_remove(&blind_select_sm);
 }
 
-void game_blind_select_change_background(void)
+void blind_select_change_background(void)
 {
     for (int i = 0; i < NUM_BLINDS_PER_ANTE; i++)
     {
