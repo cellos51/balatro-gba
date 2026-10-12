@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['can_20t_20find_20the_20compiled_20rom_0',['2. I can&apos;t find the compiled rom!',['../index.html#autotoc_md21',1,'']]],
+  ['can_20t_20find_20the_20compiled_20rom_0',['2. I can&apos;t find the compiled rom!',['../index.html#autotoc_md28',1,'']]],
   ['can_5fbe_5fpressed_1',['can_be_pressed',['../structButton.html#adc347f33aade3a610b370714fdf4b954',1,'Button']]],
   ['can_5fdiscard_5fhand_2',['can_discard_hand',['../round_8c.html#ab8ce5e3b4efa05d10da22bf8e9e81599',1,'round.c']]],
   ['can_5fplay_5fhand_3',['can_play_hand',['../round_8c.html#a96da9e5f8367ece054bc074316493ecf',1,'round.c']]],
@@ -27,17 +27,17 @@ var searchData=
   ['ci_20checks_24',['CI Checks',['../index.html#autotoc_md4',1,'']]],
   ['clang_20format_25',['clang-format',['../index.html#autotoc_md8',1,'']]],
   ['code_20style_26',['Code Style',['../index.html#autotoc_md5',1,'']]],
-  ['common_20issues_3a_27',['Common Issues:',['../index.html#autotoc_md19',1,'']]],
+  ['common_20issues_3a_27',['Common Issues:',['../index.html#autotoc_md26',1,'']]],
   ['common_5fui_2eh_28',['common_ui.h',['../common__ui_8h.html',1,'']]],
-  ['compile_29',['1. When I run &lt;tt&gt;make&lt;/tt&gt; it errors out and won&apos;t compile!',['../index.html#autotoc_md20',1,'']]],
-  ['compiled_20rom_30',['2. I can&apos;t find the compiled rom!',['../index.html#autotoc_md21',1,'']]],
+  ['compile_29',['1. When I run &lt;tt&gt;make&lt;/tt&gt; it errors out and won&apos;t compile!',['../index.html#autotoc_md27',1,'']]],
+  ['compiled_20rom_30',['2. I can&apos;t find the compiled rom!',['../index.html#autotoc_md28',1,'']]],
   ['compute_5fhand_5fvalue_5finfo_31',['compute_hand_value_info',['../hand_8h.html#ae7bd4b295ad0106d523da0c57c798748',1,'compute_hand_value_info(void):&#160;hand.c'],['../hand_8c.html#ae7bd4b295ad0106d523da0c57c798748',1,'compute_hand_value_info(void):&#160;hand.c']]],
   ['containedhandtypes_32',['ContainedHandTypes',['../structContainedHandTypes.html',1,'']]],
-  ['contributing_33',['Contributing',['../md_README.html#autotoc_md31',1,'']]],
+  ['contributing_33',['Contributing',['../md_README.html#autotoc_md38',1,'']]],
   ['contributions_34',['Making Contributions',['../index.html#autotoc_md1',1,'']]],
-  ['controls_3a_35',['Controls:',['../md_README.html#autotoc_md30',1,'']]],
+  ['controls_3a_35',['Controls:',['../md_README.html#autotoc_md37',1,'']]],
   ['count_36',['count',['../structRewardTypeData.html#ad43c3812e6d13e0518d9f8b8f463ffcf',1,'RewardTypeData']]],
-  ['credits_3a_20strong_37',['&lt;strong&gt;Credits:&lt;/strong&gt;',['../md_README.html#autotoc_md32',1,'']]],
+  ['credits_3a_20strong_37',['&lt;strong&gt;Credits:&lt;/strong&gt;',['../md_README.html#autotoc_md39',1,'']]],
   ['current_5fnode_38',['current_node',['../structListItr.html#a2c3441f4a1cd1468d52c327737bda6f6',1,'ListItr']]],
   ['custom_20scripts_39',['Custom Scripts',['../index.html#autotoc_md15',1,'']]]
 ];

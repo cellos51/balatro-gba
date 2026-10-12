@@ -5,7 +5,7 @@ var searchData=
   ['backgroundid_2',['BackgroundId',['../common__ui_8h.html#aa1dc226c31d41c9cb14cdf9e2551c5cd',1,'common_ui.h']]],
   ['balatro_20gba_3',['Balatro-GBA',['../md_README.html',1,'']]],
   ['base36_5fto_5fu32_4',['base36_to_u32',['../util_8h.html#a55717746a1b3f98855213356b0aabde8',1,'util.c']]],
-  ['below_3a_5',['Please buy the official full version from these sources below:',['../md_README.html#autotoc_md27',1,'']]],
+  ['below_3a_5',['Please buy the official full version from these sources below:',['../md_README.html#autotoc_md34',1,'']]],
   ['bg_5fse_5fcopy_5frect_5f1_5ftile_5fvert_6',['bg_se_copy_rect_1_tile_vert',['../graphic__utils_8h.html#abe1f3e909ebffd97bbbef3c9aa46b04f',1,'graphic_utils.c']]],
   ['bit_7',['bit',['../structBitsetItr.html#a276ec4ea44aa77416c732159c90a37b9',1,'BitsetItr']]],
   ['bitset_8',['bitset',['../structBitset.html',1,'Bitset'],['../bitset_8h.html#a84121fe6bbf9b688fd03fc826d056df6',1,'Bitset:&#160;bitset.h'],['../structBitsetItr.html#a8eefb48c6688723320e66c51c41a2569',1,'BitsetItr::bitset']]],
@@ -43,7 +43,7 @@ var searchData=
   ['blindtokens_40',['BlindTokens',['../blind_8h.html#ac213b67180e7b74f69beb56ddd17026e',1,'blind.h']]],
   ['blindtype_41',['BlindType',['../blind_8h.html#a360ce6465b5b6a404884c21d37759d4a',1,'blind.h']]],
   ['border_5fpal_5fidx_42',['border_pal_idx',['../structButton.html#abea673d241d333d2f16530ac12b36b6d',1,'Button']]],
-  ['build_20label_43',['With optional build label',['../index.html#autotoc_md17',1,'']]],
+  ['build_20instructions_20strong_43',['&lt;strong&gt;Build Instructions&lt;/strong&gt;',['../index.html#autotoc_md18',1,'']]],
   ['button_44',['Button',['../structButton.html',1,'']]],
   ['button_2eh_45',['button.h',['../button_8h.html',1,'']]],
   ['button_5fpal_5fidx_46',['button_pal_idx',['../structButton.html#aaec238974eccbed85d01a5c3a87173ce',1,'Button']]],
@@ -51,5 +51,6 @@ var searchData=
   ['button_5fset_5fhighlight_48',['button_set_highlight',['../button_8h.html#ab07bc69b92e6642e2b986debfb152e48',1,'button.c']]],
   ['buttoncanbepressedfunc_49',['ButtonCanBePressedFunc',['../button_8h.html#a35f4dc832e5b998d6595ca06c29f7a50',1,'button.h']]],
   ['buttononpressedfunc_50',['ButtonOnPressedFunc',['../button_8h.html#a6a588233fed69a8f3e5e69683660fedc',1,'button.h']]],
-  ['buy_20the_20official_20full_20version_20from_20these_20sources_20below_3a_51',['Please buy the official full version from these sources below:',['../md_README.html#autotoc_md27',1,'']]]
+  ['buy_20the_20official_20full_20version_20from_20these_20sources_20below_3a_51',['Please buy the official full version from these sources below:',['../md_README.html#autotoc_md34',1,'']]],
+  ['by_20step_52',['Step-by-Step',['../index.html#autotoc_md20',1,'']]]
 ];

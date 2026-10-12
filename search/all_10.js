@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['macos_0',['MacOS',['../index.html#autotoc_md18',1,'']]],
+  ['macos_0',['MacOS',['../index.html#autotoc_md25',1,'']]],
   ['main_5fbg_5fse_5fclear_5frect_1',['main_bg_se_clear_rect',['../graphic__utils_8h.html#a0d3636aed3d1c8e40b6001e839684912',1,'graphic_utils.c']]],
   ['main_5fbg_5fse_5fcopy_5fexpand_5f3w_5frow_2',['main_bg_se_copy_expand_3w_row',['../graphic__utils_8h.html#a99dfe9a3eb3ff0a11bcef62e9fbb948f',1,'graphic_utils.c']]],
   ['main_5fbg_5fse_5fcopy_5fexpand_5f3x3_5frect_3',['main_bg_se_copy_expand_3x3_rect',['../graphic__utils_8h.html#a71f811b27a9e3895ab0be4dc68f51405',1,'graphic_utils.c']]],
@@ -14,8 +14,8 @@ var searchData=
   ['main_5fmenu_5fon_5fexit_11',['main_menu_on_exit',['../main__menu_8h.html#a07be46639bf0d2c0ed7045024966cbf6',1,'main_menu.c']]],
   ['main_5fmenu_5fon_5finit_12',['main_menu_on_init',['../main__menu_8h.html#a1373b8657b89c8d6dcac7eafbbb6bdaf',1,'main_menu.c']]],
   ['main_5fmenu_5fon_5fupdate_13',['main_menu_on_update',['../main__menu_8h.html#a0f52b2f601544b37f37e08dfdcb4a9bd',1,'main_menu.c']]],
-  ['make_20tt_20installed_14',['4. It says I don&apos;t have &lt;tt&gt;Git&lt;/tt&gt; or &lt;tt&gt;Make&lt;/tt&gt; installed!',['../index.html#autotoc_md23',1,'']]],
-  ['make_20tt_20it_20errors_20out_20and_20won_20t_20compile_15',['1. When I run &lt;tt&gt;make&lt;/tt&gt; it errors out and won&apos;t compile!',['../index.html#autotoc_md20',1,'']]],
+  ['make_20tt_20installed_14',['4. It says I don&apos;t have &lt;tt&gt;Git&lt;/tt&gt; or &lt;tt&gt;Make&lt;/tt&gt; installed!',['../index.html#autotoc_md30',1,'']]],
+  ['make_20tt_20it_20errors_20out_20and_20won_20t_20compile_15',['1. When I run &lt;tt&gt;make&lt;/tt&gt; it errors out and won&apos;t compile!',['../index.html#autotoc_md27',1,'']]],
   ['making_20contributions_16',['Making Contributions',['../index.html#autotoc_md1',1,'']]],
   ['manually_17',['Manually',['../index.html#autotoc_md13',1,'']]],
   ['max_5fbase36_18',['MAX_BASE36',['../util_8h.html#a1ce076ed9d155bf8e50c66f6f6c24d5d',1,'util.h']]],
@@ -26,13 +26,12 @@ var searchData=
   ['mgba_5flogger_2eh_23',['mgba_logger.h',['../mgba__logger_8h.html',1,'']]],
   ['mgba_5flogger_5finit_24',['mgba_logger_init',['../mgba__logger_8h.html#a026b5ef89a9718f68f89cbbd8a218ca0',1,'mgba_logger.c']]],
   ['mgba_5fprintf_25',['mgba_printf',['../mgba__logger_8h.html#a45cefecf88f84f818869a3cd4fe858a0',1,'mgba_logger.c']]],
-  ['minimal_20usage_26',['Minimal usage',['../index.html#autotoc_md16',1,'']]],
-  ['mm_5fbase_5fpitch_5frate_27',['MM_BASE_PITCH_RATE',['../audio__utils_8h.html#a44f88da4c9f39b9c23c11f565a4f5fc2',1,'audio_utils.h']]],
-  ['mm_5fmodule_5ffull_5fvolume_28',['MM_MODULE_FULL_VOLUME',['../audio__utils_8h.html#a6d01a856f8b7240cbc462a5ffee7d8a9',1,'audio_utils.h']]],
-  ['mm_5fpan_5fcenter_29',['MM_PAN_CENTER',['../audio__utils_8h.html#a3b7a9973bb1c715264d24b6b619ccfcc',1,'audio_utils.h']]],
-  ['mm_5fsfx_5ffull_5fvolume_30',['MM_SFX_FULL_VOLUME',['../audio__utils_8h.html#a2f4d24c1006e56692fbb994e23e75312',1,'audio_utils.h']]],
-  ['mode_31',['mode',['../structSprite.html#a956e7bd37e48f4198fbb8cc60d1a5a13',1,'Sprite']]],
-  ['multiplier_32',['multiplier',['../structRewardTypeData.html#a2fd86b96d6a4d93cea05afc384e9b734',1,'RewardTypeData']]],
-  ['music_20strong_33',['&lt;strong&gt;Music&lt;/strong&gt;',['../md_README.html#autotoc_md34',1,'']]],
-  ['musicplayerstate_34',['MusicPlayerState',['../structMusicPlayerState.html',1,'']]]
+  ['mm_5fbase_5fpitch_5frate_26',['MM_BASE_PITCH_RATE',['../audio__utils_8h.html#a44f88da4c9f39b9c23c11f565a4f5fc2',1,'audio_utils.h']]],
+  ['mm_5fmodule_5ffull_5fvolume_27',['MM_MODULE_FULL_VOLUME',['../audio__utils_8h.html#a6d01a856f8b7240cbc462a5ffee7d8a9',1,'audio_utils.h']]],
+  ['mm_5fpan_5fcenter_28',['MM_PAN_CENTER',['../audio__utils_8h.html#a3b7a9973bb1c715264d24b6b619ccfcc',1,'audio_utils.h']]],
+  ['mm_5fsfx_5ffull_5fvolume_29',['MM_SFX_FULL_VOLUME',['../audio__utils_8h.html#a2f4d24c1006e56692fbb994e23e75312',1,'audio_utils.h']]],
+  ['mode_30',['mode',['../structSprite.html#a956e7bd37e48f4198fbb8cc60d1a5a13',1,'Sprite']]],
+  ['multiplier_31',['multiplier',['../structRewardTypeData.html#a2fd86b96d6a4d93cea05afc384e9b734',1,'RewardTypeData']]],
+  ['music_20strong_32',['&lt;strong&gt;Music&lt;/strong&gt;',['../md_README.html#autotoc_md41',1,'']]],
+  ['musicplayerstate_33',['MusicPlayerState',['../structMusicPlayerState.html',1,'']]]
 ];
