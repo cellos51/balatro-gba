@@ -9,7 +9,6 @@
 #include "graphic_utils.h"
 #include "joker.h"
 #include "sprite.h"
-#include "sprite_container.h"
 
 #include <tonc.h>
 

@@ -85,7 +85,7 @@ static const Rect     ITEM_DESC_TEXT_RECT           = { 11,  9, 26, 18};
 static const Rect     ITEM_NAME_TEXT_RECT           = { 10,  7, 27,  7};
 
 // Positions in pixels
-static const BG_POINT SHOP_JOKER_SPRITES_INIT_POS = {120, 160};
+static const int      SHOP_JOKER_SPRITES_INIT_Y   =  160;
 static const BG_POINT ITEM_DESCRIPTION_SPRITE_POS = {135,   9};
 static const Rect     SHOP_ITEMS_CONTAINER_RECT   = {114,  71, 190, 103 };
 static const Rect     SHOP_PRICES_TEXT_RECT       = { 72,  56, 192, 160 };
@@ -97,14 +97,14 @@ static void shop_items_container_update(SpriteObject* sprite_object);
 
 static List s_shop_items_list = LIST_DEFAULT;
 static SpriteContainer s_shop_items_container = {
-    .contents = &s_shop_items_list,
+    .contents_list = &s_shop_items_list,
     .custom_global_update = shop_items_container_global_update,
     .custom_update = shop_items_container_update,
     .pos = SHOP_ITEMS_CONTAINER_RECT,
-    .orientation = LAYOUT_DIR_HORIZONTAL,
+    .orientation = LAYOUT_ORI_HORIZONTAL,
     .justification = LAYOUT_JUST_CENTER,
     .justification_ortho = LAYOUT_JUST_BEGIN,
-    .sprite_local_rect = CARD_SPRITE_LOCAL_RECT,
+    .sprite_local_visible_rect = CARD_SPRITE_LOCAL_RECT,
     .maximum_spacing = ITEM_SHOP_SPACING
 };
 
@@ -326,20 +326,18 @@ static void shop_create_top_row_items(void)
             return;
         }
 
-        item->x = int2fx(SHOP_JOKER_SPRITES_INIT_POS.x + i * CARD_SPRITE_SIZE_PX);
-        item->y = int2fx(SHOP_JOKER_SPRITES_INIT_POS.y);
-
         container_push_back(&s_shop_items_container, (SpriteObject*)item, false);
     }
 
     container_update(&s_shop_items_container);
 
     // The following function uses the Sprite's target position which has just been updated
-    ListItr itr = list_itr_create(s_shop_items_container.contents);
+    ListItr itr = list_itr_create(s_shop_items_container.contents_list);
     Item* item;
     while ((item = list_itr_next(&itr)))
     {
-        item_print_buy_price_under(item);
+        item->x = item->tx;
+        item->y = int2fx(SHOP_JOKER_SPRITES_INIT_Y);
     }
 }
 
@@ -390,7 +388,7 @@ static void shop_intro()
 static int shop_top_row_get_size(void)
 {
     // + 1 to account for next round button
-    return list_get_len(s_shop_items_container.contents) + 1;
+    return list_get_len(s_shop_items_container.contents_list) + 1;
 }
 
 /**
@@ -398,16 +396,16 @@ static int shop_top_row_get_size(void)
  */
 static inline void shop_buy_item(int shop_item_idx)
 {
-    Item* item = (Item*)list_get_at_idx(s_shop_items_container.contents, shop_item_idx);
+    Item* item = (Item*)list_get_at_idx(s_shop_items_container.contents_list, shop_item_idx);
 
     g_game_vars.money -= item_get_buy_price(item);
     display_money();
     sprite_object_erase_text_under((SpriteObject*)item);
     sprite_object_set_focus((SpriteObject*)item, false);
 
-    // Remove the joker from the shop (container will update prices position under remaining Items)
+    // Removing the joker from the shop will also update prices position under remaining Items
     container_remove_at_idx(&s_shop_items_container, shop_item_idx, true);
-    // And add it to our hand
+
     item_acquire(item);
 }
 
@@ -437,7 +435,7 @@ static void shop_top_row_on_key_transit(SelectionGrid* selection_grid, Selection
     else
     {
         int shop_item_idx = selection->x - 1; // - 1 to account for next round button
-        Item* item = (Item*)list_get_at_idx(s_shop_items_container.contents, shop_item_idx);
+        Item* item = (Item*)list_get_at_idx(s_shop_items_container.contents_list, shop_item_idx);
         if (!item_can_acquire(item) || g_game_vars.money < item_get_buy_price(item))
         {
             return;
@@ -458,7 +456,7 @@ static bool shop_top_row_on_selection_changed(
     const Selection* new_selection
 )
 {
-    List* shop_items_list = s_shop_items_container.contents;
+    List* shop_items_list = s_shop_items_container.contents_list;
     // Guard if we move down while on jokers
     if (new_selection->y > row_idx && prev_selection->x > 0)
         return false;
@@ -526,7 +524,7 @@ static bool shop_reroll_row_on_selection_changed(
         {
             int idx = new_selection->x - 1;
             SpriteObject* sprite_object =
-                (SpriteObject*)list_get_at_idx(s_shop_items_container.contents, idx);
+                (SpriteObject*)list_get_at_idx(s_shop_items_container.contents_list, idx);
             sprite_object_set_focus(sprite_object, true);
         }
     }
@@ -547,7 +545,7 @@ static inline void shop_reroll(void)
     g_game_vars.money -= s_reroll_cost;
     display_money(); // Update the money display
 
-    List* shop_items_list = s_shop_items_container.contents;
+    List* shop_items_list = s_shop_items_container.contents_list;
     ListItr itr = list_itr_create(shop_items_list);
     Item* item;
 
@@ -638,7 +636,7 @@ static void shop_process_user_input(void)
         {
             new_description_item = (shop_selection_grid.selection.x > 0)
                                      ? list_get_at_idx(
-                                           s_shop_items_container.contents,
+                                           s_shop_items_container.contents_list,
                                            shop_selection_grid.selection.x - 1
                                        )
                                      : NULL;
@@ -692,7 +690,7 @@ static void shop_show_item_desc_on_init(void)
     while ((tmp_item = (Item*)list_itr_next(&itr)))
     {
         if (tmp_item != s_description_item)
-            tmp_item->ty = int2fx(SHOP_JOKER_SPRITES_INIT_POS.y + TILE_SIZE);
+            tmp_item->ty = int2fx(SHOP_JOKER_SPRITES_INIT_Y + TILE_SIZE);
     }
 
     set_owned_skip_tags_moved_offscreen(true);
@@ -887,7 +885,7 @@ static void shop_outro(void)
     {
         tte_erase_rect_wrapper(SHOP_PRICES_TEXT_RECT); // Erase the shop prices text
 
-        ListItr itr = list_itr_create(s_shop_items_container.contents);
+        ListItr itr = list_itr_create(s_shop_items_container.contents_list);
         SpriteObject* shop_item;
         while ((shop_item = list_itr_next(&itr)))
         {
@@ -956,7 +954,7 @@ void shop_on_update(void)
 
 void shop_on_exit(void)
 {
-    List* shop_items_list = s_shop_items_container.contents;
+    List* shop_items_list = s_shop_items_container.contents_list;
     ListItr itr = list_itr_create(shop_items_list);
     Item* item;
 

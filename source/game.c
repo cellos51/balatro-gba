@@ -133,15 +133,15 @@ GameVariables g_game_vars = {
 
 static List s_owned_jokers_list;
 static SpriteContainer s_owned_jokers_container = {
-    .contents = &s_owned_jokers_list,
+    .contents_list = &s_owned_jokers_list,
     .custom_global_update = NULL,
     .custom_update = NULL,
     .pos = OWNED_JOKERS_CONTAINER_RECT,
-    .orientation = LAYOUT_DIR_HORIZONTAL,
+    .orientation = LAYOUT_ORI_HORIZONTAL,
     .justification = LAYOUT_JUST_CENTER,
     .justification_ortho = LAYOUT_JUST_OFF, // deactivated here, too many issues with joker_row.c
-    .sprite_local_rect = CARD_SPRITE_LOCAL_RECT,
-    .maximum_spacing = 8
+    .sprite_local_visible_rect = CARD_SPRITE_LOCAL_RECT,
+    .maximum_spacing = 20 // Centering where 2 jokers roughly divide the row into 3 equal sections
 };
 
 static List s_discarded_items_list;
@@ -218,9 +218,9 @@ void game_init()
 
 void game_reset()
 {
-    while (list_get_len(s_owned_jokers_container.contents) > 0)
+    while (list_get_len(s_owned_jokers_container.contents_list) > 0)
     {
-        JokerObject* joker_object = list_get_at_idx(s_owned_jokers_container.contents, 0);
+        JokerObject* joker_object = list_get_at_idx(s_owned_jokers_container.contents_list, 0);
         remove_owned_joker(0);
         joker_object_destroy(&joker_object);
     }
@@ -283,7 +283,7 @@ static inline void discarded_items_update_loop(void)
 bool joker_object_can_acquire(Item* joker_object)
 {
     GBAL_RETURN_IF_NULL(joker_object, false);
-    return (list_get_len(s_owned_jokers_container.contents) < MAX_JOKERS_HELD_SIZE);
+    return (list_get_len(s_owned_jokers_container.contents_list) < MAX_JOKERS_HELD_SIZE);
 }
 
 static inline void expired_jokers_update_loop(void)
@@ -303,7 +303,7 @@ static inline void expired_jokers_update_loop(void)
         {
             // get joker idx
             int expired_joker_idx = 0;
-            ListItr joker_itr = list_itr_create(s_owned_jokers_container.contents);
+            ListItr joker_itr = list_itr_create(s_owned_jokers_container.contents_list);
             JokerObject* expired_joker;
             while ((expired_joker = list_itr_next(&joker_itr)) && expired_joker != joker_object)
             {
@@ -354,7 +354,7 @@ enum GameState game_get_state(void)
 
 bool is_joker_owned(int joker_id)
 {
-    ListItr itr = list_itr_create(s_owned_jokers_container.contents);
+    ListItr itr = list_itr_create(s_owned_jokers_container.contents_list);
     JokerObject* joker;
 
     while ((joker = list_itr_next(&itr)))
@@ -369,7 +369,7 @@ bool is_joker_owned(int joker_id)
 
 List* get_jokers_list(void)
 {
-    return s_owned_jokers_container.contents;
+    return s_owned_jokers_container.contents_list;
 }
 
 SpriteContainer* get_jokers_sprite_container(void)
@@ -415,7 +415,8 @@ void add_joker(JokerObject* joker_object)
 void remove_owned_joker(int owned_joker_idx)
 {
     // TODO: Extract to on_joker_removed() callback
-    JokerObject* joker_object = list_get_at_idx(s_owned_jokers_container.contents, owned_joker_idx);
+    JokerObject* joker_object =
+        list_get_at_idx(s_owned_jokers_container.contents_list, owned_joker_idx);
     // In case the player gets multiple Four Fingers Jokers,
     // and only reset the size when all of them have been removed
     if (joker_object->joker->id == FOUR_FINGERS_JOKER_ID)

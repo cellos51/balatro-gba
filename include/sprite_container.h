@@ -12,11 +12,11 @@
 
 const static Rect CARD_SPRITE_LOCAL_RECT = {4, 0, 28, 32};
 
-enum LayoutDirection
+enum LayoutOrientation
 {
-    LAYOUT_DIR_HORIZONTAL,
-    LAYOUT_DIR_VERTICAL,
-    LAYOUT_DIR_MAX
+    LAYOUT_ORI_HORIZONTAL,
+    LAYOUT_ORI_VERTICAL,
+    LAYOUT_ORI_MAX
 };
 
 enum LayoutJustification
@@ -38,7 +38,7 @@ typedef struct SpriteContainer
     /**
      * @brief List of SpriteObjects to organize
      */
-    List* contents;
+    List* contents_list;
 
     /**
      * @brief Custom callback to invoke only once. Called after the @ref contents are updated, but
@@ -53,14 +53,14 @@ typedef struct SpriteContainer
     ContainerCustomUpdate custom_update;
 
     /**
-     * @brief A Rect holding the position and size of the Container
+     * @brief A Rect holding the position and size of the Container. Expressed in pixels.
      */
     Rect pos;
 
     /**
      * @brief Whether the sprites are to be organized horizontally or vertically
      */
-    enum LayoutDirection orientation;
+    enum LayoutOrientation orientation;
 
     /**
      * @brief Determines the alignment of the sprites along the main direction. Cannot be
@@ -75,7 +75,8 @@ typedef struct SpriteContainer
     enum LayoutJustification justification_ortho;
 
     /**
-     * @brief A Rect representing the actual, local position/size of the art within the Sprites.
+     * @brief A Rect representing the actual, local position/size of the art within the Sprites
+     *         expressed in pixels.
      *
      * Examples:
      *   - For the Skip Tags, the sprite is 16x16 px, but the actual art always fits within
@@ -86,25 +87,25 @@ typedef struct SpriteContainer
      * The Sprites should all be uniform within a single Container, so this is stored here instead
      * of per-sprite.
      */
-    Rect sprite_local_rect;
+    Rect sprite_local_visible_rect;
 
     /**
      * @brief By how much do we need to space the Sprites, in case there are not enough to fill the
-     *         whole Container.
+     *         whole Container. Expressed in pixels.
      */
     int maximum_spacing;
 } SpriteContainer;
 
 // clang-format off
 const static Rect DEFAULT_POS_SIZE_RECT = {0, 0, 1, 1};
-#define SPRITE_CONTAINER_DEFAULT {                \
-    .contents            = NULL,                  \
-    .pos                 = DEFAULT_POS_SIZE_RECT, \
-    .orientation         = LAYOUT_DIR_HORIZONTAL, \
-    .justification       = LAYOUT_JUST_CENTER,    \
-    .justification_ortho = LAYOUT_JUST_CENTER,    \
-    .sprite_local_rect   = DEFAULT_POS_SIZE_RECT, \
-    .maximum_spacing     = 0                      \
+#define SPRITE_CONTAINER_DEFAULT {                      \
+    .contents_list             = NULL,                  \
+    .pos                       = DEFAULT_POS_SIZE_RECT, \
+    .orientation               = LAYOUT_DIR_HORIZONTAL, \
+    .justification             = LAYOUT_JUST_CENTER,    \
+    .justification_ortho       = LAYOUT_JUST_CENTER,    \
+    .sprite_local_visible_rect = DEFAULT_POS_SIZE_RECT, \
+    .maximum_spacing           = 0                      \
 }
 // clang-format on
 
