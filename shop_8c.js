@@ -12,6 +12,7 @@ var shop_8c =
     [ "shop_on_init", "shop_8c.html#a78de7bbab9bd8640fdfb4eafe46afe60", null ],
     [ "shop_on_update", "shop_8c.html#a46ec51ac19675451f22f56c2e3ca2464", null ],
     [ "shop_outro", "shop_8c.html#a6bce2c255dacd6ad30c4377802db15f2", null ],
+    [ "shop_print_reroll_cost", "shop_8c.html#a816e240fc5671952a05960e004888ff2", null ],
     [ "shop_process_user_input", "shop_8c.html#ac988ba594ceeb2ddb661d5cd5fb45a0e", null ],
     [ "shop_reroll", "shop_8c.html#a4b7abcffaf7dd88514a5613f4c6caebb", null ],
     [ "shop_reroll_row_get_size", "shop_8c.html#a6c9b1b5c9e762eadffd7156376d9b52f", null ],
