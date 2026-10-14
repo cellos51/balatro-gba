@@ -21,10 +21,15 @@ static void container_update_set_sprite_pos(
     POINT pos_size,
     POINT pos_size_ortho,
     int spacing,
-    POINT* start_pos
+    POINT start_pos
 );
 
-void container_update(SpriteContainer* container)
+/**
+ * @brief Update the position of the contents of a given Container
+ *
+ * @param container pointer to SpriteContainer to update the contents of
+ */
+static inline void container_update(SpriteContainer* container)
 {
     GBAL_RETURN_IF_NULL(container, RET_NONE);
 
@@ -85,7 +90,7 @@ void container_update(SpriteContainer* container)
 
     container_adjust_starting_pos_ortho(container, overrun_ortho, &start_pos);
 
-    container_update_set_sprite_pos(container, pos_size, pos_size_ortho, spacing, &start_pos);
+    container_update_set_sprite_pos(container, pos_size, pos_size_ortho, spacing, start_pos);
 
     // Invoke custom callbacks if any
     if (container->custom_global_update)
@@ -216,14 +221,14 @@ static inline void container_adjust_starting_pos_ortho(
  *                            one which they are organized on
  * @param[in]  spacing        How many pixels are put in between each Sprite. Can be negative if
  *                            Sprites need to overlap
- * @param[out] start_pos      pointer to the Point in space the Sprites start at initially.
+ * @param[in] start_pos       Point in space the Sprites start at initially.
  */
 static inline void container_update_set_sprite_pos(
     SpriteContainer* container,
     POINT pos_size,
     POINT pos_size_ortho,
     int spacing,
-    POINT* start_pos
+    POINT start_pos
 )
 {
     SpriteObject* sprite_object = NULL;
@@ -236,7 +241,7 @@ static inline void container_update_set_sprite_pos(
             coord = &sprite_object->tx;
         else
             coord = &sprite_object->ty;
-        *coord = int2fx(start_pos->x - pos_size.x);
+        *coord = int2fx(start_pos.x - pos_size.x);
 
         if (container->justification_ortho != LAYOUT_JUST_OFF)
         {
@@ -245,56 +250,50 @@ static inline void container_update_set_sprite_pos(
                 coord_ortho = &sprite_object->ty;
             else
                 coord_ortho = &sprite_object->tx;
-            *coord_ortho = int2fx(start_pos->y - pos_size_ortho.x);
+            *coord_ortho = int2fx(start_pos.y - pos_size_ortho.x);
         }
 
-        start_pos->x += pos_size.y + spacing;
+        start_pos.x += pos_size.y + spacing;
     }
 }
 
-void container_push_front(SpriteContainer* container, SpriteObject* sprite_object, bool do_update)
+void container_push_front(SpriteContainer* container, SpriteObject* sprite_object)
 {
     GBAL_RETURN_IF_NULL(container, RET_NONE);
     GBAL_RETURN_IF_NULL(sprite_object, RET_NONE);
     list_push_front(container->contents_list, (void*)sprite_object);
-    if (do_update)
-        container_update(container);
+    container_update(container);
 }
 
-void container_push_back(SpriteContainer* container, SpriteObject* sprite_object, bool do_update)
+void container_push_back(SpriteContainer* container, SpriteObject* sprite_object)
 {
     GBAL_RETURN_IF_NULL(container, RET_NONE);
     GBAL_RETURN_IF_NULL(sprite_object, RET_NONE);
     list_push_back(container->contents_list, (void*)sprite_object);
-    if (do_update)
-        container_update(container);
+    container_update(container);
 }
 
-void container_insert(
-    SpriteContainer* container,
-    SpriteObject* sprite_object,
-    unsigned int idx,
-    bool do_update
-)
+void container_append_list(SpriteContainer* container, List* list)
+{
+    GBAL_RETURN_IF_NULL(container, RET_NONE);
+    GBAL_RETURN_IF_NULL(list, RET_NONE);
+    list_append(container->contents_list, list);
+    container_update(container);
+}
+
+void container_insert(SpriteContainer* container, SpriteObject* sprite_object, unsigned int idx)
 {
     GBAL_RETURN_IF_NULL(container, RET_NONE);
     GBAL_RETURN_IF_NULL(sprite_object, RET_NONE);
     list_insert(container->contents_list, (void*)sprite_object, idx);
-    if (do_update)
-        container_update(container);
+    container_update(container);
 }
 
-bool container_swap(
-    SpriteContainer* container,
-    unsigned int idx_a,
-    unsigned int idx_b,
-    bool do_update
-)
+bool container_swap(SpriteContainer* container, unsigned int idx_a, unsigned int idx_b)
 {
     GBAL_RETURN_IF_NULL(container, false);
     bool res = list_swap(container->contents_list, idx_a, idx_b);
-    if (do_update)
-        container_update(container);
+    container_update(container);
     return res;
 }
 
@@ -304,29 +303,26 @@ void container_clear_contents(SpriteContainer* container)
     list_clear(container->contents_list);
 }
 
-bool container_remove_at_idx(SpriteContainer* container, unsigned int idx, bool do_update)
+bool container_remove_at_idx(SpriteContainer* container, unsigned int idx)
 {
     GBAL_RETURN_IF_NULL(container, false);
     bool res = list_remove_at_idx(container->contents_list, idx);
-    if (do_update)
-        container_update(container);
+    container_update(container);
     return res;
 }
 
-bool container_remove_data(SpriteContainer* container, SpriteObject* sprite_object, bool do_update)
+bool container_remove_data(SpriteContainer* container, SpriteObject* sprite_object)
 {
     GBAL_RETURN_IF_NULL(container, false);
     GBAL_RETURN_IF_NULL(sprite_object, false);
     bool res = list_remove_data(container->contents_list, (void*)sprite_object);
-    if (do_update)
-        container_update(container);
+    container_update(container);
     return res;
 }
 
-void container_itr_remove_current_node(SpriteContainer* container, ListItr* itr, bool do_update)
+void container_itr_remove_current_node(SpriteContainer* container, ListItr* itr)
 {
     GBAL_RETURN_IF_NULL(container, RET_NONE);
     list_itr_remove_current_node(itr);
-    if (do_update)
-        container_update(container);
+    container_update(container);
 }

@@ -395,7 +395,7 @@ int get_straight_and_flush_size(void)
 
 void add_joker(JokerObject* joker_object)
 {
-    container_push_back(&s_owned_jokers_container, (SpriteObject*)joker_object, true);
+    container_push_back(&s_owned_jokers_container, (SpriteObject*)joker_object);
     joker_object->ty = int2fx(HELD_JOKERS_POS.y);
 
     // TODO: Extract to on_joker_added() callback
@@ -431,7 +431,7 @@ void remove_owned_joker(int owned_joker_idx)
 
     // TODO: Move to site of joker_destroy()?
     joker_set_rollable(joker_object->joker->id, true);
-    container_remove_at_idx(&s_owned_jokers_container, owned_joker_idx, true);
+    container_remove_at_idx(&s_owned_jokers_container, owned_joker_idx);
 }
 
 int get_deck_top(void)

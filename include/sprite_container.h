@@ -110,49 +110,42 @@ const static Rect DEFAULT_POS_SIZE_RECT = {0, 0, 1, 1};
 // clang-format on
 
 /**
- * @brief Update the position of the contents of a given Container
- *
- * @param container pointer to SpriteContainer to update the contents of
- */
-void container_update(SpriteContainer* container);
-
-/**
  * Prepend an entry to the `head` of a @ref SpriteContainer contents
  *
  * @param container pointer to a @ref SpriteContainer
  * @param sprite_object pointer to a SpriteObject to put into the @ref SpriteContainer
- * @param do_update whether the contents' spacing needs to update after pushing the new element
  *
  * @sa list_push_front
  */
-void container_push_front(SpriteContainer* container, SpriteObject* sprite_object, bool do_update);
+void container_push_front(SpriteContainer* container, SpriteObject* sprite_object);
 
 /**
  * Append an entry to the `tail` of a @ref SpriteContainer contents
  *
  * @param container pointer to a @ref SpriteContainer
  * @param sprite_object pointer to a SpriteObject to put into the @ref SpriteContainer
- * @param do_update whether the contents' spacing needs to update after pushing the new element
  *
  * @sa list_push_back
  */
-void container_push_back(SpriteContainer* container, SpriteObject* sprite_object, bool do_update);
+void container_push_back(SpriteContainer* container, SpriteObject* sprite_object);
+
+/**
+ * Append a list of entries to the contents of a @ref SpriteContainer
+ *
+ * @param container pointer to a @ref SpriteContainer
+ * @param list pointer to a @ref List of entries to put into the @ref SpriteContainer
+ */
+void container_append_list(SpriteContainer* container, List* list);
 
 /** Insert a SpriteObject into a @ref SpriteContainer a specific index
  *
  * @param container pointer to a @ref SpriteContainer
  * @param sprite_object pointer to a SpriteObject to put into the @ref SpriteContainer
  * @param idx desired index to insert
- * @param do_update whether the contents' spacing needs to update after pushing the new element
  *
  * @sa list_insert
  */
-void container_insert(
-    SpriteContainer* container,
-    SpriteObject* sprite_object,
-    unsigned int idx,
-    bool do_update
-);
+void container_insert(SpriteContainer* container, SpriteObject* sprite_object, unsigned int idx);
 
 /**
  * Swap the data pointers at the specified indices of a @ref SpriteContainer
@@ -162,18 +155,12 @@ void container_insert(
  * @param container pointer to a @ref SpriteContainer
  * @param idx_a desired index to swap with idx_b
  * @param idx_b desired index to swap with idx_a
- * @param do_update whether the contents' spacing needs to update after pushing the new element
  *
  * @return true if successful, false otherwise
  *
  * @sa list_swap
  */
-bool container_swap(
-    SpriteContainer* container,
-    unsigned int idx_a,
-    unsigned int idx_b,
-    bool do_update
-);
+bool container_swap(SpriteContainer* container, unsigned int idx_a, unsigned int idx_b);
 
 /**
  * Clear the contents of a Container.
@@ -190,24 +177,22 @@ void container_clear_contents(SpriteContainer* container);
  *
  * @param container pointer to a @ref SpriteContainer
  * @param idx index of the desired @ref ListNode in the container
- * @param do_update whether the contents' spacing needs to update after pushing the new element
  *
  * @return `true` if successfully removed, `false` if out-of-bounds
  */
-bool container_remove_at_idx(SpriteContainer* container, unsigned int idx, bool do_update);
+bool container_remove_at_idx(SpriteContainer* container, unsigned int idx);
 
 /**
  * Remove a SpriteContainer's underlying List's node with the matching pointer
  *
  * @param container pointer to a @ref SpriteContainer
  * @param sprite_object pointer to a SpriteObject in node in container
- * @param do_update whether the contents' spacing needs to update after pushing the new element
  *
  * @return `true` if successfully removed, `false` otherwise
  *
  * @note When working with @ref ListItr, use @ref list_itr_remove_current_node()
  */
-bool container_remove_data(SpriteContainer* container, SpriteObject* sprite_object, bool do_update);
+bool container_remove_data(SpriteContainer* container, SpriteObject* sprite_object);
 
 /**
  * @brief Remove the current @ref ListNode from the iterator from the @ref SpriteContainer's
@@ -215,13 +200,12 @@ bool container_remove_data(SpriteContainer* container, SpriteObject* sprite_obje
  *
  * @param container pointer to the @ref SpriteContainer to which the iterator's @ref List belongs to
  * @param itr pointer to the @ref ListItr
- * @param do_update whether the contents' spacing needs to update after pushing the new element
  *
  * @note When working with @ref ListItr, use this and not @ref container_remove_at_idx() as it will
  * "break" the iterator.
  *
  * @sa list_itr_remove_current_node
  */
-void container_itr_remove_current_node(SpriteContainer* container, ListItr* itr, bool do_update);
+void container_itr_remove_current_node(SpriteContainer* container, ListItr* itr);
 
 #endif // SPRITE_CONTAINER_H

@@ -162,6 +162,14 @@ void list_push_front(List* list, void* data);
 void list_push_back(List* list, void* data);
 
 /**
+ * Append a list of entries to the `tail` of a @ref list
+ *
+ * @param list pointer to a @ref List
+ * @param added_list pointer to a list of data entries to put into the @ref List
+ */
+void list_append(List* list, List* added_list);
+
+/**
  * Insert data into a @ref List a specific index
  *
  * If the index specified is larger than the length of the list

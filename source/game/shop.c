@@ -94,6 +94,7 @@ static const Rect     SHOP_REROLL_RECT            = { 88,  96, UNDEFINED, UNDEFI
 
 static void shop_items_container_global_update(void);
 static void shop_items_container_update(SpriteObject* sprite_object);
+static void shop_items_set_init_pos(void);
 
 static List s_shop_items_list = LIST_DEFAULT;
 static SpriteContainer s_shop_items_container = {
@@ -311,6 +312,8 @@ static void shop_create_top_row_items(void)
 
     container_clear_contents(&s_shop_items_container);
 
+    List new_shop_items = LIST_DEFAULT;
+
     for (int i = 0; i < MAX_SHOP_ITEMS; i++)
     {
         Item* item = shop_create_top_row_item();
@@ -326,11 +329,15 @@ static void shop_create_top_row_items(void)
             return;
         }
 
-        container_push_back(&s_shop_items_container, (SpriteObject*)item, false);
+        list_push_back(&new_shop_items, (SpriteObject*)item);
     }
 
-    container_update(&s_shop_items_container);
+    container_append_list(&s_shop_items_container, &new_shop_items);
+    shop_items_set_init_pos();
+}
 
+static void shop_items_set_init_pos(void)
+{
     // The following function uses the Sprite's target position which has just been updated
     ListItr itr = list_itr_create(s_shop_items_container.contents_list);
     Item* item;
@@ -403,9 +410,7 @@ static inline void shop_buy_item(int shop_item_idx)
     sprite_object_erase_text_under((SpriteObject*)item);
     sprite_object_set_focus((SpriteObject*)item, false);
 
-    // Removing the joker from the shop will also update prices position under remaining Items
-    container_remove_at_idx(&s_shop_items_container, shop_item_idx, true);
-
+    container_remove_at_idx(&s_shop_items_container, shop_item_idx);
     item_acquire(item);
 }
 

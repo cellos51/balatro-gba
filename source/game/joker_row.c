@@ -64,8 +64,7 @@ bool jokers_sel_row_on_selection_changed(
         container_swap(
             get_jokers_sprite_container(),
             (unsigned int)prev_selection->x,
-            (unsigned int)new_selection->x,
-            true
+            (unsigned int)new_selection->x
         );
     }
 
