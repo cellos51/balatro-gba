@@ -31,6 +31,11 @@ int shop_get_reroll_cost(void);
 void shop_set_reroll_cost(int cost);
 
 /**
+ * @brief Display how much it currently costs to reroll the Items in the Shop
+ */
+void shop_print_reroll_cost(void);
+
+/**
  * @brief Get a pointer to the Card we are currently showing the description of.
  *
  * @return Item pointer, NULL if no description is currently being shown

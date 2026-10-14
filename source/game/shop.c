@@ -94,8 +94,8 @@ static List s_shop_items_list = LIST_DEFAULT;
 
 enum GameShopStates
 {
-    GAME_SHOP_SKIP_TAGS,
     GAME_SHOP_INTRO,
+    GAME_SHOP_SKIP_TAGS,
     GAME_SHOP_ACTIVE,
     GAME_SHOP_SHOW_ITEM_DESC,
     GAME_SHOP_HIDE_ITEM_DESC,
@@ -103,8 +103,8 @@ enum GameShopStates
     GAME_SHOP_MAX
 };
 
-static void shop_redeem_skip_tags(void);
 static void shop_intro(void);
+static void shop_redeem_skip_tags(void);
 static void shop_process_user_input(void);
 static void shop_show_item_desc_on_init(void);
 static void shop_show_item_desc_on_update(void);
@@ -115,8 +115,8 @@ static void shop_outro(void);
 
 // clang-format off
 static StateInfo shop_state_actions[GAME_SHOP_MAX] = {
-    [GAME_SHOP_SKIP_TAGS]      = STATE_INFO_UPDATE_FN_ONLY(shop_redeem_skip_tags),
     [GAME_SHOP_INTRO]          = STATE_INFO_UPDATE_FN_ONLY(shop_intro),
+    [GAME_SHOP_SKIP_TAGS]      = STATE_INFO_UPDATE_FN_ONLY(shop_redeem_skip_tags),
     [GAME_SHOP_ACTIVE]         = STATE_INFO_UPDATE_FN_ONLY(shop_process_user_input),
     [GAME_SHOP_SHOW_ITEM_DESC] = STATE_INFO_INIT_UPDATE_FN(
                                     shop_show_item_desc_on_init,
@@ -208,6 +208,17 @@ void shop_set_reroll_cost(int cost)
     s_reroll_cost = cost;
 }
 
+void shop_print_reroll_cost(void)
+{
+    tte_printf(
+        "#{P:%d,%d; cx:0x%X000}$%d",
+        SHOP_REROLL_RECT.left,
+        SHOP_REROLL_RECT.top,
+        TTE_WHITE_PB,
+        s_reroll_cost
+    );
+}
+
 void shop_reset(void)
 {
     list_clear(&s_shop_items_list);
@@ -246,7 +257,7 @@ void shop_on_init(void)
     s_timer = TM_ZERO;
 
     state_machine_register(&shop_sm);
-    state_machine_change_state(&shop_sm, GAME_SHOP_SKIP_TAGS);
+    state_machine_change_state(&shop_sm, GAME_SHOP_INTRO);
 
     skip_tag_process_start(SKIP_TAG_EVENT_ON_SHOP_INIT);
 
@@ -261,7 +272,7 @@ static void shop_redeem_skip_tags(void)
     if (skip_tag_process_get_proc_stage() == SKIP_TAG_PROCESS_STAGE_END)
     {
         s_timer = TM_ZERO;
-        state_machine_change_state(&shop_sm, GAME_SHOP_INTRO);
+        state_machine_change_state(&shop_sm, GAME_SHOP_ACTIVE);
     }
 }
 
@@ -346,17 +357,11 @@ static void shop_intro()
 
     if (s_timer == TM_END_GAME_SHOP_INTRO)
     {
-        state_machine_change_state(&shop_sm, GAME_SHOP_ACTIVE);
+        state_machine_change_state(&shop_sm, GAME_SHOP_SKIP_TAGS);
         s_timer = TM_ZERO; // Reset the timer
 
         // print initial reroll cost only when the panel is in place
-        tte_printf(
-            "#{P:%d,%d; cx:0x%X000}$%d",
-            SHOP_REROLL_RECT.left,
-            SHOP_REROLL_RECT.top,
-            TTE_WHITE_PB,
-            s_reroll_cost
-        );
+        shop_print_reroll_cost();
     }
 }
 
@@ -541,13 +546,7 @@ static inline void shop_reroll(void)
     }
 
     s_reroll_cost++;
-    tte_printf(
-        "#{P:%d,%d; cx:0x%X000}$%d",
-        SHOP_REROLL_RECT.left,
-        SHOP_REROLL_RECT.top,
-        TTE_WHITE_PB,
-        s_reroll_cost
-    );
+    shop_print_reroll_cost();
 }
 
 /**
@@ -824,14 +823,7 @@ static void shop_hide_item_desc_on_exit(void)
     if (!item_is_owned(s_description_item))
         s_description_item->ty -= int2fx(TILE_SIZE);
 
-    // Print Reroll prince
-    tte_printf(
-        "#{P:%d,%d; cx:0x%X000}$%d",
-        SHOP_REROLL_RECT.left,
-        SHOP_REROLL_RECT.top,
-        TTE_WHITE_PB,
-        s_reroll_cost
-    );
+    shop_print_reroll_cost();
 
     // Print Deck size that was erased
     display_deck_size_max();

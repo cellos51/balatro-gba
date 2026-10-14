@@ -132,6 +132,7 @@ static void skip_tag_effect_juggle(void)
 static void skip_tag_effect_d6(void)
 {
     shop_set_reroll_cost(0);
+    shop_print_reroll_cost();
 }
 
 #define TOP_UP_TAG_JOKER_BONUS 2
