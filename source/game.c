@@ -65,7 +65,7 @@ static int deck_get_max_size(void);
 
 // clang-format off
 // Rects                                        left     top     right   bottom
-const static Rect OWNED_JOKERS_CONTAINER_RECT = {72,     12,     176,    44};
+const static Rect OWNED_JOKERS_CONTAINER_RECT = {72,     10,     176,    42};
 
 // Rects for TTE (in pixels)
 
@@ -139,7 +139,7 @@ static SpriteContainer s_owned_jokers_container = {
     .pos = OWNED_JOKERS_CONTAINER_RECT,
     .orientation = LAYOUT_ORI_HORIZONTAL,
     .justification = LAYOUT_JUST_CENTER,
-    .justification_ortho = LAYOUT_JUST_OFF, // deactivated here, too many issues with joker_row.c
+    .justification_ortho = LAYOUT_JUST_CENTER,
     .sprite_local_visible_rect = CARD_SPRITE_LOCAL_RECT,
     .maximum_spacing = 20 // Centering where 2 jokers roughly divide the row into 3 equal sections
 };
@@ -396,7 +396,6 @@ int get_straight_and_flush_size(void)
 void add_joker(JokerObject* joker_object)
 {
     container_push_back(&s_owned_jokers_container, (SpriteObject*)joker_object);
-    joker_object->ty = int2fx(HELD_JOKERS_POS.y);
 
     // TODO: Extract to on_joker_added() callback
     // In case the player gets multiple Four Fingers Jokers,

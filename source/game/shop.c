@@ -89,6 +89,7 @@ static const int      SHOP_JOKER_SPRITES_INIT_Y   =  160;
 static const BG_POINT ITEM_DESCRIPTION_SPRITE_POS = {135,   9};
 static const Rect     SHOP_ITEMS_CONTAINER_RECT   = {114,  71, 190, 103 };
 static const Rect     SHOP_PRICES_TEXT_RECT       = { 72,  56, 192, 160 };
+static const Rect     SHOP_ITEM_PRICES_TEXT_RECT  = {114,  71, 192, 160 };
 static const Rect     SHOP_REROLL_RECT            = { 88,  96, UNDEFINED, UNDEFINED };
 // clang-format on
 
@@ -416,8 +417,7 @@ static inline void shop_buy_item(int shop_item_idx)
 
 static void shop_items_container_global_update(void)
 {
-    tte_erase_rect_wrapper(SHOP_PRICES_TEXT_RECT);
-    shop_print_reroll_cost();
+    tte_erase_rect_wrapper(SHOP_ITEM_PRICES_TEXT_RECT);
 }
 
 static void shop_items_container_update(SpriteObject* sprite_object)
