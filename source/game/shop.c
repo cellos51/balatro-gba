@@ -310,6 +310,9 @@ static void shop_create_top_row_items(void)
 
     container_clear_contents(&s_shop_items_container);
 
+    // Accumulate all new Items into a single List and add them all at the same time
+    // This is done so the Container's update function is called only once, instead of after adding
+    // each Item, which saves some compute time
     List new_shop_items = LIST_DEFAULT;
 
     for (int i = 0; i < MAX_SHOP_ITEMS; i++)
