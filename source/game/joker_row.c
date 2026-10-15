@@ -20,8 +20,6 @@ bool jokers_sel_row_on_selection_changed(
     const Selection* new_selection
 )
 {
-    List* owned_jokers_list = get_jokers_list();
-
     // swap Jokers if the A button is held down and all Jokers are on the same row
     bool swapping =
         key_is_down(KEY_CARD_SELECT) && new_selection->y == row_idx && prev_selection->y == row_idx;
@@ -29,7 +27,7 @@ bool jokers_sel_row_on_selection_changed(
     if (prev_selection->y == row_idx)
     {
         JokerObject* joker_object =
-            (JokerObject*)list_get_at_idx(owned_jokers_list, prev_selection->x);
+            (JokerObject*)list_get_at_idx(get_jokers_list(), prev_selection->x);
         // Don't change focus from current Joker if swapping
         if (joker_object != NULL && !swapping)
         {
@@ -41,7 +39,7 @@ bool jokers_sel_row_on_selection_changed(
     if (new_selection->y == row_idx)
     {
         JokerObject* joker_object =
-            (JokerObject*)list_get_at_idx(owned_jokers_list, new_selection->x);
+            (JokerObject*)list_get_at_idx(get_jokers_list(), new_selection->x);
         if (joker_object != NULL)
         {
             if (!swapping)
@@ -63,8 +61,8 @@ bool jokers_sel_row_on_selection_changed(
 
     if (swapping)
     {
-        list_swap(
-            owned_jokers_list,
+        container_swap(
+            get_jokers_sprite_container(),
             (unsigned int)prev_selection->x,
             (unsigned int)new_selection->x
         );
