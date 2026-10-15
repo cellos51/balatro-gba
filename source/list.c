@@ -107,7 +107,7 @@ void list_push_back(List* list, void* data)
     list->len++;
 }
 
-void list_append(List* list, List* added_list)
+void list_append_other_list(List* list, List* added_list)
 {
     if (list_is_empty(list))
     {

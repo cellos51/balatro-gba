@@ -23,12 +23,8 @@ enum LayoutJustification
 {
     LAYOUT_JUST_BEGIN,
     LAYOUT_JUST_CENTER,
-    LAYOUT_JUST_END,
-    LAYOUT_JUST_OFF
+    LAYOUT_JUST_END
 };
-
-typedef void (*ContainerCustomGlobalUpdate)(void);
-typedef void (*ContainerCustomUpdate)(SpriteObject* sprite_object);
 
 /**
  * @brief A structure organizing a List of SpriteObjects
@@ -38,19 +34,15 @@ typedef struct SpriteContainer
     /**
      * @brief List of SpriteObjects to organize
      */
-    List* contents_list;
+    List contents_list;
 
     /**
-     * @brief Custom callback to invoke only once. Called after the @ref contents are updated, but
-     *         before @ref custom_update
+     * @brief Custom callback invoked every time the @ref SpriteContainer's contents change.
+     *
+     * @param self pointer to the @ref SpriteContainer being updated, in case operations on its
+     *             items are required
      */
-    ContainerCustomGlobalUpdate custom_global_update;
-
-    /**
-     * @brief Custom callback to invoke once per element in the @ref contents list. Called after the
-     *         @ref custom_global_update
-     */
-    ContainerCustomUpdate custom_update;
+    void (*custom_update)(struct SpriteContainer* self);
 
     /**
      * @brief A Rect holding the position and size of the Container. Expressed in pixels.
@@ -63,14 +55,12 @@ typedef struct SpriteContainer
     enum LayoutOrientation orientation;
 
     /**
-     * @brief Determines the alignment of the sprites along the main direction. Cannot be
-     *         **LAYOUT_JUST_OFF**
+     * @brief Determines the alignment of the sprites along the main direction.
      */
     enum LayoutJustification justification;
 
     /**
      * @brief Determines the alignment of the sprites in the direction orthogonal to the main one.
-     *         `LAYOUT_JUST_OFF` disables this justification.
      */
     enum LayoutJustification justification_ortho;
 
@@ -99,7 +89,7 @@ typedef struct SpriteContainer
 // clang-format off
 const static Rect DEFAULT_POS_SIZE_RECT = {0, 0, 1, 1};
 #define SPRITE_CONTAINER_DEFAULT {                      \
-    .contents_list             = NULL,                  \
+    .contents_list             = LIST_DEFAULT,          \
     .pos                       = DEFAULT_POS_SIZE_RECT, \
     .orientation               = LAYOUT_DIR_HORIZONTAL, \
     .justification             = LAYOUT_JUST_CENTER,    \
@@ -134,8 +124,11 @@ void container_push_back(SpriteContainer* container, SpriteObject* sprite_object
  *
  * @param container pointer to a @ref SpriteContainer
  * @param list pointer to a @ref List of entries to put into the @ref SpriteContainer
+ *
+ * @warning After appending the lists point to the same memory so @p added_list
+ *          must no longer be used.
  */
-void container_append_list(SpriteContainer* container, List* list);
+void container_append_list(SpriteContainer* container, List* added_list);
 
 /** Insert a SpriteObject into a @ref SpriteContainer a specific index
  *
