@@ -267,13 +267,7 @@ void reorder_card_sprites_layers(void)
     {
         if (s_hand.cards[i] != NULL)
         {
-            // Set the sprite for the card object
             card_object_set_sprite(s_hand.cards[i], i);
-            sprite_position(
-                card_object_get_sprite(s_hand.cards[i]),
-                fx2int(s_hand.cards[i]->x),
-                fx2int(s_hand.cards[i]->y)
-            );
         }
     }
 }
