@@ -1221,12 +1221,11 @@ static inline void round_discarded_cards_loop(void)
         {
             if (g_game_vars.current_blind > BLIND_TYPE_BIG)
             {
+                set_blind_beaten(g_game_vars.next_boss_blind);
                 g_game_vars.ante++;
                 display_ante();
             }
 
-            // mark current boss blind as beaten and allow for reroll
-            set_blind_beaten(g_game_vars.next_boss_blind);
             game_change_state(GAME_STATE_ROUND_END);
         }
     }
