@@ -1,15 +1,19 @@
-import { readFileSync, statSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { readFileSync } from 'node:fs';
 import { DebugInfo } from '@gba-kit/debug-info';
+import { ELF_PATH } from './build.js';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const ELF_PATH = join(__dirname, '..', '..', 'build', 'balatro-gba.elf');
-const elfStat = statSync(ELF_PATH, { throwIfNoEntry: false });
-if (!elfStat) {
-  throw new Error(`ELF not found at ${ELF_PATH} — build it first with: UID=$(id -u) GID=$(id -g) docker compose up`);
-}
 const debug = DebugInfo.fromElf(new Uint8Array(readFileSync(ELF_PATH)));
+
+// Game variables the tests read and wait on
+export const VAR = {
+  gameState: 'game_sm.state',
+  handState: 's_hand.state',
+  round: 'g_game_vars.round',
+  currentBlind: 'g_game_vars.current_blind',
+  hands: 'g_game_vars.hands',
+  discards: 'g_game_vars.discards',
+  score: 'g_game_vars.score',
+} as const;
 
 /**
  * Read a C enum's constants from the DWARF. Throws if the enum isn't in the ELF.

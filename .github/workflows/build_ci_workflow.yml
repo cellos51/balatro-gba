@@ -86,7 +86,7 @@ jobs:
 
       - name: Run E2E tests
         working-directory: tests_e2e
-        run: npx vitest run
+        run: npm test
 
       - name: Upload E2E test output
         if: failure()

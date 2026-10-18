@@ -7,7 +7,7 @@ Runs the compiled ROM using [`@gba-kit/gba-node`](https://github.com/macabeus/gb
 Before running the E2E tests locally, make sure you have:
 
 - Node.js >= 22
-- A built ROM and its ELF file (`build/balatro-gba.elf` + `build/balatro-gba.gba`), e.g. `UID=$(id -u) GID=$(id -g) docker compose up`
+- A built ROM and its ELF file (`build/balatro-gba.gba` + `build/balatro-gba.elf`). Build them as described in the [Build Instructions](../CONTRIBUTING.md#build-instructions), e.g. with Docker on Linux or macOS: `UID=$(id -u) GID=$(id -g) docker compose up`
 
 ```bash
 # Install dependencies (pulls @gba-kit/* from npm)
@@ -22,6 +22,8 @@ npm test            # single run
 npm run test:watch  # watch mode
 ```
 
+The tests read the ROM and ELF in `build/`, so rebuild the ROM after changing the game's source.
+
 ## Writing a new test
 
 ### 1. Create a test file
@@ -30,8 +32,8 @@ Add a file under [`tests/`](./tests/), e.g. `tests/shop.test.ts`:
 
 ```ts
 import { describe, it, expect } from 'vitest';
-import { createRuntime, navigateToPlaying, readAddr } from '../helpers/runtime.js';
-import { ADDR } from '../helpers/addresses.js';
+import { createRuntime, navigateToPlaying, readVar, waitForHandState } from '../helpers/runtime.js';
+import { HandState, VAR } from '../helpers/game_variables.js';
 
 describe('Shop', () => {
   it('does something', async () => {
@@ -41,12 +43,16 @@ describe('Shop', () => {
     // Navigate to a known state using helpers
     await navigateToPlaying(runtime);
 
-    // Send inputs
+    // Select the first card, then play the hand
     await engine.press('a');
-    await engine.wait({ frames: 30 });
+    await engine.wait({ frames: 10 });
+    await engine.press('l');
 
-    // Assert on memory
-    expect(readAddr(runtime, 'score')).toBeGreaterThan(0);
+    // Wait for the game to reach a state, or fail after 1800 frames
+    await waitForHandState(runtime, HandState.HAND_SELECT, 1800);
+
+    // Assert on game variables
+    expect(readVar(runtime, VAR.score)).toBeGreaterThan(0);
   });
 });
 ```
@@ -54,10 +60,10 @@ describe('Shop', () => {
 ### 2. Key concepts
 
 - **`createRuntime(name)`** boots a fresh emulator with the ROM **and ELF** (so the engine owns the symbols + DWARF). Each test gets an isolated instance.
-- **`runtime.engine.readVariable('symbol.field')`** reads a game variable by its C `symbol.field` path (built into gba-kit).
+- **`readVar(runtime, path)`** reads a game variable by its C `symbol.field` path, such as `VAR.score` (`'g_game_vars.score'`).
 - **`engine.press(button)`** presses a GBA button (`a`, `b`, `l`, `r`, `up`, `down`, `left`, `right`, `start`, `select`).
 - **`engine.wait({ frames })`** advances the emulator by N frames (~60 fps).
-- **`engine.wait({ memory: { address: 'game_sm.state', equals }, timeout })`** advances until a variable (a `symbol.field` path, resolved from the DWARF) holds the expected value, or throws after `timeout` frames.
+- **`waitForGameState(runtime, state, timeout)`** and **`waitForHandState(runtime, state, timeout)`** advance until the game or hand state equals `state`, or throw after `timeout` frames.
 
 > 🔖 Discover all the engine methods available by reading the [Scripting Guide](https://github.com/macabeus/gba-kit/blob/main/docs/scripting.md)
 
@@ -75,16 +81,19 @@ describe('Shop', () => {
 
 ### 4. Reading game variables
 
-There's no name→address mapping file to maintain. Tests reference the game's C names directly and the engine resolves them from the build it was created with — the symbol address from the ELF's symbol table, and the field's byte offset + size from the variable's DWARF type:
+[`helpers/game_variables.ts`](./helpers/game_variables.ts) lists the variables the tests use as C paths in `VAR`, and the engine resolves each path from the build it was created with: the symbol address from the ELF's symbol table, and the field's byte offset and size from the variable's DWARF type:
 
 ```ts
-runtime.engine.readVariable('play_state'); // a standalone global (a global/file-static)
-runtime.engine.readVariable('g_game_vars.score'); // a struct field
-runtime.engine.readVariable('g_game_vars.rng_info.seed'); // a nested field
+export const VAR = {
+  gameState: 'game_sm.state', // a field of a file-static struct
+  handState: 's_hand.state',
+  score: 'g_game_vars.score', // a field of a global struct
+  // ...
+};
 ```
 
-`readVariable` reads the right number of bytes automatically and decodes bitfields. `engine.wait({ memory })` accepts the same `symbol.field` path for its `address`, so waiting on a variable needs no manual address resolution either.
+`readVar` reads the right number of bytes and decodes bitfields, and the wait helpers take the same paths. A path can also name a nested field (`'g_game_vars.rng_info.seed'`) or a plain global.
 
-If the game source moves a variable into a struct, or changes a field's type/size, nothing here needs updating — only a renamed symbol/field changes the path string at its call sites.
+If the game source moves a variable into a struct, or changes a field's type or size, nothing here needs updating. A renamed symbol or field changes one path in `VAR`.
 
 > The enum constants (`GameState`, `HandState`, `BlindType`, `HandType`) are read from the build's DWARF too, so they never go stale when the game's enums change.

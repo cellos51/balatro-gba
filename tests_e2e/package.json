@@ -9,8 +9,8 @@
     "format:check": "prettier --check ."
   },
   "devDependencies": {
-    "@gba-kit/debug-info": "^0.3.0",
-    "@gba-kit/gba-node": "^0.3.0",
+    "@gba-kit/debug-info": "^0.9.0",
+    "@gba-kit/gba-node": "^0.9.0",
     "@types/node": "^25.5.0",
     "prettier": "^3.5.3",
     "typescript": "^6.0.2",
