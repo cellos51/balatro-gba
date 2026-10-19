@@ -15,14 +15,14 @@ void splash_screen_on_init()
 {
     timer = 0;
 
-    tte_printf("#{P:72,8; cx:0xF000}DISCLAIMER");
+    tte_printf("#{P:88,8; cx:0xF000}ВНИМАНИЕ");
     tte_printf(
-        "#{P:8,24; cx:0xF000}This project is NOT endorsed \n by or affiliated with \n Playstack or "
-        "LocalThunk.\n\n If you have paid for this, \n you have been scammed \n and should request "
-        "a refund \n IMMEDIATELY. \n\n The only official place \n to obtain this is from: \n\n "
+        "#{P:8,24; cx:0xF000}Этот проект НЕ одобрен \n и не связан с Playstack \n и LocalThunk.\n\n "
+        "Если вы заплатили за это, \n вас обманули. Вы должны \n потребовать возврат \n "
+        "СРАЗУ ЖЕ. \n\n Единственный официальный \n источник игры: \n\n "
         "'github.com/\n  GBALATRO/balatro-gba'"
     );
-    tte_printf("#{P:8,144; cx:0xF000}(Press any key to skip)");
+    tte_printf("#{P:8,144; cx:0xF000}(Нажмите любую кнопку)");
 }
 
 void splash_screen_on_update()

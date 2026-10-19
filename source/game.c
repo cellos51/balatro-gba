@@ -492,19 +492,19 @@ static const int HAND_SPACING_LUT[MAX_HAND_SIZE] =
 
 static const HandValues hand_base_values[] = {
     {.chips = 0,   .mult = 0,  .display_name = NULL     }, // NONE
-    {.chips = 5,   .mult = 1,  .display_name = "HIGH C" }, // HIGH_CARD
-    {.chips = 10,  .mult = 2,  .display_name = "PAIR"   }, // PAIR
-    {.chips = 20,  .mult = 2,  .display_name = "2 PAIR" }, // TWO_PAIR
-    {.chips = 30,  .mult = 3,  .display_name = "3 OAK"  }, // THREE_OF_A_KIND
-    {.chips = 60,  .mult = 7,  .display_name = "4 OAK"  }, // FOUR_OF_A_KIND
-    {.chips = 30,  .mult = 4,  .display_name = "STRT"   }, // STRAIGHT
-    {.chips = 35,  .mult = 4,  .display_name = "FLUSH"  }, // FLUSH
-    {.chips = 40,  .mult = 4,  .display_name = "FULL H" }, // FULL_HOUSE
-    {.chips = 100, .mult = 8,  .display_name = "STRT F" }, // STRAIGHT_FLUSH
-    {.chips = 100, .mult = 8,  .display_name = "ROYAL F"}, // ROYAL_FLUSH
-    {.chips = 120, .mult = 12, .display_name = "5 OAK"  }, // FIVE_OF_A_KIND
-    {.chips = 140, .mult = 14, .display_name = "FLUSH H"}, // FLUSH_HOUSE
-    {.chips = 160, .mult = 16, .display_name = "FLUSH 5"}  // FLUSH_FIVE
+    {.chips = 5,   .mult = 1,  .display_name = "СТАРШАЯ"}, // HIGH_CARD
+    {.chips = 10,  .mult = 2,  .display_name = "ПАРА"   }, // PAIR
+    {.chips = 20,  .mult = 2,  .display_name = "2 ПАРЫ" }, // TWO_PAIR
+    {.chips = 30,  .mult = 3,  .display_name = "ТРОЙКА" }, // THREE_OF_A_KIND
+    {.chips = 60,  .mult = 7,  .display_name = "КАРЕ"   }, // FOUR_OF_A_KIND
+    {.chips = 30,  .mult = 4,  .display_name = "СТРИТ"  }, // STRAIGHT
+    {.chips = 35,  .mult = 4,  .display_name = "ФЛЕШ"   }, // FLUSH
+    {.chips = 40,  .mult = 4,  .display_name = "ФУЛХАУС"}, // FULL_HOUSE
+    {.chips = 100, .mult = 8,  .display_name = "СТРИТ-Ф"}, // STRAIGHT_FLUSH
+    {.chips = 100, .mult = 8,  .display_name = "РОЯЛ-ФЛ"}, // ROYAL_FLUSH
+    {.chips = 120, .mult = 12, .display_name = "ПЯТЕРКА"}, // FIVE_OF_A_KIND
+    {.chips = 140, .mult = 14, .display_name = "ФЛ-ХАУС"}, // FLUSH_HOUSE
+    {.chips = 160, .mult = 16, .display_name = "ФЛЕШ 5" }  // FLUSH_FIVE
 };
 
 static const SubStateActionFn shop_state_actions[] = {
@@ -3628,7 +3628,7 @@ static inline void game_round_end_print_hand_reward(int hand_y_offset)
         game_round_end_extend_black_panel_down(hand_y);
 
         tte_printf(
-            "#{P:%d,%d; cx:0x%X000}%d #{cx:0x%X000}Hands",
+            "#{P:%d,%d; cx:0x%X000}%d #{cx:0x%X000}Руки",
             ROUND_END_REWARD_TEXT_X,
             hand_y * TILE_SIZE,
             TTE_BLUE_PB,
@@ -3663,7 +3663,7 @@ static inline void game_round_end_print_interest_reward(int interest_y_offset)
         game_round_end_extend_black_panel_down(interest_y);
 
         tte_printf(
-            "#{P:%d,%d; cx:0x%X000}%d #{cx:0x%X000}Interest",
+            "#{P:%d,%d; cx:0x%X000}%d #{cx:0x%X000}Процент",
             ROUND_END_REWARD_TEXT_X,
             interest_y * TILE_SIZE,
             TTE_YELLOW_PB,
@@ -3756,7 +3756,7 @@ static void game_round_end_display_cashout()
 
         bool omit_space = cashout_amount >= 10;
         tte_printf(
-            "#{P:%d, %d; cx:0x%X000}Cash Out:%s$%d",
+            "#{P:%d, %d; cx:0x%X000}Забрать:%s$%d",
             CASHOUT_TEXT_RECT.left,
             CASHOUT_TEXT_RECT.top,
             TTE_WHITE_PB,
@@ -4852,7 +4852,7 @@ static void game_lose_on_update()
     else if (timer == GAME_OVER_ANIM_FRAMES)
     {
         tte_printf(
-            "#{P:%d,%d; cx:0x%X000}GAME OVER",
+            "#{P:%d,%d; cx:0x%X000}ПОРАЖЕНИЕ",
             GAME_LOSE_MSG_TEXT_RECT.left,
             GAME_LOSE_MSG_TEXT_RECT.top,
             TTE_RED_PB
@@ -4922,7 +4922,7 @@ static void game_win_on_update()
     else if (timer == GAME_OVER_ANIM_FRAMES)
     {
         tte_printf(
-            "#{P:%d,%d; cx:0x%X000}YOU WIN",
+            "#{P:%d,%d; cx:0x%X000}ПОБЕДА",
             GAME_WIN_MSG_TEXT_RECT.left,
             GAME_WIN_MSG_TEXT_RECT.top,
             TTE_BLUE_PB

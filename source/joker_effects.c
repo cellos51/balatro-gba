@@ -1291,7 +1291,7 @@ static u32 hanging_chad_joker_effect(
             if ((*joker_effect)->retrigger)
             {
                 *p_remaining_retriggers -= 1;
-                (*joker_effect)->message = "Again!";
+                (*joker_effect)->message = "Снова!";
                 effect_flags_ret = JOKER_EFFECT_FLAG_RETRIGGER | JOKER_EFFECT_FLAG_MESSAGE;
             }
             break;
@@ -1556,7 +1556,7 @@ static u32 dusk_joker_effect(
                 if ((*joker_effect)->retrigger)
                 {
                     *p_last_retriggered_index = get_scored_card_index();
-                    (*joker_effect)->message = "Again!";
+                    (*joker_effect)->message = "Снова!";
                     effect_flags_ret = JOKER_EFFECT_FLAG_RETRIGGER | JOKER_EFFECT_FLAG_MESSAGE;
                 }
             }
@@ -1687,7 +1687,7 @@ static u32 hack_joker_effect(
                     if ((*joker_effect)->retrigger)
                     {
                         *p_last_retriggered_index = get_scored_card_index();
-                        (*joker_effect)->message = "Again!";
+                        (*joker_effect)->message = "Снова!";
                         effect_flags_ret = JOKER_EFFECT_FLAG_RETRIGGER | JOKER_EFFECT_FLAG_MESSAGE;
                     }
                     break;
@@ -1733,7 +1733,7 @@ static u32 seltzer_joker_effect(
             if ((*joker_effect)->retrigger)
             {
                 *p_last_retriggered_idx = get_scored_card_index();
-                (*joker_effect)->message = "Again!";
+                (*joker_effect)->message = "Снова!";
                 effect_flags_ret = JOKER_EFFECT_FLAG_RETRIGGER | JOKER_EFFECT_FLAG_MESSAGE;
             }
             break;
@@ -1753,7 +1753,7 @@ static u32 seltzer_joker_effect(
             }
             else
             {
-                (*joker_effect)->message = "Drank!";
+                (*joker_effect)->message = "Выпито!";
                 (*joker_effect)->expire = true;
                 effect_flags_ret |= JOKER_EFFECT_FLAG_EXPIRE;
             }
@@ -1793,7 +1793,7 @@ static u32 sock_and_buskin_joker_effect(
             if ((*joker_effect)->retrigger)
             {
                 *p_last_retriggered_face_index = get_scored_card_index();
-                (*joker_effect)->message = "Again!";
+                (*joker_effect)->message = "Снова!";
                 effect_flags_ret = JOKER_EFFECT_FLAG_RETRIGGER | JOKER_EFFECT_FLAG_MESSAGE;
             }
             break;

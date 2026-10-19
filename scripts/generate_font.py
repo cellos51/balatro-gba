@@ -5,7 +5,7 @@ import argparse
 
 CHAR_WIDTH = 8
 CHAR_HEIGHT = 8
-NUM_VERT_CHARS = 6
+NUM_VERT_CHARS = 14
 NUM_HORZ_CHARS = 16
 WORD_SIZE = 32
 
@@ -82,7 +82,7 @@ with open(out_path, "w") as out:
     .global	gbalatro_sys8Font
 gbalatro_sys8Font:
     .word	gbalatro_sys8Glyphs, 0, 0
-    .hword	32, 96
+    .hword	32, 224
     .byte	8, 8
     .byte	8, 8
     .hword	8
