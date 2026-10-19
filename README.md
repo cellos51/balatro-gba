@@ -1,3 +1,39 @@
+# Balatro GBA — русская версия
+
+Неофициальная русская локализация фанатского порта **Balatro для Game Boy Advance**
+([GBALATRO/balatro-gba](https://github.com/GBALATRO/balatro-gba), база — коммит `fc5767c`).
+
+<p>
+<img src="docs/ru/menu.png" width="360"> <img src="docs/ru/blind-select.png" width="360">
+<img src="docs/ru/game.png" width="360"> <img src="docs/ru/splash.png" width="360">
+</p>
+
+## Что переведено
+- интерфейс: руки, сброс, анте, раунд, цель, процент, «Забрать», «ПОРАЖЕНИЕ» / «ПОБЕДА»;
+- названия комбинаций (СТАРШАЯ, ПАРА, ФЛЕШ, КАРЕ, СТРИТ и др.);
+- заставка с предупреждением, надписи, нарисованные в графике (меню, выбор блайнда, магазин).
+
+Из-за размера тайла 8×8 часть подписей сокращена (МАЛ БЛ., СТРИТ-Ф, РОЯЛ-ФЛ, ФЛ-ХАУС). Буква Ё в мелких шрифтах графики не нарисована.
+
+## Как устроено
+- шрифт расширен до 224 символов (кодировка CP1251), файл `font/gbalatro_sys8.png`;
+- в libtonc отключено декодирование UTF-8 для байтов ≥ 0x80, строки собираются с `-fexec-charset=CP1251`;
+- подписи в PNG перерисованы скриптами из `ru-tools/` (`apply_labels.py`).
+
+Сборка — как в оригинальном проекте (см. English README ниже), результат — `gbalatro.gba`.
+
+## Важно
+Проект неофициальный и **не связан с LocalThunk и Playstack**. Готовый ром здесь не распространяется:
+собирай из исходников или применяй патч к собственной копии. Покупайте оригинальную игру Balatro.
+
+---
+
+# English
+
+This branch (`ru-translation`) is a Russian localization of the Balatro GBA fan port. The original project README follows.
+
+---
+
 # Balatro-GBA
 
 [![Build Status](https://img.shields.io/github/actions/workflow/status/cellos51/balatro-gba/build_ci_workflow.yml?style=flat&logo=github&branch=main&label=Builds&labelColor=gray&color=default&maxAge=7200)](https://github.com/cellos51/balatro-gba/actions)
