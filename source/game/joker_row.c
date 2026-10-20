@@ -63,7 +63,7 @@ bool jokers_sel_row_on_selection_changed(
 
     if (swapping)
     {
-        list_swap_at_idx(
+        list_swap(
             owned_jokers_list,
             (unsigned int)prev_selection->x,
             (unsigned int)new_selection->x
